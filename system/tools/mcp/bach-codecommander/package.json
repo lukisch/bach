@@ -1,0 +1,60 @@
+{
+  "name": "bach-codecommander-mcp",
+  "version": "1.1.0",
+  "description": "A developer-focused MCP server providing 14 tools for code analysis, JSON repair, encoding fix, import organization, format conversion, and more",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "bach-codecommander": "dist/index.js"
+  },
+  "files": [
+    "dist/",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md",
+    "SECURITY.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "claude",
+    "code-analysis",
+    "developer-tools",
+    "json-repair",
+    "encoding-fix",
+    "mcp-server",
+    "ai-tools",
+    "claude-desktop",
+    "bach",
+    "python",
+    "ast-analysis",
+    "import-organizer"
+  ],
+  "author": "Lukas (BACH)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lukisch/bach-codecommander-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lukisch/bach-codecommander-mcp/issues"
+  },
+  "homepage": "https://github.com/lukisch/bach-codecommander-mcp#readme",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

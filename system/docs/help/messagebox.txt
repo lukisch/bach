@@ -1,0 +1,56 @@
+# Portabilitaet: UNIVERSAL
+# Version: 2.0.0
+# Zuletzt validiert: 2026-02-08
+# Naechste Pruefung: 2026-08-08
+# Status: VERALTET - Ersetzt durch messages.py Handler
+
+MESSAGEBOX-SYSTEM (VERALTET)
+=============================
+
+HINWEIS: Dieses dateibasierte System ist VERALTET und archiviert.
+         Aktuelles System: MessagesHandler (system/hub/messages.py)
+
+Das alte Themen-basierte Nachrichtensystem (wie Email, aber dateibasiert)
+wurde durch ein SQLite-basiertes System ersetzt.
+
+AKTUELLER ERSATZ:
+  Handler:  system/hub/messages.py (MessagesHandler)
+  Backend:  system/data/bach.db (messages Tabelle)
+  CLI:      bach msg <operation>
+
+SIEHE:
+  bach msg --help           Aktuelle Befehle
+  system/docs/docs/docs/docs/help/messages.txt  Neue Dokumentation
+
+ARCHIVIERTER CODE:
+  system/data/_archive/gui_Entwuerfe/inbox/
+    - messagebox_backend.py
+    - messagebox.html
+    - inbox_index.json
+
+-----------------------------------------------------------------------
+ALTE DOKUMENTATION (nur noch historisch)
+-----------------------------------------------------------------------
+
+KONZEPT (alt):
+  - Ein Thema = eine TXT-Datei
+  - Nachrichten werden Themen zugeordnet
+  - Index (JSON) fuer schnellen Zugriff
+  - Auto-Archivierung bei Groessenlimit
+
+ORDNER (alt):
+  DATA/inbox/               Aktive Themen (existiert nicht mehr)
+  DATA/inbox/archive/       Archivierte Themen (existiert nicht mehr)
+  DATA/inbox/agenda/        Agenda-Referenzen (existiert nicht mehr)
+
+CLI-BEFEHLE (alt, nicht mehr funktional):
+  python messagebox_backend.py list [--all]
+  python messagebox_backend.py new <titel>
+  python messagebox_backend.py add <id> <text>
+  python messagebox_backend.py show <id>
+  python messagebox_backend.py archive <id>
+  python messagebox_backend.py restore <id>
+
+MIGRATION:
+  Das alte System wurde nicht migriert. Bei Bedarf koennen alte
+  Themen-Dateien aus Backups wiederhergestellt werden.

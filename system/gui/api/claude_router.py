@@ -1,0 +1,121 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Copyright (c) 2026 Lukas Geiger
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
+
+"""
+GUI → Claude Router
+====================
+Entscheidet ob Anfrage an 24h-Bridge oder Extra-Session geht.
+
+Routing-Regeln:
+- Chat/Assistent/Quick-Question → 24h-Bridge (wenn läuft)
+- Chat/Assistent/Quick-Question → GUI-24h-Session (wenn Bridge NICHT läuft)
+- Code-Analyse/Long-Task → Extra-Session (Worker)
+- Task-CRUD → Direkt via BACH CLI (kein LLM)
+"""
+
+import subprocess
+import sqlite3
+from pathlib import Path
+from typing import Literal, Optional
+
+BACH_DIR = Path(__file__).parent.parent.parent
+DB_PATH = BACH_DIR / "data" / "bach.db"
+
+RequestType = Literal["chat", "assistant", "quick_question", "code_analysis", "long_task", "task_crud"]
+
+def route_request(request_type: RequestType, prompt: str, user_id: str = "user") -> dict:
+    """
+    Routet Anfrage basierend auf Typ.
+
+    Returns:
+        {"status": "ok", "response": "...", "mode": "bridge|worker|cli"}
+    """
+
+    if request_type in ["chat", "assistant", "quick_question"]:
+        # Alle Chat-Anfragen an Bridge (läuft immer)
+        return send_to_bridge(prompt, user_id)
+
+    elif request_type in ["code_analysis", "long_task"]:
+        return spawn_worker_session(prompt, user_id)
+
+    elif request_type == "task_crud":
+        return execute_cli_command(prompt)
+
+    else:
+        return {"status": "error", "response": f"Unknown request_type: {request_type}"}
+
+def is_bridge_running() -> bool:
+    """Prüft ob Bridge-Daemon läuft."""
+    import tempfile
+    lock_file = Path(tempfile.gettempdir()) / "bach_bridge.lock"
+    return lock_file.exists()
+
+def send_to_bridge(prompt: str, user_id: str) -> dict:
+    """Sendet Anfrage an 24h-Bridge via Message-Queue."""
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+
+    # Nachricht in outbox einfügen
+    cur.execute("""
+        INSERT INTO connector_outbox (connector, recipient, message, created_at)
+        VALUES ('telegram', ?, ?, datetime('now'))
+    """, (user_id, prompt))
+
+    conn.commit()
+    conn.close()
+
+    # TODO: WebSocket-Notification für Live-Response
+    return {"status": "queued", "mode": "bridge", "response": "Anfrage an Bridge gesendet"}
+
+# GUI nutzt Bridge-Session - keine separate GUI-Session mehr nötig
+
+def spawn_worker_session(prompt: str, user_id: str) -> dict:
+    """Spawnt neue Worker-Session (nicht persistent)."""
+    result = subprocess.run(
+        ["claude", prompt],
+        capture_output=True,
+        text=True,
+        encoding='utf-8'
+    )
+
+    return {
+        "status": "ok",
+        "mode": "worker",
+        "response": result.stdout
+    }
+
+def execute_cli_command(command: str) -> dict:
+    """Führt BACH CLI-Befehl direkt aus (kein LLM)."""
+    result = subprocess.run(
+        ["python", str(BACH_DIR / "bach.py")] + command.split(),
+        capture_output=True,
+        text=True,
+        encoding='utf-8'
+    )
+
+    return {
+        "status": "ok",
+        "mode": "cli",
+        "response": result.stdout
+    }

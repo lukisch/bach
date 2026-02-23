@@ -1,0 +1,133 @@
+BACH MONITORING TOOLS
+=====================
+
+Tools zur Systemueberwachung, Konsistenzpruefung und Fehlererkennung.
+
+SCHNELLSTART
+------------
+  bach --maintain registry     # DB/JSON Konsistenz pruefen
+  bach --maintain skills       # Skill-Gesundheit pruefen
+  bach --status               # Systemstatus anzeigen
+
+UEBERSICHT MONITORING-TOOLS
+---------------------------
+tools/maintenance/
+├── registry_watcher.py       # DB-JSON Konsistenzpruefung
+└── skill_health_monitor.py   # Skill-Validierung
+
+REGISTRY WATCHER
+----------------
+Prueft Konsistenz zwischen SQLite-Datenbank und JSON-Konfigurationen.
+
+  python tools/maintenance/registry_watcher.py check
+  python tools/maintenance/registry_watcher.py repair
+
+Was wird geprueft:
+- Tabellen-Existenz in bach.db
+- JSON-Konfig-Dateien Validitaet
+- Referentielle Integritaet
+- Orphaned Records (Waisen-Eintraege)
+
+SKILL HEALTH MONITOR
+--------------------
+Validiert alle BACH-Skills und Agenten.
+
+  python tools/maintenance/skill_health_monitor.py check
+  python tools/maintenance/skill_health_monitor.py report
+
+Was wird geprueft:
+- SKILL.md Vollstaendigkeit
+- Agent-Manifeste
+- Verzeichnisstruktur
+- Verwaiste Skills
+
+TOKEN MONITORING
+----------------
+Ueberwacht Token-Verbrauch fuer Kostenkontrolle.
+
+Tabelle: monitor_tokens
+- session_id, tokens_used, timestamp
+- Token-Zonen (1-4) fuer Partner-Delegation
+
+  bach --memory status         # Token-Zone anzeigen
+  SELECT * FROM monitor_tokens; # Rohdaten
+
+PROCESS MONITORING
+------------------
+Tabelle: monitor_processes
+- Laufende Prozesse
+- Wartungs-Daemon-Status
+- Background-Jobs
+
+  bach daemon status           # Wartungs-Daemon pruefen
+  bach --status               # Gesamtstatus
+
+SUCCESS MONITORING
+------------------
+Tabelle: monitor_success
+- Erfolgsraten von Tools
+- Fehlerhistorie
+- Lernmuster fuer Verbesserungen
+
+AUTOMATISCHE CHECKS BEI --startup
+---------------------------------
+Diese Checks laufen automatisch bei Session-Start:
+
+1. Directory Scan         # Aenderungen seit letzter Session
+2. Path Healer (dry-run)  # Pfadkorrektur-Vorschlaege
+3. Registry Watcher       # DB/JSON Konsistenz
+4. Skill Health Monitor   # Skills/Agenten Zustand
+
+Probleme werden als Warnings in Startup-Ausgabe gemeldet.
+
+DATENBANK-TABELLEN
+------------------
+27 Tabellen in bach.db, davon Monitoring-relevant:
+
+  monitor_tokens      # Token-Tracking
+  monitor_success     # Erfolgsraten
+  monitor_processes   # Prozess-Status
+
+CLI-BEFEHLE
+-----------
+  bach --maintain heal        # Pfad-Korrektur (dry-run)
+  bach --maintain registry    # DB/JSON Konsistenz
+  bach --maintain skills      # Skill-Gesundheit
+  bach --maintain docs        # Dokumentations-Check
+  bach --status              # Gesamtstatus
+
+LOGS UND AUSWERTUNG
+-------------------
+Monitoring-Daten werden in Logs gespeichert:
+
+  logs/auto_log_extended.txt  # Befehls-Log
+  logs/errors/               # Fehler-Logs
+
+Auswertung:
+  bach --logs tail 20          # Letzte 20 Log-Eintraege
+  bach --logs search "error"   # Nach Fehlern suchen
+
+ALARME UND WARNUNGEN
+--------------------
+- Token-Zone 3/4: Warnung bei hohem Verbrauch
+- Skill-Fehler: Warning bei --startup
+- DB-Inkonsistenz: Error mit Repair-Vorschlag
+
+TIPPS
+-----
+- --maintain Befehle regelmaessig ausfuehren
+- Bei Problemen: bach --maintain heal --execute
+- Token-Verbrauch im Auge behalten (Zone 2-3)
+- Fehler-Logs bei Problemen pruefen
+
+SIEHE AUCH
+----------
+  bach --help maintain         # Wartungs-Uebersicht
+  bach --help startup          # Startup-Checks
+  bach --help logs             # Log-System
+  tools/TOOLS_CONCEPT.md       # Tool-Konzept
+
+---
+Version: 1.0.0
+Erstellt: 2026-01-23
+Teil von: BACH Tool-Dokumentation

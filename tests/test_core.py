@@ -1,0 +1,334 @@
+# -*- coding: utf-8 -*-
+"""
+Copyright (c) 2026 Lukas Geiger
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
+
+"""
+Unit Tests fuer core/ Module
+==============================
+Tests fuer base, db, registry, adapter, app.
+"""
+
+import sys
+import sqlite3
+import tempfile
+from pathlib import Path
+
+# System-Pfad sicherstellen
+SYSTEM_ROOT = Path(__file__).parent.parent
+if str(SYSTEM_ROOT) not in sys.path:
+    sys.path.insert(0, str(SYSTEM_ROOT))
+
+import pytest
+
+
+# ═══════════════════════════════════════════════════════════════
+# core/base.py Tests
+# ═══════════════════════════════════════════════════════════════
+
+class TestResult:
+    def test_basic_creation(self):
+        from core.base import Result
+        r = Result(True, "Erfolg")
+        assert r.success is True
+        assert r.message == "Erfolg"
+        assert r.data is None
+
+    def test_with_data(self):
+        from core.base import Result
+        r = Result(True, "OK", data={"count": 42})
+        assert r.data == {"count": 42}
+
+    def test_tuple_unpacking(self):
+        from core.base import Result
+        r = Result(True, "Hallo")
+        success, message = r
+        assert success is True
+        assert message == "Hallo"
+
+    def test_bool(self):
+        from core.base import Result
+        assert bool(Result(True, "OK")) is True
+        assert bool(Result(False, "Fail")) is False
+
+
+class TestParsedArgs:
+    def test_empty(self):
+        from core.base import ParsedArgs
+        args = ParsedArgs()
+        assert args.positional == []
+        assert args.options == {}
+        assert args.flags == set()
+        assert args.first is None
+        assert args.rest == []
+
+    def test_positional(self):
+        from core.base import ParsedArgs
+        args = ParsedArgs(positional=["add", "Test-Task"])
+        assert args.first == "add"
+        assert args.rest == ["Test-Task"]
+
+    def test_get_flag(self):
+        from core.base import ParsedArgs
+        args = ParsedArgs(flags={"dry-run", "verbose"})
+        assert args.get("dry-run") is True
+        assert args.get("verbose") is True
+        assert args.get("missing") is None
+        assert args.get("missing", "default") == "default"
+
+    def test_get_option(self):
+        from core.base import ParsedArgs
+        args = ParsedArgs(options={"output": "/tmp/out"})
+        assert args.get("output") == "/tmp/out"
+
+    def test_to_list(self):
+        from core.base import ParsedArgs
+        args = ParsedArgs(
+            positional=["add", "Test"],
+            options={"priority": "P1"},
+            flags={"dry-run"}
+        )
+        result = args.to_list()
+        assert "add" in result
+        assert "Test" in result
+        assert "--priority" in result
+        assert "P1" in result
+        assert "--dry-run" in result
+
+
+class TestParseArgs:
+    def test_simple(self):
+        from core.base import parse_args
+        args = parse_args(["add", "Test-Task"])
+        assert args.positional == ["add", "Test-Task"]
+
+    def test_flags(self):
+        from core.base import parse_args, OpDef
+        op_def = OpDef(flags=["dry-run", "verbose"])
+        args = parse_args(["--dry-run", "task"], op_def)
+        assert "dry-run" in args.flags
+        assert args.positional == ["task"]
+
+    def test_key_value(self):
+        from core.base import parse_args
+        args = parse_args(["--output=/tmp/out", "--format", "json"])
+        assert args.options["output"] == "/tmp/out"
+        assert args.options["format"] == "json"
+
+
+# ═══════════════════════════════════════════════════════════════
+# core/db.py Tests
+# ═══════════════════════════════════════════════════════════════
+
+class TestDatabase:
+    def setup_method(self):
+        self.tmpdir = tempfile.mkdtemp()
+        self.db_path = Path(self.tmpdir) / "test.db"
+        self.schema_dir = Path(self.tmpdir)
+
+        # Minimales Schema erstellen
+        schema = (self.schema_dir / "schema.sql")
+        schema.write_text(
+            "CREATE TABLE IF NOT EXISTS test_table (id INTEGER PRIMARY KEY, name TEXT);",
+            encoding="utf-8"
+        )
+
+    def test_init_schema(self):
+        from core.db import Database
+        db = Database(self.db_path, self.schema_dir)
+        db.init_schema()
+        assert db.table_exists("test_table")
+
+    def test_execute_write_and_read(self):
+        from core.db import Database
+        db = Database(self.db_path, self.schema_dir)
+        db.init_schema()
+
+        db.execute_write("INSERT INTO test_table (name) VALUES (?)", ("Alice",))
+        rows = db.execute("SELECT * FROM test_table")
+        assert len(rows) == 1
+        assert rows[0]["name"] == "Alice"
+
+    def test_execute_one(self):
+        from core.db import Database
+        db = Database(self.db_path, self.schema_dir)
+        db.init_schema()
+
+        db.execute_write("INSERT INTO test_table (name) VALUES (?)", ("Bob",))
+        row = db.execute_one("SELECT * FROM test_table WHERE name = ?", ("Bob",))
+        assert row is not None
+        assert row["name"] == "Bob"
+
+        missing = db.execute_one("SELECT * FROM test_table WHERE name = ?", ("Nobody",))
+        assert missing is None
+
+    def test_execute_scalar(self):
+        from core.db import Database
+        db = Database(self.db_path, self.schema_dir)
+        db.init_schema()
+
+        db.execute_write("INSERT INTO test_table (name) VALUES (?)", ("Charlie",))
+        count = db.execute_scalar("SELECT COUNT(*) FROM test_table")
+        assert count == 1
+
+    def test_tables(self):
+        from core.db import Database
+        db = Database(self.db_path, self.schema_dir)
+        db.init_schema()
+        assert "test_table" in db.tables()
+
+    def test_migrations(self):
+        from core.db import Database
+        # Migration erstellen
+        migrations_dir = self.schema_dir / "migrations"
+        migrations_dir.mkdir()
+        (migrations_dir / "001_add_column.sql").write_text(
+            "ALTER TABLE test_table ADD COLUMN email TEXT;",
+            encoding="utf-8"
+        )
+
+        db = Database(self.db_path, self.schema_dir)
+        db.init_schema()
+        db.run_migrations()
+
+        # Pruefe Migration-Tracking
+        assert db.table_exists("_migrations")
+        applied = db.execute("SELECT filename FROM _migrations")
+        assert len(applied) == 1
+        assert applied[0]["filename"] == "001_add_column.sql"
+
+
+# ═══════════════════════════════════════════════════════════════
+# core/registry.py Tests
+# ═══════════════════════════════════════════════════════════════
+
+class TestHandlerRegistry:
+    def test_create_empty(self):
+        from core.registry import HandlerRegistry
+        reg = HandlerRegistry()
+        assert reg.count == 0
+        assert reg.names == []
+
+    def test_discover(self):
+        from core.registry import HandlerRegistry
+        reg = HandlerRegistry()
+        count = reg.discover(SYSTEM_ROOT / "hub")
+        assert count > 0
+        assert "task" in reg.names
+        assert "memory" in reg.names
+
+    def test_discover_with_aliases(self):
+        from core.registry import HandlerRegistry
+        from core.aliases import COMMAND_ALIASES
+        reg = HandlerRegistry()
+        reg.discover(SYSTEM_ROOT / "hub", aliases=COMMAND_ALIASES)
+        assert "mem" in reg.names  # alias fuer memory
+
+    def test_suggest(self):
+        from core.registry import HandlerRegistry
+        reg = HandlerRegistry()
+        reg.discover(SYSTEM_ROOT / "hub")
+        suggestions = reg.suggest("taks")  # Tippfehler
+        assert "task" in suggestions
+
+    def test_levenshtein(self):
+        from core.registry import HandlerRegistry
+        assert HandlerRegistry._levenshtein("task", "task") == 0
+        assert HandlerRegistry._levenshtein("task", "tast") == 1
+        assert HandlerRegistry._levenshtein("task", "test") == 2
+
+
+# ═══════════════════════════════════════════════════════════════
+# core/adapter.py Tests
+# ═══════════════════════════════════════════════════════════════
+
+class TestHandlerAdapter:
+    def test_tuple_to_result(self):
+        from core.adapter import HandlerAdapter
+        from core.base import Result, ParsedArgs
+
+        class FakeHandler:
+            profile_name = "fake"
+            def get_operations(self):
+                return {}
+            def handle(self, operation, args, dry_run=False):
+                return (True, f"OK: {operation}")
+
+        adapter = HandlerAdapter(FakeHandler())
+        result = adapter.handle("test", ParsedArgs(positional=["arg1"]))
+        assert isinstance(result, Result)
+        assert result.success is True
+        assert "OK: test" in result.message
+
+    def test_profile_name_proxy(self):
+        from core.adapter import HandlerAdapter
+
+        class FakeHandler:
+            profile_name = "fake"
+            def get_operations(self): return {}
+            def handle(self, op, args, dry_run=False): return (True, "")
+
+        adapter = HandlerAdapter(FakeHandler())
+        assert adapter.profile_name == "fake"
+
+
+# ═══════════════════════════════════════════════════════════════
+# core/app.py Tests
+# ═══════════════════════════════════════════════════════════════
+
+class TestApp:
+    def test_create(self):
+        from core.app import App
+        app = App(SYSTEM_ROOT)
+        assert app.base_path == SYSTEM_ROOT
+
+    def test_db_lazy(self):
+        from core.app import App
+        app = App(SYSTEM_ROOT)
+        # DB sollte lazy sein
+        assert app._db is None
+        db = app.db
+        assert app._db is not None
+
+    def test_registry_lazy(self):
+        from core.app import App
+        app = App(SYSTEM_ROOT)
+        assert app._registry is None
+        reg = app.registry
+        assert app._registry is not None
+        assert reg.count > 0
+
+    def test_get_handler(self):
+        from core.app import App
+        app = App(SYSTEM_ROOT)
+        handler = app.get_handler("task")
+        assert handler is not None
+
+    def test_execute(self):
+        from core.app import App
+        app = App(SYSTEM_ROOT)
+        success, message = app.execute("task", "list")
+        assert success is True
+        assert len(message) > 0
+
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

@@ -1,0 +1,350 @@
+# Portabilitaet: UNIVERSAL
+# Version: 1.1.0
+# Zuletzt validiert: 2026-02-08
+# Naechste Pruefung: 2026-08-08
+
+MAINTAIN - BACH Wartungs-Tools
+==============================
+
+UEBERSICHT
+----------
+Sammlung von Wartungs- und Analyse-Tools fuer BACH.
+Alle Tools sind CLI-zugaenglich via bach --maintain
+
+BEFEHLE (16)
+------------
+  bach --maintain docs          Dokumentations-Update-Check
+  bach --maintain duplicates    Duplikat-Erkennung Info
+  bach --maintain generate      Skill/Agent Generator
+  bach --maintain export        Export-Tools
+  bach --maintain pattern       Dateinamen-Pattern kuerzen
+  bach --maintain scan          System nach CLI-Tools scannen
+  bach --maintain clean         Dateien nach Alter/Muster loeschen
+  bach --maintain json          JSON-Dateien reparieren
+  bach --maintain heal          Pfad-Korrektur und Selbstheilung
+  bach --maintain registry      Registry-Konsistenz pruefen
+  bach --maintain skills        Skill-Gesundheit pruefen
+  bach --maintain sync          Skills mit Datenbank synchronisieren
+  bach --maintain headers       SKILL.md YAML-Header generieren/validieren
+  bach --maintain skill-help    Help-Dateien aus SKILL.md generieren
+  bach --maintain workflows     Workflow-Format validieren
+  bach --maintain nul           Windows NUL-Dateien entfernen
+  bach --maintain list          Alle Tools anzeigen
+
+DOKUMENTATIONS-CHECK
+--------------------
+  bach --maintain docs [--dry-run]
+  
+  Erkennt veraltete Dokumentationen:
+  - Aelter als 60 Tage
+  - Ungueltige Pfade
+  - Fehlende Referenzen
+
+SKILL GENERATOR
+---------------
+  bach --maintain generate <n> [profil] [zielordner]
+  
+  Profile:
+    MICRO    - Nur Datei(en)
+    LIGHT    - Minimal (SKILL.md + config + data)
+    STANDARD - Standard mit Memory
+    EXTENDED - Komplex mit Mikro-Skills
+
+  Beispiele:
+    bach --maintain generate mein-skill STANDARD skills/
+    bach --maintain generate analyse MICRO skills/_protocols/
+
+EXPORT TOOLS
+------------
+  bach --maintain export skill <n> --from-os <path>
+  bach --maintain export agent <n> --from-os <path>
+  bach --maintain export os-fresh <path> --output <zip>
+  bach --maintain export os-reset <path> --backup
+
+PATTERN TOOL
+------------
+  bach --maintain pattern <ordner> [optionen]
+  
+  Optionen:
+    --dry-run       Nur anzeigen (default)
+    --execute       Umbenennungen durchfuehren
+    --prefix-only   Nur Prefix-Patterns
+    --suffix-only   Nur Suffix-Patterns
+    -m <n>          Minimale Pattern-Laenge
+
+TOOL SCANNER
+------------
+  bach --maintain scan [--json]
+  bach --maintain scan compare
+  
+  Findet installierte CLI-Tools und vergleicht mit Registry.
+
+FILE CLEANER
+------------
+  bach --maintain clean <ordner> [optionen]
+  
+  Optionen:
+    --age <tage>    Dateien aelter als X Tage
+    --keep <n>      Nur N neueste behalten
+    --pattern <p>   Datei-Pattern (z.B. "*.log")
+    -r              Rekursiv suchen
+    --execute       Tatsaechlich loeschen
+
+  Beispiele:
+    bach --maintain clean ./logs --age 30
+    bach --maintain clean ./backups --keep 5 --execute
+
+JSON FIXER
+----------
+  bach --maintain json <datei/ordner> [optionen]
+  
+  Optionen:
+    --dry-run    Nur pruefen (default)
+    --execute    Tatsaechlich reparieren
+    --backup     Backup vor Aenderung
+
+  Repariert:
+    - UTF-8 BOM
+    - Trailing Commas
+    - Single-Quotes
+    - PowerShell Newlines
+
+PATH HEALER (NEU)
+-----------------
+  bach --maintain heal [optionen]
+  
+  Korrigiert veraltete Pfade in BACH-Dateien.
+  
+  Optionen:
+    --dry-run       Nur pruefen, nichts aendern (default)
+    --execute       Tatsaechlich korrigieren
+    --target <p>    Nur bestimmte Datei pruefen
+    --report        Detaillierten Report generieren
+    
+  Korrigiert:
+    - Alte recludOS-Pfade -> BACH_v2_vanilla
+    - Alte Skill-Pfade
+    - Hub/Handler-Pfade
+    - Tools-Verweise
+    
+  Beispiele:
+    bach --maintain heal                   # Dry-run fuer alle
+    bach --maintain heal --execute         # Alle korrigieren
+    bach --maintain heal --target config.py
+
+  Basiert auf: RecludOS Unified Path Healer v2.3.0
+
+REGISTRY WATCHER (NEU)
+----------------------
+  bach --maintain registry [optionen]
+  
+  Ueberwacht und validiert alle BACH-Registries.
+  
+  Optionen:
+    check           Vollstaendiger Check (default)
+    check --db      Nur Datenbank pruefen
+    check --json    Nur JSON-Configs pruefen
+    partners        Partner-Registry Check (NEU)
+    report          Detaillierter Report
+    
+  Prueft:
+    - Existenz der Registry-relevanten DB-Tabellen (tools, skills, agents, partners)
+    - JSON-Konfigurationsdateien (nur noch begruendete Ausnahmen)
+    - Cross-Referenzen zwischen Tabellen
+    - partner_recognition + delegation_rules Konsistenz
+
+  Hinweis: partner_registry.json ist DEPRECATED (siehe docs/docs/docs/help/formats.txt)
+    
+  Beispiele:
+    bach --maintain registry               # Quick-Check
+    bach --maintain registry report        # Detaillierter Report
+    bach --maintain registry check --db    # Nur Datenbank
+    
+  Hinweis: Laeuft automatisch bei --startup (Quick-Check)
+
+SKILL HEALTH MONITOR (NEU)
+--------------------------
+  bach --maintain skills [optionen]
+  
+  Ueberwacht und validiert alle BACH-Skills und Agenten.
+  
+  Optionen:
+    check            Vollstaendiger Check (default)
+    check --skills   Nur Skills pruefen
+    check --agents   Nur Agenten pruefen
+    report           Detaillierter Report
+    
+  Prueft:
+    - Skill-Verzeichnisse (_agents, _experts, _services)
+    - SKILL.md Vollstaendigkeit (name, version, description)
+    - Agent-Definitionen validieren
+    - Verwaiste oder fehlerhafte Skills finden
+    
+  Beispiele:
+    bach --maintain skills                 # Quick-Check
+    bach --maintain skills report          # Detaillierter Report
+    bach --maintain skills check --agents  # Nur Agenten
+    
+  Hinweis: Laeuft automatisch bei --startup (Quick-Check)
+
+SYNC TOOL (NEU)
+---------------
+  bach --maintain sync [optionen]
+
+  Synchronisiert skills/ Dateien mit der Datenbank.
+
+  Optionen:
+    --dry-run    Nur anzeigen, nichts aendern (default)
+    --verbose    Ausfuehrliche Ausgabe
+    -v           Kurz fuer --verbose
+
+  Synchronisiert:
+    - SKILL.md Metadaten (Name, Version, Beschreibung)
+    - Skill-Status und Abhaengigkeiten
+    - Agent-Definitionen
+
+  Beispiele:
+    bach --maintain sync               # Dry-run
+    bach --maintain sync --verbose     # Mit Details
+    bach --maintain sync --dry-run -v  # Dry-run ausfuehrlich
+
+HEADERS TOOL (NEU)
+------------------
+  bach --maintain headers [optionen]
+
+  Generiert und validiert YAML-Header fuer SKILL.md Dateien.
+
+  Optionen:
+    --all           Alle Skill-Verzeichnisse scannen (default)
+    --path <p>      Bestimmtes Verzeichnis scannen
+    --file <f>      Einzelne SKILL.md verarbeiten
+    --dry-run       Nur anzeigen (default)
+    --fix           Aenderungen schreiben
+    --update-db     DB-Versionen aus YAML-Headern aktualisieren
+    -v              Ausfuehrlich
+
+  Gescannte Verzeichnisse:
+    - agents/*/SKILL.md
+    - agents/_experts/*/SKILL.md
+    - hub/_services/*/SKILL.md
+    - partners/*/SKILL.md
+
+  Beispiele:
+    bach --maintain headers                      # Trockenlauf
+    bach --maintain headers --fix                # Alle Header normalisieren
+    bach --maintain headers --fix --update-db    # Header + DB aktualisieren
+    bach --maintain headers --path agents -v
+
+SKILL-HELP TOOL (NEU)
+---------------------
+  bach --maintain skill-help [optionen]
+
+  Generiert docs/docs/docs/help/*.txt Dateien aus SKILL.md.
+
+  Optionen:
+    <name>       Einzelner Skill-Name
+    --all        Alle Skills verarbeiten
+    -a           Kurz fuer --all
+    --dry-run    Nur anzeigen, nichts schreiben
+    -n           Kurz fuer --dry-run
+
+  Beispiele:
+    bach --maintain skill-help ati              # Help fuer ATI-Agent
+    bach --maintain skill-help --all            # Alle Skills
+    bach --maintain skill-help --all --dry-run  # Trockenlauf
+
+WORKFLOWS TOOL (NEU)
+--------------------
+  bach --maintain workflows [optionen]
+
+  Validiert Workflow-Dateien auf konsistentes Format.
+
+  Prueft:
+    - H1-Titel vorhanden
+    - Beschreibung (> Blockquote, **Zweck:**, ## Uebersicht)
+    - Schritte/Phasen-Struktur
+    - Versions-Angabe (optional)
+
+  Erwartet in: skills/_protocols/*.md
+
+  Beispiele:
+    bach --maintain workflows        # Alle Workflows validieren
+    bach --maintain workflows help   # Hilfe anzeigen
+
+NUL-CLEANER (NEU)
+-----------------
+  bach --maintain nul [optionen]
+
+  Entfernt Windows NUL-Dateien (reservierter Dateiname).
+
+  Optionen:
+    scan            Nur NUL-Dateien auflisten (default)
+    delete          NUL-Dateien loeschen
+    clean/remove    Alias fuer delete
+    <pfad>          Bestimmtes Verzeichnis scannen
+
+  Beispiele:
+    bach --maintain nul                        # Scan BACH-Verzeichnis
+    bach --maintain nul scan                   # Nur scannen
+    bach --maintain nul delete                 # Scannen und loeschen
+    bach --maintain nul delete C:\Pfad         # Bestimmtes Verzeichnis
+
+  Hinweis: NUL-Dateien entstehen auf Windows, wenn versehentlich
+           nach 'NUL' geschrieben wird (Windows Device-Name).
+
+TOOLS
+-----
+  tools/doc_update_checker.py        Dokumentations-Pruefung
+  tools/duplicate_detector.py        Duplikat-Erkennung
+  tools/generators/                  Generator-Scripts
+    skill_generator.py               Skill-Strukturen
+    exporter.py                      Export-Funktionen
+  tools/pattern_tool.py              Pattern-Erkennung
+  tools/tool_scanner.py              CLI-Tool Discovery
+  tools/file_cleaner.py              Datei-Cleanup
+  tools/json_fixer.py                JSON-Reparatur
+  tools/c_path_healer.py             Pfad-Korrektur (WICHTIG: c_path_healer!)
+  tools/nulcleaner.py                NUL-Dateien entfernen
+  tools/skill_header_gen.py          YAML-Header Generator
+  tools/skill_help_gen.py            Help-Generator + Workflow-Validator
+  tools/maintenance/
+    registry_watcher.py              Registry-Konsistenz
+    skill_health_monitor.py          Skill-Gesundheit
+    sync_skills.py                   Skills-DB Synchronisierung
+
+AUTOMATISCHE CHECKS BEI --startup
+---------------------------------
+Die folgenden Wartungs-Checks laufen automatisch bei Session-Start:
+
+  1. Directory Scan     - Aenderungen seit letzter Session
+  2. Path Healer        - Dry-run Pfadkorrektur
+  3. Registry Watcher   - Quick-Check DB/JSON Konsistenz
+  4. Skill Health       - Quick-Check Skills/Agenten
+
+Fuer detaillierte Reports: bach --maintain <tool> report
+
+AKTUELLE TOOL-UBERSICHT (16 Befehle)
+-------------------------------------
+1.  docs          - Dokumentations-Update-Check
+2.  duplicates    - Duplikat-Erkennung Info
+3.  generate      - Skill/Agent Generator
+4.  export        - Export-Tools
+5.  pattern       - Dateinamen-Pattern kuerzen
+6.  scan          - System nach CLI-Tools scannen
+7.  clean         - Dateien nach Alter/Muster loeschen
+8.  json          - JSON-Dateien reparieren
+9.  heal          - Pfad-Korrektur und Selbstheilung
+10. registry      - Registry-Konsistenz pruefen
+11. skills        - Skill-Gesundheit pruefen
+12. sync          - Skills mit Datenbank synchronisieren
+13. headers       - SKILL.md YAML-Header generieren/validieren
+14. skill-help    - Help-Dateien aus SKILL.md generieren
+15. workflows     - Workflow-Format validieren
+16. nul           - Windows NUL-Dateien entfernen
+
+SIEHE AUCH
+----------
+  docs/docs/docs/help/backup.txt   Backup-System
+  docs/docs/docs/help/test.txt     Test-System
+  docs/docs/docs/help/tools.txt    Tool-Inventar
+  docs/docs/docs/help/formats.txt  Datenbank-Formate

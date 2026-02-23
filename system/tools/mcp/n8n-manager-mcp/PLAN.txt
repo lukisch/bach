@@ -1,0 +1,128 @@
+n8n-manager-mcp -- Release-Plan
+==================================
+Status: Code fertig, TypeScript kompiliert, 14 Tools
+Ziel: npm-Veroeffentlichung + Claude Code/Desktop Integration
+
+WICHTIG: Zuerst PRIVAT committen. Erst nach n8n-workflow-manager Release veroeffentlichen.
+Reihenfolge: n8n-workflow-manager ZUERST, dann MCP-Server (referenziert das Hauptprojekt).
+
+
+Phase 1: Lokaler Test
+-----------------------
+[ ] MCP-Server in Claude Code registrieren:
+    claude mcp add --scope user n8n-manager node "C:\Users\User\OneDrive\KI&AI\MCP\n8n-manager-mcp\dist\index.js"
+
+[ ] Claude Code neu starten, pruefen ob Tools verfuegbar:
+    - n8n_list_servers (sollte leer sein)
+    - n8n_add_server (Test-Server eintragen)
+    - n8n_describe_nodes (Node-Katalog anzeigen)
+
+[ ] n8n auf Hetzner installieren (via n8nManager setup), dann:
+    - n8n_add_server mit echtem Server testen
+    - n8n_list_workflows
+    - n8n_create_workflow (einfacher Webhook -> HTTP Request)
+    - n8n_activate_workflow
+    - n8n_list_executions
+    - n8n_export_workflow + n8n_import_workflow
+
+[ ] Edge Cases testen:
+    - Kein Server konfiguriert -> saubere Fehlermeldung?
+    - Falscher API-Key -> verstaendlicher Fehler?
+    - Server offline -> Timeout-Handling?
+    - Ungueltige Workflow-JSON -> Validierung?
+
+
+Phase 2: Privates GitHub-Repo
+-------------------------------
+[ ] Git initialisieren:
+    cd "/c/Users/User/OneDrive/KI&AI/MCP/n8n-manager-mcp"
+    git init
+    echo "node_modules/" > .gitignore
+    echo "dist/" >> .gitignore
+    git add -A
+    git commit -m "Initial commit: n8n-manager-mcp v0.1.0"
+
+[ ] Privates Repo erstellen + pushen:
+    gh repo create lukisch/n8n-manager-mcp --private --source=. --push
+
+[ ] Auf GitHub pruefen:
+    - README rendert korrekt?
+    - .gitignore greift? (kein node_modules, kein dist)
+    - package.json URLs stimmen?
+
+
+Phase 3: Polish
+-----------------
+[ ] .gitignore erstellen (node_modules/, dist/, *.tsbuildinfo)
+[ ] CHANGELOG.md erstellen
+[ ] README: Claude Desktop + Claude Code Installationsanleitung testen
+[ ] README: Beispiel-Konversation hinzufuegen (User fragt, Claude nutzt Tools)
+[ ] server.json erstellen (MCP Server Manifest):
+    {
+      "name": "n8n-manager-mcp",
+      "version": "0.1.0",
+      "description": "...",
+      "tools": 14
+    }
+[ ] Error-Messages alle auf Englisch pruefen
+[ ] Tool-Descriptions optimieren (klar, praegnant, mit Beispielen)
+
+
+Phase 4: npm Veroeffentlichung
+--------------------------------
+VORAUSSETZUNG: n8n-workflow-manager ist bereits public auf GitHub!
+
+[ ] npm Login pruefen: npm whoami
+[ ] Version in package.json pruefen (0.1.0)
+[ ] Build frisch:
+    cd "/c/Users/User/OneDrive/KI&AI/MCP/n8n-manager-mcp"
+    node "node_modules/typescript/bin/tsc"
+    (NICHT npm run build wegen & im Pfad!)
+
+[ ] Publish:
+    npm publish --ignore-scripts
+    (--ignore-scripts wegen & im Pfad!)
+
+[ ] Testen via npx:
+    npx -y n8n-manager-mcp
+    (Sollte Server starten und auf stdin warten)
+
+[ ] GitHub Repo PUBLIC stellen:
+    gh repo edit lukisch/n8n-manager-mcp --visibility public
+
+
+Phase 5: Integration + Community
+-----------------------------------
+[ ] Claude Code Registration via npx:
+    claude mcp add --scope user n8n-manager npx -y n8n-manager-mcp
+
+[ ] Claude Desktop config Beispiel testen:
+    AppData/Roaming/Claude/claude_desktop_config.json:
+    {"mcpServers": {"n8n-manager": {"command": "npx", "args": ["-y", "n8n-manager-mcp"]}}}
+
+[ ] MCP-Server in n8n-workflow-manager README referenzieren
+[ ] n8n Community Forum: MCP-Server erwaehnen
+[ ] Optional: In MCP-Server-Verzeichnisse eintragen (awesome-mcp-servers etc.)
+
+
+Phase 6: Post-Launch
+----------------------
+[ ] Feedback sammeln
+[ ] Fehlende Tools ergaenzen:
+    - n8n_list_credentials (Credentials auflisten)
+    - n8n_get_execution_data (Detail-Daten einer Execution)
+    - n8n_copy_workflow (zwischen Servern kopieren)
+    - n8n_search_workflows (Name/Tag-basierte Suche)
+[ ] i18n-Support (de/en) wie bei bach-codecommander-mcp
+[ ] Lokale Installation in ~/.claude/mcp-servers/ dokumentieren
+
+
+Notizen
+--------
+- Build-Workaround: node "node_modules/typescript/bin/tsc" (& im Pfad!)
+- Publish-Workaround: npm publish --ignore-scripts (& im Pfad!)
+- Lokal installieren: ~/.claude/mcp-servers/n8n-manager-mcp/ (kein & im Pfad)
+- Config-Speicherort: ~/.n8n-manager-mcp/servers.json
+- Abhaengigkeit: @modelcontextprotocol/sdk ^1.0.0, zod ^3.23.8
+- 14 Tools, kein Python noetig (reines TypeScript, direkter n8n API-Zugriff)
+- Komplementaer zu n8n-workflow-manager (MCP fuer KI, Web-UI fuer Menschen)

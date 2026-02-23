@@ -1,0 +1,216 @@
+# Portabilitaet: UNIVERSAL
+# Version: 2.0.2
+# Zuletzt validiert: 2026-02-08 (Claude Sonnet 4.5)
+# Naechste Pruefung: 2026-08-08
+# Ressourcen: [skills table, skill_sources.json]
+
+BACH SKILLS SYSTEM (Architektur v2.0)
+=====================================
+
+Stand: 2026-02-08
+
+Skills sind spezialisierte Faehigkeiten, die LLMs erweitern.
+Sie sind modular in Schicht 3 (Logic & Skill) organisiert.
+
+VERSIONS-CHECK-PRINZIP (NEU)
+----------------------------
+IMMER die neueste Version verwenden - egal ob lokal oder zentral:
+
+  bach --skills version <name>  # Pruefe Versionen
+  bach --tools version <name>   # Pruefe Tool-Versionen
+
+SKILL-STRUKTUR: EIN SKILL = EIN ORDNER (NEU)
+--------------------------------------------
+Jeder Skill, Agent, Expert ist vollstaendig autark in einem eigenen Ordner:
+
+  FLAT (Standard, < 5 Dateien):
+  ----------------------------
+  agents/entwickler/
+  +-- SKILL.md              # Definition mit Standard-Header
+  +-- tool_xyz.py           # Spezifisches Tool (direkt im Root)
+  +-- workflow_abc.md       # Spezifischer Workflow (direkt im Root)
+  +-- config.json           # Optional
+
+  KOMPLEX (>= 5 Dateien):
+  -----------------------
+  agents/_experts/steuer/
+  +-- SKILL.md
+  +-- tools/                # Unterordner bei vielen Tools
+  +-- workflows/            # Unterordner bei vielen Workflows
+  +-- data/                 # Spezifische Daten
+
+HIERARCHIE & KATEGORIEN
+-----------------------
+skills/
++-- _agents/        Agenten (orchestrieren, eigener Ordner)
++-- _experts/       Experten (Domaenenwissen, eigener Ordner)
++-- _services/      Services (Handler-nah, eigener Ordner)
++-- _connectors/    Adapter (Telegram, Discord, HA, eigener Ordner)
++-- partners/      Partner-Integrationen (eigener Ordner)
++-- _os/            OS-spezifische Skills (eigener Ordner)
++-- _workflows/     Workflows (KEIN Ordner, 1 Datei = 1 Workflow)
++-- _templates/     Standard-Templates (TEMPLATE_*.md)
+
+KOMPONENTEN-TYPEN
+-----------------
+
+  Typ         Ordner              Charakteristik
+  ---------   -----------------   ---------------------------------
+  Agent       _agents/<name>/     Orchestriert Experten, eigener Ordner
+  Expert      _experts/<name>/    Tiefes Domaenenwissen, eigener Ordner
+  Service     _services/<name>/   Allgemein, Handler-nah, eigener Ordner
+  Connector   _connectors/<name>/ Adapter fuer externe Dienste
+  Partner     partners/<name>/   Partner-Integrationen (konsolidiert)
+  OS-Skill    _os/<name>/         OS-spezifische Funktionalitaet
+  Workflow    _workflows/         KEIN Ordner (1 Datei = 1 Workflow)
+  Tool (allg) system/tools/       Wiederverwendbar, kein Skill-Bezug
+  Tool (spez) Im Skill-Ordner     Nur fuer diesen Skill
+
+TOOL-DUPLIZIERUNG
+-----------------
+REGEL: Im Zweifel doppelt halten!
+
+  system/tools/c_ocr_engine.py             # Allgemeine Version
+  agents/_experts/steuer/steuer_ocr.py     # Skill-spezifische Version
+
+Vorteile:
+- Koennen unabhaengig weiterentwickelt werden
+- Skill bleibt autark
+- Keine Abhaengigkeitskonflikte
+
+WICHTIG: tools/ liegt unter system/tools/ (NICHT unter skills/tools/)
+
+CONNECTORS (NEU 2026-02)
+------------------------
+_connectors/ enthaelt Adapter fuer externe Dienste:
+- telegram_connector.py - Telegram Bot API Integration
+- discord_connector.py - Discord Bot Integration
+- homeassistant_connector.py - Home Assistant Integration
+- base.py - Basis-Connector-Klasse
+- SKILL.md - Connector-Dokumentation
+
+Connectors sind spezialisierte Services die externe Plattformen anbinden.
+Sie nutzen meist asynchrone Kommunikation und Event-Queues.
+
+STANDARD-HEADER (Pflicht)
+-------------------------
+Jede Komponente braucht einen YAML-Frontmatter Header:
+
+  ---
+  name: [name]
+  version: X.Y.Z
+  type: skill | agent | expert | service | connector | partner | os | workflow
+  author: [author]
+  created: YYYY-MM-DD
+  updated: YYYY-MM-DD
+  anthropic_compatible: true
+  dependencies:
+    tools: []
+    services: []
+    workflows: []
+  description: >
+    [Beschreibung]
+  ---
+
+Templates: skills/_templates/TEMPLATE_*.md
+
+EXPORT-SYSTEM
+-------------
+Exportierte Skills muessen OHNE BACH funktionieren:
+
+  bach --skills export <name>  # Erstellt autarkes Paket
+
+Export enthaelt:
+- SKILL.md mit Header
+- manifest.json (Abhaengigkeiten, Versionen)
+- Alle spezifischen Tools
+- Alle spezifischen Workflows
+- README.md (Standalone-Anleitung)
+- Alle allgemeinen Ressourcen aus Bach, die benötigt werden
+
+SKILL-QUELLEN & SICHERHEIT
+--------------------------
+
+  Klasse        Quellen                           Vorgehen
+  -----------   -------------------------------   ----------------------
+  Goldstandard  Selbst geschrieben                Beste Integration
+  Trusted       anthropics/skills, cookbooks      Nach Pruefung 1:1 OK
+  Untrusted     Andere GitHub-Repos               NUR neu schreiben
+  Blacklist     data/skill_blacklist.json         VERBOTEN
+
+Pruefung: data/skill_sources.json
+
+DB-SYNCHRONISATION
+------------------
+Alle Skills werden bidirektional zwischen Dateisystem und DB abgeglichen:
+- Tabelle: skills (aktuell 876 Eintraege)
+- Felder: name, type, path, content_hash, is_active, version
+- Erweiterte Felder: category, priority, trigger_phrases, dist_type, template_content, content
+- Statistik: bach --skills list
+
+CLI-BEFEHLE
+-----------
+  bach skills list               Alle Skills auflisten
+  bach skills show <name>        Inhalt und Metadaten
+  bach skills search <term>      Nach Funktionalitaet suchen
+  bach skills version <name>     Versions-Check (lokal vs zentral)
+  bach skills export <name>      Autarkes Paket erstellen (v2.0)
+  bach skills install <path>     Skill aus ZIP/Verzeichnis importieren
+  bach skills hierarchy          Hierarchie aus DB anzeigen
+  bach skills hierarchy <typ>    Nur Typ anzeigen (agent/expert/skill/service/workflow)
+
+SELBSTERWEITERUNG (NEU v2.5)
+-----------------------------
+  bach skills create <name> --type <typ>   Neue Faehigkeit scaffolden
+  bach skills reload                        Hot-Reload ohne Neustart
+
+  Unterstuetzte Typen fuer 'create':
+
+    --type tool       Erstellt: system/tools/<name>.py
+                       Python-Script mit Standard-Template
+                       Sofort nutzbar nach Implementierung
+
+    --type agent      Erstellt: system/agents/<name>/SKILL.md
+                       Eigener Ordner, orchestriert andere Komponenten
+                       Template mit Standard-Header
+
+    --type expert     Erstellt: system/agents/_experts/<name>/SKILL.md
+                       Eigener Ordner, tiefes Domaenenwissen
+                       Template mit Standard-Header
+
+    --type handler    Erstellt: system/hub/<name>.py
+                       Sofort als CLI-Befehl verfuegbar!
+                       BaseHandler-Subklasse mit get_operations()
+                       Nach 'reload' ueber bach <name> erreichbar
+
+    --type service    Erstellt: system/skills/_services/<name>/
+                       Ordner mit __init__.py und service.py
+                       Handler-nah, allgemein nutzbar
+
+  Workflow:
+    1. bach skills create mein-tool --type handler
+    2. hub/mein_tool.py bearbeiten (Logik implementieren)
+    3. bach skills reload
+    4. bach mein-tool help  (sofort verfuegbar!)
+
+  Hooks nach Create/Reload:
+    after_skill_create → wird nach jedem 'create' emittiert
+    after_skill_reload → wird nach jedem 'reload' emittiert
+
+GUI (Skills Board)
+------------------
+Das interaktive Skills Board zeigt die gesamte Hierarchie,
+den Sync-Status und ermoeglicht direktes Editieren.
+
+  http://127.0.0.1:8000/skills
+
+SIEHE AUCH
+----------
+  bach help agents             Agenten-Uebersicht
+  bach help tools              Tool-Verwaltung
+  bach help workflow           Workflow-System
+  bach help naming             Namenskonventionen
+  bach help hooks              Hook-Framework (14 Events)
+  bach help self-extension     Selbsterweiterungs-System
+  SKILL.md                     Zentrale Skill-Definition
+  data/skill_sources.json      Skill-Quellen und Versionen

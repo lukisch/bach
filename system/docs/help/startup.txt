@@ -1,0 +1,242 @@
+# Portabilitaet: UNIVERSAL
+# Version: 1.0.1
+# Zuletzt validiert: 2026-02-08 (Log-Pfad korrigiert)
+# Naechste Pruefung: 2026-08-08
+
+STARTUP - Session starten
+=========================
+
+BESCHREIBUNG
+Das Startup-Protokoll initialisiert eine BACH-Session mit allen
+notwendigen Checks und zeigt den Kontext der letzten Session.
+
+BEFEHL
+------
+bach --startup                    Komplettes Startprotokoll
+bach --startup quick              Schnellstart (ohne Directory-Scan)
+bach --startup mode <m>           Startup-Modus aendern (gui|text|dual|silent)
+bach --startup --mode=<m>         Einmalig mit anderem Modus starten
+bach --startup --partner=NAME     Partner-spezifische Session (NEU v1.1.38)
+
+PARTNER-SESSIONS (v1.1.38)
+--------------------------
+Ermoeglicht Partner-spezifisches Session-Management:
+
+  bach --startup --partner=claude   Startet Claude-Session
+  bach --startup --partner=gemini   Startet Gemini-Session
+  bach --startup --partner=user     Standard (Default)
+  bach --startup --partner=new      Generiert automatische ID (partner_HHMMSS)
+  bach --startup --partner=simonAI  Neuer Partner mit eigenem Namen
+
+VORTEILE:
+- Vorherige Session desselben Partners wird automatisch geschlossen
+- Parallele Sessions fuer verschiedene Partner moeglich
+- Verhindert "verwaiste" offene Sessions bei wiederholtem Startup
+- Automatische Stempelkarte (Clock-In/Out) in partner_presence Tabelle
+
+STEMPELKARTEN-SYSTEM (v1.1.71):
+- Bei Startup: Partner wird automatisch eingestempelt
+- Bei Shutdown: Partner wird automatisch ausgestempelt
+- Partner-Awareness: Zeigt wer noch online ist
+- Multi-LLM Protokoll V3: Aktiviert bei mehreren Partnern
+
+NEUE PARTNER:
+  # Mit eigenem Namen (empfohlen)
+  bach --startup --partner=simonAI
+
+  # Ohne Namen (generiert ID)
+  bach --startup --partner=new      -> partner_143052
+  bach --startup --partner=nameless -> partner_143052
+
+BEISPIEL:
+  # Gemini startet Arbeit
+  bach --startup --partner=gemini --mode=silent
+
+  # Spaeter: Gemini startet neu -> alte Session wird geschlossen
+  bach --startup --partner=gemini --mode=silent
+  [AUTO-CLOSE] Vorherige GEMINI-Session beendet: session_20260126_...
+
+  # Partner-Awareness zeigt:
+  [PARTNER-AWARENESS]
+   *** 1 ANDERE PARTNER ONLINE ***
+     CLAUDE: Task_XYZ
+   --> Protokoll V3 verwenden! (bach --help multi_llm)
+
+DATENBANK:
+  memory_sessions.partner_id speichert den Partner-Namen.
+  partner_presence speichert Stempelkarte (online/offline/crashed).
+  Default: "user" fuer manuelle Sessions.
+
+NUTZERMODI (v1.1.37)
+--------------------
+BACH unterstuetzt 4 Startup-Modi:
+
+  gui      GUI Dashboard oeffnet im Browser (Standard)
+  text     Nur Konsole, kein Browser
+  dual     GUI + Konsole parallel
+  silent   Nichts automatisch starten
+
+Der Modus wird in data/user_config.json gespeichert.
+Details: bach --help modes
+
+ABLAUF (v1.1.31)
+----------------
+Das Startup-Protokoll fuehrt folgende Schritte aus:
+
+1. [DIRECTORY SCAN]
+   - Prueft Aenderungen seit letzter Session
+   - Zeigt neue/geloeschte/geaenderte Dateien
+   - Wird bei "quick" uebersprungen
+
+2. [PROBLEMS FIRST]
+   - Automatische Fehlermeldung (von CHIAH)
+   - Zeigt Fehler der letzten 24 Stunden
+
+3. [PATH HEALER CHECK] *** NEU v1.1.18 ***
+   - Dry-Run Pruefung auf Pfadprobleme
+   - Zeigt Dateien mit fehlerhaften Pfaden
+   - Reparieren: bach --maintain heal --execute
+
+4. [REGISTRY WATCHER] *** NEU v1.1.21 ***
+   - Prueft DB/JSON Konsistenz
+   - Zeigt fehlende Tabellen, ungueltige JSON
+   - Details: bach --maintain registry
+
+5. [SKILL HEALTH] *** NEU v1.1.21 ***
+   - Validiert Skills und Agenten
+   - Zeigt Probleme mit SKILL.md Dateien
+   - Details: bach --maintain skills
+
+6. [LETZTE SESSION]
+   - Zeigt die letzte abgeschlossene Session
+   - Tasks erstellt/erledigt
+   - WICHTIG: "NAECHSTE SCHRITTE" = continuation_context
+
+7. [SNAPSHOT VERFUEGBAR] *** NEU v1.1.17 ***
+   - Zeigt letzten Snapshot (wenn heute erstellt)
+   - Anzahl offener Tasks im Snapshot
+   - Fortsetzen: bach snapshot load
+
+8. [MEMORY CHECK]
+   - Zaehlt Working Memory, Facts, Lessons
+   - Zeigt letzte Notiz
+
+9. [SESSION REGISTRIEREN]
+   - Neue Session-ID wird in memory_sessions erstellt
+
+10. [NACHRICHTEN]
+    - Prueft ungelesene Nachrichten in MessageBox
+    - Zeigt Absender und Betreff
+    - Details: bach msg unread
+
+11. [PERIODISCHE TASKS] *** NEU v1.1.18 ***
+    - Zeigt faellige Recurring Tasks
+    - Erstellen: bach --recurring check
+
+12. [BACH SYSTEM-TASKS]
+    - Zeigt offene/erledigte BACH Framework-Tasks
+    - Top 3 nach Prioritaet (P1 > P2 > P3)
+    - Alle: bach task list
+
+13. [ATI AGENT]
+    - Prueft ob ATI-Ordner existiert
+    - Software-Entwickler-Agent Status
+
+14. [LESSONS LEARNED]
+    - Zeigt gespeicherte Lessons
+    - Details: bach lesson last
+
+15. [AUTOLOG]
+    - Eintraege aus system/data/logs/auto_log.txt
+    - Letzte 3 Befehle
+    - Mehr: bach --logs tail 20
+
+16. [INJEKTOREN]
+    - Zeigt aktive Injektoren
+
+17. [STARTUP MODUS] *** NEU v1.1.37 ***
+    - Zeigt aktuellen Modus (GUI/TEXT/DUAL/SILENT)
+    - Startet GUI und/oder Konsole je nach Modus
+    - GUI: http://127.0.0.1:8000 im Browser
+    - Text: Neues Konsolenfenster mit bach.py
+
+OUTPUT-BEISPIEL
+---------------
+=======================================================
+         BACH SESSION STARTUP
+=======================================================
+ Zeit: 2026-01-22 13:10:15 (Thursday)
+ Modus: GUI
+ Partner: GEMINI
+=======================================================
+
+[AUTO-CLOSE] Vorherige GEMINI-Session beendet: session_20260122_...
+
+[PATH HEALER]
+ [!] 2 Dateien mit Pfadproblemen gefunden
+   - example_file.py
+ --> bach --maintain heal --execute zum Reparieren
+
+[LETZTE SESSION]
+ Session: session_20260122_1200
+ Beendet: 2026-01-22 12:30
+ Tasks: +3 erstellt, 2 erledigt
+ Thema: Help-Dateien aktualisiert...
+
+ *** NAECHSTE SCHRITTE ***
+   P2: shutdown.txt aktualisieren
+   P2: memory.txt pruefen
+
+[SNAPSHOT VERFUEGBAR]
+ Letzter: auto_shutdown_20260122_1230 (12:30)
+ Tasks im Snapshot: 5
+ --> bach snapshot load zum Fortsetzen
+
+[PERIODISCHE TASKS]
+ *** 1 TASK(S) FAELLIG ***
+   [weekly_backup] Woechentliches Backup -> BACH
+ --> bach --recurring check zum Erstellen
+
+[BACH SYSTEM-TASKS]
+ 42 offen, 15 erledigt
+ Top-Aufgaben:
+   [93] P1 GUI: /api/skills Endpunkt...
+   [94] P1 GUI: Skills-Dashboard...
+
+=======================================================
+ READY - Session gestartet
+
+ HINWEIS: Bei Shutdown -> bach --memory session "..."
+=======================================================
+
+DATEN-QUELLEN
+-------------
+- memory_sessions:    Letzte Session, continuation_context
+- memory_working:     Aktuelle Notizen
+- memory_facts:       Persistente Fakten
+- memory_lessons:     Lessons Learned
+- session_snapshots:  Wiederherstellungspunkte
+- tasks:              BACH System-Tasks
+- messages:           MessageBox (bach.db)
+
+HANDLER
+-------
+hub/startup.py    Startup-Handler (DB-basiert)
+
+VERSIONSHISTORIE
+----------------
+v1.1.2   Basis-Startup mit Dir-Scan, Memory, Tasks
+v1.1.17  + Snapshot-Anzeige
+v1.1.18  + Path Healer, Recurring Tasks
+v1.1.21  + Registry Watcher, Skill Health Monitor
+v1.1.37  + Nutzermodi (gui, text, dual, silent)
+v1.1.38  + Partner-Sessions (--partner=NAME, Auto-Close)
+
+SIEHE AUCH
+----------
+bach --help modes          Nutzermodi (gui, text, dual, silent)
+bach --help shutdown       Session beenden
+bach --help memory         Memory-System
+bach --help maintain       Wartungs-Tools (heal, registry, skills)
+bach --help snapshot       Snapshots verwalten
+bach --help tasks          Task-Management

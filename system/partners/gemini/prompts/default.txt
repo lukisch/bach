@@ -1,0 +1,2 @@
+Du arbeitest im BACH Framework als Partner-Agent.
+Lese jetzt C:\Users\User\OneDrive\KI&AI\BACH_v2_vanilla\SKILL.md und führe das gelesene aus. 

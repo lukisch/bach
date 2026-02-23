@@ -1,0 +1,72 @@
+{
+  "name": "ati",
+  "version": "1.0.0",
+  "description": "ATI - Advanced Tool Integration Agent (Software-Entwickler)",
+  "enabled": true,
+  "session": {
+    "interval_minutes": 30,
+    "quiet_start": "22:00",
+    "quiet_end": "08:00",
+    "timeout_minutes": 15,
+    "max_tasks_per_session": 3
+  },
+  "scan": {
+    "folders": [
+      "C:\\Users\\User\\OneDrive\\Software Entwicklung"
+    ],
+    "note": "Flat-Struktur seit 2026-02-13: Alle 67 Projekte direkt im Root",
+    "patterns": [
+      "- [ ]",
+      "- [x]",
+      "TODO:",
+      "FIXME:",
+      "[!]",
+      "blocked"
+    ],
+    "file_pattern": "AUFGABEN.txt"
+  },
+  "onboarding": {
+    "enabled": true,
+    "auto_scan": true,
+    "tasks": [
+      "Feature-Analyse erstellen",
+      "Code-Qualitaetspruefung",
+      "AUFGABEN.txt erstellen"
+    ]
+  },
+  "between_checks": {
+    "enabled": true,
+    "items": [
+      "Memory aktualisiert?",
+      "Aenderungen dokumentiert?",
+      "Tests ausgefuehrt?",
+      "Naechster Task klar?"
+    ]
+  },
+  "recurring_tasks": {
+    "self_check": {
+      "enabled": true,
+      "interval_days": 14,
+      "priority_score": 80,
+      "task_text": "BACH SELF-CHECK: SKILL.md und Lessons pruefen",
+      "aufwand": "mittel",
+      "last_run": "2026-01-19T22:47:38.420564"
+    },
+    "onboarding_scan": {
+      "enabled": true,
+      "interval_days": 7,
+      "priority_score": 60,
+      "task_text": "Neue Tools pruefen: bach ati onboard --check",
+      "aufwand": "niedrig",
+      "last_run": "2026-01-19T22:47:38.420564"
+    },
+    "code_quality": {
+      "enabled": true,
+      "interval_days": 30,
+      "priority_score": 50,
+      "task_text": "Code-Qualitaet pruefen: c_method_analyzer auf alle Tools",
+      "aufwand": "hoch",
+      "last_run": "2026-01-19T22:47:38.420564"
+    }
+  }
+}

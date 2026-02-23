@@ -1,0 +1,87 @@
+# Portabilitaet: UNIVERSAL
+# Version: 2.0.0
+# Zuletzt validiert: 2026-02-08
+# Naechste Pruefung: 2026-08-08
+
+VERSICHERUNG - Versicherungsverwaltung
+=======================================
+
+BESCHREIBUNG:
+  Verwaltung aller Versicherungspolicen mit Fristen, Kuendigungsterminen
+  und Beitraegen. Daten liegen in bach.db/fin_insurances.
+  GUI-Zugriff ueber das Finanz-Modul (Versicherungen-Tab).
+
+STATUS:
+  Vollstaendiger CLI-Handler implementiert in hub/versicherung.py
+  - CLI: bach versicherung <operation> (list, show, add, edit, delete, status, fristen, check, claim)
+  - GUI: Finanz-Modul > Versicherungen (CRUD von Gemini implementiert)
+  - Direkte DB-Abfrage (fuer Agents/Experten)
+
+DATENBANK:
+  Tabellen:
+    - bach.db / fin_insurances (Versicherungen)
+    - bach.db / fin_insurance_claims (Schadenfaelle)
+    - bach.db / insurance_types (Referenzdaten, optional)
+
+  Felder fin_insurances:
+    id                       Auto-ID
+    anbieter                 Versicherungsgesellschaft (Allianz, HUK, AXA, ...)
+    tarif_name               Tarifbezeichnung
+    police_nr                Policennummer (UNIQUE)
+    sparte                   Haftpflicht, BU, KFZ, Hausrat, Rechtsschutz, ...
+    status                   aktiv | gekuendigt | beitragsfrei | ruhend
+    beginn_datum             Vertragsbeginn
+    ablauf_datum             Vertragsende
+    kuendigungsfrist_monate  Kuendigungsfrist in Monaten (Default: 3)
+    verlaengerung_monate     Auto-Verlaengerung (Default: 12)
+    naechste_kuendigung      Naechster Kuendigungstermin
+    beitrag                  Beitrag als Betrag
+    zahlweise                monatlich | quartalsweise | halbjaehrlich | jaehrlich
+    steuer_relevant_typ      Vorsorgeaufwendungen etc.
+    ordner_pfad              Pfad zu Scans/Dokumenten auf Dateisystem
+    notizen                  Freitext
+    created_at, updated_at   Timestamps
+
+VERKNUEPFUNGEN:
+  - financial_emails: E-Mails von Versicherungen (category = 'versicherung')
+  - ordner_pfad: Echte Dokumente unter C:\Users\User\OneDrive\Dokumente\_Versicherungen&Finanzen\
+  - user_data_folders: Registrierter Ordner 'user/versicherungen'
+
+AKTUELLE DATEN:
+  13 Versicherungen importiert (Stand: Session 2026-01-28)
+  Sparten: Haftpflicht, BU, KFZ, Hausrat, Rechtsschutz, Zahnzusatz,
+           PKV, Unfallversicherung, Auslandskrankenversicherung, u.a.
+
+CLI-BEFEHLE:
+  bach versicherung list                    Alle aktiven Versicherungen
+  bach versicherung list --all              Inkl. gekuendigte
+  bach versicherung list --sparte <sparte>  Nach Sparte filtern
+  bach versicherung list --status <status>  Nach Status filtern
+
+  bach versicherung show <id>               Details anzeigen
+
+  bach versicherung add --anbieter "X" --sparte "Y" [Optionen]
+    Pflicht: --anbieter, --sparte
+    Optionen: --beitrag, --zahlweise, --police, --tarif, --beginn,
+              --ablauf, --kuendigung, --frist, --steuer, --ordner, --note
+
+  bach versicherung edit <id> [Felder]      Versicherung bearbeiten
+  bach versicherung delete <id>             Status -> gekuendigt setzen
+
+  bach versicherung status                  Dashboard mit Statistiken
+  bach versicherung fristen [--tage N]      Kuendigungsfristen anzeigen (Default: 90 Tage)
+  bach versicherung check                   Portfolio-Analyse
+
+  bach versicherung claim add <id> --datum DD.MM.YYYY --beschreibung "Text" [--betrag X]
+  bach versicherung claim list [<id>]       Schadenfaelle anzeigen
+
+  bach versicherung help                    Hilfe anzeigen
+
+GEPLANT:
+  - Automatischer E-Mail-Abgleich mit financial_emails
+  - Steuer-Export-Integration (aktuell: manuelle Steuer-Typ-Verwaltung)
+
+ZUSAMMENSPIEL:
+  - GUI: Finanz-Dashboard mit Fristen-Warnung (#575)
+  - GUI: Versicherungen CRUD (#570)
+  - Steuer-Export: #572 (geplant)

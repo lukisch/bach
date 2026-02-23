@@ -1,0 +1,64 @@
+# Portabilitaet: UNIVERSAL
+# Version: 1.0.0
+# Zuletzt validiert: 2026-02-08
+# Naechste Pruefung: 2026-08-08
+
+DIRECTORY TRUTH
+===============
+
+Automatische Verzeichnis-Zustandsverwaltung.
+
+KONZEPT:
+  - Startup: IST-Zustand erfassen, mit SOLL vergleichen
+  - Shutdown: Aktueller Zustand wird neuer SOLL
+  - Heuristik: Claude-Aenderungen sind gewollt
+
+ABLAUF:
+
+1. Erster Start
+   - Aktueller Zustand = SOLL-Zustand
+   - Gespeichert in data/directory_truth.json
+
+2. Folgende Starts
+   - IST-Zustand scannen
+   - Vergleich mit SOLL
+   - Externe Aenderungen anzeigen (User hat was geaendert)
+
+3. Shutdown
+   - Aktueller Zustand wird neuer SOLL
+   - Claudes Aenderungen sind jetzt "Standard"
+
+IGNORIERT:
+  - __pycache__
+  - .pyc Dateien
+  - .git, .idea, .vscode
+  - auto_log.txt (aendert sich staendig)
+  - current.md (Memory)
+
+AUSGABE BEI AENDERUNGEN:
+  + Neue Ordner/Dateien
+  - Geloeschte Ordner/Dateien
+  ~ Modifizierte Dateien
+
+VORTEILE:
+  - Claude muss nicht manuell tracken was sich geaendert hat
+  - Externe Aenderungen (User) werden erkannt
+  - Eigene Aenderungen automatisch uebernommen
+
+INTEGRATION:
+  - Automatisch in hub/startup.py (DirectoryScanner bei Startup)
+  - Automatisch in hub/shutdown.py (Zustand bei Shutdown speichern)
+  - Kein eigener Handler, Tool-basiert (tools/c_dirscan.py)
+
+CLI (MANUELL):
+  python c_dirscan.py                    # Status anzeigen
+  python c_dirscan.py --scan             # Aktuellen Zustand scannen
+  python c_dirscan.py --compare          # Vergleich IST vs SOLL
+  python c_dirscan.py --update           # SOLL-Zustand aktualisieren
+  python c_dirscan.py --path /pfad       # Anderes Verzeichnis
+  python c_dirscan.py --json             # JSON-Ausgabe
+
+DATEIEN:
+  - Tool: system/tools/c_dirscan.py (DirectoryScanner-Klasse)
+  - Daten: system/data/directory_truth.json
+  - Struktur: {timestamp, directories[], files{path: {hash, size}}}

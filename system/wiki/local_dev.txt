@@ -1,0 +1,91 @@
+# Portabilitaet: SYSTEM
+# Grund: Beschreibt C:\_Local_DEV - existiert nur auf diesem System
+# Bei Neuinstallation: Datei anpassen oder entfernen
+
+C:\_LOCAL_DEV - LOKALER WORKSPACE & BACKUP
+==========================================
+
+Stand: 2026-01-24
+
+ZWECK
+-----
+Lokaler Arbeitsbereich ausserhalb von Cloud-Sync (OneDrive/Google Drive).
+
+Verwendung fuer:
+  - Sensible Datenbanken (keine Cloud-Sync)
+  - Temporaere Arbeitsdateien
+  - Backup-Bereich bei OneDrive-Problemen
+  - Grosse Dateien die nicht synchronisiert werden sollen
+  - Entwicklungs-Sandboxes
+
+STRUKTUR (empfohlen)
+--------------------
+  C:\_Local_DEV\
+  ├── backup\              # Lokale Backups
+  │   ├── bach_db\         # BACH Datenbank-Backups
+  │   └── steuer\          # Sensible Steuer-Backups
+  │
+  ├── workspace\           # Aktive Arbeitsbereiche
+  │   ├── temp\            # Temporaere Dateien
+  │   └── sandbox\         # Test-Umgebungen
+  │
+  ├── databases\           # Sensible Datenbanken
+  │   └── sensitive.db     # Nicht fuer Cloud
+  │
+  └── transfer\            # Datei-Transfer-Zone
+      ├── inbox\           # Eingehende Dateien
+      └── outbox\          # Ausgehende Dateien
+
+WANN NUTZEN?
+------------
+  1. OneDrive-Probleme
+     - Sync-Konflikte vermeiden
+     - Grosse Dateien ohne Upload-Wartezeit
+     - Offline-Arbeit garantiert
+
+  2. Sensible Daten
+     - Datenbanken mit persoenlichen Daten
+     - Unverschluesselte Backups
+     - Temporaere Passwort-Listen
+
+  3. Performance
+     - Schnellere Datei-Operationen
+     - Kein Cloud-Overhead
+     - Grosse Build-Outputs
+
+  4. Entwicklung
+     - node_modules, venv etc.
+     - Build-Caches
+     - Temporaere Test-Daten
+
+BACH-INTEGRATION
+----------------
+  Backup-Ziel:
+    python bach.py backup create --to-local
+    (Speichert nach C:\_Local_DEV\backup\bach_db\)
+
+  Datenbank bei Problemen:
+    1. BACH stoppen
+    2. data\bach.db nach C:\_Local_DEV\databases\ kopieren
+    3. Dort arbeiten bis OneDrive stabil
+    4. Zurueck synchronisieren wenn fertig
+
+WICHTIG
+-------
+  - KEIN automatischer Cloud-Sync!
+  - Manuelle Backups regelmaessig erstellen
+  - Nicht fuer Langzeit-Archivierung
+  - Bei Neuinstallation: Ordner manuell sichern
+
+ABGRENZUNG
+----------
+  C:\_Local_DEV\          Lokal, kein Sync, temporaer/sensitiv
+  OneDrive\KI&AI\         Cloud-Sync, Hauptarbeitsbereich
+  G:\                     Google Drive (Partner-Sync)
+  NAS (\\nas\)            Langzeit-Archiv, Backup-Ziel
+
+SIEHE AUCH
+----------
+  docs/docs/docs/help/backup.txt         BACH Backup-System
+  wiki/gemini.txt    Partner-Konfiguration
+  docs/docs/docs/help/steuer.txt         Steuer-Daten Handling

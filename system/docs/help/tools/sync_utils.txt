@@ -1,0 +1,23 @@
+BACH Tool: sync_utils
+==================================================
+Generiert: 2026-01-23 10:36
+Quelle: tools/sync_utils.py
+
+BESCHREIBUNG
+----------------------------------------
+BACH Sync Utilities v1.0
+========================
+Zentrale Funktionen fuer Datei-Hashing und Aenderungserkennung.
+
+Verwendung:
+  from tools.sync_utils import file_hash, content_hash, has_changed, SyncTracker
+
+VERWENDUNG
+----------------------------------------
+python bach.py tools run sync_utils [args]
+oder direkt: python tools/sync_utils.py [args]
+
+HINWEISE
+----------------------------------------
+- Automatisch generiert aus Docstring
+- Bei Fragen: bach tools show sync_utils

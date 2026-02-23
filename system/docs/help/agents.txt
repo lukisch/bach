@@ -1,0 +1,158 @@
+# Portabilitaet: UNIVERSAL
+# Version: 1.0.1
+# Zuletzt validiert: 2026-02-08 (Help-Forensik)
+# Naechste Pruefung: 2026-08-08
+
+BACH AGENTEN-SYSTEM
+==================
+
+Hierarchisches System aus Boss-Agenten und Experten.
+
+STRUKTUR
+--------
+
+Boss-Agenten koordinieren, Experten sind spezialisiert:
+
+  [Boss-Agent]
+       |
+       +-- [Experte 1]
+       +-- [Experte 2]
+
+
+VERFUEGBARE AGENTEN (agents/)
+-------------------------------------
+
+[BERUFLICH]
+
+  ATI (ati/)
+    Software-Entwickler-Agent mit Scanner, Sessions
+    Features: Task-Scanner, Headless Sessions, Tool Discovery
+
+  Entwickler (entwickler)
+    Allgemeiner Entwickler-Agent
+
+  Production (production)
+    Produktions-Workflow-Agent
+
+  Research (research)
+    Wissenschaftliche Recherche (PubMed, Perplexity, Consensus)
+
+  Bueroassistent (bueroassistent)
+    Steuern, Foerderplanung, Dokumentation
+    Experten: Steuer, Foerderplaner
+
+  Reflection (reflection)
+    Selbstreflexion und Meta-Analyse
+
+
+[PRIVAT]
+
+  Persoenlicher Assistent (persoenlicher-assistent)
+    Terminverwaltung, Recherche, Kommunikation
+    Experten: Haushaltsmanagement
+
+  Gesundheitsassistent (gesundheitsassistent)
+    Medizinische Dokumentation und Verwaltung
+    Experten: Gesundheitsverwalter, Psycho-Berater
+
+  Versicherungen (versicherungen)
+    Versicherungs-Verwaltung
+
+
+[TEST]
+
+  Test-Agent (test-agent)
+    Fuer Tests und Experimente
+
+
+CLI-BEFEHLE
+-----------
+
+  # Agenten auflisten
+  bach --agents list
+  python tools/agent_cli.py list
+
+  # Experten anzeigen
+  python tools/agent_cli.py experts
+
+  # Agent-Details
+  python tools/agent_cli.py info <agent-name>
+
+  # User-Ordner initialisieren
+  python tools/agent_cli.py init all
+  python tools/agent_cli.py init <agent-name>
+
+  # Datenbank einrichten
+  python tools/agent_cli.py setup-db
+
+  # System-Status
+  python tools/agent_cli.py status
+
+
+VERZEICHNISSE
+-------------
+
+  agents/     Boss-Agenten Definitionen (11 Agenten)
+  agents/_experts/    Experten-Ordner mit CONCEPT.md (17 Experten)
+  user/<agent>/       User-Datenordner pro Agent
+
+WICHTIG: Agenten und Experten sind unterschiedliche Konzepte!
+  - Agenten (Boss): Koordinieren und delegieren (_agents/)
+  - Experten: Spezialisierte Ausfuehrung (_experts/)
+  - Einige in Help gelistete "Agenten" sind eigentlich Experten:
+    * steuer-agent → _experts/steuer/
+    * foerderplaner → _experts/foerderplaner/
+    * haushaltsmanagement → _experts/haushaltsmanagement/
+    * psycho-berater → _experts/psycho-berater/
+
+
+DATENBANKEN
+-----------
+
+  bach.db:
+    - agents (Agenten-Registry)
+    - agent_synergies (Synergien zwischen Agenten)
+
+  bach.db:
+    - Tabellen je Experte (health_*, household_*, etc.)
+
+
+WORKFLOW
+--------
+
+1. Agent aktivieren (ueber Skill oder CLI)
+2. Agent laedt Skill-Definition und User-Daten
+3. Bei Spezialthema: Delegation an Experten
+4. Experte fuehrt aus, Boss-Agent fasst zusammen
+
+
+GUI
+---
+
+  http://127.0.0.1:8000/agents     Agenten-Uebersicht
+  http://127.0.0.1:8000/ati        ATI-Agent Details
+  http://127.0.0.1:8000/steuer     Steuer-Agent Details
+
+
+DATEIEN
+-------
+
+  agents/ati/              ATI-Agent Ordner
+  agents/ati/ATI.md        ATI Definition
+  agents/persoenlicher-assistent.txt
+  agents/gesundheitsassistent.txt
+  agents/bueroassistent.txt
+  agents/steuer-agent.txt
+  agents/research.txt
+  agents/entwickler.txt
+  agents/production.txt
+  agents/README.md
+
+
+SIEHE AUCH
+----------
+
+  bach --help actors      Ueberblick ueber Akteure
+  bach --help bach_paths        Verzeichnisstruktur
+  bach --help practices   Architektur-Prinzipien
+  bach --help ati         ATI Software-Entwickler Details

@@ -1,0 +1,83 @@
+# Portabilitaet: UNIVERSAL
+# Zuletzt validiert: 2026-02-15 (Opus 4.6)
+# Naechste Pruefung: 2026-05-15
+# Ressourcen: [NPM Registry, GitHub Repos]
+
+NPM PUBLISH - MCP Server Veroeffentlichung
+============================================
+
+STAND: 2026-02-15
+
+Workflow zum Veroeffentlichen der BACH MCP Server auf NPM und GitHub.
+
+PAKETE
+------
+  bach-filecommander-mcp    39 Tools, Filesystem/Prozesse/Sessions/i18n
+  bach-codecommander-mcp    15 Tools, Code-Analyse/JSON/Encoding/i18n
+
+GITHUB REPOS
+-------------
+  https://github.com/lukisch/bach-filecommander-mcp
+  https://github.com/lukisch/bach-codecommander-mcp
+
+NPM AUTHENTIFIZIERUNG
+----------------------
+  Methode: Granular Access Token mit "Bypass 2FA"
+  Token-Name: bach-publisher 2
+  Erstellt: 2026-02-15
+  Laeuft ab: 2026-05-16
+  Gespeichert in: ~/.npmrc
+
+  WICHTIG: Classic Automation Tokens funktionieren NICHT mehr (EOTP-Fehler).
+  Nur Granular Access Tokens mit "Bypass 2FA" umgehen die OTP-Abfrage.
+
+  Token erneuern (wenn abgelaufen):
+    1. https://www.npmjs.com/settings/~/tokens -> "Generate New Token"
+    2. "Granular Access Token" waehlen (NICHT Classic!)
+    3. Permissions: Read and Write, alle Packages
+    4. "Bypass 2FA" Checkbox aktivieren
+    5. Token in ~/.npmrc eintragen:
+       //registry.npmjs.org/:_authToken=<neuer-token>
+
+NPM PUBLISH WORKFLOW
+---------------------
+  1. Token pruefen:
+     npm whoami    -> muss "lukisch" ausgeben
+
+  2. Build manuell ausfuehren (wegen & im Pfad KI&AI):
+     node "<pfad>/node_modules/typescript/bin/tsc" --project "<pfad>/tsconfig.json"
+
+  3. npm publish ausfuehren (kein OTP, kein Browser noetig):
+     cd <projektverzeichnis>
+     npm publish --ignore-scripts
+
+BEKANNTE PROBLEME
+------------------
+  - & im Pfad "KI&AI" stoert npm scripts (prepublishOnly)
+    -> Workaround: --ignore-scripts (Build vorher manuell)
+  - npm run build schlaegt fehl im Projektverzeichnis
+    -> Workaround: tsc direkt ueber node aufrufen
+  - Classic Automation Tokens loesen EOTP-Fehler aus
+    -> Workaround: Granular Access Token mit "Bypass 2FA"
+
+GITHUB WORKFLOW
+----------------
+  1. git add <dateien> && git commit -m "message"
+  2. git tag vX.Y.Z
+  3. git push origin master --tags
+
+VERSION BUMP CHECKLISTE
+------------------------
+  [ ] package.json version
+  [ ] src/index.ts version (server config)
+  [ ] CHANGELOG.md neuer Eintrag
+  [ ] README.md falls Features sich aendern
+  [ ] Build testen
+  [ ] Git commit + tag + push
+  [ ] npm publish --ignore-scripts
+
+SIEHE AUCH
+----------
+  docs/help/tools.txt         Tool-Uebersicht
+  docs/help/coding.txt        Coding-Standards
+  skills/_protocols/npm-mcp-publish.md  Ausfuehrliches Protokoll
