@@ -1,0 +1,32 @@
+BACH Tool: path_healer
+==================================================
+Generiert: 2026-01-23 10:36
+Quelle: tools/path_healer.py
+
+BESCHREIBUNG
+----------------------------------------
+BACH Path Healer v1.0.0
+Zentraler Pfad-Heilungs-Service fuer BACH
+
+Basiert auf: RecludOS Unified Path Healer v2.3.0
+Angepasst fuer BACH v1.1
+
+Usage:
+    python path_healer.py                    # Vollstaendiger Scan
+    python path_healer.py --dry-run          # Nur pruefen
+    python path_healer.py --target <pfad>    # Einzelne Datei
+    python path_healer.py --report           # Report generieren
+
+CLI (geplant):
+    bach maintain heal                       # Vollstaendiger Scan
+    bach maintain heal --dry-run             # Nur pruefen
+
+VERWENDUNG
+----------------------------------------
+python bach.py tools run path_healer [args]
+oder direkt: python tools/path_healer.py [args]
+
+HINWEISE
+----------------------------------------
+- Automatisch generiert aus Docstring
+- Bei Fragen: bach tools show path_healer

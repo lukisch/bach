@@ -1,0 +1,54 @@
+{
+  "$schema": "./manifest.schema.json",
+  "name": "ati",
+  "version": "1.0.0",
+  "type": "agent",
+  "description": "ATI - Advanced Tool Integration Agent. Software-Entwickler-Agent fuer BACH.",
+  "created_at": "2026-01-21T15:18:00",
+  "bach_min_version": "1.1.0",
+
+  "includes": {
+    "core": [
+      "agents/ati/ATI.md",
+      "agents/ati/ATI_PROJECT_BOOTSTRAPPING.md",
+      "agents/ati/export/*"
+    ],
+    "services": [
+      "skills/_services/daemon/session_daemon.py",
+      "skills/_services/daemon/auto_session.py",
+      "skills/_services/daemon/config.json",
+      "skills/_services/daemon/profiles/ati.json",
+      "skills/_services/recurring/recurring_tasks.py"
+    ],
+    "tools": [
+      "tools/c_*.py",
+      "tools/structure_generator.py"
+    ],
+    "data": [
+      "data/templates/ati/*"
+    ],
+    "docs": [
+      "docs/con2_ANFORDERUNGSANALYSE.md"
+    ]
+  },
+
+  "dependencies": {
+    "python": ">=3.9",
+    "packages": [
+      "pyautogui",
+      "pyperclip"
+    ],
+    "system": []
+  },
+
+  "entry_points": {
+    "daemon": "services/daemon/session_daemon.py --profile ati",
+    "session": "services/daemon/auto_session.py --profile ati",
+    "scan": "bach ati scan"
+  },
+
+  "config": {
+    "default_profile": "ati",
+    "auto_onboarding": true
+  }
+}

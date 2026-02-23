@@ -1,0 +1,25 @@
+BACH Tool: autolog
+==================================================
+Generiert: 2026-01-23 10:36
+Quelle: tools/autolog.py
+
+BESCHREIBUNG
+----------------------------------------
+Auto-Logger - Protokolliert automatisch alle Aktionen
+=====================================================
+
+Zweistufiges System:
+1. auto_log.txt        - Letzte 300 Zeilen (Kurzzeitgedaechtnis)
+2. auto_log_extended.txt - Aeltere Eintraege, max 30 Tage (Archiv)
+
+Nach 30 Tagen werden Eintraege endgueltig geloescht.
+
+VERWENDUNG
+----------------------------------------
+python bach.py tools run autolog [args]
+oder direkt: python tools/autolog.py [args]
+
+HINWEISE
+----------------------------------------
+- Automatisch generiert aus Docstring
+- Bei Fragen: bach tools show autolog

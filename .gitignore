@@ -1,0 +1,85 @@
+# ═══════════════════════════════════════════════════════════════
+# BACH .gitignore - Schützt User-Daten und Laufzeit-Dateien
+# ═══════════════════════════════════════════════════════════════
+
+# === USER DATA (NIEMALS COMMITTEN!) ===
+/user/
+/system/user/
+
+# === CLAUDE BRIDGE LAUFZEIT (User-spezifisch, niemals committen!) ===
+/system/hub/_services/claude_bridge/config.json
+/system/hub/_services/claude_bridge/state.json
+/system/hub/_services/claude_bridge/bridge_memory.md
+/system/hub/_services/claude_bridge/last_start*.txt
+
+# === MAIL CREDENTIALS (NIEMALS COMMITTEN!) ===
+/system/hub/_services/mail/credentials/
+/system/hub/_services/mail/credentials/*.json
+/system/hub/_services/mail/credentials/*.token
+
+# === BACKUPS & LAUFZEIT-DATEN (Nicht committen!) ===
+/backups/*.bachdb
+/backups/*.db
+/backups/heartbeat.json
+/system/_backups/*.zip
+/system/storage/
+/system/storage/**
+
+# === SYSTEM LAUFZEIT-DATEN ===
+/system/data/bach.db
+/system/data/bach.db-journal
+/system/data/bach.db-wal
+/system/data/bach.db-shm
+/system/data/archive.db
+/system/data/directory_truth.json
+/system/data/user_config.json
+/system/data/skills_hierarchy.json
+/system/data/skills_hierarchy.backup.json
+/system/data/_archive/
+/system/data/_backups/
+/system/data/_trash/
+/system/data/logs/
+/system/data/messages/
+/system/data/ati/
+/system/data/backups/
+/system/data/mail_attachments/
+/system/data/migrations/
+/system/data/trash/
+
+# === EXPORTS (Generiert) ===
+/exports/**/*.zip
+/exports/**/_archive/
+
+# === CACHE & TEMP ===
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.cache/
+*.log
+nul
+.DS_Store
+Thumbs.db
+
+# === IDE & EDITOR ===
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# === EXTENSIONS (Dependencies) ===
+**/node_modules/
+**/venv/
+**/.venv/
+**/dist/
+**/build/
+
+# === AGENT WORKFLOWS (Lokal) ===
+.agent/
+.claude/
+
+# === DISTRIBUTION SNAPSHOTS (Optional behalten) ===
+# Auskommentieren wenn Snapshots versioniert werden sollen:
+# /system/dist/snapshots/

@@ -1,0 +1,99 @@
+# Portabilitaet: SYSTEM
+# Zuletzt validiert: 2026-02-08 (Help-Forensik - Library-API ergaenzt)
+# Naechste Pruefung: 2027-02-08
+# Ressourcen: [tasks table, ati_tasks table, hub/task.py, bach_api.py]
+
+TASKS - Aufgaben-System
+=======================
+
+STAND: 2026-02-08
+
+Das Task-System (Schicht 5) orchestriert die Arbeit zwischen User und
+Partner-Agenten (Claude, Gemini, etc.).
+
+KERNKONZEPTE
+------------
+- MANUELLE TASKS: Via `bach task add` (Tabelle: `tasks`).
+- GESCANNTE TASKS: Aus Code-Kommentaren (Tabelle: `ati_tasks`).
+- MULTI-PARTNER: Zuweisung via `--assigned` an Agenten oder User.
+- DISTI-TIERS: Tasks sind via `dist_type` (User/Template/Core) getrennt.
+
+ZWEI ZUGRIFFSWEGE (NEU ab v2.0)
+-------------------------------
+BACH hat ZWEI parallele Zugangswege - beide nutzen dieselben Handler + DB:
+
+1. CLI (fuer Menschen am Terminal):
+     python bach.py task add "Titel" --priority P4
+
+2. LIBRARY-API (BEVORZUGT fuer LLM/Scripts):
+     from bach_api import task
+     task.add("Titel", "--priority", "P4")
+     task.list()
+     task.done(42, "--note", "Erledigt")
+
+CLI-BEFEHLE (bach task)
+-----------------------
+  add <titel>       Erstellt Task (--priority P1-P4, --description, --category)
+  list [filter]     Gefilterte Uebersicht (pending/done/blocked/all)
+  list --filter     Nach Begriff im Titel filtern
+  list --assigned   Tasks fuer einen bestimmten Partner
+  list --unassigned Tasks ohne Zuweisung
+  show <ID>         Details inkl. Beschreibung und Historie
+  edit <ID>         Bearbeitet Task (--title, --description, --category, --assigned)
+  done <ID>         Markiert Task als erledigt (Multi-ID, --note)
+  block <ID>        Blockiert Task(s) (Multi-ID, --reason)
+  unblock <ID>      Entblockt Task(s) (Multi-ID)
+  reopen <ID>       Oeffnet erledigte Task(s) erneut (Multi-ID)
+  delete <ID>       Loescht Task(s) permanent (Multi-ID)
+  priority <ID> <P> Aendert Prioritaet (P1-P4)
+  assign <ID>       Zuweisung an Partner (--to GEMINI/COPILOT/etc.)
+  depends <ID>      Zeigt Abhaengigkeiten an
+    --on <X>        Fuegt Abhaengigkeit hinzu (Task wartet auf X)
+    --remove <X>    Entfernt Abhaengigkeit
+    --clear         Loescht alle Abhaengigkeiten
+
+LIBRARY-API BEISPIELE
+---------------------
+  from bach_api import task
+
+  # Task erstellen
+  task.add("Doku schreiben", "--priority", "P2", "--category", "docs")
+
+  # Tasks auflisten
+  task.list("pending")
+  task.list("all", "--assigned", "GEMINI")
+  task.list("--unassigned")
+
+  # Tasks bearbeiten
+  task.edit(42, "--title", "Neuer Titel")
+  task.done(100, 101, 102, "--note", "Alle erledigt")
+  task.assign(200, "--to", "COPILOT")
+
+  # Abhaengigkeiten
+  task.depends(306, "--on", "305")  # Task 306 wartet auf 305
+  task.depends(306)                 # Abhaengigkeiten anzeigen
+
+SCAN-TASKS (hub/ati.py)
+-----------------------
+  bach ati onboard --check    Scannt das Filesystem nach neuen Aufgaben.
+  bach scan tasks             Listet Aufgaben aus `ati_tasks` auf.
+
+DATENBANK (Schicht 1)
+---------------------
+- `tasks`: id, title, description, status, priority, assigned_to, delegated_to,
+  depends_on, category, tags, created_at, completed_at, updated_at, dist_type.
+- `ati_tasks`: Gescannte Aufgaben mit Source-Link (File/Line).
+- DB-Pfad: system/data/bach.db
+
+GUI & INTEGRATION (geplant)
+---------------------------
+Das **Task-Board** (/tasks) ist als Kanban-Ansicht geplant, die das
+Verschieben von Tasks zwischen Status-Spalten ermoeglicht.
+
+SIEHE AUCH
+----------
+  system/bach_api.py   Library-API Modul (bevorzugter Zugriff)
+  system/hub/task.py   TaskHandler Implementation
+  docs/docs/docs/help/delegate.txt    Delegation an Partner
+  docs/docs/docs/help/maintain.txt    Integritaets-Pruefung und Cleanup
+  bach --help ati      Der Automated Tool Incorporator

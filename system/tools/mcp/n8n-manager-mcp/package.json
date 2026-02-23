@@ -1,0 +1,48 @@
+{
+  "name": "n8n-manager-mcp",
+  "version": "0.1.0",
+  "mcpName": "io.github.lukisch/n8n-manager-mcp",
+  "description": "MCP server for n8n workflow management -- view, create, sync, and manage n8n workflows via AI assistants",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "n8n-manager-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist/",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "n8n",
+    "workflow",
+    "automation",
+    "claude",
+    "ai-tools",
+    "mcp-server"
+  ],
+  "author": "Lukas Geiger",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lukisch/n8n-manager-mcp.git"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

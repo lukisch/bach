@@ -1,0 +1,101 @@
+# Portabilitaet: UNIVERSAL
+# Version: 1.0.0
+# Zuletzt validiert: 2026-02-08
+# Naechste Pruefung: 2026-08-08
+
+DOCS - Menschenlesbare Dokumentation
+=====================================
+
+BESCHREIBUNG
+------------
+Neben dem help-System (fuer KI optimiert) gibt es zwei menschenlesbare
+Dokumentationen mit ASCII-Grafiken und Uebersichten.
+
+DOKUMENTATIONSEBENEN
+--------------------
+BACH hat drei Dokumentationsebenen:
+
+  ┌────────────────────────────────────────────────────────────────┐
+  │  EBENE              │  ZIELGRUPPE    │  ORT                   │
+  ├────────────────────────────────────────────────────────────────┤
+  │  docs/README.txt    │  Entwickler    │  docs/                 │
+  │  (Entwicklung)      │  Kontributoren │                        │
+  ├────────────────────────────────────────────────────────────────┤
+  │  ARCHITECTURE.md    │  Entwickler    │  system/               │
+  │  (Architektur)      │  Tiefgehend    │                        │
+  ├────────────────────────────────────────────────────────────────┤
+  │  docs/docs/docs/help/*.txt         │  KI-Agenten    │  system/docs/docs/docs/docs/help/          │
+  │  (Operativ)         │  Claude, etc.  │                        │
+  ├────────────────────────────────────────────────────────────────┤
+  │  wiki/*.txt    │  Alle          │  system/wiki/     │
+  │  (Fachwissen)       │                │                        │
+  └────────────────────────────────────────────────────────────────┘
+
+DOKUMENTE
+---------
+
+  docs/README.txt
+  ---------------
+  Entwicklungsdokumentation - Uebersicht ueber docs/ Ordnerstruktur.
+  - Konzepte (CONCEPT_*.md)
+  - Analysen und Reports
+  - Archivierte Altkonzepte (_archive/)
+  - Langfristige Ideen (_ideas/)
+  - Tests und Reports (_test_and_reports/)
+
+  Zielgruppe: Entwickler, Kontributoren
+  Format: Plain Text mit Verweisen
+
+  system/ARCHITECTURE.md
+  ----------------------
+  System-Architektur fuer Entwickler.
+  - Vision & Design-Philosophie
+  - High-Level Architektur-Diagramme
+  - Hub & Handler Pattern erklaert
+  - Datenbankschema visualisiert
+  - Datenfluss-Diagramme
+  - Erweiterungsanleitungen
+  - Konventionen
+
+  Zielgruppe: Entwickler, Kontributoren, fortgeschrittene Nutzer
+  Format: Markdown mit ASCII-Diagrammen
+
+ABGRENZUNG
+----------
+  docs/docs/docs/help/*.txt             Operative Referenz, maschinenlesbar, konsistent
+  docs/README.txt        Entwickler-Uebersicht, Ordnerstruktur
+  system/ARCHITECTURE.md Technisches Verstaendnis, Architektur, Design
+
+  help ist die PRIMAERE Dokumentation.
+  docs/README.txt und ARCHITECTURE.md verweisen auf help fuer Details.
+
+AKTUALISIERUNG
+--------------
+Bei groesseren Aenderungen am System sollten alle Ebenen
+aktualisiert werden:
+
+  1. docs/docs/docs/help/*.txt           - Befehle, Operationen (IMMER aktuell halten)
+  2. docs/README.txt      - Bei Konzept-/Ordner-Aenderungen
+  3. system/ARCHITECTURE.md - Bei Architektur-Aenderungen
+
+GITHUB-VEROEFFENTLICHUNG
+------------------------
+Bei Veroeffentlichung auf GitHub:
+
+  - system/ARCHITECTURE.md als Haupteinstieg verlinken
+  - docs/README.txt fuer Entwickler-Uebersicht
+  - help-System als integrierte Dokumentation erwaehnen
+
+DATEIPFADE
+----------
+  docs/README.txt              Entwickler-Uebersicht
+  system/ARCHITECTURE.md       Architektur-Dokumentation
+  system/docs/docs/docs/docs/help/*.txt            Operative Hilfe (diese Dateien)
+  system/wiki/*.txt       Hintergrundwissen
+
+SIEHE AUCH
+----------
+  bach --help list         Alle Help-Themen
+  bach wiki list           Alle Wiki-Artikel
+  docs/docs/docs/help/practices.txt       Architektur-Prinzipien
+  docs/docs/docs/help/naming.txt          Namenskonventionen

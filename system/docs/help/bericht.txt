@@ -1,0 +1,82 @@
+# Portabilitaet: UNIVERSAL
+# Version: 1.0.0
+# Zuletzt validiert: 2026-02-08
+# Naechste Pruefung: 2026-08-08
+
+FOERDERBERICHT
+==============
+
+ICF-basierte Entwicklungsberichte erstellen, exportieren und archivieren.
+Alle Klientendaten werden automatisch anonymisiert.
+
+WICHTIG: Der Handler (system/hub/bericht.py) nutzt FALSCHE Pfade!
+         Er verweist auf user/buero/foerderplanung (existiert nicht).
+         Tatsaechlicher Pfad: user/documents/foerderplaner/
+         Generator (generator.py) nutzt korrekte Pfade via bach_paths.py.
+
+BEFEHLE
+-------
+
+  bach bericht help
+    Zeigt diese Hilfe an.
+
+  bach bericht list
+    Listet alle Klienten-Ordner mit Status (JSON/DOCX vorhanden).
+
+  bach bericht status
+    Zeigt Pipeline-Status aller Ordner (Berichte/data, bundles, output, _archive).
+
+  bach bericht extract <klient-ordner> [-o output]
+    Extrahiert Text aus .docx, .txt, .pdf im Klienten-Ordner.
+    Ohne -o wird der Text auf stdout ausgegeben.
+
+  bach bericht prompt <klient-ordner> [-o output]
+    Erstellt den vollstaendigen LLM-Prompt inkl. ICF-Referenz
+    und JSON-Schema-Anforderungen.
+
+  bach bericht generate <json-datei> -o <output> [-t vorlage]
+    Fuellt die Word-Vorlage mit Daten aus der JSON-Datei.
+    -t: Vorlage (Standard: bericht_template_geiger_universal.docx)
+    -o: Ausgabedatei (erforderlich)
+
+  bach bericht export <klient-ordner> -p <passwort>
+    De-anonymisiert den Bericht und legt ihn in
+    Berichte/output/<Echter_Name>/ ab.
+
+  bach bericht archive [name]
+    Verschiebt einen fertigen Bericht aus Berichte/output/
+    nach _archive/<Name>_YYYY-MM/.
+
+BEISPIELE
+---------
+
+  # Uebersicht
+  bach bericht list
+  bach bericht status
+
+  # Workflow (mit anonymisierten Bundles)
+  bach bericht extract Berichte/bundles/K_CE2E70
+  bach bericht prompt Berichte/bundles/K_CE2E70 -o Berichte/bundles/K_CE2E70/core/_prompt.txt
+  bach bericht generate Berichte/bundles/K_CE2E70/output/bericht_data.json \
+    -o Berichte/bundles/K_CE2E70/output/bericht_2026-02.docx
+  bach bericht export Berichte/bundles/K_CE2E70 -p bach2026
+  bach bericht archive Mustermann_Max
+
+PIPELINE (user/documents/foerderplaner/)
+-----------------------------------------
+
+  Berichte/data/<Echter_Name>/     Echte Akten (nur User-Zugriff)
+         ↓
+  Berichte/bundles/K_xxxx/         Anonymisierte Bundles (LLM/Chatbot)
+         ↓
+  Berichte/output/<Echter_Name>/   De-anonymisierte Berichte
+         ↓
+  _archive/<Name>_YYYY-MM/         Abgeschlossene Berichte
+
+VERWANDTE SKILLS
+----------------
+
+  agents/_experts/report_generator/generator.py      Report Generator
+  hub/_services/document/anonymizer_service.py       Anonymisierung
+  skills/_templates/bericht_template_geiger_universal.docx  Word-Vorlage
+  user/documents/foerderplaner/                      Klientendaten & Output

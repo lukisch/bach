@@ -1,0 +1,80 @@
+# Portabilitaet: UNIVERSAL
+# Version: 1.0.0
+# Zuletzt validiert: 2026-02-21 (SQ063)
+# Naechste Pruefung: 2026-08-21
+
+BACH UPGRADE - SYSTEM-AKTUALISIERUNG
+=====================================
+
+Aktualisiert BACH auf eine neuere Version. Unterstützt selektive
+Upgrades nach Kategorien (SQ020).
+
+
+VERWENDUNG
+----------
+
+  # Upgrade-Status anzeigen
+  bach upgrade status
+
+  # Verfügbare Updates anzeigen
+  bach upgrade check
+
+  # Vollständiges Upgrade durchführen
+  bach upgrade --all
+
+  # Selektives Upgrade nach Kategorie
+  bach upgrade --category <kategorie>
+
+  # Dry-Run (nur anzeigen, nicht ausführen)
+  bach upgrade --dry-run
+
+
+KATEGORIEN
+----------
+
+  core         System-Kern (hub/, tools/, core/)
+  templates    Vorlagen und Templates
+  agents       Boss-Agenten und Experten
+  skills       Skills und Protokolle
+  connectors   Connector-System
+  partners     Partner-Dateien (claude/, gemini/, ollama/)
+  docs         Dokumentation
+  gui          GUI-Dateien
+
+
+WICHTIG
+-------
+
+- Upgrade überschreibt NUR CORE + TEMPLATE Dateien
+- USER_DATA bleibt unangetastet
+- Backup wird empfohlen vor Upgrade
+- Versionen werden in dist_file_versions getrackt
+
+
+BEISPIELE
+---------
+
+  # Nur Core-Dateien aktualisieren
+  bach upgrade --category core
+
+  # Nur Templates aktualisieren
+  bach upgrade --category templates
+
+  # Prüfen welche Dateien aktualisiert würden
+  bach upgrade --dry-run --category agents
+
+
+VERSIONIERUNG
+-------------
+
+- Hash + Auto-Increment System (ENT-09)
+- Nur CORE + TEMPLATE werden versioniert (dist_type 1+2)
+- USER_DATA ist vom User und wird nicht versioniert
+
+
+SIEHE AUCH
+----------
+
+  bach --help restore       Template-Wiederherstellung
+  bach --help downgrade     Downgrade auf ältere Version
+  bach --help seal          Integritätsprüfung

@@ -1,0 +1,162 @@
+# Portabilitaet: UNIVERSAL
+# Version: 1.0.1
+# Zuletzt validiert: 2026-02-08 (Help-Forensik)
+# Naechste Pruefung: 2026-08-08
+
+BACH KERN-KONZEPT
+=================
+
+"Der Agent ist die Rolle und die zielorientierte Absicht darin.
+Workflows sind das Gehirn zur Ausfuehrung.
+Skills, Tools und Services sind die Werkzeuge zur Ausfuehrung.
+Zusammen sind sie der Kern."
+
+DIE VIER SAEULEN
+----------------
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        DER KERN                                 │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────────────┐  │
+│  │   AGENT     │    │  WORKFLOW   │    │  SKILLS/TOOLS/SVC   │  │
+│  │             │    │             │    │                     │  │
+│  │  Rolle +    │───>│  Gehirn     │───>│  Werkzeuge          │  │
+│  │  Absicht    │    │  Steuerung  │    │  Ausfuehrung        │  │
+│  │             │    │             │    │                     │  │
+│  │  WER + WARUM│    │  WIE        │    │  WOMIT              │  │
+│  └─────────────┘    └─────────────┘    └─────────────────────┘  │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+AGENT = Rolle + zielorientierte Absicht
+---------------------------------------
+
+- WER bin ich in dieser Aufgabe?
+- WARUM tue ich das? (Ziel, Motivation)
+- Definiert Perspektive und Entscheidungsrahmen
+
+Beispiele:
+  - Entwickler-Agent: Schreibt Code, debuggt, testet
+  - Persoenlicher Assistent: Hilft User bei Alltag
+  - Recherche-Experte: Sucht und bewertet Informationen
+
+Speicherort: agents/*.txt
+
+WORKFLOW = Gehirn zur Ausfuehrung
+---------------------------------
+
+- WIE wird die Aufgabe ausgefuehrt?
+- Steuert den Ablauf, die Reihenfolge, die Entscheidungen
+- Prozedurales Wissen: Schritt-fuer-Schritt Anleitung
+
+Beispiele:
+  - Bugfix-Workflow: Reproduzieren -> Analysieren -> Fixen -> Testen
+  - Review-Workflow: Lesen -> Bewerten -> Kommentieren -> Entscheiden
+  - Startup-Workflow: Pruefen -> Laden -> Initialisieren -> Bereit
+
+Speicherort: skills/_protocols/*.md
+
+Workflows sind ZENTRAL weil:
+  1. Sie die eigentliche Steuerung uebernehmen
+  2. Sie Skills, Tools und Services orchestrieren
+  3. Sie testbar sind (Usecase-Tests)
+  4. Sie wiederverwendbar sind
+
+SKILLS / TOOLS / SERVICES = Werkzeuge
+-------------------------------------
+
+- WOMIT wird die Aufgabe ausgefuehrt?
+- Konkrete Faehigkeiten und Funktionen
+- Werden von Workflows aufgerufen
+
+| Typ     | Beschreibung              | Speicherort           |
+|---------|---------------------------|-----------------------|
+| Skills  | Wissen + Anleitung (.txt) | skills/*.txt          |
+| Tools   | Python-Scripts (.py)      | tools/*.py            |
+| Services| Externe Dienste           | via API/CLI           |
+
+ZUSAMMENSPIEL
+-------------
+
+```
+User-Anfrage
+     │
+     v
+┌─────────────┐
+│   AGENT     │  "Ich bin Entwickler, Ziel: Bug fixen"
+└─────────────┘
+     │
+     v
+┌─────────────┐
+│  WORKFLOW   │  "1. Reproduzieren 2. Analysieren 3. Fixen"
+└─────────────┘
+     │
+     v
+┌─────────────────────────────────────┐
+│  SKILLS / TOOLS / SERVICES          │
+│  - debugger.py (Tool)               │
+│  - git-workflow.txt (Skill)         │
+│  - test-runner (Service)            │
+└─────────────────────────────────────┘
+     │
+     v
+Ergebnis
+```
+
+BEWUSSTSEIN DES LLM
+-------------------
+
+Das operierende LLM muss wissen:
+1. WELCHE Agents existieren (agents/)
+2. WELCHE Workflows verfuegbar sind (skills/_protocols/)
+3. WELCHE Skills/Tools/Services es gibt (skills/, tools/)
+
+Dies wird erreicht durch:
+- Handler-Registry (system/core/registry.py) - Auto-Discovery von Handlern
+- Tool-Auto-Discovery (tools/tool_auto_discovery.py) - Scannt Tools in DB
+- DB-Eintraege (tools-Tabelle, hierarchy_items)
+- Startup-Uebersicht zeigt Session-Kontext
+
+Siehe: --help startup, --help tools
+
+QUALITAETSSICHERUNG (WORKFLOW-TUEV)
+-----------------------------------
+
+Workflows sind so wichtig, dass sie geprueft werden muessen:
+
+1. USECASE-TESTS
+   - Sammlung von Testfaellen in DB
+   - Automatische Durchfuehrung
+   - Bewertung: sehr gut / gut / befriedigend / ausreichend / durchgefallen
+
+2. TUEV-ABLAUF
+   - Workflows haben Ablaufdatum
+   - Bei Ablauf: Wartungs-Task automatisch erstellen
+   - Nach Pruefung: Neues Ablaufdatum setzen
+
+3. CHECKLISTE fuer neue Komponenten
+   [ ] Funktioniert ohne User-Daten?
+   [ ] CLI-Befehl vorhanden?
+   [ ] Input aus Dateien/Ordnern moeglich?
+   [ ] Output in strukturierte DB?
+   [ ] Scan/Import wiederholbar (idempotent)?
+   [ ] Keine Hardcoded-Pfade?
+
+Siehe: WF-TUEV Tasks (in Entwicklung)
+
+VERWANDTE KONZEPTE
+------------------
+
+- docs/docs/docs/help/memory.txt        - Memory als kognitives Modell
+- docs/docs/docs/help/agents.txt        - Agent-System Details
+- docs/docs/docs/help/workflow.txt      - Workflow-System Details
+- docs/docs/docs/help/skills.txt        - Skills-Hierarchie
+- docs/docs/docs/help/tools.txt         - Tool-System Details
+- system/ARCHITECTURE.md - Gesamtarchitektur
+
+---
+Version: 1.0.1 | Erstellt: 2026-01-30 | Aktualisiert: 2026-02-08
+(Kern-Konzept: Agent/Workflow/Skills/Tools)

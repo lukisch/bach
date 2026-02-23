@@ -1,0 +1,4 @@
+# Standard
+# Eigene Vorlage
+
+Lies SKILL.md im Arbeitsverzeichnis und führe die dortigen Anweisungen aus. 

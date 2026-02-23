@@ -1,0 +1,187 @@
+# Portabilitaet: UNIVERSAL
+# Version: 1.0.0
+# Zuletzt validiert: 2026-02-08 (Help-Forensik)
+# Naechste Pruefung: 2026-08-08
+
+DENKSTRATEGIEN
+==============
+Kognitive und metakognitive Strategien fuer Informationsverarbeitung.
+
+Bezug: Lernsystem-Analyse, docs/docs/docs/help/operatoren.txt, docs/docs/docs/help/rhetorik.txt
+
+
+1. KOGNITIVE STRATEGIEN (Informationsverarbeitung)
+===================================================
+Steuern WIE man Informationen verarbeitet.
+
+1.1 Chunking (Buendeln)
+-----------------------
+Komplexe Informationen in kleinere Einheiten zerlegen.
+  - grosse Aufgabe in 5 Schritte teilen
+  - Text in Abschnitte gliedern
+BACH: Task-Breakdown, Workflow-Phasen
+
+1.2 Mustererkennung
+-------------------
+Wiederkehrende Strukturen erkennen.
+  - aehnliche Fehler in Logs
+  - wiederkehrende Dokumenttypen
+BACH: Lessons-Learned Pattern-Matching
+
+1.3 Analogiebildung
+-------------------
+Neues durch Vergleich mit Bekanntem verstehen.
+  - "Mail-Routing ist wie Netzwerk-Routing"
+  - "Operatoren sind wie Lego-Bausteine"
+
+1.4 Hypothesenbildung
+---------------------
+Annahmen formulieren, bevor man prueft.
+  - "Wenn Score niedrig, fehlt vermutlich ein Pflichtfeld"
+
+1.5 Deduktives Denken
+---------------------
+Vom Allgemeinen auf den Einzelfall schliessen.
+  - "Alle Rechnungen haben Rechnungsnummer -> dieses Dokument
+     hat keine -> vermutlich keine Rechnung"
+
+1.6 Induktives Denken
+---------------------
+Vom Einzelfall auf Regeln schliessen.
+  - "In 90% der Faelle enthaelt 'Rechnung' im Betreff
+     eine echte Rechnung"
+BACH: Lessons-Learned Ableitung
+
+1.7 Kausales Denken
+-------------------
+Ursache-Wirkungs-Beziehungen erkennen.
+  - "Fehler steigt -> CPU-Last steigt -> vermutlich Engpass"
+
+1.8 Perspektivwechsel
+---------------------
+Problem aus anderer Sicht betrachten.
+  - Nutzerperspektive vs. Entwicklerperspektive
+
+1.9 Szenariodenken
+------------------
+"Was waere wenn"-Varianten durchspielen.
+  - "Was passiert, wenn API ausfaellt"
+  - "Was, wenn Klassifikation falsch liegt"
+BACH: Modus (2) Nachdenken
+
+1.10 Priorisieren
+-----------------
+Wichtige Informationen zuerst verarbeiten.
+  - kritische Fehler vor Warnungen
+  - Rechnungen vor Newslettern
+BACH: Task-Prioritaeten (P1 > P2 > P3)
+
+
+2. METAKOGNITIVE STRATEGIEN (Denken ueber Denken)
+==================================================
+Steuern WIE man sein eigenes Denken steuert.
+
+2.1 Selbstueberwachung (Monitoring)
+-----------------------------------
+Eigenes Denken beobachten.
+  - "Verstehe ich das Problem wirklich"
+  - "Welche Annahmen mache ich gerade"
+
+2.2 Selbstregulation
+--------------------
+Den Denkprozess aktiv anpassen.
+  - Tempo reduzieren
+  - Strategie wechseln (z.B. von Hypothese -> Test)
+
+2.3 Fehleranalyse
+-----------------
+Eigene Denkfehler erkennen.
+  - Bestaetigungsfehler
+  - vorschnelle Schlussfolgerungen
+BACH: Lessons-Learned (Bug-Kategorie)
+
+2.4 Meta-Fragen stellen
+-----------------------
+Fragen ueber den Denkprozess selbst.
+  - "Welche Informationen fehlen mir"
+  - "Welche Operatoren brauche ich hier"
+
+2.5 Strategiewahl
+-----------------
+Bewusst entscheiden, welche Denkstrategie passt.
+  - "Brauche ich Mustererkennung oder Hypothesenbildung"
+
+2.6 Reflexion
+-------------
+Nachtraegliches Bewerten des Denkprozesses.
+  - "Warum hat diese Loesung funktioniert"
+  - "Was wuerde ich naechstes Mal anders machen"
+BACH: Session-Summary, Konsolidierung
+
+2.7 Metamodellierung
+--------------------
+Das Problem in ein abstrakteres Modell ueberfuehren.
+  - "Das ist ein Klassifikationsproblem"
+  - "Das ist ein Routing-Problem"
+
+2.8 Meta-Abstraktion
+--------------------
+Komplexitaet reduzieren, indem man auf die Essenz schaut.
+  - "Eigentlich geht es nur um drei Variablen"
+
+2.9 Meta-Vergleiche
+-------------------
+Vergleich zwischen Denkstrategien.
+  - "Hypothesenbildung war ineffektiv -> besser Daten-Driven"
+
+2.10 Meta-Planung
+-----------------
+Planen, wie man denkt, bevor man denkt.
+BACH: Modus (2) Nachdenken = Injektoren bewusst provozieren
+
+
+3. BEZUG ZU BACH MODI
+=====================
+
+Modus (1) Energiesparen:
+  - Mustererkennung (automatisch)
+  - Priorisieren (Regeln abrufen)
+  - Deduktion (schnelle Schlussfolgerungen)
+
+Modus (2) Nachdenken:
+  - Szenariodenken
+  - Perspektivwechsel
+  - Hypothesenbildung
+  - Meta-Fragen stellen
+  - Strategiewahl
+
+Modus (3) Konsolidierung:
+  - Induktives Denken (Regeln ableiten)
+  - Reflexion
+  - Fehleranalyse
+  - Meta-Abstraktion
+
+
+4. BEZUG ZU RHETORIK
+====================
+Denkstrategien haben direkte rhetorische Entsprechungen:
+
+  Chunking           -> Gliederung, 3-Punkte-Regel
+  Mustererkennung    -> Topoi (Argumentmuster), Story-Archetypen
+  Analogiebildung    -> Metaphern, Vergleiche
+  Hypothesenbildung  -> Argumente vorbereiten, Gegenargumente antizipieren
+  Deduktion/Induktion-> Logische Argumentation
+  Szenariodenken     -> "Was waere wenn"-Argumente
+  Priorisieren       -> Kernbotschaft, Elevator Pitch
+
+Rhetorik = Kognitive Strategie + Sprachliche Verpackung
+
+Siehe: --help rhetorik
+
+
+VERWANDTE HELP-DATEIEN
+======================
+  --help operatoren   Basis-Operatoren und Patterns
+  --help strategien   Kategorisieren, Bewerten, Testen, etc.
+  --help rhetorik     Rhetorische Operatoren und Patterns
+  --help metakognition Wiki-Eintrag zur Metakognition

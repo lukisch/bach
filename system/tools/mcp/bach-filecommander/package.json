@@ -1,0 +1,57 @@
+{
+  "name": "bach-filecommander-mcp",
+  "version": "1.5.0",
+  "description": "A comprehensive MCP server providing 38 tools for filesystem operations, process management, interactive sessions, async file search, JSON repair, encoding fix, duplicate detection, and Markdown export",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "bach-filecommander": "dist/index.js"
+  },
+  "files": [
+    "dist/",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md",
+    "SECURITY.md",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "claude",
+    "filesystem",
+    "file-management",
+    "process-management",
+    "mcp-server",
+    "ai-tools",
+    "claude-desktop",
+    "bach"
+  ],
+  "author": "Lukas (BACH)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lukisch/bach-filecommander-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lukisch/bach-filecommander-mcp/issues"
+  },
+  "homepage": "https://github.com/lukisch/bach-filecommander-mcp#readme",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

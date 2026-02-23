@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BACH Dashboard</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+
+    <!-- TailwindCSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'bach-primary': '#e94560',
+                        'bach-accent': '#4a90d9',
+                        'bach-success': '#2ecc71',
+                        'bach-warning': '#f39c12',
+                        'bach-error': '#e74c3c',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Alpine.js via CDN -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+        /* Minimale Custom Styles - meiste Styles durch Tailwind ersetzt */
+
+        /* CSS Variablen für Kompatibilität mit bestehendem System */
+        :root {
+            --primary: #e94560;
+            --accent: #4a90d9;
+            --accent-blue: #4a90d9;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --error: #e74c3c;
+            --bg: #0f0f23;
+            --bg-dark: #0a0a15;
+            --bg-secondary: #1a1a2e;
+            --bg-tertiary: #16213e;
+            --bg-panel: #16213e;
+            --bg-card: #1a1a2e;
+            --border: #2a2a3e;
+            --text: #e0e0e0;
+            --text-muted: #8e8ea0;
+        }
+
+        /* Dark mode colors */
+        .dark {
+            --bg: #0f0f23;
+            --bg-dark: #0a0a15;
+            --text: #e0e0e0;
+        }
+
+        /* Kompakte Custom Styles - Rest wird durch Tailwind abgedeckt */
+
+        .stat-box::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            opacity: 0.5;
+        }
+
+        .stat-box.green::after { background: var(--success); }
+        .stat-box.blue::after { background: var(--accent-blue); }
+        .stat-box.orange::after { background: var(--warning); }
+        .stat-box.accent::after { background: var(--accent); }
+
+        .calc-result {
+            background: linear-gradient(135deg, rgba(233, 69, 96, 0.1) 0%, rgba(74, 144, 217, 0.1) 100%);
+        }
+
+        .ai-input-area textarea:focus {
+            height: 80px;
+        }
+    </style>
+</head>
+
+<body x-data="{
+    darkMode: true,
+    activeTab: 'overview',
+    activeSubTab: 'inbox',
+    selectedPartner: 'claude'
+}"
+:class="darkMode ? 'dark bg-[#0f0f23] text-gray-200' : 'bg-gray-50 text-gray-900'"
+class="min-h-screen transition-colors duration-300">
+
+    <header class="sticky top-0 z-50 bg-[#16213e] border-b border-[#2a2a3e] shadow-lg" id="main-header">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <h1 class="text-2xl font-bold text-bach-primary">BACH</h1>
+                <span class="text-sm text-gray-400">Dashboard</span>
+            </div>
+
+            <!-- Dark Mode Toggle -->
+            <button
+                @click="darkMode = !darkMode"
+                class="px-4 py-2 rounded-lg bg-[#1a1a2e] border border-[#2a2a3e] hover:border-bach-accent transition-all"
+                :aria-label="darkMode ? 'Light Mode aktivieren' : 'Dark Mode aktivieren'"
+            >
+                <span x-show="darkMode">🌙</span>
+                <span x-show="!darkMode">☀️</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-6">
+        <!-- Dashboard Tabs - Modernisiert mit Alpine.js & Tailwind -->
+        <div class="flex gap-2 border-b-2 border-[#2a2a3e] mb-6">
+            <button
+                @click="activeTab = 'overview'"
+                :class="activeTab === 'overview' ? 'bg-bach-primary text-white' : 'bg-[#1a1a2e] text-gray-400 hover:bg-[#16213e]'"
+                class="px-4 py-2 rounded-t-lg font-semibold transition-all"
+            >
+                Startseite
+            </button>
+            <button
+                @click="activeTab = 'tokens'"
+                :class="activeTab === 'tokens' ? 'bg-bach-primary text-white' : 'bg-[#1a1a2e] text-gray-400 hover:bg-[#16213e]'"
+                class="px-4 py-2 rounded-t-lg font-semibold transition-all"
+            >
+                🔋 Tokens
+            </button>
+            <button
+                @click="activeTab = 'files'"
+                :class="activeTab === 'files' ? 'bg-bach-primary text-white' : 'bg-[#1a1a2e] text-gray-400 hover:bg-[#16213e]'"
+                class="px-4 py-2 rounded-t-lg font-semibold transition-all"
+            >
+                📂 Dateien
+            </button>
+        </div>
+
+        <!-- Tab: Uebersicht -->
+        <div x-show="activeTab === 'overview'" x-transition id="tab-overview">
+
+            <!-- AI Console - Modernisiert mit Tailwind & Alpine -->
+            <div class="bg-[#16213e] border border-[#2a2a3e] rounded-xl p-4 mb-6 shadow-lg">
+                <div class="flex gap-2 mb-3 flex-wrap">
+                    <button
+                        @click="selectedPartner = 'claude'"
+                        :class="selectedPartner === 'claude' ? 'bg-bach-accent text-white opacity-100' : 'bg-[#1a1a2e] text-gray-400 opacity-70 hover:opacity-100 hover:border-bach-accent'"
+                        class="px-4 py-2 border border-[#2a2a3e] rounded-full text-sm font-medium transition-all flex items-center gap-2"
+                        onclick="selectPartner('claude', this)"
+                    >
+                        <span>🧠</span> Claude
+                    </button>
+                    <button
+                        @click="selectedPartner = 'gemini'"
+                        :class="selectedPartner === 'gemini' ? 'bg-bach-accent text-white opacity-100' : 'bg-[#1a1a2e] text-gray-400 opacity-70 hover:opacity-100 hover:border-bach-accent'"
+                        class="px-4 py-2 border border-[#2a2a3e] rounded-full text-sm font-medium transition-all flex items-center gap-2"
+                        onclick="selectPartner('gemini', this)"
+                    >
+                        <span>✨</span> Gemini
+                    </button>
+                    <button
+                        @click="selectedPartner = 'ollama'"
+                        :class="selectedPartner === 'ollama' ? 'bg-bach-accent text-white opacity-100' : 'bg-[#1a1a2e] text-gray-400 opacity-70 hover:opacity-100 hover:border-bach-accent'"
+                        class="px-4 py-2 border border-[#2a2a3e] rounded-full text-sm font-medium transition-all flex items-center gap-2"
+                        onclick="selectPartner('ollama', this)"
+                    >
+                        <span>🦙</span> Ollama
+                    </button>
+                    <button
+                        @click="selectedPartner = 'planner'"
+                        :class="selectedPartner === 'planner' ? 'bg-bach-accent text-white opacity-100' : 'bg-[#1a1a2e] text-gray-400 opacity-70 hover:opacity-100 hover:border-bach-accent'"
+                        class="px-4 py-2 border border-[#2a2a3e] rounded-full text-sm font-medium transition-all flex items-center gap-2"
+                        onclick="selectPartner('planner', this)"
+                    >
+                        <span>📅</span> Planner
+                    </button>
+                </div>
+                <div class="flex gap-2 items-start">
+                    <textarea
+                        id="headless-prompt"
+                        :placeholder="'Nachricht an ' + selectedPartner.charAt(0).toUpperCase() + selectedPartner.slice(1) + '...'"
+                        class="flex-1 bg-[#0a0a15] border border-[#2a2a3e] rounded-lg text-gray-200 px-3 py-2 resize-none h-[46px] min-h-[46px] focus:outline-none focus:border-bach-accent transition-all"
+                        onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendHeadlessPrompt(); }"
+                    ></textarea>
+                    <button
+                        onclick="sendHeadlessPrompt()"
+                        class="bg-bach-primary hover:bg-opacity-90 text-white h-[46px] w-[46px] rounded-lg flex items-center justify-center transition-all"
+                    >
+                        🚀
+                    </button>
+                    <select id="headless-partner" class="hidden">
+                        <option value="claude" selected>Claude</option>
+                        <option value="gemini">Gemini</option>
+                        <option value="ollama">Ollama</option>
+                        <option value="planner">Planner</option>
+                    </select>
+                </div>
+                <div id="headless-info" class="hidden text-xs mt-2 text-gray-400 pl-1"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Status Card -->
+                <div class="bg-[#16213e] border border-[#2a2a3e] rounded-xl p-6 shadow-lg">
+                    <h2 class="text-xl font-bold mb-4 text-gray-200">System Status</h2>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="text-center">
+                            <span class="block text-3xl font-bold text-bach-primary" id="stat-tasks">-</span>
+                            <span class="text-xs text-gray-400 uppercase tracking-wide">Offene Tasks</span>
+                        </div>
+                        <div class="text-center">
+                            <span class="block text-3xl font-bold text-bach-accent" id="stat-messages">-</span>
+                            <span class="text-xs text-gray-400 uppercase tracking-wide">Ungelesene</span>
+                        </div>
+                        <div class="text-center">
+                            <span class="block text-3xl font-bold text-bach-warning" id="stat-deadlines">0</span>
+                            <span class="text-xs text-gray-400 uppercase tracking-wide">Fristen</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Deadlines Card -->
+                <div class="bg-[#16213e] border border-bach-error rounded-xl p-6 shadow-lg hidden" id="deadlines-card">
+                    <h2 class="text-xl font-bold mb-4 text-bach-error">⚠️ Kritische Fristen</h2>
+                    <div id="deadlines-list" class="space-y-2"></div>
+                </div>
+
+                <!-- Favoriten & Quick Links -->
+                <div class="bg-[#16213e] border border-[#2a2a3e] rounded-xl p-6 shadow-lg">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold text-gray-200">Favoriten & Tools</h2>
+                        <button
+                            onclick="toggleFavoritesEdit()"
+                            id="edit-favs-btn"
+                            class="px-3 py-1 text-sm bg-[#1a1a2e] border border-[#2a2a3e] rounded-lg hover:border-bach-accent transition-all"
+                        >
+                            Bearbeiten
+                        </button>
+                    </div>
+                    <div id="favorites-container" class="flex flex-wrap gap-2">
+                        <!-- Wird dynamisch geladen -->
+                    </div>
+                    <div id="favorites-edit" class="hidden mt-4 pt-4 border-t border-[#2a2a3e]">
+                        <p class="text-sm text-gray-400 mb-2">Verfuegbare Seiten:</p>
+                        <div id="available-pages" class="flex flex-wrap gap-2"></div>
+                    </div>
+                </div>
+
+                <!-- Recent Tasks -->
+                <div class="bg-[#16213e] border border-[#2a2a3e] rounded-xl p-6 shadow-lg">
+                    <h2 class="text-xl font-bold mb-4 text-gray-200">Aktuelle Tasks</h2>
+                    <div id="tasks-list" class="space-y-2">
+                        <p class="text-gray-400 text-center py-4">Lade...</p>
+                    </div>
+                </div>
+
+                <!-- Task Statistik / Scanner Monitor -->
+                <div id="scanner-status" class="hidden bg-[#16213e] border border-[#2a2a3e] rounded-xl p-6 shadow-lg"></div>
+            </div>
+        </div>
+
+        <!-- Tab: Tokens (Integrated Content) -->
+        <div x-show="activeTab === 'tokens'" x-transition id="tab-tokens">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-200">🔋 Token-Dashboard</h1>
+                        <p class="text-gray-400 mt-1">Kostenüberwachung & Modell-Vergleich</p>
+                    </div>
+                    <div class="text-right">
+                        <div id="priceDate" class="text-sm text-gray-400 mb-2">Stand: lädt...</div>
+                        <button
+                            onclick="loadTokenData()"
+                            class="px-4 py-2 bg-[#1a1a2e] border border-[#2a2a3e] rounded-lg hover:border-bach-accent transition-all"
+                        >
+                            🔄 Aktualisieren
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="stat-box blue relative overflow-hidden bg-[#16213e] border border-[#2a2a3e] rounded-xl p-6 text-center transition-all hover:-translate-y-1 hover:border-bach-accent hover:shadow-2xl">
+                        <span class="block text-4xl font-extrabold text-bach-accent mb-2" id="exchangeRate">0.0000</span>
+                        <span class="block text-xs text-gray-400 uppercase tracking-wider">EUR/USD Kurs</span>
+                    </div>
+                    <div class="stat-box accent relative overflow-hidden bg-[#16213e] border border-[#2a2a3e] rounded-xl p-6 text-center transition-all hover:-translate-y-1 hover:border-bach-accent hover:shadow-2xl">
+                        <span class="block text-4xl font-extrabold text-bach-primary mb-2" id="totalCost">€0.00</span>
+                        <span class="block text-xs text-gray-400 uppercase tracking-wider">Kosten (30 Tage)</span>
+                    </div>
+                    <div class="stat-box orange relative overflow-hidden bg-[#16213e] border border-[#2a2a3e] rounded-xl p-6 text-center transition-all hover:-translate-y-1 hover:border-bach-accent hover:shadow-2xl">
+                        <span class="block text-4xl font-extrabold text-bach-warning mb-2" id="totalTokens">0</span>
+                        <span class="block text-xs text-gray-400 uppercase tracking-wider">Tokens (Gesamt)</span>
+                    </div>
+                    <div class="stat-box green relative overflow-hidden bg-[#16213e] border border-[#2a2a3e] rounded-xl p-6 text-center transition-all hover:-translate-y-1 hover:border-bach-accent hover:shadow-2xl">
+                        <span class="block text-4xl font-extrabold text-bach-success mb-2" id="topModel">-</span>
+                        <span class="block text-xs text-gray-400 uppercase tracking-wider">Meistgenutzt</span>
+                    </div>
+                </div>
+
+                <div class="bg-[#16213e] border border-[#2a2a3e] rounded-xl p-6 shadow-lg mb-8">
+                    <h2 class="text-2xl font-bold text-gray-200 mb-4">💰 Modell-Preise</h2>
+                    <div class="overflow-x-auto rounded-xl border border-[#2a2a3e]">
+                        <table class="w-full border-collapse">
+                            <thead>
+                                <tr class="bg-[#1a1a2e]">
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider border-b-2 border-[#2a2a3e]">Modell</th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider border-b-2 border-[#2a2a3e]">Input / 1M</th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider border-b-2 border-[#2a2a3e]">Output / 1M</th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider border-b-2 border-[#2a2a3e]">Pro 1K (In/Out)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="priceTable" class="divide-y divide-[#2a2a3e]"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-[#16213e] border border-[#2a2a3e] rounded-xl p-6 shadow-lg">
+                        <h2 class="text-2xl font-bold text-gray-200 mb-4">🧮 Kosten-Rechner</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Aktion:</label>
+                                <select
+                                    id="actionSelect"
+                                    onchange="calculateCost()"
+                                    class="w-full bg-[#0a0a15] border border-[#2a2a3e] rounded-lg px-4 py-2 text-gray-200 focus:outline-none focus:border-bach-accent"
+                                >
+                                    <option value="500">Antwort (~500)</option>
+                                    <option value="1500">Chat (~1.500)</option>
+                                    <option value="5000">Analyse (~5.000)</option>
+                                    <option value="15000">Migration (~15.000)</option>
+                                    <option value="50000">Refactoring (~50.000)</option>
+                                    <option value="custom">Eigene...</option>
+                                </select>
+                            </div>
+                            <div id="customTokensGroup" class="hidden">
+                                <input
+                                    type="number"
+                                    id="customTokens"
+                                    placeholder="Token Anzahl"
+                                    oninput="calculateCost()"
+                                    class="w-full bg-[#0a0a15] border border-[#2a2a3e] rounded-lg px-4 py-2 text-gray-200 focus:outline-none focus:border-bach-accent"
+                                >
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Modell:</label>
+                                <select
+                                    id="modelSelect"
+                                    onchange="calculateCost()"
+                                    class="w-full bg-[#0a0a15] border border-[#2a2a3e] rounded-lg px-4 py-2 text-gray-200 focus:outline-none focus:border-bach-accent"
+                                ></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="calc-result border border-[#2a2a3e] rounded-xl p-6 flex flex-col justify-center items-center">
+                        <div class="text-5xl font-extrabold text-bach-success mb-4" id="calcCost">€0.0000</div>
+                        <div class="text-sm text-gray-400 text-center" id="calcBreakdown">Bereit</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Dateien (Integrated Content) -->
+        <div x-show="activeTab === 'files'" x-transition id="tab-files">
+            <div class="p-4">
+                <div class="flex gap-4 border-b-2 border-[#2a2a3e] mb-6">
+                    <button
+                        @click="activeSubTab = 'inbox'"
+                        :class="activeSubTab === 'inbox' ? 'text-bach-accent border-bach-accent' : 'text-gray-400 border-transparent hover:text-gray-300'"
+                        class="px-6 py-3 font-semibold border-b-3 -mb-0.5 transition-all"
+                        onclick="showSubTab('inbox')"
+                    >
+                        Eingang / Scanner
+                    </button>
+                    <button
+                        @click="activeSubTab = 'quarantine'"
+                        :class="activeSubTab === 'quarantine' ? 'text-bach-accent border-bach-accent' : 'text-gray-400 border-transparent hover:text-gray-300'"
+                        class="px-6 py-3 font-semibold border-b-3 -mb-0.5 transition-all"
+                        onclick="showSubTab('quarantine')"
+                    >
+                        Quarantäne
+                    </button>
+                    <button
+                        @click="activeSubTab = 'connections'"
+                        :class="activeSubTab === 'connections' ? 'text-bach-accent border-bach-accent' : 'text-gray-400 border-transparent hover:text-gray-300'"
+                        class="px-6 py-3 font-semibold border-b-3 -mb-0.5 transition-all"
+                        onclick="showSubTab('connections')"
+                    >
+                        Verbindungen
+                    </button>
+                </div>
+
+
+                <div x-show="activeSubTab === 'inbox'" x-transition id="subtab-inbox">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-[#16213e] border border-[#2a2a3e] rounded-xl p-6 shadow-lg">
+                            <h2 class="text-xl font-bold text-gray-200 mb-4">Status & Ordner</h2>
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div class="text-center">
+                                    <div class="text-3xl font-bold text-bach-accent" id="stat-folders">-</div>
+                                    <div class="text-xs text-gray-400 uppercase tracking-wide">Ordner</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-3xl font-bold text-bach-warning" id="stat-unsorted">-</div>
+                                    <div class="text-xs text-gray-400 uppercase tracking-wide">Neu</div>
+                                </div>
+                            </div>
+                            <ul class="space-y-1" id="folder-list"></ul>
+                        </div>
+                        <div class="bg-[#16213e] border border-[#2a2a3e] rounded-xl p-6 shadow-lg">
+                            <h2 class="text-xl font-bold text-gray-200 mb-4">Review Queue</h2>
+                            <div id="unsorted-list" class="max-h-[300px] overflow-y-auto space-y-2 mb-4">Lade...</div>
+                            <button
+                                onclick="runScan()"
+                                class="w-full px-4 py-2 bg-[#1a1a2e] border border-[#2a2a3e] rounded-lg hover:border-bach-accent transition-all"
+                            >
+                                Scan starten
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div x-show="activeSubTab === 'quarantine'" x-transition id="subtab-quarantine">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-[#16213e] border border-[#2a2a3e] rounded-xl p-6 shadow-lg">
+                            <h2 class="text-xl font-bold text-gray-200 mb-4">Anonymisierung</h2>
+                            <div id="anon-clients-list" class="space-y-2">Lade...</div>
+                        </div>
+                        <div class="bg-[#16213e] border border-[#2a2a3e] rounded-xl p-6 shadow-lg">
+                            <h2 class="text-xl font-bold text-gray-200 mb-4">Datei Upload</h2>
+                            <div class="border-2 border-dashed border-[#2a2a3e] rounded-lg p-8 text-center text-gray-400 cursor-pointer hover:border-bach-accent hover:text-bach-accent transition-all">
+                                📄 Dateien hier ablegen
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div x-show="activeSubTab === 'connections'" x-transition id="subtab-connections">
+                    <div class="bg-[#16213e] border border-[#2a2a3e] rounded-xl p-6 shadow-lg">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                            <h2 class="text-2xl font-bold text-gray-200">🔗 Externe Verbindungen (Mounts)</h2>
+                            <button
+                                onclick="restoreMounts()"
+                                class="px-4 py-2 bg-[#1a1a2e] border border-[#2a2a3e] rounded-lg hover:border-bach-accent transition-all"
+                            >
+                                🔄 Alle wiederherstellen
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto rounded-xl border border-[#2a2a3e] mb-8">
+                            <table class="w-full border-collapse">
+                                <thead>
+                                    <tr class="bg-[#1a1a2e]">
+                                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider border-b-2 border-[#2a2a3e]">Alias</th>
+                                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider border-b-2 border-[#2a2a3e]">Pfad</th>
+                                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider border-b-2 border-[#2a2a3e]">Status</th>
+                                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider border-b-2 border-[#2a2a3e]">Aktion</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="mounts-list-body" class="divide-y divide-[#2a2a3e]"></tbody>
+                            </table>
+                        </div>
+
+                        <div class="border border-[#2a2a3e] rounded-xl p-6">
+                            <h3 class="text-xl font-bold text-gray-200 mb-4">➕ Neuen Ordner anbinden</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">Alias (Name im user/ Ordner)</label>
+                                    <input
+                                        type="text"
+                                        id="mount-alias"
+                                        placeholder="z.B. google_drive"
+                                        class="w-full bg-[#0a0a15] border border-[#2a2a3e] rounded-lg px-4 py-2 text-gray-200 focus:outline-none focus:border-bach-accent"
+                                    >
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">Absoluter Zielpfad</label>
+                                    <input
+                                        type="text"
+                                        id="mount-path"
+                                        placeholder="C:\Users\...\Desktop"
+                                        class="w-full bg-[#0a0a15] border border-[#2a2a3e] rounded-lg px-4 py-2 text-gray-200 focus:outline-none focus:border-bach-accent"
+                                    >
+                                </div>
+                            </div>
+                            <button
+                                onclick="addMount()"
+                                class="w-full px-6 py-3 bg-bach-primary hover:bg-opacity-90 text-white rounded-lg font-semibold transition-all"
+                            >
+                                Verbinden
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Modals for Inbox/Files -->
+        <div id="process-modal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-[1000]">
+            <div class="bg-[#16213e] border border-[#2a2a3e] rounded-xl p-8 w-full max-w-3xl mx-4 shadow-2xl">
+                <h2 class="text-2xl font-bold text-gray-200 mb-6">Datei Review</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div
+                        id="process-preview"
+                        class="h-[300px] bg-black rounded-lg flex items-center justify-center"
+                    >
+                    </div>
+                    <form id="process-form" class="flex flex-col justify-between">
+                        <input type="hidden" id="process-filename">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Zielordner</label>
+                            <input
+                                type="text"
+                                id="process-target"
+                                required
+                                class="w-full bg-[#0a0a15] border border-[#2a2a3e] rounded-lg px-4 py-2 text-gray-200 focus:outline-none focus:border-bach-accent"
+                            >
+                        </div>
+                        <div class="flex justify-end gap-4 mt-6">
+                            <button
+                                type="button"
+                                onclick="closeModal('process-modal')"
+                                class="px-6 py-2 bg-[#1a1a2e] border border-[#2a2a3e] rounded-lg hover:border-bach-accent transition-all"
+                            >
+                                Abbruch
+                            </button>
+                            <button
+                                type="submit"
+                                class="px-6 py-2 bg-bach-primary hover:bg-opacity-90 text-white rounded-lg font-semibold transition-all"
+                            >
+                                Verschieben
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-[#16213e] border-t border-[#2a2a3e] py-4 text-center">
+        <span class="text-gray-400 text-sm">BACH v1.1.7</span>
+    </footer>
+
+    <script src="/static/js/api.js?v=2"></script>
+    <script src="/static/js/nav.js?v=2"></script>
+    <script src="/static/js/app.js?v=2"></script>
+    <script>
+        // Sub-Tab Switching for Files (Alpine.js handles main tabs)
+        function showSubTab(subId) {
+            if (subId === 'quarantine') loadQuarantine();
+            if (subId === 'connections') loadMounts();
+            // Alpine.js handles the activeSubTab state
+        }
+
+        // Alpine.js watcher for tab changes
+        document.addEventListener('alpine:init', () => {
+            Alpine.effect(() => {
+                const activeTab = Alpine.store ? Alpine.store('activeTab') : null;
+                // Trigger data loads when tabs change
+                if (window.location.hash === '#tokens' || activeTab === 'tokens') loadTokenData();
+                if (window.location.hash === '#files' || activeTab === 'files') {
+                    loadInboxStatus();
+                    loadFolders();
+                    loadUnsorted();
+                }
+            });
+        });
+
+        // --- MOUNT LOGIC (Task #569) ---
+        async function loadMounts() {
+            try {
+                const res = await fetch('/api/mounts');
+                const data = await res.json();
+                const tbody = document.getElementById('mounts-list-body');
+                if (!tbody) return;
+
+                if (data.mounts && data.mounts.length > 0) {
+                    tbody.innerHTML = data.mounts.map(m => `
+                        <tr class="hover:bg-[#1a1a2e] transition-colors">
+                            <td class="px-6 py-4"><b class="text-gray-200">${m.alias}</b></td>
+                            <td class="px-6 py-4 text-sm text-gray-400">${m.path}</td>
+                            <td class="px-6 py-4">
+                                <span class="inline-block px-3 py-1 text-xs rounded-full border ${m.active && m.exists ? 'border-bach-success text-bach-success' : 'border-[#2a2a3e] text-gray-400'}">
+                                    ${m.active && m.exists ? 'Aktiv' : (m.exists ? 'Verbunden (System)' : 'Fehlt')}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <button onclick="removeMount('${m.alias}')" class="px-3 py-1 text-xs bg-[#1a1a2e] border border-[#2a2a3e] rounded hover:border-bach-error hover:text-bach-error transition-all">Löschen</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-gray-400">Keine Verbindungen definiert.</td></tr>';
+                }
+            } catch (e) {
+                console.error('Mount API Fehler:', e);
+                document.getElementById('mounts-list-body').innerHTML = '<tr><td colspan="4" class="text-center py-4 text-bach-error">API Fehler</td></tr>';
+            }
+        }
+
+        async function addMount() {
+            const path = document.getElementById('mount-path').value;
+            const alias = document.getElementById('mount-alias').value;
+            if (!path || !alias) { alert('Bitte Pfad und Alias angeben.'); return; }
+
+            try {
+                const res = await fetch('/api/mounts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path, alias })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('Erfolgreich angebunden!');
+                    document.getElementById('mount-path').value = '';
+                    document.getElementById('mount-alias').value = '';
+                    loadMounts();
+                } else {
+                    alert('Fehler: ' + data.output);
+                }
+            } catch (e) { alert('API Fehler'); }
+        }
+
+        async function removeMount(alias) {
+            if (!confirm(`Möchten Sie die Verbindung '${alias}' wirklich entfernen?`)) return;
+            try {
+                const res = await fetch(`/api/mounts/${alias}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) loadMounts();
+                else alert('Fehler: ' + data.output);
+            } catch (e) { alert('API Fehler'); }
+        }
+
+        async function restoreMounts() {
+            try {
+                const res = await fetch('/api/mounts/restore', { method: 'POST' });
+                const data = await res.json();
+                alert(data.output);
+                loadMounts();
+            } catch (e) { alert('API Fehler'); }
+        }
+
+        // --- PARTNER SELECTION (Task #642) ---
+        function selectPartner(value, el) {
+            // Update Select logic
+            document.getElementById('headless-partner').value = value;
+            // Alpine.js handles visual updates via selectedPartner state
+        }
+
+
+        // --- TOKEN LOGIC (Task #614) ---
+        let tokenConfig = {
+            currency: { exchange_rate: 0.85, rate_date: "2026-01-28" },
+            models: {
+                "claude-opus-4-5": { name: "Claude Opus 4.5", input_per_mtok_usd: 15.00, output_per_mtok_usd: 75.00 },
+                "claude-sonnet-4": { name: "Claude Sonnet 4", input_per_mtok_usd: 3.00, output_per_mtok_usd: 15.00 },
+                "claude-3-5-sonnet": { name: "Claude 3.5 Sonnet", input_per_mtok_usd: 3.00, output_per_mtok_usd: 15.00 },
+                "claude-haiku-3-5": { name: "Claude Haiku 3.5", input_per_mtok_usd: 0.80, output_per_mtok_usd: 4.00 },
+                "gemini-2-0-flash": { name: "Gemini 2.0 Flash", input_per_mtok_usd: 0.10, output_per_mtok_usd: 0.40 },
+                "gemini-2-0-pro": { name: "Gemini 2.0 Pro", input_per_mtok_usd: 1.25, output_per_mtok_usd: 10.00 },
+                "gpt-4o": { name: "GPT-4o", input_per_mtok_usd: 2.50, output_per_mtok_usd: 10.00 },
+                "deepseek-chat": { name: "DeepSeek V3", input_per_mtok_usd: 0.14, output_per_mtok_usd: 0.28 },
+                "ollama-local": { name: "Ollama (Lokal)", input_per_mtok_usd: 0.00, output_per_mtok_usd: 0.00 }
+            }
+        };
+
+        async function loadTokenData() {
+            try {
+                const res = await fetch('/api/tokens/usage');
+                const data = await res.json();
+                if (data.success) {
+                    tokenConfig.currency.exchange_rate = data.exchange_rate;
+                    document.getElementById('exchangeRate').textContent = data.exchange_rate.toFixed(4);
+                    document.getElementById('totalCost').textContent = '€' + data.total_cost_eur;
+                    document.getElementById('totalTokens').textContent = data.total_tokens.toLocaleString();
+
+                    const topModelId = data.top_model;
+                    const topModelName = tokenConfig.models[topModelId]?.name || topModelId || '-';
+                    document.getElementById('topModel').textContent = topModelName;
+
+                    document.getElementById('priceDate').textContent = 'Stand: ' + data.rate_date;
+                    updateTokenUI();
+                }
+            } catch (e) {
+                console.error('Token API Fehler:', e);
+                document.getElementById('priceDate').textContent = 'API Offline';
+            }
+        }
+
+        function updateTokenUI() {
+            const rate = tokenConfig.currency.exchange_rate;
+            const tbody = document.getElementById('priceTable');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            const modelSelect = document.getElementById('modelSelect');
+            if (!modelSelect) return;
+            modelSelect.innerHTML = '';
+            const currentSelected = modelSelect.value; // Falls redraw
+
+            for (const [id, model] of Object.entries(tokenConfig.models)) {
+                const inEur = model.input_per_mtok_usd * rate;
+                const outEur = model.output_per_mtok_usd * rate;
+
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-[#1a1a2e] transition-colors';
+                row.innerHTML = `
+                    <td class="px-6 py-4"><span class="font-semibold text-gray-200">${model.name}</span></td>
+                    <td class="px-6 py-4"><span class="font-mono font-bold text-bach-success text-lg">€${inEur.toFixed(2)}</span> <span class="text-gray-400 text-sm ml-2">($${model.input_per_mtok_usd.toFixed(2)})</span></td>
+                    <td class="px-6 py-4"><span class="font-mono font-bold text-bach-success text-lg">€${outEur.toFixed(2)}</span> <span class="text-gray-400 text-sm ml-2">($${model.output_per_mtok_usd.toFixed(2)})</span></td>
+                    <td class="px-6 py-4 text-xs text-gray-400">In: €${(inEur / 1000).toFixed(4)} | Out: €${(outEur / 1000).toFixed(4)}</td>
+                `;
+                tbody.appendChild(row);
+
+                const opt = document.createElement('option');
+                opt.value = id;
+                opt.textContent = model.name;
+                // Default selection priority
+                if (id === 'claude-3-5-sonnet') opt.selected = true;
+                modelSelect.appendChild(opt);
+            }
+            calculateCost();
+        }
+
+        function calculateCost() {
+            const actionSelect = document.getElementById('actionSelect');
+            const modelSelect = document.getElementById('modelSelect');
+            if (!actionSelect || !modelSelect) return;
+
+            const tokens = actionSelect.value === 'custom' ?
+                parseInt(document.getElementById('customTokens').value) || 0 :
+                parseInt(actionSelect.value);
+
+            const model = tokenConfig.models[modelSelect.value || 'claude-3-5-sonnet'];
+            if (!model) return;
+
+            const rate = tokenConfig.currency.exchange_rate;
+            const inCost = (tokens * 0.4 / 1000000) * model.input_per_mtok_usd * rate;
+            const outCost = (tokens * 0.6 / 1000000) * model.output_per_mtok_usd * rate;
+            const total = inCost + outCost;
+
+            document.getElementById('calcCost').textContent = '€' + total.toFixed(4);
+            document.getElementById('calcBreakdown').innerHTML = `
+                ${tokens.toLocaleString()} Tokens (40/60 Split)<br>
+                Modell: ${model.name}<br>
+                In: €${inCost.toFixed(5)} | Out: €${outCost.toFixed(5)}
+            `;
+            const customGroup = document.getElementById('customTokensGroup');
+            if (actionSelect.value === 'custom') {
+                customGroup.classList.remove('hidden');
+            } else {
+                customGroup.classList.add('hidden');
+            }
+        }
+
+        // --- FILES/INBOX LOGIC (Task #623) ---
+        async function loadInboxStatus() {
+            try {
+                const res = await fetch('/api/inbox/status');
+                const data = await res.json();
+                document.getElementById('stat-folders').textContent = data.folders?.length || 0;
+                document.getElementById('stat-unsorted').textContent = data.unsorted_count || 0;
+            } catch (e) { console.error(e); }
+        }
+
+        async function loadFolders() {
+            try {
+                const res = await fetch('/api/inbox/status');
+                const data = await res.json();
+                const list = document.getElementById('folder-list');
+                if (!list) return;
+                list.innerHTML = (data.folders || []).map(f => `
+                    <li class="flex justify-between items-center py-2 px-3 border-b border-[#2a2a3e] hover:bg-[#1a1a2e] transition-colors">
+                        <span class="text-sm text-gray-300">${f.path}</span>
+                    </li>
+                `).join('');
+            } catch (e) { console.error(e); }
+        }
+
+        async function loadUnsorted() {
+            try {
+                const res = await fetch('/api/inbox/unsorted');
+                const data = await res.json();
+                const container = document.getElementById('unsorted-list');
+                if (!container) return;
+                container.innerHTML = (data.files || []).map(f => `
+                    <div onclick="processFile('${f.name}')" class="flex justify-between items-center p-3 bg-[#1a1a2e] rounded-lg border border-[#2a2a3e] cursor-pointer hover:border-bach-accent transition-all">
+                        <span class="text-gray-200">${f.name}</span>
+                        <span class="px-3 py-1 bg-[#16213e] rounded text-sm">⚙️</span>
+                    </div>
+                `).join('') || '<p class="text-gray-400 text-center py-4">Keine neuen Dateien</p>';
+            } catch (e) { console.error(e); }
+        }
+
+        async function processFile(filename) {
+            document.getElementById('process-filename').value = filename;
+            document.getElementById('process-target').value = '';
+            document.getElementById('process-modal').style.display = 'flex';
+        }
+
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        async function runScan() {
+            try {
+                await fetch('/api/inbox/scan', { method: 'POST' });
+                loadInboxStatus();
+                loadUnsorted();
+            } catch (e) { console.error(e); }
+        }
+
+        async function loadQuarantine() {
+            try {
+                const res = await fetch('/api/anonymization/clients');
+                const data = await res.json();
+                const list = document.getElementById('anon-clients-list');
+                if (!list) return;
+                list.innerHTML = (data.clients || []).map(c => `
+                    <div class="p-3 border-b border-[#2a2a3e] hover:bg-[#1a1a2e] transition-colors">
+                        <b class="text-gray-200">${c.name}</b> <span class="text-gray-400">(${c.status})</span>
+                    </div>
+                `).join('') || '<p class="text-gray-400 text-center py-4">Keine Klienten</p>';
+            } catch (e) { console.error(e); }
+        }
+
+        // Deadlines laden (Task #575)
+        async function loadDeadlines() {
+            try {
+                const res = await fetch('/api/financial/deadlines');
+                const data = await res.json();
+                if (data.success && data.count > 0) {
+                    document.getElementById('stat-deadlines').textContent = data.count;
+                    document.getElementById('stat-deadlines').className = 'block text-3xl font-bold text-bach-error';
+                    const card = document.getElementById('deadlines-card');
+                    const list = document.getElementById('deadlines-list');
+                    card.classList.remove('hidden');
+                    list.innerHTML = data.deadlines.map(d => `
+                        <div class="p-3 mb-2 bg-[#1a1a2e] rounded-lg border-l-4 border-bach-error">
+                            <div class="font-bold text-gray-200">${d.name}</div>
+                            <div class="text-sm text-gray-400 mt-1">
+                                Bis: ${new Date(d.deadline).toLocaleDateString()}
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (e) { console.error('Deadlines API Fehler:', e); }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadDeadlines();
+        });
+    </script>
+</body>
+
+</html>

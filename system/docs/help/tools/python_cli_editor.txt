@@ -1,0 +1,81 @@
+BACH Tool: python_cli_editor
+==================================================
+Generiert: 2026-01-23 10:36
+Quelle: tools/python_cli_editor.py
+
+BESCHREIBUNG
+----------------------------------------
+python_cli_editor.py - Python Code Editor CLI v2.0
+
+Analysiert und bearbeitet Python-Dateien strukturiert.
+Zeigt Klassen, Methoden, Imports und ermoeglicht gezieltes Editieren.
+
+Autor: BACH Contributors
+Version: 2.0.0
+Datum: 2026-01-13
+
+============================================================
+NEUE FEATURES v2.0:
+============================================================
+
+ZEILENNUMMERN:
+  --lines / --no-lines    Zeilennummern ein/aus (Default: on)
+
+EINFUEGEN:
+  --add CODE              Fuegt Code ein (aus Datei oder direkt)
+  --at-start              Am Dateianfang (nach Imports)
+  --at-end                Am Dateiende  
+  --at-imports            Im Import-Bereich
+  --in-class NAME         In Klasse NAME (am Ende)
+  --before NAME           Vor Element NAME
+  --after NAME            Nach Element NAME
+  --at-line N             An Zeile N
+
+LOESCHEN:
+  --delete NAME           Loescht Klasse, Methode oder Funktion
+
+ZEILEN BEARBEITEN:
+  --change-line N         Zeile N bearbeiten (interaktiv oder mit --content)
+  --content "CODE"        Neuer Inhalt fuer --change-line
+
+SPEICHERN:
+  --test                  Erstellt Testdatei ohne Original zu aendern
+  --save                  Speichert direkt mit automatischem Backup
+
+============================================================
+BEISPIELE:
+============================================================
+
+# Struktur mit Zeilennummern anzeigen
+python python_cli_editor.py script.py --show-all --lines
+
+# Neue Funktion am Ende einfuegen
+python python_cli_editor.py script.py --add new_func.py --at-end --save
+
+# Methode in Klasse einfuegen
+python python_cli_editor.py script.py --add method.py --in-class MyClass --save
+
+# Import hinzufuegen
+python python_cli_editor.py script.py --add "import os" --at-imports --save
+
+# Klasse loeschen
+python python_cli_editor.py script.py --delete MyClass --save
+
+# Zeile aendern
+python python_cli_editor.py script.py --change-line 42 --content "x = 100" --save
+
+# Vor/Nach Element einfuegen
+python python_cli_editor.py script.py --add helper.py --before MainClass --save
+python python_cli_editor.py script.py --add cleanup.py --after process_data --save
+
+============================================================
+
+VERWENDUNG
+----------------------------------------
+python bach.py tools run python_cli_editor [args]
+oder direkt: python tools/python_cli_editor.py [args]
+
+HINWEISE
+----------------------------------------
+- Automatisch generiert aus Docstring
+- Bei Fragen: bach tools show python_cli_editor

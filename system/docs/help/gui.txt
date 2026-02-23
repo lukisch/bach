@@ -1,0 +1,503 @@
+# Portabilitaet: UNIVERSAL
+# Version: 1.2.0
+# Zuletzt validiert: 2026-02-08 (Help-Forensik: Headless API + Messages integriert)
+# Naechste Pruefung: 2026-08-08
+
+GUI - Web-Dashboard
+===================
+
+BESCHREIBUNG
+Das GUI-Modul stellt ein Web-Dashboard fuer BACH bereit.
+Basiert auf FastAPI mit HTML/CSS/JS Frontend.
+Wird automatisch mit --startup im Hintergrund gestartet.
+
+ZWEI SERVER:
+  - GUI Server (Port 8000):    Web-Dashboard mit HTML-Templates
+  - Headless API (Port 8001):  Pure REST-API fuer Programme
+
+BEFEHLE
+-------
+bach gui start              Server starten (blockierend, Port 8000)
+bach gui start --port 9000  Server auf anderem Port
+bach gui start-bg           Server im Hintergrund starten
+bach gui start-bg --port 9000  Hintergrund mit anderem Port
+bach gui status             Server-Status pruefen
+bach gui info               GUI-Informationen anzeigen
+
+MANUELLER START
+---------------
+user/start_gui.bat          Batch-Datei fuer Windows (oeffnet Browser)
+
+AUTOMATISCHER START
+-------------------
+bach --startup              Startet GUI automatisch im Hintergrund
+                            (siehe [GUI SERVER] Sektion im Output)
+
+VORAUSSETZUNGEN
+---------------
+pip install fastapi uvicorn
+
+DASHBOARDS (Basis)
+------------------
+/              Startseite mit Status-Cards und Quick-Actions
+/tasks         Task-Management (Filter, CRUD, Status-Wechsel)
+/messages      Nachrichten (Inbox/Outbox, Compose)
+/daemon        Wartung (Jobs, Runs, Toggle)
+/docs          API-Dokumentation (Swagger)
+
+DASHBOARDS (Erweitert)
+----------------------
+/agents        Agent-Verwaltung
+/memory        Memory/Wissensbasis
+/tools         Tool-Verwaltung
+/tokens        Token-Statistik
+/steuer        Steuer-Workflows
+/financial     Finanz-Uebersicht
+/gesundheit    Gesundheits-Tracking
+/kontakte      Kontaktverwaltung
+/routinen      Routinen-Editor
+/skills-board  Skills-Board
+/tasks_board   Kanban Task-Board
+/logs          Log-Viewer
+/help          Help-System
+/wiki          Wiki-Seiten
+/inbox         Inbox-Ansicht
+/inbox_editor  Inbox-Editor
+/maintenance   Wartungs-Dashboard
+/partners      Partner-Verwaltung
+/persoenlich   Persoenliche Einstellungen
+/ati           ATI-System
+/usecases      Use-Cases
+/workflow_tuev Workflow-Pruefung
+/prompt-generator  Prompt-Generator
+/foerderplaner Foerderplaner
+/anonymization Anonymisierung
+
+FEATURES
+--------
+- Dashboard mit System-Status
+- Task-Uebersicht (User + Gescannte)
+- Message-System (CLI-Anbindung: bach msg)
+- Wartungs-Jobs
+- REST-API mit automatischer Dokumentation (/docs)
+
+CLI <-> GUI VERKNUEPFUNG
+------------------------
+Nachrichten:
+  CLI: bach msg send/list/read/unread
+  GUI: /messages (Inbox/Outbox, Compose)
+  DB:  bach.db -> messages Tabelle
+  Startup: Ungelesene werden bei --startup angezeigt
+
+Tasks:
+  CLI: bach task add/list/done
+  GUI: /tasks (CRUD, Filter, Status)
+  DB:  bach.db -> tasks Tabelle
+
+Wartung:
+  CLI: bach daemon list/run/toggle
+  GUI: /daemon (Jobs, Runs, Toggle)
+  DB:  bach.db -> daemon_jobs, daemon_runs
+
+
+STRUKTUR
+--------
+gui/
+├── server.py          FastAPI Backend (alle APIs integriert)
+├── daemon_service.py  Hintergrund-Service
+├── prompt_manager.py  Prompt-Verwaltung
+├── file_watcher.py    Datei-Ueberwachung
+├── sync_service.py    Synchronisation
+├── api_webhook.py     Webhook-Handler
+├── __init__.py        Modul-Init
+├── static/
+│   ├── css/main.css   Styling
+│   └── js/
+│       ├── api.js     API-Client
+│       ├── app.js     Haupt-Logik
+│       ├── nav.js     Navigation
+│       └── skills-board.js  Skills-Board Logik
+└── templates/
+    ├── index.html     Startseite
+    ├── tasks.html     Task-Management
+    ├── messages.html  Nachrichten
+    ├── daemon.html    Daemon-Manager
+    └── ... (30+ weitere Templates)
+
+API-ENDPUNKTE (GUI SERVER - Port 8000)
+---------------------------------------
+Status:
+GET  /api/status              System-Status
+
+Tasks:
+GET  /api/tasks               User-Tasks
+POST /api/tasks               Task erstellen
+POST /api/tasks/export        Tasks exportieren
+GET  /api/tasks/{id}          Task Details
+PUT  /api/tasks/{id}          Task aktualisieren
+DELETE /api/tasks/{id}        Task loeschen
+GET  /api/scanned-tasks       Gescannte Tasks
+GET  /api/assignees           Task-Zuweisungen
+
+Nachrichten (CLI-Verwaltung):
+GET  /api/messages            Nachrichten (messages Tabelle)
+POST /api/messages            Nachricht erstellen
+PUT  /api/messages/{id}/read  Als gelesen markieren
+PUT  /api/messages/{id}/archive  Nachricht archivieren
+PUT  /api/messages/{id}/delete   Nachricht loeschen
+
+Daemon:
+GET  /api/daemon/jobs         Daemon-Jobs
+POST /api/daemon/jobs         Job erstellen
+PUT  /api/daemon/jobs/{id}/toggle  Job aktivieren/deaktivieren
+POST /api/daemon/jobs/{id}/run     Job manuell ausfuehren
+GET  /api/daemon/runs         Job-Ausfuehrungen
+GET  /api/daemon/status       Daemon-Status
+POST /api/daemon/start        Daemon starten
+POST /api/daemon/stop         Daemon stoppen
+POST /api/daemon/kill-all     Alle Jobs beenden
+PUT  /api/daemon/config       Daemon-Konfiguration aendern
+
+Memory:
+GET  /api/memory/overview     Memory-Uebersicht
+GET  /api/memory/working      Working Memory
+GET  /api/memory/lessons      Lessons
+GET  /api/memory/facts        Fakten
+GET  /api/memory/sessions     Sessions
+POST /api/memory/working      Working Memory Entry erstellen
+POST /api/memory/lessons      Lesson erstellen
+POST /api/memory/facts        Fakt erstellen
+DELETE /api/memory/facts/{id}       Fakt loeschen
+DELETE /api/memory/working/{id}     Working Entry loeschen
+DELETE /api/memory/lessons/{id}     Lesson loeschen
+GET  /api/memory/stats/db     DB-Statistiken
+POST /api/memory/maintenance/cleanup  Memory-Cleanup
+GET  /api/memory/sessions/{id}       Session-Details
+
+Skills:
+GET  /api/skills              Skills auflisten
+GET  /api/skills/categories   Skill-Kategorien
+GET  /api/skills/{id}         Skill-Details
+
+Tools:
+GET  /api/tools               Tools auflisten
+GET  /api/tools/{name}        Tool-Details
+POST /api/tools/{name}/run    Tool ausfuehren
+
+Agents:
+GET  /api/agents              Agent-Liste
+PUT  /api/agents/{id}/toggle  Agent aktivieren/deaktivieren
+
+ATI:
+GET  /api/ati/stats           ATI-Statistiken
+GET  /api/ati/tasks           ATI-Tasks
+GET  /api/ati/tasks/{id}      ATI-Task-Details
+GET  /api/ati/sessions        ATI-Sessions
+POST /api/ati/session/start   ATI-Session starten
+POST /api/ati/session/start-cli  ATI CLI-Session
+POST /api/ati/tasks           ATI-Task erstellen
+PUT  /api/ati/tasks/{id}      ATI-Task aktualisieren
+DELETE /api/ati/tasks/{id}    ATI-Task loeschen
+
+Financial:
+GET  /api/financial/status    Financial-Status
+GET  /api/financial/emails    Financial-Emails
+GET  /api/financial/emails/{id}  Email-Details
+GET  /api/financial/subscriptions  Abonnements
+GET  /api/financial/subscriptions-unified  Vereinigte Abos
+DELETE /api/financial/subscriptions/{id}  Abo loeschen
+GET  /api/financial/categories  Kategorien
+POST /api/financial/sync      Financial-Sync
+POST /api/financial/save-json  JSON speichern
+GET  /api/financial/config    Financial-Config
+PUT  /api/financial/config    Config aktualisieren
+PUT  /api/financial/emails/{id}/status  Email-Status aendern
+GET  /api/financial/export    Financial exportieren
+GET  /api/financial/accounts  Email-Accounts
+POST /api/financial/accounts  Account erstellen
+PUT  /api/financial/accounts/{id}/toggle  Account aktivieren
+POST /api/financial/accounts/{id}/test  Account testen
+DELETE /api/financial/accounts/{id}  Account loeschen
+GET  /api/financial/imap-presets  IMAP-Presets
+GET  /api/financial/gmail/find-credentials  Gmail-Credentials
+POST /api/financial/gmail/setup  Gmail-Setup
+GET  /api/financial/gmail/status  Gmail-Status
+GET  /api/financial/profiles  Profile
+POST /api/financial/profiles  Profil erstellen
+PUT  /api/financial/profiles/{id}  Profil aktualisieren
+DELETE /api/financial/profiles/{id}  Profil loeschen
+GET  /api/financial/false-positives  False-Positives
+POST /api/financial/false-positives  False-Positive erstellen
+DELETE /api/financial/false-positives/{id}  False-Positive loeschen
+POST /api/financial/profiles/test  Profil testen
+POST /api/financial/profiles/import  Profile importieren
+GET  /api/financial/contracts  Vertraege
+POST /api/financial/contracts  Vertrag erstellen
+PUT  /api/financial/contracts/{id}  Vertrag aktualisieren
+DELETE /api/financial/contracts/{id}  Vertrag loeschen
+GET  /api/financial/insurances  Versicherungen
+GET  /api/financial/deadlines  Deadlines
+POST /api/financial/insurances  Versicherung erstellen
+PUT  /api/financial/insurances/{id}  Versicherung aktualisieren
+DELETE /api/financial/insurances/{id}  Versicherung loeschen
+GET  /api/financial/bank-accounts  Bank-Accounts
+POST /api/financial/bank-accounts  Bank-Account erstellen
+PUT  /api/financial/bank-accounts/{id}  Bank-Account aktualisieren
+DELETE /api/financial/bank-accounts/{id}  Bank-Account loeschen
+GET  /api/financial/credits  Kredite
+POST /api/financial/credits  Kredit erstellen
+PUT  /api/financial/credits/{id}  Kredit aktualisieren
+DELETE /api/financial/credits/{id}  Kredit loeschen
+
+Steuer:
+GET  /api/steuer/dokumente/unlinked  Unverlinkte Steuer-Dokumente
+POST /api/steuer/posten/{id}/link  Dokument verlinken
+POST /api/steuer/match-bank  Bank-Matching
+
+Bericht (Foerderplaner):
+GET  /api/bericht/status      Bericht-Status
+GET  /api/bericht/clients     Klienten
+POST /api/bericht/export      Bericht exportieren
+POST /api/bericht/generate    Bericht generieren
+
+Mounts:
+GET  /api/mounts              Mounts auflisten
+POST /api/mounts              Mount erstellen
+DELETE /api/mounts/{alias}    Mount loeschen
+POST /api/mounts/restore      Mounts wiederherstellen
+
+Scanner:
+POST /api/scanner/trigger     Scanner ausloesen
+POST /api/scanner/run         Scanner starten
+GET  /api/scanner/status      Scanner-Status
+GET  /api/scanner/tools       Scanner-Tools
+GET  /api/scanner/config      Scanner-Config
+
+Wartung:
+POST /api/wartung/trigger     Wartung ausloesen
+GET  /api/wartung/status      Wartungs-Status
+
+Tokens:
+GET  /api/tokens/usage        Token-Nutzung
+
+Logs:
+GET  /api/system/logs         Log-Dateien
+GET  /api/system/logs/{name}  Log-Datei lesen
+
+Inbox:
+GET  /api/inbox/status        Inbox-Status
+GET  /api/inbox/config        Inbox-Config
+POST /api/inbox/config        Config aktualisieren
+GET  /api/inbox/folders       Ordner
+POST /api/inbox/folders       Ordner erstellen
+PUT  /api/inbox/folders       Ordner aktualisieren
+DELETE /api/inbox/folders     Ordner loeschen
+GET  /api/inbox/rules         Regeln
+POST /api/inbox/rules         Regel erstellen
+PUT  /api/inbox/rules/{id}    Regel aktualisieren
+DELETE /api/inbox/rules/{id}  Regel loeschen
+POST /api/inbox/scan          Inbox scannen
+GET  /api/inbox/unsorted      Unsortierte Elemente
+POST /api/inbox/sort          Elemente sortieren
+GET  /api/inbox/preview/{file}  Datei-Vorschau
+GET  /api/inbox/analyze/{file}  Datei analysieren
+PUT  /api/inbox/settings      Settings aktualisieren
+
+Skills-Board:
+GET  /api/skills-board/item-file  Item-Datei lesen
+PUT  /api/skills-board/item-file  Item-Datei speichern
+GET  /api/skills-board/hierarchy  Hierarchie lesen
+PUT  /api/skills-board/hierarchy  Hierarchie speichern
+
+Help-System:
+GET  /api/help               Help-Dateien auflisten
+GET  /api/docs/docs/docs/help/{name}        Help-Datei lesen
+PUT  /api/docs/docs/docs/help/{name}        Help-Datei aktualisieren
+POST /api/help               Help-Datei erstellen
+DELETE /api/docs/docs/docs/help/{name}      Help-Datei loeschen
+GET  /api/docs/docs/docs/help/search/{term} Help durchsuchen
+
+Anonymization (Foerderplaner):
+GET  /api/anonymization/clients  Klienten
+POST /api/anonymization/profile  Profil erstellen
+POST /api/anonymization/upload  Dokument hochladen
+POST /api/report/session/start  Bericht-Session starten
+POST /api/report/session/{id}/import  Import
+POST /api/report/session/{id}/profile  Profil
+POST /api/report/session/{id}/anonymize  Anonymisieren
+POST /api/report/session/{id}/prompt  Prompt
+POST /api/report/session/{id}/generate  Generieren
+POST /api/report/session/{id}/cleanup  Cleanup
+GET  /api/report/session/{id}  Session-Details
+GET  /api/report/pending      Pending Reports
+
+Prompt-Generator:
+GET  /api/prompt-generator/templates  Templates
+GET  /api/prompt-generator/template/{path}  Template lesen
+POST /api/prompt-generator/send/task  Als Task senden
+POST /api/prompt-generator/send/session  In Session senden
+POST /api/prompt-generator/send/copy  In Zwischenablage
+GET  /api/prompt-generator/daemon/status  Daemon-Status
+PUT  /api/prompt-generator/daemon/config  Daemon-Config
+POST /api/prompt-generator/start-desktop  Desktop starten
+POST /api/prompt-generator/daemon/toggle  Daemon-Toggle
+POST /api/prompt-generator/templates/save  Template speichern
+
+Auto-Sessions:
+POST /api/auto-sessions/launch  Session starten
+
+Session:
+GET  /api/session/activities  Aktivitaeten
+POST /api/session/generate-summary  Summary generieren
+POST /api/session/end        Session beenden
+
+Recurring:
+GET  /api/recurring           Wiederkehrende Tasks
+POST /api/recurring/check    Check ausfuehren
+POST /api/recurring/trigger/{id}  Task ausloesen
+
+Use-Cases:
+GET  /api/usecases            Use-Cases
+GET  /api/usecases/{id}       Use-Case-Details
+POST /api/usecases            Use-Case erstellen
+PUT  /api/usecases/{id}       Use-Case aktualisieren
+DELETE /api/usecases/{id}     Use-Case loeschen
+POST /api/usecases/{id}/test  Use-Case testen
+POST /api/usecases/test-all   Alle testen
+POST /api/usecases/{id}/execute  Use-Case ausfuehren
+
+Kontakte:
+GET  /api/contacts            Kontakte
+GET  /api/contacts/{id}       Kontakt-Details
+POST /api/contacts            Kontakt erstellen
+PUT  /api/contacts/{id}       Kontakt aktualisieren
+DELETE /api/contacts/{id}     Kontakt loeschen
+GET  /api/contacts/export     Kontakte exportieren
+
+Routinen:
+GET  /api/routines            Routinen
+GET  /api/routines/{id}       Routinen-Details
+POST /api/routines            Routine erstellen
+PUT  /api/routines/{id}       Routine aktualisieren
+POST /api/routines/{id}/complete  Routine abschliessen
+DELETE /api/routines/{id}     Routine loeschen
+GET  /api/routines/export     Routinen exportieren
+
+WebSockets:
+GET  /api/ws/status           WebSocket-Status
+
+Workflow-TÜV:
+GET  /api/workflow-tuev       Workflows
+POST /api/workflow-tuev/{id}/check  Workflow pruefen
+POST /api/workflow-tuev/check-all  Alle pruefen
+POST /api/workflow-tuev/sync  Workflows synchronisieren
+GET  /api/workflow-tuev/content  Workflow-Content
+
+AI Headless:
+POST /api/ai/headless/run     AI-Task ausfuehren
+
+Bach-Agents:
+GET  /api/bach-agents         Bach-Agents auflisten
+
+
+HEADLESS API (Port 8001) - Programmatischer Zugriff
+-----------------------------------------------------
+Zweck: Pure REST-API ohne HTML, fuer Skripte/Programme
+
+Auth:
+  - Localhost (127.0.0.1, ::1, localhost): Kein Auth noetig (Trust-Modus)
+  - Remote: X-BACH-Key Header ODER ?api_key= Parameter
+  - Key: Auto-generiert beim ersten Start → data/.api_key
+
+Start:
+  python gui/api/headless.py [--port 8001] [--key YOUR_KEY]
+
+Dokumentation:
+  http://localhost:8001/api/docs (Swagger)
+  http://localhost:8001/api/redoc (ReDoc)
+
+Endpoints (Prefix: /api/v1):
+
+Tasks:
+GET  /api/v1/tasks             Tasks auflisten (Filter: status, priority, limit)
+POST /api/v1/tasks             Task erstellen
+GET  /api/v1/tasks/{id}        Task-Details
+PUT  /api/v1/tasks/{id}        Task aktualisieren
+
+Memory:
+GET  /api/v1/memory/facts      Fakten (Filter: category, min_confidence)
+GET  /api/v1/memory/lessons    Lessons (Filter: category, limit)
+GET  /api/v1/memory/search     Memory durchsuchen (Parameter: q)
+POST /api/v1/memory            Memory-Eintrag erstellen
+
+Messages (Queue + Inbox):
+POST /api/v1/messages/send     Nachricht in Queue einreihen (connector_messages)
+GET  /api/v1/messages/queue    Queue-Status (pending/failed/dead pro Connector)
+GET  /api/v1/messages/inbox    Inbox lesen (Filter: status, sender, Paginierung)
+POST /api/v1/messages/route    Routing manuell ausloesen (in → inbox)
+
+System:
+GET  /api/v1/status            System-Status (Tasks, Memory, DB-Size)
+POST /api/v1/backup            Backup erstellen
+GET  /api/v1/skills            Skills auflisten (Filter: type, limit)
+GET  /api/v1/health            Health-Check (oeffentlich, kein Auth)
+
+BEISPIELE
+---------
+GUI Server (Port 8000):
+  # Server im Hintergrund starten
+  bach gui start-bg
+
+  # Oder: Server starten (blockierend)
+  bach gui start
+
+  # Browser oeffnen
+  http://127.0.0.1:8000
+
+  # API-Dokumentation
+  http://127.0.0.1:8000/docs
+
+  # Server auf anderem Port
+  bach gui start --port 9000
+
+  # Status pruefen
+  bach gui status
+
+Headless API (Port 8001):
+  # Server starten
+  python gui/api/headless.py --port 8001
+
+  # Mit Custom API-Key
+  python gui/api/headless.py --key MEIN_KEY
+
+  # API-Docs
+  http://localhost:8001/api/docs
+
+  # Task erstellen (localhost = kein Auth)
+  curl -X POST http://localhost:8001/api/v1/tasks \
+       -H "Content-Type: application/json" \
+       -d '{"title": "Test", "priority": "P2"}'
+
+  # Von Remote mit API-Key
+  curl -X GET http://REMOTE:8001/api/v1/status \
+       -H "X-BACH-Key: YOUR_KEY"
+
+  # Nachricht senden
+  curl -X POST http://localhost:8001/api/v1/messages/send \
+       -H "Content-Type: application/json" \
+       -d '{"connector": "signal", "recipient": "+49...", "content": "Test"}'
+
+  # Queue-Status
+  curl http://localhost:8001/api/v1/messages/queue
+
+  # Inbox lesen
+  curl "http://localhost:8001/api/v1/messages/inbox?status=unread&limit=20"
+
+SIEHE AUCH
+----------
+bach --help wartung         Wartungs-Jobs
+bach --help tasks           Task-Verwaltung
+bach --help messages        Nachrichten-CLI
+bach --help connector       Connector-System
+gui/api/headless.py         Headless API Source
+gui/api/messages_api.py     Messages-API Router

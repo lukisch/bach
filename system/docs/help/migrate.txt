@@ -1,0 +1,100 @@
+# Portabilitaet: UNIVERSAL
+# Version: 1.0.0
+# Zuletzt validiert: 2026-02-08
+# Naechste Pruefung: 2026-08-08
+
+MIGRATE - Evolutionaere Datei-Migration
+=======================================
+
+KONZEPT
+-------
+Bei Datei-Umbenennungen oder Pfadaenderungen:
+Statt alle Verweise auf einmal zu aendern, nutze eine Wrapper-Datei.
+Verweise werden organisch korrigiert durch taegliche Nutzung.
+
+WARUM?
+------
+- Keine harten Brueche
+- Verweise werden schrittweise aktualisiert
+- Jeder Partner korrigiert was ihn herschickte
+- Keine vergessenen Verweise
+
+VORGEHEN
+--------
+1. Datei umbenennen:
+   mv alte_datei.md neue_datei.md
+
+2. Wrapper erstellen (alte_datei.md):
+   - Status-Hinweis "umgeleitet"
+   - Log-Tabelle fuer Besucher
+   - Anleitung: Herkunft pruefen + korrigieren
+   - Link zur neuen Datei
+
+3. Kritische Verweise SOFORT korrigieren:
+   - docs/docs/docs/help/*.txt (primaere Dokumentation)
+   - System-Code der Pfad direkt nutzt
+   - CLI-Handler
+
+4. Uebrige evolutionaer migrieren:
+   - Partner korrigieren bei Nutzung
+   - Path Healer findet automatisch
+   - Manual discovery
+
+WRAPPER-TEMPLATE
+----------------
+# ALTE_DATEI - UMGELEITET
+
+Status: Diese Datei wurde umbenannt zu `neue_datei.md`
+
+## Migration-Log
+
+| Datum | Wer | Herkunft | Verweis korrigiert? |
+|-------|-----|----------|---------------------|
+| | | | |
+
+## Anleitung
+
+1. Log-Eintrag hinterlassen
+2. Herkunft pruefen (was hat dich hergeschickt?)
+3. Verweis dort korrigieren
+4. Zur eigentlichen Datei gehen
+
+**Zieldatei:** [neue_datei.md](neue_datei.md)
+
+WANN WRAPPER?
+-------------
+JA (Wrapper sinnvoll):
+  - Viele potenzielle Verweise
+  - Von verschiedenen Partnern referenziert
+  - Keine kritische System-Datei
+
+NEIN (direkt alle aendern):
+  - Wenige, bekannte Verweise
+  - Kritische System-Dateien
+  - Performance-kritische Pfade
+
+CLEANUP
+-------
+Nach 30 Tagen oder wenn Log leer:
+  bach trash delete <wrapper>
+
+AUTOMATISCHE UNTERSTUETZUNG
+---------------------------
+  bach --maintain heal       Findet veraltete Pfade automatisch
+  bach --maintain docs       Erkennt veraltete Dokumentation
+
+BEISPIEL
+--------
+ROADMAP_ADVANCED.md → ROADMAP.md (2026-01-24):
+
+  1. mv ROADMAP_ADVANCED.md ROADMAP.md
+  2. Wrapper ROADMAP_ADVANCED.md erstellt
+  3. docs/docs/docs/help/formats.txt korrigiert (kritisch)
+  4. 20+ andere Verweise → evolutionaer
+
+SIEHE AUCH
+----------
+  skills/_protocols/migrate-rename.md   Detaillierter Workflow
+  docs/docs/docs/help/practices.txt                    Prinzip #3: Evolutionaere Migration
+  bach --maintain heal                  Automatische Pfadkorrektur
+  bach --maintain docs                  Erkennt veraltete Dokumentation
