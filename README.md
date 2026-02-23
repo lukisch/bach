@@ -1,8 +1,12 @@
 # BACH - Textbasiertes Betriebssystem für LLMs
 
+![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Tools](https://img.shields.io/badge/Tools-262-orange)
+![Skills](https://img.shields.io/badge/Skills-945-purple)
+![Status](https://img.shields.io/badge/Status-Production--Ready-brightgreen)
+
 **Version:** v3.1.6
-**Status:** Production-Ready
-**Lizenz:** MIT
 
 ## Überblick
 
