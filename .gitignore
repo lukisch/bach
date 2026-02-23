@@ -27,6 +27,7 @@
 
 # === SYSTEM LAUFZEIT-DATEN ===
 /system/data/bach.db
+/system/data/bach-*.db
 /system/data/bach.db-journal
 /system/data/bach.db-wal
 /system/data/bach.db-shm
