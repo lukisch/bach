@@ -59,6 +59,13 @@ CONFIG_FILE = BRIDGE_DIR / "config.json"
 STATE_FILE = BRIDGE_DIR / "state.json"
 BACH_DIR = BRIDGE_DIR.parent.parent.parent
 LOG_FILE = BACH_DIR / "data" / "logs" / "claude_bridge.log"
+AGENTS_DIR = BACH_DIR / "agents"
+EXPERTS_DIR = AGENTS_DIR / "_experts"
+
+# Externe Automatisierungspfade (MarbleRun, llmauto)
+KIAI_DIR = BACH_DIR.parent  # KI&AI Verzeichnis
+MARBLE_RUN_DIR = KIAI_DIR / "BACH_Dev" / "marble_run"
+LLMAUTO_DIR = KIAI_DIR / "MODULAR_AGENTS" / "llmauto"
 
 # ============ ICON ERSTELLEN ============
 
@@ -136,6 +143,8 @@ class BridgeTray:
                 self._on_pause,
                 visible=lambda item: self.state == "running",
             ),
+            self._build_agent_menu(),
+            self._build_automation_menu(),
             pystray.Menu.SEPARATOR,
             pystray.MenuItem(
                 lambda text: f"Modus: {self.permission_mode.upper()}",
@@ -255,6 +264,294 @@ class BridgeTray:
                 self._on_quit,
             ),
         )
+
+    # ---------- AGENT LAUNCHER ----------
+
+    def _scan_agents(self) -> dict:
+        """Scannt verfuegbare Agenten und Experten mit SKILL.md."""
+        result = {"agents": [], "experts": []}
+        if AGENTS_DIR.exists():
+            for d in sorted(AGENTS_DIR.iterdir()):
+                if d.is_dir() and not d.name.startswith("_") and (d / "SKILL.md").exists():
+                    result["agents"].append(d.name)
+        if EXPERTS_DIR.exists():
+            for d in sorted(EXPERTS_DIR.iterdir()):
+                if d.is_dir() and (d / "SKILL.md").exists():
+                    result["experts"].append(d.name)
+        return result
+
+    def _build_agent_menu(self) -> pystray.MenuItem:
+        """Baut das Agent-Starter Submenue."""
+        catalog = self._scan_agents()
+        items = []
+
+        # Agenten
+        if catalog["agents"]:
+            items.append(pystray.MenuItem("--- Agenten ---", None, enabled=False))
+            for name in catalog["agents"]:
+                items.append(pystray.MenuItem(
+                    name,
+                    pystray.Menu(
+                        pystray.MenuItem("Interaktiv",
+                                         lambda icon, item, n=name: self._launch_agent(n, "agent", False)),
+                        pystray.MenuItem("Autonom",
+                                         lambda icon, item, n=name: self._launch_agent(n, "agent", True)),
+                    )
+                ))
+
+        # Experten
+        if catalog["experts"]:
+            if items:
+                items.append(pystray.Menu.SEPARATOR)
+            items.append(pystray.MenuItem("--- Experten ---", None, enabled=False))
+            for name in catalog["experts"]:
+                items.append(pystray.MenuItem(
+                    name,
+                    pystray.Menu(
+                        pystray.MenuItem("Interaktiv",
+                                         lambda icon, item, n=name: self._launch_agent(n, "expert", False)),
+                        pystray.MenuItem("Autonom",
+                                         lambda icon, item, n=name: self._launch_agent(n, "expert", True)),
+                    )
+                ))
+
+        if not items:
+            items.append(pystray.MenuItem("Keine Agenten gefunden", None, enabled=False))
+
+        return pystray.MenuItem("Agent starten", pystray.Menu(*items))
+
+    def _launch_agent(self, agent_name: str, agent_type: str, autonomous: bool):
+        """Startet einen BACH Agent in neuem Claude-Konsolenfenster."""
+        if agent_type == "agent":
+            skill_path = AGENTS_DIR / agent_name / "SKILL.md"
+        else:
+            skill_path = EXPERTS_DIR / agent_name / "SKILL.md"
+
+        if not skill_path.exists():
+            self.icon.notify(f"SKILL.md nicht gefunden: {agent_name}", "BACH Bridge Fehler")
+            return
+
+        try:
+            skill_content = skill_path.read_text(encoding="utf-8")
+        except Exception as e:
+            self.icon.notify(f"SKILL.md Lesefehler: {e}", "BACH Bridge Fehler")
+            return
+
+        mode_label = "Autonom" if autonomous else "Interaktiv"
+
+        # Temp-Projektverzeichnis fuer isolierte Claude-Session
+        project_dir = Path(tempfile.gettempdir()) / f"bach_agent_{agent_name}"
+        project_dir.mkdir(exist_ok=True)
+
+        # CLAUDE.md mit Agent-Kontext schreiben
+        claude_md = (
+            f"# BACH Agent: {agent_name}\n\n"
+            f"Du bist der BACH Agent \"{agent_name}\". Befolge die folgende SKILL.md "
+            f"als deine Identitaet und Arbeitsanweisung.\n\n"
+            f"BACH System-Pfad: {BACH_DIR}\n"
+            f"Nutze die Tools und Dateien im BACH-System unter diesem Pfad.\n"
+            f"Antworte auf Deutsch.\n\n"
+            f"---\n\n"
+            f"{skill_content}"
+        )
+        (project_dir / "CLAUDE.md").write_text(claude_md, encoding="utf-8")
+
+        # Claude CLI Konfiguration
+        cli_path = self.config.get("claude_cli", {}).get("path", "claude")
+        model = self.current_model
+
+        cmd_parts = [f'"{cli_path}"', "--model", model]
+        if autonomous:
+            cmd_parts.append("--dangerously-skip-permissions")
+        cmd_str = " ".join(cmd_parts)
+
+        bat_content = (
+            f'@echo off\n'
+            f'title BACH: {agent_name} [{mode_label}]\n'
+            f'cd /d "{project_dir}"\n'
+            f'echo === BACH Agent: {agent_name} ({mode_label}) ===\n'
+            f'echo.\n'
+            f'{cmd_str}\n'
+        )
+        bat_file = project_dir / "start.bat"
+        bat_file.write_text(bat_content, encoding="utf-8")
+
+        try:
+            subprocess.Popen(
+                ["cmd", "/c", str(bat_file)],
+                creationflags=subprocess.CREATE_NEW_CONSOLE,
+            )
+            self.icon.notify(f"{agent_name} gestartet ({mode_label})", "BACH Agent")
+            self.log(f"Agent gestartet: {agent_name} [{mode_label}], Modell: {model}", "INFO")
+        except Exception as e:
+            self.icon.notify(f"Agent-Start fehlgeschlagen: {e}", "BACH Bridge Fehler")
+            self.log(f"Agent-Start fehlgeschlagen: {agent_name}: {e}", "ERROR")
+
+    # ---------- AUTOMATION (MarbleRun / llmauto) ----------
+
+    def _build_automation_menu(self) -> pystray.MenuItem:
+        """Baut das Automatisierungs-Submenue (MarbleRun, llmauto)."""
+        items = []
+
+        # MarbleRun
+        if MARBLE_RUN_DIR.exists() and (MARBLE_RUN_DIR / "marble.py").exists():
+            chains = self._load_marble_chains()
+            marble_items = []
+            for chain_id, chain_info in chains.items():
+                chain_name = chain_info.get("name", chain_id)
+                marble_items.append(pystray.MenuItem(
+                    f"{chain_name}",
+                    lambda icon, item, c=chain_id: self._launch_marble_run(c)
+                ))
+            if marble_items:
+                marble_items.append(pystray.Menu.SEPARATOR)
+            marble_items.append(pystray.MenuItem(
+                "Status",
+                lambda icon, item: self._marble_run_action("status")
+            ))
+            marble_items.append(pystray.MenuItem(
+                "Stop",
+                lambda icon, item: self._marble_run_action("stop")
+            ))
+            items.append(pystray.MenuItem("MarbleRun", pystray.Menu(*marble_items)))
+
+        # llmauto
+        if LLMAUTO_DIR.exists() and (LLMAUTO_DIR / "llmauto.py").exists():
+            llmauto_chains = self._load_llmauto_chains()
+            llm_items = []
+            for chain_name in llmauto_chains:
+                llm_items.append(pystray.MenuItem(
+                    chain_name,
+                    lambda icon, item, c=chain_name: self._launch_llmauto(c)
+                ))
+            if llm_items:
+                llm_items.append(pystray.Menu.SEPARATOR)
+            llm_items.append(pystray.MenuItem(
+                "Status",
+                lambda icon, item: self._llmauto_action("status")
+            ))
+            llm_items.append(pystray.MenuItem(
+                "Stop",
+                lambda icon, item: self._llmauto_action("stop")
+            ))
+            if llm_items:
+                items.append(pystray.MenuItem("llmauto", pystray.Menu(*llm_items)))
+
+        if not items:
+            return pystray.MenuItem("Automatisierung", pystray.Menu(
+                pystray.MenuItem("Nicht verfuegbar", None, enabled=False)
+            ))
+
+        return pystray.MenuItem("Automatisierung", pystray.Menu(*items))
+
+    def _load_marble_chains(self) -> dict:
+        """Laedt MarbleRun Ketten aus chains.json."""
+        chains_file = MARBLE_RUN_DIR / "chains.json"
+        if chains_file.exists():
+            try:
+                data = json.loads(chains_file.read_text(encoding="utf-8"))
+                return data.get("chains", {})
+            except Exception:
+                pass
+        return {}
+
+    def _load_llmauto_chains(self) -> list:
+        """Scannt llmauto chains/ Verzeichnis nach Ketten-Dateien."""
+        chains_dir = LLMAUTO_DIR / "chains"
+        chains = []
+        if chains_dir.exists():
+            for f in sorted(chains_dir.iterdir()):
+                if f.is_file() and f.suffix == ".json" and not f.name.startswith("_"):
+                    chains.append(f.stem)
+        return chains
+
+    def _launch_marble_run(self, chain_id: str):
+        """Startet MarbleRun Kette in neuem Fenster."""
+        try:
+            bat_content = (
+                f'@echo off\n'
+                f'title MarbleRun: {chain_id}\n'
+                f'cd /d "{MARBLE_RUN_DIR}"\n'
+                f'echo === MarbleRun: {chain_id} ===\n'
+                f'echo.\n'
+                f'python marble.py start --chain {chain_id}\n'
+                f'echo.\n'
+                f'echo MarbleRun beendet. Druecke eine Taste...\n'
+                f'pause >nul\n'
+            )
+            bat_file = Path(tempfile.gettempdir()) / f"marble_run_{chain_id}.bat"
+            bat_file.write_text(bat_content, encoding="utf-8")
+            subprocess.Popen(
+                ["cmd", "/c", str(bat_file)],
+                creationflags=subprocess.CREATE_NEW_CONSOLE,
+            )
+            self.icon.notify(f"MarbleRun: {chain_id} gestartet", "BACH Automatisierung")
+            self.log(f"MarbleRun gestartet: {chain_id}", "INFO")
+        except Exception as e:
+            self.icon.notify(f"MarbleRun fehlgeschlagen: {e}", "BACH Bridge Fehler")
+            self.log(f"MarbleRun fehlgeschlagen: {chain_id}: {e}", "ERROR")
+
+    def _marble_run_action(self, action: str):
+        """Fuehrt MarbleRun Aktion aus (status/stop) und zeigt Ergebnis."""
+        def _run():
+            try:
+                env = os.environ.copy()
+                env["PYTHONIOENCODING"] = "utf-8"
+                result = subprocess.run(
+                    [sys.executable, str(MARBLE_RUN_DIR / "marble.py"), action],
+                    capture_output=True, text=True, timeout=10,
+                    cwd=str(MARBLE_RUN_DIR), env=env,
+                    encoding='utf-8', errors='replace'
+                )
+                output = (result.stdout or result.stderr or "Keine Ausgabe").strip()[:200]
+                self.icon.notify(output, f"MarbleRun {action}")
+            except Exception as e:
+                self.icon.notify(f"Fehler: {e}", "MarbleRun")
+        threading.Thread(target=_run, daemon=True).start()
+
+    def _launch_llmauto(self, chain_name: str):
+        """Startet llmauto Kette in neuem Fenster."""
+        try:
+            bat_content = (
+                f'@echo off\n'
+                f'title llmauto: {chain_name}\n'
+                f'cd /d "{LLMAUTO_DIR}"\n'
+                f'echo === llmauto: {chain_name} ===\n'
+                f'echo.\n'
+                f'python llmauto.py chain start {chain_name}\n'
+                f'echo.\n'
+                f'echo llmauto beendet. Druecke eine Taste...\n'
+                f'pause >nul\n'
+            )
+            bat_file = Path(tempfile.gettempdir()) / f"llmauto_{chain_name}.bat"
+            bat_file.write_text(bat_content, encoding="utf-8")
+            subprocess.Popen(
+                ["cmd", "/c", str(bat_file)],
+                creationflags=subprocess.CREATE_NEW_CONSOLE,
+            )
+            self.icon.notify(f"llmauto: {chain_name} gestartet", "BACH Automatisierung")
+            self.log(f"llmauto gestartet: {chain_name}", "INFO")
+        except Exception as e:
+            self.icon.notify(f"llmauto fehlgeschlagen: {e}", "BACH Bridge Fehler")
+            self.log(f"llmauto fehlgeschlagen: {chain_name}: {e}", "ERROR")
+
+    def _llmauto_action(self, action: str):
+        """Fuehrt llmauto Aktion aus (status/stop)."""
+        def _run():
+            try:
+                env = os.environ.copy()
+                env["PYTHONIOENCODING"] = "utf-8"
+                result = subprocess.run(
+                    [sys.executable, str(LLMAUTO_DIR / "llmauto.py"), action],
+                    capture_output=True, text=True, timeout=10,
+                    cwd=str(LLMAUTO_DIR), env=env,
+                    encoding='utf-8', errors='replace'
+                )
+                output = (result.stdout or result.stderr or "Keine Ausgabe").strip()[:200]
+                self.icon.notify(output, f"llmauto {action}")
+            except Exception as e:
+                self.icon.notify(f"Fehler: {e}", "llmauto")
+        threading.Thread(target=_run, daemon=True).start()
 
     # ---------- ACTIONS ----------
 
