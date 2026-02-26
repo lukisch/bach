@@ -131,11 +131,11 @@ Beispiel `mcp_config.json`:
   "mcpServers": {
     "sqlite": {
       "command": "uvx",
-      "args": ["mcp-server-sqlite", "--db-path", "C:/Users/User/.bach/data/bach.db"]
+      "args": ["mcp-server-sqlite", "--db-path", "<HOME>/.bach/data/bach.db"]
     },
     "filesystem": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "C:/Users/User/Work"]
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "<HOME>/Work"]
     }
   }
 }

@@ -248,7 +248,7 @@ def format_search_results(results: List[Dict], query: str) -> str:
         if folder != current_folder:
             current_folder = folder
             # Kurzen Ordnerpfad anzeigen
-            short = folder.replace("C:/Users/User/OneDrive/", "~/")
+            short = folder.replace(str(Path.home() / "OneDrive") + "/", "~/")
             lines.append(f"  [{short}]")
 
         size_kb = (r.get("file_size", 0) or 0) / 1024

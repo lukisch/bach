@@ -61,7 +61,7 @@ from datetime import datetime
 from pathlib import Path
 
 # === Pfade ===
-BASE = Path(r"C:\Users\User\OneDrive\KI&AI\BACH_v2_vanilla")
+BASE = Path(__file__).resolve().parent.parent.parent.parent  # converters/ -> tools/ -> system/ -> BACH_ROOT
 WORKSPACE = BASE / "workspace"
 MESSAGEBOX_INBOX = BASE / "user" / "MessageBox" / "inbox"
 STORAGE_REPORTS = BASE / "system" / "storage" / "reports"

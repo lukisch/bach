@@ -148,7 +148,7 @@ else:
     BACH_BASE = _SERVICE_DIR.parent.parent.parent.parent
     BERICHTE_BASE = BACH_BASE / "user" / "documents" / "foerderplaner" / "Berichte"
     TEMPLATE_PATH = BACH_BASE / "system" / "skills" / "_templates" / "bericht_template_geiger_universal.docx"
-    WISSENSDATENBANK = Path("C:/Users/User/OneDrive/Dokumente/_Wissensdatenbank")
+    WISSENSDATENBANK = Path.home() / "OneDrive" / "Dokumente" / "_Wissensdatenbank"
 
 ICF_REF_PATH = BACH_BASE / "system" / "skills" / "_experts" / "foerderplaner" / "Kontext" / "ICF-Checker Tabelle_Geiger.docx"
 

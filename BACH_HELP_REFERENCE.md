@@ -4909,7 +4909,7 @@ QUELLEN REGISTRIEREN (sources.json):
   {
     "sources": [
       {"path": "user/persoenlicher_assistent/", "patterns": ["*.md","*.txt"], "recursive": true},
-      {"path": "C:/Users/User/OneDrive/Forschung/", "patterns": ["Plan.txt","*.md"], "recursive": true}
+      {"path": "<HOME>/OneDrive/Forschung/", "patterns": ["Plan.txt","*.md"], "recursive": true}
     ]
   }
 

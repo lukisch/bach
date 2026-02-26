@@ -197,7 +197,7 @@ BERICHT_TEMPLATE = SKILL_TEMPLATES_DIR / "bericht_template_geiger_universal.docx
 # ============================================================================
 
 # Wissensdatenbank - externer Pfad außerhalb von BACH
-WISSENSDATENBANK_DIR = Path("C:/Users/User/OneDrive/Dokumente/_Wissensdatenbank")
+WISSENSDATENBANK_DIR = Path.home() / "OneDrive" / "Dokumente" / "_Wissensdatenbank"
 
 # ============================================================================
 # PFAD-REGISTRY (Single Source of Truth)

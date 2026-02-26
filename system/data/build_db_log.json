@@ -1,7 +1,7 @@
 {
   "build_time": "2026-02-18 12:16:12",
-  "source": "C:\\Users\\User\\OneDrive\\KI&AI\\BACH_v2_vanilla\\system\\data\\bach.db",
-  "target": "C:\\Users\\User\\OneDrive\\KI&AI\\BACH_v3_strawberry\\system\\data\\bach.db",
+  "source": "{BACH_VANILLA_PATH}/system/data/bach.db",
+  "target": "{BACH_STRAWBERRY_PATH}/system/data/bach.db",
   "stats": {
     "total": 142,
     "core": 22,

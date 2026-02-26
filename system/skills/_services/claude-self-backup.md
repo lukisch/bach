@@ -114,10 +114,10 @@ Lösung: Während Backup wird das Original-WLAN auf "manual" gesetzt:
 
 ```powershell
 # Vor WLAN-Wechsel: Sperre Auto-Connect zum Original-WLAN
-netsh wlan set profileparameter name="HUAWEI_B535_1D13_5G" connectionmode=manual
+netsh wlan set profileparameter name="YOUR_DEFAULT_WLAN_SSID" connectionmode=manual
 
 # Nach Backup: Entsperre wieder
-netsh wlan set profileparameter name="HUAWEI_B535_1D13_5G" connectionmode=auto
+netsh wlan set profileparameter name="YOUR_DEFAULT_WLAN_SSID" connectionmode=auto
 ```
 
 Dies verhindert dass Windows während des Backups zurück zum
@@ -275,8 +275,8 @@ python scripts/backup_watchdog.py --cleanup-now
 | Parameter | Wert |
 |-----------|------|
 | IP | NAS-HOST |
-| Benutzer | lukisch |
-| WLAN-SSID | FRITZ!Box 7490 |
+| Benutzer | YOUR_NAS_USER |
+| WLAN-SSID | YOUR_NAS_WLAN_SSID |
 | FTP-Port | 21 |
 | TR-064-Port | 49000 |
 
@@ -307,7 +307,7 @@ Claude kann nach Reconnect automatisch prüfen:
 import json
 from pathlib import Path
 
-scripts_dir = Path("C:/Users/User/OneDrive/KI&AI/BACH_v2_vanilla/Skills/Subroutinen/claude_self_backup/scripts")
+scripts_dir = Path("{BACH_INSTALL_PATH}/skills/_services/claude_self_backup/scripts")
 
 # 1. Session-Snapshot prüfen (existiert = unterbrochen)
 snapshot = scripts_dir / "claude_session_snapshot.md"
