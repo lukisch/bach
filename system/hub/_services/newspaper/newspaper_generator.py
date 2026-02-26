@@ -65,7 +65,7 @@ def load_config() -> dict:
         "max_items_per_category": 10,
         "delivery": {
             "desktop_copy": True,
-            "desktop_path": "C:/Users/User/Desktop/",
+            "desktop_path": str(Path.home() / "Desktop"),
             "email": False,
             "telegram": True,
         }
@@ -161,7 +161,7 @@ def deliver_newspaper(result: dict, config: dict = None) -> list:
 
     # Desktop-Kopie
     if delivery_config.get("desktop_copy", True):
-        desktop_path = delivery_config.get("desktop_path", "C:/Users/User/Desktop/")
+        desktop_path = delivery_config.get("desktop_path", str(Path.home() / "Desktop"))
         pdf_path = result.get("pdf_path") or result.get("html_path")
         if pdf_path and Path(pdf_path).exists():
             try:

@@ -1724,7 +1724,7 @@ CREATE TABLE IF NOT EXISTS ati_scan_runs (
 
 -- Default Scan-Konfiguration
 INSERT OR IGNORE INTO ati_scan_config (key, value, category, description) VALUES
-    ('base_path', '"C:\\Users\\User\\OneDrive\\Software Entwicklung"', 'scan', 'Basis-Pfad fuer Tool-Scans'),
+    ('base_path', '"{USER_DEV_PATH}"', 'scan', 'Basis-Pfad fuer Tool-Scans'),
     ('scan_folders', '["SINGLE", "SUITEN", "TOOLS"]', 'scan', 'Zu scannende Unterordner'),
     ('task_files', '["AUFGABEN.txt", "Aufgaben.txt", "AUFGABEN.TXT"]', 'scan', 'Task-Dateinamen'),
     ('test_files', '["TEST.txt", "Test.txt"]', 'scan', 'Test-Dateinamen'),

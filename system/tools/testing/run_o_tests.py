@@ -51,8 +51,8 @@ def run_o_tests(system_path: str, output_dir: str = None) -> dict:
     
     scores = []
     
-    # PATH FIX: Hardcoded absolute path
-    o_tests_subdir = Path(r"C:\Users\User\OneDrive\KI&AI\BACH_v2_vanilla\system\skills\tools\testing\o_tests")
+    # PATH: Relativ zu diesem Skript
+    o_tests_subdir = Path(__file__).resolve().parent.parent.parent / "skills" / "tools" / "testing" / "o_tests"
 
     for test_id, test_name, description in O_TESTS:
         script_name = f"{test_id}_{test_name}.py"

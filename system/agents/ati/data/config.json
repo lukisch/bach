@@ -12,7 +12,7 @@
   },
   "scan": {
     "folders": [
-      "C:\\Users\\User\\OneDrive\\Software Entwicklung"
+      "{USER_DEV_PATH}"
     ],
     "note": "Flat-Struktur seit 2026-02-13: Alle 67 Projekte direkt im Root",
     "patterns": [

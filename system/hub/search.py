@@ -366,6 +366,6 @@ Beispiele:
   bach search "bridge connector"
   bach search "encoding" --source memory_lesson
   bach search "entwickler" --source knowledgedigest_skill
-  bach search index C:\\Users\\User\\OneDrive\\Dokumente
+  bach search index C:\\Users\\YOUR_USERNAME\\Documents
   bach search tags health
 """

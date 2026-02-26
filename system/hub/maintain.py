@@ -713,7 +713,7 @@ Optionen:
 Beispiele:
   bach --maintain nul scan
   bach --maintain nul delete
-  bach --maintain nul delete C:\\Users\\User\\Projekt
+  bach --maintain nul delete C:\\Users\\YOUR_USERNAME\\Projekt
 
 NUL-Dateien entstehen auf Windows wenn versehentlich
 nach 'NUL' geschrieben wird (Windows Device-Name)."""

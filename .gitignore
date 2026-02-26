@@ -77,6 +77,10 @@ Thumbs.db
 **/dist/
 **/build/
 
+# === PLAN-DATEIEN (Interne Planung, nicht veröffentlichen) ===
+PLAN.txt
+**/PLAN.txt
+
 # === AGENT WORKFLOWS (Lokal) ===
 .agent/
 .claude/
