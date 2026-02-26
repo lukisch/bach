@@ -97,6 +97,7 @@ class BridgeTray:
         self.budget_limit = 5.0
         self.voice_mode = False
         self.max_turns = 0  # 0 = kein Limit
+        self.chat_timeout = 0  # 0 = kein Timeout
         self.current_model = "sonnet"
         self.watchdog_active = True
         self.lock = threading.Lock()
@@ -196,6 +197,29 @@ class BridgeTray:
                         lambda icon, item: self._on_set_max_turns(50)
                     ),
                     pystray.MenuItem("Eigener Wert...", self._on_set_max_turns_custom),
+                ),
+                visible=lambda item: self.state == "running",
+            ),
+            pystray.MenuItem(
+                lambda text: f"Timeout: {'AUS' if self.chat_timeout == 0 else str(self.chat_timeout) + 's'}",
+                pystray.Menu(
+                    pystray.MenuItem(
+                        lambda text: "AUS (aktuell)" if self.chat_timeout == 0 else "AUS",
+                        lambda icon, item: self._on_set_timeout(0)
+                    ),
+                    pystray.MenuItem(
+                        lambda text: "120s (aktuell)" if self.chat_timeout == 120 else "120s",
+                        lambda icon, item: self._on_set_timeout(120)
+                    ),
+                    pystray.MenuItem(
+                        lambda text: "300s (aktuell)" if self.chat_timeout == 300 else "300s",
+                        lambda icon, item: self._on_set_timeout(300)
+                    ),
+                    pystray.MenuItem(
+                        lambda text: "600s (aktuell)" if self.chat_timeout == 600 else "600s",
+                        lambda icon, item: self._on_set_timeout(600)
+                    ),
+                    pystray.MenuItem("Eigener Wert...", self._on_set_timeout_custom),
                 ),
                 visible=lambda item: self.state == "running",
             ),
@@ -401,7 +425,41 @@ class BridgeTray:
                 icon.notify(f"Eingabe fehlgeschlagen: {e}", "BACH Bridge Fehler")
         threading.Thread(target=_ask, daemon=True).start()
 
-    def _update_state_file(self, enabled=None, spent=None, voice_mode=None, max_turns=None, current_model=None):
+    def _on_set_timeout(self, seconds: int):
+        """Setzt Chat-Timeout in state.json."""
+        try:
+            self.chat_timeout = seconds
+            self._update_state_file(chat_timeout=seconds)
+            label = "AUS" if seconds == 0 else f"{seconds}s"
+            self.icon.notify(f"Chat-Timeout: {label}", "BACH Bridge")
+        except Exception as e:
+            self.icon.notify(f"Timeout setzen fehlgeschlagen: {e}", "BACH Bridge Fehler")
+
+    def _on_set_timeout_custom(self, icon, item):
+        """Oeffnet Eingabedialog fuer eigenen Timeout-Wert."""
+        def _ask():
+            try:
+                import tkinter as tk
+                from tkinter import simpledialog
+                root = tk.Tk()
+                root.withdraw()
+                root.attributes("-topmost", True)
+                result = simpledialog.askinteger(
+                    "BACH Chat-Timeout",
+                    "Inaktivitaets-Timeout in Sekunden (0 = kein Timeout):",
+                    initialvalue=self.chat_timeout,
+                    minvalue=0,
+                    maxvalue=3600,
+                    parent=root
+                )
+                root.destroy()
+                if result is not None:
+                    self._on_set_timeout(result)
+            except Exception as e:
+                icon.notify(f"Eingabe fehlgeschlagen: {e}", "BACH Bridge Fehler")
+        threading.Thread(target=_ask, daemon=True).start()
+
+    def _update_state_file(self, enabled=None, spent=None, voice_mode=None, max_turns=None, current_model=None, chat_timeout=None):
         """Aktualisiert Felder direkt in state.json."""
         try:
             state = {}
@@ -417,6 +475,8 @@ class BridgeTray:
                 state["max_turns"] = max_turns
             if current_model is not None:
                 state["current_model"] = current_model
+            if chat_timeout is not None:
+                state["chat_timeout"] = chat_timeout
             STATE_FILE.write_text(
                 json.dumps(state, indent=2, ensure_ascii=False),
                 encoding="utf-8"
@@ -492,6 +552,7 @@ class BridgeTray:
                 self.budget_spent = state.get("daily_spent", 0.0)
                 self.voice_mode = state.get("voice_mode", False)
                 self.max_turns = state.get("max_turns", 0)
+                self.chat_timeout = state.get("chat_timeout", 0)
                 self.current_model = state.get("current_model", "sonnet")
         except Exception:
             pass
@@ -508,12 +569,14 @@ class BridgeTray:
             budget_status = f"{'AN' if self.budget_enabled else 'AUS'}"
             pid_str = f"PID {self.daemon_proc.pid}" if self.daemon_proc else "extern"
             turns_str = "kein Limit" if self.max_turns == 0 else str(self.max_turns)
+            timeout_str = "AUS" if self.chat_timeout == 0 else f"{self.chat_timeout}s"
             msg = (f"Bridge laeuft ({pid_str})\n"
                    f"Modell: {self.current_model.upper()}\n"
                    f"Modus: {self.permission_mode}\n"
                    f"Budget: ${self.budget_spent:.2f}/${self.budget_limit:.2f} [{budget_status}]\n"
                    f"Voice: {'AN' if self.voice_mode else 'AUS'}\n"
-                   f"Max-Turns: {turns_str}")
+                   f"Max-Turns: {turns_str}\n"
+                   f"Timeout: {timeout_str}")
         elif self.state == "paused":
             msg = "Bridge pausiert"
         else:
