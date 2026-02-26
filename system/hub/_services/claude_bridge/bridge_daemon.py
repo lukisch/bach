@@ -1319,6 +1319,10 @@ class BridgeDaemon:
         self.max_turns = state.get("max_turns",
                                    self.config.get("chat", {}).get("max_turns", 0))
 
+        # Chat-Timeout: 0 = kein Timeout (Default), >0 = Inaktivitaets-Timeout in Sekunden
+        self.chat_timeout = state.get("chat_timeout",
+                                      self.config.get("chat", {}).get("timeout_seconds", 0))
+
         # Aktuelles Claude-Modell (persistent, via Telegram/Tray aenderbar)
         self.current_model = state.get("current_model",
                                        self.config.get("claude_cli", {}).get("model", "sonnet"))
@@ -1335,6 +1339,7 @@ class BridgeDaemon:
             "session_start_time": self.session_start_time,
             "voice_mode": self.voice_mode,
             "max_turns": self.max_turns,
+            "chat_timeout": self.chat_timeout,
             "current_model": self.current_model,
         })
 
@@ -1629,6 +1634,34 @@ class BridgeDaemon:
                 )
             return True
 
+        if first_word == "timeout":
+            parts = content_lower.split()
+            sub = parts[1] if len(parts) > 1 else ""
+            if sub == "off" or sub == "unlimited" or sub == "0":
+                self.chat_timeout = 0
+                self._save_state()
+                send_telegram("Chat-Timeout: AUS (kein Inaktivitaets-Limit).", self.config)
+                log("CHAT_TIMEOUT: 0 (deaktiviert)")
+            elif sub.isdigit():
+                n = int(sub)
+                if n >= 10:
+                    self.chat_timeout = n
+                    self._save_state()
+                    send_telegram(f"Chat-Timeout: {n} Sekunden Inaktivitaet.", self.config)
+                    log(f"CHAT_TIMEOUT: {n}s")
+                else:
+                    send_telegram("Timeout muss mindestens 10 Sekunden sein oder 0/off.", self.config)
+            else:
+                cur_str = "AUS (kein Limit)" if self.chat_timeout == 0 else f"{self.chat_timeout}s"
+                cfg_default = self.config.get("chat", {}).get("timeout_seconds", 0)
+                def_str = "AUS" if cfg_default == 0 else f"{cfg_default}s"
+                send_telegram(
+                    f"Chat-Timeout aktuell: {cur_str} (Config-Default: {def_str})\n"
+                    f"Aendern: timeout <sekunden> oder timeout off",
+                    self.config
+                )
+            return True
+
         if first_word == "queue":
             with self._chat_lock:
                 busy = self._chat_busy
@@ -1649,6 +1682,8 @@ class BridgeDaemon:
                 "  turns <n> - Max-Turns setzen (z.B. turns 50)\n"
                 "  turns unlimited - Kein Turn-Limit (Default)\n"
                 "  turns - Aktuellen Wert anzeigen\n"
+                "  timeout <sek> - Inaktivitaets-Timeout setzen\n"
+                "  timeout off - Kein Timeout (Default)\n"
                 "  budget - Budget-Status anzeigen\n"
                 "  budget set <$> - Limit setzen\n"
                 "  budget on/off - Limit ein/ausschalten\n"
@@ -1860,7 +1895,7 @@ class BridgeDaemon:
         cli_path = cli_config.get("path", "claude")
         cwd = cli_config.get("cwd", str(BACH_DIR))
         model = self.current_model
-        timeout = self.config.get("chat", {}).get("timeout_seconds", 120)
+        timeout = self.chat_timeout  # 0 = kein Timeout
 
         # Prompt via stdin statt CLI-Argument (Windows 32K Commandline-Limit)
         # max_turns aus State (via "turns" Codeword aenderbar), Fallback auf Config
@@ -1928,11 +1963,11 @@ class BridgeDaemon:
             t_out.start()
             t_err.start()
 
-            # Warte auf Prozessende - Timeout nur bei Inaktivitaet
+            # Warte auf Prozessende - Timeout nur bei Inaktivitaet (0 = kein Timeout)
             timed_out = False
             while proc.poll() is None:
                 time.sleep(1)
-                if time.time() - last_activity[0] > timeout:
+                if timeout > 0 and time.time() - last_activity[0] > timeout:
                     proc.terminate()
                     timed_out = True
                     break
@@ -2582,6 +2617,8 @@ def show_status():
     print(f"  Budget:     ${state.get('daily_spent', 0):.2f} ({state.get('budget_date', '?')})")
     mt = state.get('max_turns', config.get('chat', {}).get('max_turns', 0))
     print(f"  Max-Turns:  {mt if mt > 0 else 'kein Limit'}")
+    ct = state.get('chat_timeout', config.get('chat', {}).get('timeout_seconds', 0))
+    print(f"  Timeout:    {str(ct) + 's' if ct > 0 else 'AUS'}")
     session_active = state.get("has_active_session", False)
     print(f"  Session:    {'aktiv' if session_active else 'keine'}")
     if state.get("session_start_time"):
