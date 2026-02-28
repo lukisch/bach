@@ -480,7 +480,7 @@ SAFE_TABLES = {
     "folder_scans", "folder_scan_files", "scan_config", "scan_runs",
     "session_snapshots", "backup_snapshots", "import_runs",
     # Automation / Daemon
-    "daemon_jobs", "daemon_runs", "routines", "automation_routines",
+    "scheduler_jobs", "scheduler_runs", "routines", "automation_routines",
     "automation_triggers", "automation_injectors",
     "delegation_rules", "context_triggers", "hierarchy_types",
     "hierarchy_items", "hierarchy_assignments",

@@ -41,13 +41,13 @@ from .base import BaseHandler
 class SteuerHandler(BaseHandler):
     """Handler fuer Steuer-Operationen"""
     
-    def __init__(self, base_path: Path):
-        super().__init__(base_path)
-        self.steuer_dir = base_path.parent / "user" / "steuer"  # FIX: base_path=system/, user/ ist eine Ebene höher (BACH_ROOT/user/)
+    def __init__(self, base_path_or_app):
+        super().__init__(base_path_or_app)
+        self.steuer_dir = self.base_path.parent / "user" / "steuer"  # FIX: base_path=system/, user/ ist eine Ebene höher (BACH_ROOT/user/)
         self.profile_dir = self.steuer_dir / "profile"
         self.watch_dir = self.steuer_dir / "watch"
         self.templates_dir = self.steuer_dir / "templates"
-        self.db_path = base_path / "data" / "bach.db"  # Unified DB seit v1.1.84
+        self.db_path = self.base_path / "data" / "bach.db"  # Unified DB seit v1.1.84
         self.username = "user"  # Default, spaeter aus Config
 
     @staticmethod

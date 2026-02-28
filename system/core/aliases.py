@@ -40,6 +40,7 @@ COMMAND_ALIASES = {
     "mail": "email",
     "hook": "hooks",
     "plugin": "plugins",
+    "daemon": "scheduler",
 
     # Multi-Handler-Dateien: time.py hat 5 Handler
     # (werden automatisch erkannt wenn profile_name != dateiname)
@@ -63,6 +64,8 @@ DEFAULT_OPERATIONS = {
     "ati": "status",
     "gui": "info",
     "daemon": "status",
+    "scheduler": "status",
+    "prompt": "list",
     "inbox": "status",
     "scan": "status",
     "calendar": "week",
@@ -83,6 +86,7 @@ DEFAULT_OPERATIONS = {
     "beat": "",
     "tuev": "status",
     "usecase": "list",
+    "agent": "list",
     "chain": "list",
     "routine": "list",
     "gesundheit": "status",

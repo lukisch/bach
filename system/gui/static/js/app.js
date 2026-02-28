@@ -41,7 +41,7 @@ async function loadStatus() {
         document.getElementById('stat-tasks').textContent = data.stats.tasks_open || 0;
         document.getElementById('stat-scanned').textContent = data.stats.scanned_tasks || 0;
         document.getElementById('stat-messages').textContent = data.stats.messages_unread || 0;
-        document.getElementById('stat-daemon').textContent = data.stats.daemon_jobs_active || 0;
+        document.getElementById('stat-daemon').textContent = data.stats.scheduler_jobs_active || 0;
 
         // Status-Indikator
         const statusDot = document.getElementById('status-dot');

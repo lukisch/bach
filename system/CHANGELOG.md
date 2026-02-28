@@ -2,6 +2,110 @@
 
 Alle wichtigen Aenderungen an BACH werden hier dokumentiert.
 
+Copyright (c) 2026 Lukas Geiger. Alle Rechte vorbehalten.
+
+---
+
+## [3.2.0-butternut] - 2026-02-28
+
+### Datenbankschema
+
+- **UMBENENNUNG:** `daemon_jobs` → `scheduler_jobs` (klarere Bezeichnung)
+- **UMBENENNUNG:** `daemon_runs` → `scheduler_runs` (konsistent mit scheduler_jobs)
+- **NEU:** Tabelle `prompt_templates` - Zentrale Prompt-Verwaltung
+  - Felder: id, name, content, version, tags, created_at, updated_at
+- **NEU:** Tabelle `prompt_versions` - Versionsverlauf fuer Prompts
+  - Felder: id, template_id (FK), content, version_note, created_at
+- **NEU:** Tabelle `prompt_boards` - Sammlungen von Prompts (Boards)
+  - Felder: id, name, description, created_at
+- **NEU:** Tabelle `prompt_board_items` - Zuordnung Prompt → Board
+  - Felder: id, board_id (FK), template_id (FK), position, added_at
+- **NEU:** 8 Schema-Migrationen nachgezogen (Migrationen 012 bis 020)
+
+### Neue Handler
+
+- **NEU:** `AgentLauncherHandler` (`hub/handlers/agent_launcher.py`)
+  - Befehl: `bach agent`
+  - Startet, stoppt und verwaltet Agent-Ausfuehrungen
+  - Unterstuetzt llmauto-Ketten und direkte Agent-Runs
+- **NEU:** `PromptHandler` (`hub/handlers/prompt.py`)
+  - Befehl: `bach prompt`
+  - CRUD fuer prompt_templates und prompt_boards
+  - Operationen: list, add, edit, delete, show, board-create, board-add, board-list
+
+### SharedMemory-Erweiterungen
+
+- **NEU:** Operation `current-task` - Aktuellen Task im Shared Memory speichern/abfragen
+- **NEU:** Operation `generate-context` - Automatische Kontext-Generierung aus Working Memory + Facts
+- **NEU:** Operation `conflict-resolution` - Konflikterkennung bei gleichzeitigem Multi-Agent-Zugriff
+- **NEU:** Operation `decay` - Zeitbasierter Relevanz-Abbau fuer Working-Memory-Eintraege
+- **NEU:** Operation `changes-since` - Delta-Abfrage: Alle Aenderungen seit Zeitstempel T
+
+### ChainHandler
+
+- **NEU:** Operation `create` fuer ChainHandler - Neue Chain aus YAML/JSON-Definition anlegen
+- **ERWEITERUNG:** llmauto-Ketten neben klassischen Toolchains unterstuetzt
+  - llmauto-Ketten koennen Claude-Prompts als Chain-Steps definieren
+  - Konfiguration via `chain_type: llmauto` in Chain-Definition
+
+### SchedulerService
+
+- **NEU:** `job_type='chain'` im SchedulerService
+  - Ketten koennen als zeitgesteuerte Jobs registriert werden
+  - `bach scheduler add --type chain --chain-id <id> --cron "0 8 * * *"`
+
+### USMC Bridge
+
+- **NEU:** `hub/_services/usmc_bridge.py` - Unified Shared Memory Communication Bridge
+  - Verbindet SharedMemory-Handler mit externen Agenten und Services
+  - Protokoll: JSON-basiert, unidirektional oder bidirektional
+  - Unterstuetzt: local, tcp, file-based Transport
+
+### bach:// URL-Resolution
+
+- **NEU:** bach:// URL-Schema in llmauto-Prompts
+  - `bach://memory/facts/key` → laedt Fact direkt in Prompt
+  - `bach://task/current` → injiziert aktuellen Task
+  - `bach://skill/help/topic` → laedt Help-Text fuer Thema
+  - Resolution via `hub/url_resolver.py`
+
+### Prompt-Migration
+
+- **NEU:** `tools/migrate_prompts.py` - Einmalige Migration aller Prompt-Quellen in DB
+  - Quelle 1: `partners/claude/prompts/` (Partner-spezifische Prompts)
+  - Quelle 2: `skills/_services/*/prompts/` (Service-Prompts)
+  - Quelle 3: `data/prompt_templates/` (Legacy Dateisystem-Prompts)
+  - Ergebnis: Alle Prompts in `prompt_templates` DB-Tabelle, Versionierung erhalten
+
+### Portierungen von Vanilla
+
+- **PORT:** `SharedMemoryHandler` aus vanilla portiert
+  - Vollstaendige Implementierung mit allen 5 neuen Operationen (s.o.)
+- **PORT:** `ApiProberHandler` aus vanilla portiert
+  - Befehl: `bach api-probe` - Testet HTTP-Endpoints
+- **PORT:** `N8nManagerHandler` aus vanilla portiert
+  - Befehl: `bach n8n` - Verwaltet n8n-Workflows via REST-API
+- **PORT:** `UserSyncHandler` aus vanilla portiert
+  - Befehl: `bach user-sync` - Synchronisiert User-Profile zwischen Instanzen
+- **PORT:** Stigmergy-Service aus vanilla portiert
+  - `hub/_services/stigmergy/` - Indirektes Koordinationssystem fuer Agenten
+  - Pheromon-basiertes Signal-Routing
+
+### Archivierungen
+
+- **ARCHIV:** `marble_run` in `_archive/marble_run/` verschoben
+  - Ersetzt durch llmauto-Integration im ChainHandler
+- **ARCHIV:** ATI SessionDaemon (`agents/ati/session_daemon.py`) archiviert
+  - Ersetzt durch SchedulerService mit job_type='chain'
+
+### Geaendert
+
+- **UPDATE:** `core/registry.py` - AgentLauncherHandler und PromptHandler registriert
+- **UPDATE:** `hub/shared_memory.py` - 5 neue Operationen implementiert
+- **UPDATE:** `hub/chain.py` - create-Operation + llmauto-Support
+- **UPDATE:** `hub/daemon.py` (→ Scheduler) - job_type='chain' + Umbenennung DB-Tabellen
+- **UPDATE:** `db/schema.sql` - 4 neue Tabellen, Umbenennung daemon_* → scheduler_*
+
 ---
 
 ## [2.2.0] - 2026-02-08

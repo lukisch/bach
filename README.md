@@ -2,11 +2,10 @@
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python)
 ![License](https://img.shields.io/badge/License-MIT-green)
-![Tools](https://img.shields.io/badge/Tools-262-orange)
-![Skills](https://img.shields.io/badge/Skills-945-purple)
+![Version](https://img.shields.io/badge/Version-v3.2.0--butternut-orange)
 ![Status](https://img.shields.io/badge/Status-Production--Ready-brightgreen)
 
-**Version:** v3.1.6
+**Version:** v3.2.0-butternut
 
 ## Überblick
 
@@ -14,11 +13,16 @@ BACH ist ein textbasiertes Betriebssystem, das Large Language Models (LLMs) bef�
 
 ### Kernfunktionen
 
-- **🤖 5 KI-Agenten** - Spezialisierte Agenten für verschiedene Aufgabenbereiche
-- **🛠️ 262 Tools** - Umfangreiche Tool-Bibliothek für Dateiverarbeitung, Analyse, Automation
-- **📚 945 Skills** - Wiederverwendbare Workflows und Templates
-- **🔄 10 Workflows** - Vorgefertigte Prozess-Workflows
-- **💾 Wissensspeicher** - 147 Lessons + 249 Facts
+- **98+ Handler** - Vollständige CLI- und API-Abdeckung aller Systemfunktionen
+- **373+ Tools** - Umfangreiche Tool-Bibliothek für Dateiverarbeitung, Analyse, Automation
+- **932+ Skills** - Wiederverwendbare Workflows und Templates
+- **26 Protokoll-Workflows** - Vorgefertigte Prozess-Workflows
+- **Wissensspeicher** - Lessons, Facts und Multi-Level-Memory-System
+- **Agent-CLI** - `bach agent start/stop/list` für direkte Agent-Steuerung
+- **Prompt-System** - Zentrale Prompt-Verwaltung mit Board-System und Versionierung
+- **SharedMemory-Bus** - Multi-Agent-Koordination mit Konflikt-Erkennung und Decay
+- **USMC Bridge** - Unified Shared Memory Communication für Cross-Agent-Kommunikation
+- **llmauto-Ketten** - Claude-Prompts als Chain-Steps mit `bach://` URL-Resolution
 
 ## Installation
 
@@ -43,8 +47,16 @@ python bach.py --startup
 # Task erstellen
 python bach.py task add "Analysiere Projektstruktur"
 
-# Wissen abrufen
-python bach.py wiki search "Task Management"
+# Agenten verwalten
+python bach.py agent list
+python bach.py agent start bueroassistent
+
+# Prompts verwalten
+python bach.py prompt list
+python bach.py prompt add "Mein Prompt" --content "..."
+
+# Scheduler-Status prüfen
+python bach.py scheduler status
 
 # BACH beenden
 python bach.py --shutdown
@@ -56,23 +68,34 @@ python bach.py --shutdown
 Vollständiges GTD-System mit Priorisierung, Deadlines, Tags und Context-Tracking.
 
 ### 2. Wissenssystem
-Strukturiertes Memory-System mit Facts, Lessons und automatischer Konsolidierung.
+Strukturiertes Memory-System mit Facts, Lessons und automatischer Konsolidierung (5 Memory-Typen).
 
 ### 3. Agenten-Framework
-Boss-Agenten orchestrieren Experten für komplexe Aufgaben (Büro, Gesundheit, Produktion, etc.).
+Boss-Agenten orchestrieren Experten für komplexe Aufgaben. Agent-CLI ermöglicht direktes Starten, Stoppen und Auflisten von Agenten über `bach agent`.
 
-### 4. Bridge-System
-Connector-Framework für externe Services (Telegram, Email, WhatsApp, etc.).
+### 4. Prompt-System
+Zentrale Verwaltung von Prompt-Templates mit Board-Sammlungen und vollständiger Versionierung (`bach prompt`).
 
-### 5. Automatisierung
-Scheduler für wiederkehrende Tasks und Event-basierte Workflows.
+### 5. Bridge-System
+Connector-Framework für externe Services (Telegram, Email, WhatsApp, etc.) sowie USMC Bridge für Cross-Agent-Kommunikation.
+
+### 6. Automatisierung
+SchedulerService für zeitgesteuerte Jobs (Chains, Tasks, Scripts) und Event-basierte Workflows via Hook-Framework.
+
+### 7. SharedMemory
+Multi-Agent-Koordination mit Kontext-Generierung, Konflikt-Erkennung, Decay und Delta-Abfragen.
+
+### 8. llmauto-Integration
+Chain-Steps als LLM-Prompts mit `bach://`-URL-Resolution für dynamische Kontext-Einbindung.
 
 ## Dokumentation
 
-- **[Getting Started](docs/getting-started.md)** - Erste Schritte mit BACH
-- **[API Reference](docs/reference/)** - Vollständige API-Dokumentation
+- **[Quickstart Guide](QUICKSTART.md)** - In 5 Minuten zum ersten Workflow
+- **[User Manual](BACH_USER_MANUAL.md)** - Vollständiges Handbuch
 - **[Skills Katalog](SKILLS.md)** - Alle verfügbaren Skills
-- **[Agents Katalog](AGENTS.md)** - Alle verfügbaren Agenten
+- **[Agents Katalog](AGENTS.md)** - Alle verfügbaren Agenten und Experten
+- **[Workflows](WORKFLOWS.md)** - 26 Protokoll-Workflows
+- **[SKILL.md](SKILL.md)** - LLM-Betriebsanleitung (für Claude, Gemini, Ollama)
 
 ## Lizenz
 
@@ -85,4 +108,4 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 
 ---
 
-*Generiert mit `bach docs generate readme`*
+*BACH v3.2.0-butternut - Best of Agentic Cognitive Helpers*

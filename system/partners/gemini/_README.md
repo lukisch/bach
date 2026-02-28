@@ -123,7 +123,7 @@ from bach_paths import BACH_ROOT, DATA_DIR, get_db
 ```
 
 ## Metaprompt
-Gemini liest: `C:\Users\User\.gemini\GEMINI.md`
+Gemini liest: `~/.gemini/GEMINI.md`
 
 ## Antigravity Workflow (optional)
 Falls `.agent/workflows/bach-task.md` existiert:

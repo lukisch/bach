@@ -72,7 +72,7 @@ class DaemonJob:
     id: int
     name: str
     description: str
-    job_type: str  # 'cron', 'interval', 'event', 'manual'
+    job_type: str  # 'cron', 'interval', 'event', 'manual', 'chain'
     schedule: str
     command: str
     script_path: Optional[str]
@@ -120,7 +120,7 @@ class DaemonService:
         conn = self._get_db()
         try:
             rows = conn.execute("""
-                SELECT * FROM daemon_jobs WHERE is_active = 1
+                SELECT * FROM scheduler_jobs WHERE is_active = 1
             """).fetchall()
             
             with self.lock:
@@ -232,11 +232,10 @@ class DaemonService:
             # Command zusammenbauen
             cmd = job.command
             
-            # Special handling for Chain jobs (Task SYS_002_DAEMON)
+            # Special handling for Chain jobs (B16: ChainHandler-Integration)
             if job.job_type == 'chain':
-                # job.command holds the chain_id
-                cmd = f"python bach.py chain run {job.command}"
-                
+                return self._run_chain_job(job, result, start_time, triggered_by)
+
             if job.script_path:
                 cmd = f"python {job.script_path}"
             if job.arguments:
@@ -284,12 +283,65 @@ class DaemonService:
         
         return result
     
+    def _run_chain_job(self, job, result: dict, start_time, triggered_by: str) -> dict:
+        """Fuehrt einen Chain-Job via ChainHandler aus (B16).
+
+        Command-Formate:
+          - "llmauto:<name>"    -> ChainHandler.handle('start', [name])
+          - "toolchain:<id>"    -> ChainHandler.handle('run', [id])
+          - "<name>"            -> ChainHandler.handle('start', [name])  (Default: llmauto)
+        """
+        try:
+            from hub.chain import ChainHandler
+            chain_handler = ChainHandler(BACH_DIR)
+
+            cmd_str = job.command.strip()
+
+            if cmd_str.startswith("llmauto:"):
+                chain_name = cmd_str[len("llmauto:"):]
+                success, output = chain_handler.handle('start', [chain_name])
+            elif cmd_str.startswith("toolchain:"):
+                chain_id = cmd_str[len("toolchain:"):]
+                success, output = chain_handler.handle('run', [chain_id])
+            else:
+                # Default: als llmauto-Chain-Name interpretieren
+                success, output = chain_handler.handle('start', [cmd_str])
+
+            result["success"] = success
+            result["output"] = output
+            if not success:
+                result["error"] = output
+
+        except ImportError as e:
+            result["success"] = False
+            result["error"] = f"ChainHandler Import fehlgeschlagen: {e}"
+            logger.error(f"Chain-Job '{job.name}': {e}")
+        except Exception as e:
+            result["success"] = False
+            result["error"] = str(e)
+            logger.error(f"Chain-Job '{job.name}' Fehler: {e}")
+
+        end_time = datetime.now()
+        result["duration_seconds"] = (end_time - start_time).total_seconds()
+        result["finished_at"] = end_time.isoformat()
+
+        self._log_run(job.id, result, triggered_by)
+
+        job.last_run = end_time
+        self._calculate_next_run(job)
+        self._update_job_in_db(job)
+
+        status = "OK" if result["success"] else "FAILED"
+        logger.info(f"Chain-Job '{job.name}' beendet [{status}] ({result['duration_seconds']:.1f}s)")
+
+        return result
+
     def _log_run(self, job_id: int, result: dict, triggered_by: str):
         """Protokolliert Job-Lauf in DB."""
         conn = self._get_db()
         try:
             conn.execute("""
-                INSERT INTO daemon_runs 
+                INSERT INTO scheduler_runs 
                 (job_id, started_at, finished_at, duration_seconds, result, output, error, triggered_by)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """, (
@@ -311,7 +363,7 @@ class DaemonService:
         conn = self._get_db()
         try:
             conn.execute("""
-                UPDATE daemon_jobs 
+                UPDATE scheduler_jobs 
                 SET last_run = ?,
                     next_run = ?,
                     run_count = run_count + 1,
@@ -327,10 +379,20 @@ class DaemonService:
         finally:
             conn.close()
     
+    def get_pending_jobs(self) -> List[DaemonJob]:
+        """Gibt Jobs zurueck, die in den naechsten 60 Sekunden faellig sind."""
+        now = datetime.now()
+        cutoff = now + timedelta(seconds=60)
+        with self.lock:
+            return [
+                job for job in self.jobs.values()
+                if job.next_run and job.next_run <= cutoff
+            ]
+
     def check_and_run_due_jobs(self):
         """Prueft und fuehrt faellige Jobs aus."""
         now = datetime.now()
-        
+
         with self.lock:
             for job in list(self.jobs.values()):
                 if job.next_run and job.next_run <= now:
@@ -541,13 +603,13 @@ class DaemonService:
         """Liefert aktuellen Daemon-Status."""
         conn = self._get_db()
         try:
-            total_jobs = conn.execute("SELECT COUNT(*) FROM daemon_jobs").fetchone()[0]
-            active_jobs = conn.execute("SELECT COUNT(*) FROM daemon_jobs WHERE is_active = 1").fetchone()[0]
+            total_jobs = conn.execute("SELECT COUNT(*) FROM scheduler_jobs").fetchone()[0]
+            active_jobs = conn.execute("SELECT COUNT(*) FROM scheduler_jobs WHERE is_active = 1").fetchone()[0]
             
             last_runs = conn.execute("""
                 SELECT j.name, r.result, r.finished_at 
-                FROM daemon_runs r 
-                JOIN daemon_jobs j ON r.job_id = j.id
+                FROM scheduler_runs r 
+                JOIN scheduler_jobs j ON r.job_id = j.id
                 ORDER BY r.id DESC LIMIT 5
             """).fetchall()
             

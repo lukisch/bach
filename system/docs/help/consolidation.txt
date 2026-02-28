@@ -51,7 +51,7 @@ CLI-BEFEHLE (bach consolidate)
 
 DAEMON-INTEGRATION
 ------------------
-Die Konsolidierung kann als Hintergrund-Job laufen (daemon_jobs):
+Die Konsolidierung kann als Hintergrund-Job laufen (scheduler_jobs):
 - `consolidate-weight`: Täglich (Decay-Simulation).
 - `consolidate-archive`: Wöchentlich (Archiv-Prüfung).
 - `consolidate-index`: Facts-Index aktualisieren.

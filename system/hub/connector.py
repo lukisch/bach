@@ -789,8 +789,8 @@ class ConnectorHandler(BaseHandler):
         if dry_run:
             return True, "[DRY] Wuerde 2 Daemon-Jobs registrieren (poll_and_route, dispatch)."
 
-        from hub._services.connector.queue_processor import ensure_daemon_jobs
-        return ensure_daemon_jobs()
+        from hub._services.connector.queue_processor import ensure_scheduler_jobs
+        return ensure_scheduler_jobs()
 
     def _queue_status(self, args: List[str], dry_run: bool) -> Tuple[bool, str]:
         """Zeigt Queue-Statistiken pro Connector."""

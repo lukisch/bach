@@ -90,24 +90,32 @@ class HandlerRegistry:
             if parent not in sys.path:
                 sys.path.insert(0, parent)
 
-            spec = importlib.util.spec_from_file_location(module_name, py_file)
-            if not spec or not spec.loader:
-                return 0
+            # Bereits geladenes Modul wiederverwenden (verhindert doppeltes Laden)
+            if module_name in sys.modules:
+                module = sys.modules[module_name]
+            else:
+                spec = importlib.util.spec_from_file_location(module_name, py_file)
+                if not spec or not spec.loader:
+                    return 0
 
-            module = importlib.util.module_from_spec(spec)
-            sys.modules[module_name] = module
-            spec.loader.exec_module(module)
+                module = importlib.util.module_from_spec(spec)
+                sys.modules[module_name] = module
+                spec.loader.exec_module(module)
 
             # BaseHandler aus hub.base importieren
             from hub.base import BaseHandler
 
-            # Alle BaseHandler-Subklassen finden
+            # Alle BaseHandler-Subklassen finden (nur lokal definierte, keine Imports/Aliase)
+            seen_classes = set()
             for attr_name in dir(module):
                 attr = getattr(module, attr_name)
                 if (isinstance(attr, type)
                         and issubclass(attr, BaseHandler)
                         and attr is not BaseHandler
-                        and not getattr(attr, '__abstract__', False)):
+                        and not getattr(attr, '__abstract__', False)
+                        and getattr(attr, '__module__', None) == module_name
+                        and id(attr) not in seen_classes):
+                    seen_classes.add(id(attr))
                     # profile_name extrahieren
                     name = self._extract_profile_name(attr, py_file)
                     if name:

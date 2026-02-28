@@ -1,10 +1,10 @@
 ---
-name: bach-vanilla
-version: 2.6.0
+name: bach-strawberry
+version: 3.2.0
 type: skill
 author: BACH Team
 created: 2025-12-01
-updated: 2026-02-13
+updated: 2026-02-28
 anthropic_compatible: true
 
 description: >
@@ -289,7 +289,7 @@ from bach_api import (
 | Dateien lesen, Code suchen | Direkt (Glob/Grep/Read) |
 | Handler nicht in bach_api | `app().execute("handler", "op", ["args"])` |
 
-**Architektur:** `core/registry.py` erkennt 75+ Handler automatisch (Auto-Discovery). Neue Handler brauchen nur eine `.py`-Datei in `hub/` -- kein manuelles Mapping. Hot-Reload: `app().reload_registry()`
+**Architektur:** `core/registry.py` erkennt 98+ Handler automatisch (Auto-Discovery). Neue Handler brauchen nur eine `.py`-Datei in `hub/` -- kein manuelles Mapping. Hot-Reload: `app().reload_registry()`
 
 #### Komponenten-Typen
 
@@ -808,6 +808,19 @@ injector.set_mode("api")              # CLI-Hinweise aus Kontext filtern
 ---
 
 ## CHANGELOG
+
+### v3.2.0-butternut (2026-02-28)
+
+- **Agent-CLI**: `AgentLauncherHandler` -- `bach agent start/stop/list` fuer direkte Agent-Steuerung
+- **Prompt-System**: `PromptHandler` -- `bach prompt list/add/edit/show/board-create` fuer zentrale Prompt-Verwaltung
+- **SharedMemory-Erweiterungen**: `current-task`, `generate-context`, `conflict-resolution`, `decay`, `changes-since`
+- **USMC Bridge**: Unified Shared Memory Communication (`hub/_services/usmc_bridge.py`)
+- **llmauto-Ketten**: Claude-Prompts als Chain-Steps + `bach://`-URL-Resolution
+- **Scheduler**: `job_type='chain'` + Umbenennung `daemon_jobs` → `scheduler_jobs`
+- **Neue API-Module**: `agent`, `prompt` in `bach_api`
+- **Portierungen**: SharedMemoryHandler, ApiProberHandler, N8nManagerHandler, UserSyncHandler, Stigmergy-Service
+- **Tabellen**: 4 neue DB-Tabellen: `prompt_templates`, `prompt_versions`, `prompt_boards`, `prompt_board_items`
+- **98+ Handler** (bisher: 75+)
 
 ### v2.6.0 (2026-02-13)
 

@@ -25,10 +25,8 @@ from datetime import datetime
 
 # Bekannte Systeme
 KNOWN_SYSTEMS = {
-    "recludOS": r"C:\Users\User\OneDrive\KI&AI\recludOS",
-    "_BATCH": r"C:\Users\User\OneDrive\Software Entwicklung\_BATCH",
-    "_CHIAH": r"C:\Users\User\OneDrive\Software Entwicklung\_CHIAH",
-    "universal-llm-os-v2": r"C:\Users\User\OneDrive\KI&AI\Templates\OS\universal-llm-os-v2",
+    # Pfade werden aus Umgebungsvariablen oder relativ aufgeloest
+    # Beispiel: BACH_EXTERNAL_SYSTEMS=recludOS:/pfad/zu/recludOS,...
 }
 
 # Test-Profile

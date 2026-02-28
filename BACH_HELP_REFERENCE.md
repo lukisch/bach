@@ -3170,7 +3170,7 @@ Tabellen:
   connections         Connector-Konfiguration + Circuit-Breaker-Status
   connector_messages  Nachrichten-Queue (ein-/ausgehend, Retry-Tracking)
   messages            Inbox/Outbox (geroutete Nachrichten)
-  daemon_jobs         Automatische Poll/Dispatch-Jobs
+  scheduler_jobs         Automatische Poll/Dispatch-Jobs
 
 Relevante Spalten connector_messages:
   status          TEXT (pending/sent/failed/dead)
@@ -3250,7 +3250,7 @@ CLI-BEFEHLE (bach consolidate)
 
 DAEMON-INTEGRATION
 ------------------
-Die Konsolidierung kann als Hintergrund-Job laufen (daemon_jobs):
+Die Konsolidierung kann als Hintergrund-Job laufen (scheduler_jobs):
 - `consolidate-weight`: Täglich (Decay-Simulation).
 - `consolidate-archive`: Wöchentlich (Archiv-Prüfung).
 - `consolidate-index`: Facts-Index aktualisieren.
@@ -5543,7 +5543,7 @@ Tasks:
 Wartung:
   CLI: bach daemon list/run/toggle
   GUI: /daemon (Jobs, Runs, Toggle)
-  DB:  bach.db -> daemon_jobs, daemon_runs
+  DB:  bach.db -> scheduler_jobs, scheduler_runs
 
 
 STRUKTUR
@@ -14211,7 +14211,7 @@ Der Wartungs-Handler fuehrt automatisch geplante System-Jobs aus - z.B. Backups,
 Token-Checks, Datenbereinigung oder eigene Scripts.
 
 HANDLER:  system/hub/daemon.py
-SERVICE:  system/gui/daemon_service.py + DB (daemon_jobs, daemon_runs)
+SERVICE:  system/gui/daemon_service.py + DB (scheduler_jobs, scheduler_runs)
 GUI:      /daemon (http://localhost:8000/daemon)
 
 
@@ -14285,8 +14285,8 @@ LOG-DATEIEN
 TECHNISCHE DETAILS
 ------------------
 
-- Jobs werden aus bach.db geladen (Tabelle: daemon_jobs)
-- Ausfuehrungen in daemon_runs protokolliert
+- Jobs werden aus bach.db geladen (Tabelle: scheduler_jobs)
+- Ausfuehrungen in scheduler_runs protokolliert
 - Timeout pro Job konfigurierbar (Standard: 300s)
 - Bei Fehler optional Retry (max_retries konfigurierbar)
 - Alle 5 Minuten werden Jobs neu geladen

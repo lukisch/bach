@@ -2,22 +2,205 @@
 
 > Design-Manifest und Architektur-Dokumentation
 
-**Version:** 1.1.73
-**Stand:** 2026-01-29
+**Version:** 3.2.0-butternut
+**Stand:** 2026-02-28
 **Zielgruppe:** Entwickler, Kontributoren, fortgeschrittene Nutzer
+
+Copyright (c) 2026 Lukas Geiger. Alle Rechte vorbehalten.
 
 ---
 
 ## Inhaltsverzeichnis
 
 1. [Vision & Philosophie](#vision--philosophie)
-2. [Systemuebersicht](#systemuebersicht)
-3. [Kernprinzipien](#kernprinzipien)
-4. [Architektur-Diagramme](#architektur-diagramme)
-5. [Komponenten](#komponenten)
-6. [Datenfluss](#datenfluss)
-7. [Erweiterbarkeit](#erweiterbarkeit)
-8. [Konventionen](#konventionen)
+2. [Execution Stack: 3-Schichten-Modell](#execution-stack-3-schichten-modell) *(NEU v3.2)*
+3. [Handler-System & Auto-Discovery](#handler-system--auto-discovery) *(NEU v3.2)*
+4. [Shared Memory & USMC](#shared-memory--usmc) *(NEU v3.2)*
+5. [Systemuebersicht](#systemuebersicht)
+6. [Kernprinzipien](#kernprinzipien)
+7. [Architektur-Diagramme](#architektur-diagramme)
+8. [Datenfluss](#datenfluss)
+9. [Erweiterbarkeit](#erweiterbarkeit)
+10. [Konventionen](#konventionen)
+11. [Versionierung](#versionierung)
+
+---
+
+---
+
+## Execution Stack: 3-Schichten-Modell
+
+> Neu in v3.2.0-butternut: Der Execution Stack beschreibt, wie BACH autonome AI-Ausfuehrungen koordiniert.
+
+```
+  ========================================================================
+                     BACH EXECUTION STACK (v3.2)
+  ========================================================================
+
+  SCHICHT 1: ZEITSTEUERUNG (SchedulerService)
+  +------------------------------------------------------------------+
+  |  SchedulerService  →  scheduler_jobs / scheduler_runs (DB)       |
+  |                                                                    |
+  |  - Cron-basierte Job-Ausfuehrung (0 8 * * *, @hourly, etc.)     |
+  |  - job_type: 'tool' | 'chain' | 'agent'  [chain NEU]            |
+  |  - Tracking: last_run, next_run, run_count, error_count          |
+  |  - `bach scheduler add/list/run/pause/remove`                    |
+  +------------------------------------------------------------------+
+                              |
+                    startet / delegiert an
+                              |
+                              v
+  SCHICHT 2: ORCHESTRIERUNG (ChainHandler / llmauto)
+  +------------------------------------------------------------------+
+  |  ChainHandler  →  Toolchains + llmauto-Ketten                   |
+  |                                                                    |
+  |  Toolchains:  Sequenz von Tools/Scripts/Bach-Befehlen            |
+  |  llmauto:     Sequenz von Claude-Prompts mit bach://-Variablen   |
+  |                                                                    |
+  |  - `bach chain create/list/run/show`                             |
+  |  - bach:// URL-Resolution: memory/facts, task/current, help/...  |
+  |  - Ergebnis-Weitergabe zwischen Chain-Steps                      |
+  +------------------------------------------------------------------+
+                              |
+                    ausfuehren via
+                              |
+                              v
+  SCHICHT 3: AUSFUEHRUNG (ClaudeRunner / AgentLauncherHandler)
+  +------------------------------------------------------------------+
+  |  AgentLauncherHandler  →  claude, gemini, ollama                 |
+  |                                                                    |
+  |  - `bach agent run <agent-name> [--prompt "..."]`                |
+  |  - Startet Claude/Gemini/Ollama mit generiertem System-Prompt    |
+  |  - Nutzt partners/claude|gemini|ollama/ Infrastruktur            |
+  |  - Session-Tracking: start_time, end_time, result_summary        |
+  +------------------------------------------------------------------+
+                              |
+               lesen/schreiben
+                              |
+                              v
+  QUERSCHNITT: SHARED MEMORY (SharedMemoryHandler + USMC Bridge)
+  +------------------------------------------------------------------+
+  |  SharedMemoryHandler: cross-agent Zustand                        |
+  |  USMC Bridge: Cross-Instanz-Kommunikation (local/tcp/file)       |
+  |                                                                    |
+  |  - current-task: Welcher Task wird gerade bearbeitet?            |
+  |  - generate-context: Auto-Kontext fuer naechste Agent-Session    |
+  |  - conflict-resolution: Wer hat Schreibzugriff?                  |
+  |  - decay: Alte Eintraege verlieren Relevanz                      |
+  |  - changes-since <timestamp>: Delta-Abfrage                      |
+  +------------------------------------------------------------------+
+
+  DATENFLUSS (Autonomer Betrieb):
+  ================================
+  Scheduler → Chain (llmauto) → bach:// URL-Resolution → SharedMemory
+      |                                                        |
+      └──────────────── Agent startet ─────────────────────── ┘
+                        Agent schreibt Ergebnisse in SharedMemory
+                        Scheduler liest Status, plant naechsten Run
+```
+
+---
+
+## Handler-System & Auto-Discovery
+
+> Das Handler-System ermoeglicht modulare Erweiterung ohne Anpassung von bach.py.
+
+### Registrierung (core/registry.py)
+
+```python
+# Auto-Discovery: Alle Handler in hub/handlers/*.py werden geladen
+# Registrierung via profile_name Property
+
+class AgentLauncherHandler(BaseHandler):
+    @property
+    def profile_name(self) -> str:
+        return "agent"   # → `bach agent ...`
+
+class PromptHandler(BaseHandler):
+    @property
+    def profile_name(self) -> str:
+        return "prompt"  # → `bach prompt ...`
+```
+
+### Handler-Uebersicht (98+ Handler, Stand v3.2)
+
+| Kategorie | Handler | Befehl |
+|-----------|---------|--------|
+| **System** | StartupHandler, ShutdownHandler, StatusHandler | `--startup`, `--shutdown`, `--status` |
+| **Daten** | TaskHandler, MemoryHandler, LessonHandler | `bach task`, `bach mem`, `bach lesson` |
+| **AI (NEU)** | AgentLauncherHandler | `bach agent` |
+| **AI** | PartnerHandler, SchedulerHandler, OllamaHandler | `bach partner`, `bach scheduler`, `bach ollama` |
+| **Prompts (NEU)** | PromptHandler | `bach prompt` |
+| **Memory (NEU)** | SharedMemoryHandler | `bach shared-mem` |
+| **Komm.** | ConnectorHandler, MessagesHandler | `bach connector`, `bach msg` |
+| **Domain** | SteuerHandler, AboHandler, GesundheitHandler | `bach steuer`, `bach abo`, `bach gesundheit` |
+| **Tools (NEU)** | ApiProberHandler, N8nManagerHandler, UserSyncHandler | `bach api-probe`, `bach n8n`, `bach user-sync` |
+
+### Prompt-System (NEU v3.2)
+
+```
+prompt_templates           prompt_versions        prompt_boards
++-----------------+        +---------------+      +-------------+
+| id              |  1:N   | id            |      | id          |
+| name            |------->| template_id   |      | name        |
+| content         |        | content       |      | description |
+| version         |        | version_note  |      +------+------+
+| tags            |        | created_at    |             |
+| created_at      |        +---------------+             | N:M via
+| updated_at      |                                      | prompt_board_items
++-----------------+                                      |
+        |                                                v
+        +-----------------------------------------------+
+                    prompt_board_items
+                    +------------------+
+                    | board_id (FK)    |
+                    | template_id (FK) |
+                    | position         |
+                    +------------------+
+
+CLI:
+  bach prompt list                    # Alle Prompts anzeigen
+  bach prompt add "name" "content"    # Prompt erstellen
+  bach prompt board-create "name"     # Board erstellen
+  bach prompt board-add <bid> <pid>   # Prompt zu Board hinzufuegen
+```
+
+---
+
+## Shared Memory & USMC
+
+> SharedMemory ermoeglicht Cross-Agent-Koordination innerhalb einer BACH-Instanz.
+> USMC Bridge erweitert dies auf mehrere BACH-Instanzen.
+
+### SharedMemory-Operationen
+
+| Operation | Beschreibung | Beispiel |
+|-----------|-------------|---------|
+| `read` | Eintrag lesen | `bach shared-mem read key` |
+| `write` | Eintrag schreiben | `bach shared-mem write key "value"` |
+| `list` | Alle Eintraege auflisten | `bach shared-mem list` |
+| `current-task` | Aktuellen Task setzen/abfragen | `bach shared-mem current-task` |
+| `generate-context` | Kontext fuer Agent generieren | `bach shared-mem generate-context` |
+| `conflict-resolution` | Schreibkonflikte loesen | `bach shared-mem conflict-resolution` |
+| `decay` | Relevanz-Abbau ausfuehren | `bach shared-mem decay` |
+| `changes-since` | Delta seit Zeitstempel | `bach shared-mem changes-since 2026-02-28T10:00` |
+
+### USMC Bridge (hub/_services/usmc_bridge.py)
+
+```
+  Instanz A (Agent 1)          Instanz B (Agent 2)
+  +-------------------+        +-------------------+
+  | SharedMemory A    |        | SharedMemory B    |
+  |                   | <----- |                   |
+  | USMC Bridge       | -----> | USMC Bridge       |
+  | (local/tcp/file)  |        | (local/tcp/file)  |
+  +-------------------+        +-------------------+
+
+  Transport-Modi:
+  - local:  Gleicher Prozess, direkter Aufruf
+  - file:   JSON-Dateien in partners/shared/ (OneDrive-tauglich)
+  - tcp:    Socket-basiert fuer Netzwerk-Szenarien
+```
 
 ---
 
@@ -882,9 +1065,13 @@ BACH_ROOT/
 | 1.1.0 | 2026-01-14 | Backup/Restore/Distribution |
 | 1.1.50 | 2026-01-24 | Wiki-Service, Help-Forensik |
 | 1.1.73 | 2026-01-29 | Architektur-Diagramme zusammengefuehrt |
+| 2.0.0 | 2026-02-06 | Registry-Based Architecture, bach_api |
+| 2.2.0 | 2026-02-08 | MCP-Server v2.2, Message-System v2.0 |
+| 2.5.0 | 2026-02-13 | Directory Restructuring, Self-Extension, Capability System |
+| **3.2.0-butternut** | **2026-02-28** | **Execution Stack, Prompt-System, USMC Bridge, SharedMemory-Erweiterungen** |
 
 ---
 
 *Dieses Dokument ist Teil der BACH-Entwicklerdokumentation.*
 *Fuer operative Befehle siehe: `bach --help`*
-*Erstellt: 2026-01-29 | Zusammengefuehrt aus ../docs/ARCHITECTURE.md und ../docs/ARCHITECTURE_DIAGRAMS.md*
+*Erstellt: 2026-01-29 | Aktualisiert: 2026-02-28 (v3.2.0-butternut)*

@@ -616,7 +616,7 @@ def _schedule_retry(conn: sqlite3.Connection, msg, error: str) -> bool:
 
 # ── Daemon-Integration ────────────────────────────────────────
 
-def ensure_daemon_jobs() -> Tuple[bool, str]:
+def ensure_scheduler_jobs() -> Tuple[bool, str]:
     """Registriert die 2 Daemon-Jobs (idempotent via INSERT OR IGNORE).
 
     Jobs:
@@ -632,7 +632,7 @@ def ensure_daemon_jobs() -> Tuple[bool, str]:
 
         # Job 1: Poll + Route
         conn.execute("""
-            INSERT OR IGNORE INTO daemon_jobs
+            INSERT OR IGNORE INTO scheduler_jobs
                 (name, description, job_type, schedule, command,
                  script_path, is_active, timeout_seconds, created_at)
             VALUES (
@@ -647,7 +647,7 @@ def ensure_daemon_jobs() -> Tuple[bool, str]:
 
         # Job 2: Dispatch
         conn.execute("""
-            INSERT OR IGNORE INTO daemon_jobs
+            INSERT OR IGNORE INTO scheduler_jobs
                 (name, description, job_type, schedule, command,
                  script_path, is_active, timeout_seconds, created_at)
             VALUES (
@@ -664,7 +664,7 @@ def ensure_daemon_jobs() -> Tuple[bool, str]:
 
         # Pruefen was angelegt wurde
         jobs = conn.execute("""
-            SELECT name, is_active, schedule FROM daemon_jobs
+            SELECT name, is_active, schedule FROM scheduler_jobs
             WHERE name IN ('connector_poll_and_route', 'connector_dispatch')
         """).fetchall()
 
@@ -805,7 +805,7 @@ def main():
             print(f"Fehler: {', '.join(result['errors'])}")
 
     elif args.action == "setup":
-        ok, msg = ensure_daemon_jobs()
+        ok, msg = ensure_scheduler_jobs()
         print(msg)
         sys.exit(0 if ok else 1)
 

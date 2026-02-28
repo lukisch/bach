@@ -1934,14 +1934,30 @@ class BridgeDaemon:
                 cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 env=env, cwd=cwd, creationflags=creation_flags
             )
+            # Pruefen ob Prozess noch lebt bevor stdin beschrieben wird
+            if proc.poll() is not None:
+                stderr_out = ""
+                try:
+                    stderr_out = proc.stderr.read().decode("utf-8", errors="replace")[:500] if proc.stderr else ""
+                except Exception:
+                    pass
+                log(f"CHAT: Prozess bereits beendet (exit={proc.returncode}), stderr: {stderr_out}", "ERROR")
+                self._last_chat_failed = True
+                return f"Fehler: Claude beendet (exit={proc.returncode}). {stderr_out}"
+
             try:
                 proc.stdin.write(prompt.encode("utf-8"))
                 proc.stdin.close()
             except BrokenPipeError:
-                log("CHAT: Broken pipe beim Schreiben in stdin (Prozess fruehzeitig beendet)", "WARN")
+                stderr_out = ""
+                try:
+                    stderr_out = proc.stderr.read().decode("utf-8", errors="replace")[:500] if proc.stderr else ""
+                except Exception:
+                    pass
+                log(f"CHAT: Broken pipe, stderr: {stderr_out}", "WARN")
                 proc.wait()
                 self._last_chat_failed = True
-                return "Fehler: Claude konnte nicht gestartet werden (Broken pipe)."
+                return f"Fehler: Claude Broken pipe. {stderr_out}"
 
             stdout_chunks = []
             stderr_chunks = []
@@ -2013,11 +2029,26 @@ class BridgeDaemon:
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                             env=env, cwd=cwd, creationflags=creation_flags
                         )
+                        # Pruefen ob Fallback-Prozess noch lebt
+                        if proc2.poll() is not None:
+                            stderr_out = ""
+                            try:
+                                stderr_out = proc2.stderr.read().decode("utf-8", errors="replace")[:500] if proc2.stderr else ""
+                            except Exception:
+                                pass
+                            log(f"FALLBACK: Prozess bereits beendet (exit={proc2.returncode}), stderr: {stderr_out}", "ERROR")
+                            raise RuntimeError(f"Fallback-Prozess beendet (exit={proc2.returncode}). {stderr_out}")
+
                         try:
                             proc2.stdin.write(prompt.encode("utf-8"))
                             proc2.stdin.close()
                         except BrokenPipeError:
-                            log("FALLBACK: Broken pipe beim Schreiben in stdin", "WARN")
+                            stderr_out = ""
+                            try:
+                                stderr_out = proc2.stderr.read().decode("utf-8", errors="replace")[:500] if proc2.stderr else ""
+                            except Exception:
+                                pass
+                            log(f"FALLBACK: Broken pipe, stderr: {stderr_out}", "WARN")
                             proc2.wait()
                             raise
                         fb_out, fb_err = proc2.communicate(timeout=timeout)

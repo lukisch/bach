@@ -9,9 +9,11 @@ BACH WARTUNG (System-Jobs)
 Der Wartungs-Handler fuehrt automatisch geplante System-Jobs aus - z.B. Backups,
 Token-Checks, Datenbereinigung oder eigene Scripts.
 
-HANDLER:  system/hub/daemon.py
-SERVICE:  system/gui/daemon_service.py + DB (daemon_jobs, daemon_runs)
+HANDLER:  system/hub/scheduler.py (ehemals: daemon.py)
+SERVICE:  system/gui/daemon_service.py + DB (scheduler_jobs, scheduler_runs)
 GUI:      /daemon (http://localhost:8000/daemon)
+
+Hinweis: "bach daemon ..." und "bach scheduler ..." sind Aliases.
 
 
 BEFEHLE
@@ -84,8 +86,8 @@ LOG-DATEIEN
 TECHNISCHE DETAILS
 ------------------
 
-- Jobs werden aus bach.db geladen (Tabelle: daemon_jobs)
-- Ausfuehrungen in daemon_runs protokolliert
+- Jobs werden aus bach.db geladen (Tabelle: scheduler_jobs)
+- Ausfuehrungen in scheduler_runs protokolliert
 - Timeout pro Job konfigurierbar (Standard: 300s)
 - Bei Fehler optional Retry (max_retries konfigurierbar)
 - Alle 5 Minuten werden Jobs neu geladen

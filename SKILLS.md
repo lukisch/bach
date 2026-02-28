@@ -1887,7 +1887,7 @@ FINANZPLANUNG FUER SELBSTSTAENDIGE
 **Kategorie:** general  
 FINANZWIRTSCHAFT
 
-### `fix_daemon_jobs`
+### `fix_scheduler_jobs`
 **Kategorie:** general  
 db_path = Path("data/bach.db")
 
@@ -3095,7 +3095,7 @@ Pfade
 **Kategorie:** general  
 BACH Tool: universal_compiler
 
-### `update_daemon_jobs`
+### `update_scheduler_jobs`
 **Kategorie:** general  
 def update_jobs():
 

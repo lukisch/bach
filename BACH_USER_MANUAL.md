@@ -1,7 +1,7 @@
 # BACH User Manual
 
-**Version:** unknown
-**Generiert:** 2026-02-22
+**Version:** v3.2.0-butternut
+**Generiert:** 2026-02-28
 **Lizenz:** MIT
 
 ---
@@ -23,7 +23,7 @@ Dieses Handbuch beschreibt Installation, Nutzung und Erweiterung von BACH.
 
 # BACH - Textbasiertes Betriebssystem für LLMs
 
-**Version:** unknown
+**Version:** v3.2.0-butternut
 **Status:** Production-Ready
 **Lizenz:** MIT
 

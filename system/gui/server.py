@@ -683,7 +683,7 @@ async def get_status():
 
         daemon_active = conn_user.execute(
 
-            "SELECT COUNT(*) FROM daemon_jobs WHERE is_active = 1"
+            "SELECT COUNT(*) FROM scheduler_jobs WHERE is_active = 1"
 
         ).fetchone()[0]
 
@@ -747,7 +747,7 @@ async def get_status():
 
             "messages_unread": messages_unread,
 
-            "daemon_jobs_active": daemon_active,
+            "scheduler_jobs_active": daemon_active,
 
             "last_scan": last_scan[0] if last_scan else None
 
@@ -1766,13 +1766,13 @@ async def delete_message(msg_id: int):
 
 @app.get("/api/daemon/jobs")
 
-async def list_daemon_jobs():
+async def list_scheduler_jobs():
 
     """Listet alle Daemon-Jobs."""
 
     conn = get_user_db()
 
-    rows = conn.execute("SELECT * FROM daemon_jobs ORDER BY name").fetchall()
+    rows = conn.execute("SELECT * FROM scheduler_jobs ORDER BY name").fetchall()
 
     conn.close()
 
@@ -1792,7 +1792,7 @@ async def create_daemon_job(job: DaemonJobCreate):
 
     cursor = conn.execute("""
 
-        INSERT INTO daemon_jobs (name, description, job_type, schedule, command, script_path, arguments)
+        INSERT INTO scheduler_jobs (name, description, job_type, schedule, command, script_path, arguments)
 
         VALUES (?, ?, ?, ?, ?, ?, ?)
 
@@ -1822,7 +1822,7 @@ async def toggle_daemon_job(job_id: int):
 
     
 
-    current = conn.execute("SELECT is_active FROM daemon_jobs WHERE id = ?", (job_id,)).fetchone()
+    current = conn.execute("SELECT is_active FROM scheduler_jobs WHERE id = ?", (job_id,)).fetchone()
 
     if not current:
 
@@ -1834,7 +1834,7 @@ async def toggle_daemon_job(job_id: int):
 
     new_state = 0 if current[0] else 1
 
-    conn.execute("UPDATE daemon_jobs SET is_active = ? WHERE id = ?", (new_state, job_id))
+    conn.execute("UPDATE scheduler_jobs SET is_active = ? WHERE id = ?", (new_state, job_id))
 
     conn.commit()
 
@@ -1848,7 +1848,7 @@ async def toggle_daemon_job(job_id: int):
 
 @app.get("/api/daemon/runs")
 
-async def list_daemon_runs(job_id: Optional[int] = None, limit: int = 20):
+async def list_scheduler_runs(job_id: Optional[int] = None, limit: int = 20):
 
     """Listet Daemon-Laeufe."""
 
@@ -1860,7 +1860,7 @@ async def list_daemon_runs(job_id: Optional[int] = None, limit: int = 20):
 
         rows = conn.execute(
 
-            "SELECT * FROM daemon_runs WHERE job_id = ? ORDER BY started_at DESC LIMIT ?",
+            "SELECT * FROM scheduler_runs WHERE job_id = ? ORDER BY started_at DESC LIMIT ?",
 
             (job_id, limit)
 
@@ -1870,7 +1870,7 @@ async def list_daemon_runs(job_id: Optional[int] = None, limit: int = 20):
 
         rows = conn.execute(
 
-            "SELECT * FROM daemon_runs ORDER BY started_at DESC LIMIT ?",
+            "SELECT * FROM scheduler_runs ORDER BY started_at DESC LIMIT ?",
 
             (limit,)
 
@@ -1920,19 +1920,19 @@ async def get_daemon_status():
 
     stats = {
 
-        "total_jobs": conn.execute("SELECT COUNT(*) FROM daemon_jobs").fetchone()[0],
+        "total_jobs": conn.execute("SELECT COUNT(*) FROM scheduler_jobs").fetchone()[0],
 
-        "active_jobs": conn.execute("SELECT COUNT(*) FROM daemon_jobs WHERE is_active = 1").fetchone()[0],
+        "active_jobs": conn.execute("SELECT COUNT(*) FROM scheduler_jobs WHERE is_active = 1").fetchone()[0],
 
         "runs_today": conn.execute(
 
-            "SELECT COUNT(*) FROM daemon_runs WHERE date(started_at) = date('now')"
+            "SELECT COUNT(*) FROM scheduler_runs WHERE date(started_at) = date('now')"
 
         ).fetchone()[0],
 
         "failed_today": conn.execute(
 
-            "SELECT COUNT(*) FROM daemon_runs WHERE date(started_at) = date('now') AND result = 'failed'"
+            "SELECT COUNT(*) FROM scheduler_runs WHERE date(started_at) = date('now') AND result = 'failed'"
 
         ).fetchone()[0],
 
@@ -1946,9 +1946,9 @@ async def get_daemon_status():
 
         SELECT r.id, j.name, r.result, r.started_at, r.duration_seconds
 
-        FROM daemon_runs r
+        FROM scheduler_runs r
 
-        JOIN daemon_jobs j ON r.job_id = j.id
+        JOIN scheduler_jobs j ON r.job_id = j.id
 
         ORDER BY r.started_at DESC LIMIT 5
 
@@ -10411,7 +10411,7 @@ async def import_profiles_from_universal_mail():
 
         search_paths = [
 
-            Path(r"C:\Users\User\OneDrive\Software Entwicklung\TOOLS\Mail\UniversalInvoiceMail"),
+            Path.home() / "OneDrive" / "Software Entwicklung" / "TOOLS" / "Mail" / "UniversalInvoiceMail",
 
             BACH_DIR / "tools" / "mail",
 

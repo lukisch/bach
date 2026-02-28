@@ -1,6 +1,8 @@
 # BACH ROADMAP - Strategische Vision
 
-**Stand:** 2026-02-13 | **Version:** 3.7.0
+**Stand:** 2026-02-28 | **Version:** 3.8.0
+
+Copyright (c) 2026 Lukas Geiger. Alle Rechte vorbehalten.
 
 > Die ROADMAP definiert Vision und Phasen. Konkrete Tasks siehe: `bach task list`
 
@@ -43,6 +45,35 @@ Siehe: `../docs/WICHTIG_SYSTEMISCH_FIRST.md`
 ---
 
 ## Aktuelle Fokus-Bereiche
+
+### 0b.2 Release v3.2.0-butternut (KOMPLETT - 2026-02-28)
+
+Grosse BUTTERNUT-Release mit Scheduler-Refactoring, Prompt-System, neuen Handlern und Portierungen.
+
+**DB-Schema:**
+- `daemon_jobs` → `scheduler_jobs`, `daemon_runs` → `scheduler_runs`
+- 4 neue Tabellen: `prompt_templates`, `prompt_versions`, `prompt_boards`, `prompt_board_items`
+- 8 Migrationen (012-020) nachgezogen
+
+**Neue Handler:**
+- `AgentLauncherHandler` (`bach agent`) - Agent-Ausfuehrung via CLI
+- `PromptHandler` (`bach prompt`) - Prompt-CRUD mit Board-System
+
+**SharedMemory-Erweiterungen:**
+- `current-task`, `generate-context`, `conflict-resolution`, `decay`, `changes-since`
+
+**Neue Infrastruktur:**
+- `hub/_services/usmc_bridge.py` - USMC Bridge fuer Cross-Agent-Kommunikation
+- bach:// URL-Resolution in llmauto-Prompts (`hub/url_resolver.py`)
+- `tools/migrate_prompts.py` - 3-Quellen-Migration in DB
+
+**Portierungen aus vanilla:**
+- SharedMemoryHandler, ApiProberHandler, N8nManagerHandler, UserSyncHandler
+- Stigmergy-Service
+
+**Archivierungen:**
+- marble_run → `_archive/marble_run/`
+- ATI SessionDaemon → Ersetzt durch SchedulerService
 
 ### 0. Adaptionsfaehigkeit & Self-Extension (In Progress)
 
@@ -250,8 +281,9 @@ Automatische Synchronisation Skills/Tools.
 | 18.3 | Plugin-API (register_tool/hook/workflow/handler, plugin.json) | 2026-02 |
 | 18.4 | Capability System Stufe 1 (11 Caps, Trust-Enforcement, Audit-Log) | 2026-02 |
 | 19 | Directory Restructuring v2.5 (agents/, connectors/, partners/ top-level, workflows/) | 2026-02 |
+| 20 | BUTTERNUT v3.2.0: Scheduler, Prompt-System, USMC Bridge, 4 Portierungen | 2026-02 |
 
-~100+ Tasks abgeschlossen in Phase 1-19.
+~120+ Tasks abgeschlossen in Phase 1-20.
 
 ---
 
@@ -266,20 +298,23 @@ Automatische Synchronisation Skills/Tools.
   ========================================================================
                                 |
   HUB LAYER (hub/*.py)
-    System: startup, shutdown, status, backup, tokens, inject, scan
-    Domain: steuer, abo, haushalt, gesundheit, contact, calendar, routine
-    Data:   task, memory, db, session, logs, wiki, docs, inbox
-    AI:     agents, partner, daemon, ollama, ati
-    Comm:   connector, messages (Queue, Retry, Circuit Breaker)
+    System:    startup, shutdown, status, backup, tokens, inject, scan
+    Domain:    steuer, abo, haushalt, gesundheit, contact, calendar, routine
+    Data:      task, memory, db, session, logs, wiki, docs, inbox
+    AI:        agent (launcher), partner, scheduler, ollama, ati
+    Comm:      connector, messages (Queue, Retry, Circuit Breaker)
+    Prompts:   prompt (templates, versions, boards) [NEU v3.2]
+    Memory:    shared_memory + USMC Bridge [NEU v3.2]
   ========================================================================
               |                     |                      |
   AGENTS LAYER            TOOLS LAYER              DATA LAYER
     agents/ (ATI, 4+)      c_ocr_engine.py          bach.db (Unified DB)
-    agents/_experts/ (14)  data_importer.py          Dateisystem
-    skills/_services/      folder_diff_scanner.py     (../user/, memory/,
-     (daemon, connector,   doc_search.py               logs/, skills/docs/docs/docs/help/)
-     document, voice,      mcp_server.py             Externe Ordner/Inbox
-     mail, market)         injectors.py
+    agents/_experts/ (14)  data_importer.py          prompt_templates [NEU]
+    skills/_services/      folder_diff_scanner.py    scheduler_jobs [NEU]
+     (daemon, connector,   doc_search.py             Dateisystem
+     document, voice,      mcp_server.py             (../user/, memory/,
+     mail, market,         migrate_prompts.py [NEU]   logs/, help/)
+     stigmergy [NEU])      url_resolver.py [NEU]     Externe Ordner/Inbox
     skills/workflows/
      (.md)
   ========================================================================
@@ -288,7 +323,7 @@ Automatische Synchronisation Skills/Tools.
     partners/claude/                          connectors/ (3+)
     partners/gemini/                          Telegram, Discord
     partners/ollama/                          HomeAssistant
-                                              (Signal, WhatsApp geplant)
+    USMC Bridge [NEU]                         (Signal, WhatsApp geplant)
   ========================================================================
 
   DATENFLUSS:  CLI/GUI/API --> Hub --> Agents/Skills/Tools --> DB/Files/Partners
@@ -331,6 +366,7 @@ Automatische Synchronisation Skills/Tools.
 | **3.5** | 2026-02-13 | **Self-Extension: Skills Create/Reload, Hook-Framework (14 Events), Email-Handler** |
 | **3.6** | 2026-02-13 | **Capability System Stufe 1: 11 Caps, Trust-Enforcement, Audit-Log, Plugin-API Security** |
 | **3.7** | 2026-02-13 | **Directory Restructuring v2.5: agents/, connectors/, partners/ top-level; _workflows/ -> workflows/** |
+| **3.8** | 2026-02-28 | **BUTTERNUT v3.2.0: Scheduler, Prompt-System, USMC Bridge, bach://, 4 Handler portiert** |
 
 Detaillierte Historie: `CHANGELOG.md`
 Archivierte Versionen: `../docs/_archive/ROADMAP_*.md`
@@ -350,4 +386,4 @@ Archivierte Versionen: `../docs/_archive/ROADMAP_*.md`
 
 ---
 
-*BACH Session 2026-02-13, Querverweise ergaenzt 2026-02-16*
+*BACH Session 2026-02-28, BUTTERNUT Release v3.2.0 dokumentiert*

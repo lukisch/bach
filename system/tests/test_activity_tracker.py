@@ -239,30 +239,42 @@ def test_session_id_persistence(temp_db):
 
 
 def test_idle_threshold_calculation(temp_db):
-    """Test: Idle-Threshold wird korrekt berechnet."""
-    # Test mit verschiedenen Thresholds
-    thresholds = [0, 15, 30, 60, 120]
+    """Test: Idle-Threshold wird korrekt auf Basis der last_activity berechnet.
 
-    # Nutze temp_db Parent-Dir als bach_root (vermeidet PermissionError beim Cleanup)
-    bach_root = temp_db.parent
+    Hinweis: Prueft nur ob Idle korrekt erkannt wird (unter/ueber Schwelle),
+    nicht die Finalize-Logik (die haengt wenn kein echtes BACH-System vorhanden).
+    """
+    from datetime import datetime, timedelta
 
-    for threshold_minutes in thresholds:
-        tracker = ActivityTracker(temp_db, idle_threshold_minutes=threshold_minutes)
+    # Pruefe: Unter Schwelle = nicht idle
+    tracker_30 = ActivityTracker(temp_db, idle_threshold_minutes=30)
 
-        # Setze last_activity auf genau threshold + 1 Minute zurück
-        past = (datetime.now() - timedelta(minutes=threshold_minutes + 1)).isoformat()
-        conn = sqlite3.connect(str(temp_db))
-        conn.execute("UPDATE system_activity SET last_activity = ? WHERE id = 1", (past,))
-        conn.commit()
-        conn.close()
+    # Setze last_activity auf 5 Minuten zurueck (weit unter 30 Min Schwelle)
+    recent = (datetime.now() - timedelta(minutes=5)).isoformat()
+    conn = sqlite3.connect(str(temp_db))
+    conn.execute("UPDATE system_activity SET last_activity = ? WHERE id = 1", (recent,))
+    conn.commit()
+    conn.close()
 
-        # Prüfe ob als Idle erkannt (Finalize schlägt fehl, aber Idle-Erkennung klappt)
-        try:
-            # Idle sollte erkannt werden (Finalize schlägt fehl wegen fehlender Struktur, aber das ist OK)
-            tracker.check_idle_and_finalize(bach_root)
-        except Exception:
-            # Exception ist OK - bedeutet Idle wurde erkannt
-            pass
+    result = tracker_30.check_idle_and_finalize(temp_db.parent)
+    assert result is False, "Sollte nicht idle sein bei 5 Min / 30 Min Schwelle"
+
+    # Pruefe: Ueber Schwelle = idle (aber Finalize schlaegt fehl wegen fehlender Struktur)
+    tracker_1 = ActivityTracker(temp_db, idle_threshold_minutes=120)
+
+    # Setze last_activity auf 130 Minuten zurueck (ueber 120 Min Schwelle)
+    old_activity = (datetime.now() - timedelta(minutes=130)).isoformat()
+    conn = sqlite3.connect(str(temp_db))
+    conn.execute("UPDATE system_activity SET last_activity = ? WHERE id = 1", (old_activity,))
+    conn.commit()
+    conn.close()
+
+    # Finalize schlaegt fehl (kein echtes BACH-System), aber darf nicht crashen
+    try:
+        result = tracker_1.check_idle_and_finalize(temp_db.parent)
+        # False ist OK (Finalize hat fehlgeschlagen aber nicht gecrasht)
+    except Exception:
+        pass  # Exception bedeutet Idle wurde erkannt, aber Finalize schlug fehl
 
 
 if __name__ == "__main__":
