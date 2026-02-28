@@ -55,11 +55,12 @@ bach scan run               Tools scannen
 bach scan status            Scan-Status
 bach scan tasks             Gescannte Tasks anzeigen
 
-WARTUNG (Daemon)
-----------------
-bach daemon jobs            Jobs anzeigen
-bach daemon run J001        Job ausfuehren
-bach daemon toggle J001     Job aktivieren/deaktivieren
+WARTUNG (Scheduler, ehemals Daemon)
+-------------------------------------
+bach scheduler jobs            Jobs anzeigen
+bach scheduler run J001        Job ausfuehren
+bach scheduler status          Scheduler-Status anzeigen
+(Alias: bach daemon ... funktioniert weiterhin)
 
 GUI & REST-API
 --------------
@@ -149,7 +150,7 @@ FEATURE-MATRIX
 
 Handler (Auto-Discovery in hub/):
   abo, agents, ati, backup, bericht, calendar, chain, connections,
-  connector, consolidation, contact, context, cv, daemon, data_analysis,
+  connector, consolidation, contact, context, cv, daemon (=scheduler), data_analysis,
   db, dist, doc, docs, extensions, fs, gesundheit, gui, haushalt, health,
   help, inbox, inject, lang, lesson, logs, maintain, memory, messages,
   mount, multi_llm_protocol, notify, obsidian, ollama, partner, path,

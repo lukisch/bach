@@ -169,7 +169,7 @@ CREATE INDEX IF NOT EXISTS idx_tasks_project ON tasks(project);
 -- ───────────────────────────────────────────────────────────────────────────
 -- DAEMON JOBS (erweitert aus DaemonManager)
 -- ───────────────────────────────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS daemon_jobs (
+CREATE TABLE IF NOT EXISTS scheduler_jobs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL UNIQUE,
     profile_name TEXT,               -- Aus DaemonManager/profiles.json
@@ -198,9 +198,9 @@ CREATE TABLE IF NOT EXISTS daemon_jobs (
 -- ───────────────────────────────────────────────────────────────────────────
 -- DAEMON RUNS (Job-Ausführungen)
 -- ───────────────────────────────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS daemon_runs (
+CREATE TABLE IF NOT EXISTS scheduler_runs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    job_id INTEGER NOT NULL REFERENCES daemon_jobs(id),
+    job_id INTEGER NOT NULL REFERENCES scheduler_jobs(id),
     started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     finished_at TIMESTAMP,
     duration_seconds REAL,
@@ -210,12 +210,12 @@ CREATE TABLE IF NOT EXISTS daemon_runs (
     triggered_by TEXT DEFAULT 'schedule'  -- 'schedule', 'manual', 'event'
 );
 
-CREATE INDEX IF NOT EXISTS idx_daemon_runs_job ON daemon_runs(job_id);
+CREATE INDEX IF NOT EXISTS idx_scheduler_runs_job ON scheduler_runs(job_id);
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- STANDARD DAEMON-JOBS (migriert aus DaemonManager/profiles.json)
 -- ───────────────────────────────────────────────────────────────────────────
-INSERT OR IGNORE INTO daemon_jobs (name, profile_name, description, job_type, schedule, command, script_path, arguments, is_active) VALUES
+INSERT OR IGNORE INTO scheduler_jobs (name, profile_name, description, job_type, schedule, command, script_path, arguments, is_active) VALUES
     ('scanner', 'scanner', 'Scannt Software-Ordner nach Aufgaben', 'interval', '60', 'bach scan run', NULL, NULL, 1),
     ('backup', 'backup_tool', 'Automatisches Backup', 'interval', '1440', 'bach backup create', NULL, '--to-nas', 0);
 
@@ -276,6 +276,6 @@ SELECT
     j.success_count,
     j.fail_count,
     r.duration_seconds as last_duration
-FROM daemon_jobs j
-LEFT JOIN daemon_runs r ON r.job_id = j.id 
+FROM scheduler_jobs j
+LEFT JOIN scheduler_runs r ON r.job_id = j.id 
     AND r.started_at = j.last_run;

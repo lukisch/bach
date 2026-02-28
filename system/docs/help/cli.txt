@@ -52,7 +52,7 @@ AGENTEN & EXPERTEN (Fachgebiete):
 SERVICES & INFRASTRUKTUR:
 ----------------------------------------
   gui           Dashboard Steuerung (start, stop, status)
-  daemon        Hintergrund-Service fuer Wartung
+  scheduler     Hintergrund-Service fuer Wartung (ehemals: daemon)
   scan          Input-Scanner (Inbox, OCR)
   connector     Connector-Verwaltung (poll, dispatch, setup-daemon)
   mount         Einbinden externer Ressourcen
@@ -143,7 +143,7 @@ REGISTRIERTE HANDLER (Stand 2026-02-13):
 75+ Handler via Auto-Discovery (hub/*.py):
 abo, agents, ati, backup, beat, bericht, between, calendar, chain, clock,
 connections, connector, consolidation, contact, context, countdown, cv,
-daemon, data, db, dist, doc, docs, email, extensions, fs, gesundheit, gui,
+daemon (=scheduler), data, db, dist, doc, docs, email, extensions, fs, gesundheit, gui,
 haushalt, healthcheck, help, hooks, inject, lang, lesson, logs, maintain,
 mem, memory, mount, msg, notify, obsidian, ollama, partner, path, profile,
 profiler, recurring, reflection, routine, scan, session, shutdown, skill,

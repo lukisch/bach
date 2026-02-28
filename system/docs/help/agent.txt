@@ -1,0 +1,121 @@
+# Portabilitaet: SYSTEM
+# Version: 1.0.0
+# Zuletzt validiert: 2026-02-28
+# Naechste Pruefung: 2026-08-28
+# Ressourcen: [hub/agent_launcher.py, agents/, agents/_experts/]
+
+AGENT - Agent-Launcher und Verwaltung
+======================================
+
+STAND: 2026-02-28
+
+Das Agent-System erlaubt das Starten und Verwalten von BACH-Agenten
+als separate Claude-Code-Prozesse. Jeder Agent wird mit seiner eigenen
+SKILL.md als Identitaet gestartet.
+
+STRUKTUR
+--------
+
+  [Boss-Agent]         -- Koordiniert und delegiert
+       |
+       +-- [Experte 1] -- Spezialisierte Ausfuehrung
+       +-- [Experte 2]
+
+Agenten-Verzeichnisse:
+  agents/              Boss-Agenten (mit SKILL.md)
+  agents/_experts/     Experten (mit SKILL.md)
+
+CLI-BEFEHLE (bach agent)
+------------------------
+
+  list                  Alle verfuegbaren Agents auflisten
+  start <name>          Agent starten (neues Terminalfenster)
+  stop <name>           Laufenden Agent stoppen
+  status                Alle laufenden Agents anzeigen
+
+OPTIONEN FUER START
+-------------------
+
+  --mode plan|default   Modus (Standard: default)
+  --model sonnet|opus|haiku   KI-Modell (Standard: sonnet)
+
+BEISPIELE
+---------
+
+  # Alle Agents auflisten (inkl. Laufstatus)
+  bach agent list
+
+  # Agent starten
+  bach agent start ati
+  bach agent start research --model opus
+  bach agent start entwickler --mode plan
+
+  # Laufende Agents anzeigen
+  bach agent status
+
+  # Agent stoppen (per Name)
+  bach agent stop ati
+
+VERFUEGBARE AGENTEN (Auswahl)
+-----------------------------
+
+  [BERUFLICH]
+    ati               Software-Entwickler-Agent (Scanner, Sessions)
+    entwickler        Allgemeiner Entwickler-Agent
+    production        Produktions-Workflow-Agent
+    research          Wissenschaftliche Recherche
+    bueroassistent    Steuern, Foerderplanung, Dokumentation
+    reflection        Selbstreflexion und Meta-Analyse
+
+  [PRIVAT]
+    persoenlicher-assistent   Terminverwaltung, Recherche
+    gesundheitsassistent      Medizinische Dokumentation
+    versicherungen            Versicherungs-Verwaltung
+
+  [EXPERTEN]
+    steuer            Steuer-Experte (unter _experts/)
+    foerderplaner     Foerderantrag-Experte
+    haushaltsmanagement
+    psycho-berater
+
+Aktuelle Liste: bach agent list
+
+WIE ES FUNKTIONIERT
+-------------------
+
+1. `bach agent start <name>` findet die SKILL.md des Agenten
+2. Eine temporaere CLAUDE.md wird erstellt (data/temp/agent_<name>/)
+3. Ein neues Terminalfenster oeffnet sich mit Claude Code
+4. PID wird in data/agent_pids/<name>.pid gespeichert
+5. `bach agent stop <name>` beendet den Prozess und loescht die PID
+
+VORAUSSETZUNGEN
+---------------
+- Claude Code CLI muss installiert sein (Befehl: `claude`)
+- Agent muss eine SKILL.md haben (agents/<name>/SKILL.md)
+
+DATENBANK
+---------
+  bach.db:
+    agents              Agenten-Registry
+    agent_synergies     Synergien zwischen Agenten
+
+DATEIEN
+-------
+  hub/agent_launcher.py     Handler-Implementation
+  agents/                   Boss-Agenten-Ordner
+  agents/_experts/          Experten-Ordner
+  data/agent_pids/          PID-Dateien laufender Agents
+  data/temp/agent_*/        Temporaere CLAUDE.md pro Agent
+
+UNTERSCHIED ZU agents.txt
+--------------------------
+Dieses Dokument beschreibt den AgentLauncherHandler (bach agent ...).
+Fuer eine Uebersicht ueber alle Agenten und Experten:
+  bach --help agents
+
+SIEHE AUCH
+----------
+  bach --help agents      Agenten-Uebersicht (alle Agenten)
+  bach --help skills      SKILL.md-System
+  bach --help ati         ATI Software-Entwickler Details

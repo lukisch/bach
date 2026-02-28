@@ -27,7 +27,7 @@ Dieser Skill definiert:
 
 | Zone | Pfad | Berechtigung |
 |------|------|--------------|
-| **RecludOS-Ordner** | `C:\Users\User\OneDrive\KI&AI\BACH_v2_vanilla\` | Volle Kontrolle |
+| **BACH-Ordner** | `<BACH_ROOT>/` | Volle Kontrolle |
 | **Workspace** | `recludOS\Workspace\` | Frei nutzbar |
 | **Extern** | Alles andere | Backup-Pflicht! |
 

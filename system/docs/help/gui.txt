@@ -97,7 +97,7 @@ Tasks:
 Wartung:
   CLI: bach daemon list/run/toggle
   GUI: /daemon (Jobs, Runs, Toggle)
-  DB:  bach.db -> daemon_jobs, daemon_runs
+  DB:  bach.db -> scheduler_jobs, scheduler_runs
 
 
 STRUKTUR

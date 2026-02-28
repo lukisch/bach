@@ -385,7 +385,7 @@ class PipelineHandler:
         # daemon_job erstellen/aktualisieren
         try:
             conn.execute("""
-                INSERT INTO daemon_jobs
+                INSERT INTO scheduler_jobs
                     (name, description, job_type, schedule, command, is_active)
                 VALUES (?, ?, ?, ?, ?, ?)
                 ON CONFLICT(name) DO UPDATE SET

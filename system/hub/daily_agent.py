@@ -333,7 +333,7 @@ class DailyAgentHandler(BaseHandler):
         # Faellige periodische Tasks
         try:
             recurring = conn.execute("""
-                SELECT id, name FROM daemon_jobs
+                SELECT id, name FROM scheduler_jobs
                 WHERE is_active = 1 LIMIT 5
             """).fetchall()
             if recurring:

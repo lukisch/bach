@@ -1,11 +1,13 @@
 # Portabilitaet: SYSTEM
-# Zuletzt validiert: 2026-02-08
-# Naechste Pruefung: 2026-05-08
+# Zuletzt validiert: 2026-02-28
+# Naechste Pruefung: 2026-08-28
 
 DAEMON - Hintergrund-Jobs und Scheduler
 =======================================
+HINWEIS: "bach daemon" ist ein Alias fuer "bach scheduler".
+Aktuelle Dokumentation: bach --help scheduler
 
-STAND: 2026-02-08
+STAND: 2026-02-08 (Alias seit 2026-02-28)
 
 WICHTIGE POLICY
 ---------------

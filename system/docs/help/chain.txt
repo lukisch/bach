@@ -1,0 +1,128 @@
+# Portabilitaet: SYSTEM
+# Version: 1.0.0
+# Zuletzt validiert: 2026-02-28
+# Naechste Pruefung: 2026-08-28
+# Ressourcen: [hub/chain.py, toolchains, daemon_jobs]
+
+CHAIN - Verkettete Tool-Befehle und LLM-Ketten
+================================================
+
+STAND: 2026-02-28
+
+Das Chain-System erlaubt die Verkettung von BACH-Befehlen (Toolchains)
+und die Verwaltung von LLM-Agenten-Ketten via MarbleRun/llmauto.
+
+Ref: SYS_002, SQ074
+
+ZWEI CHAIN-TYPEN
+----------------
+
+1. TOOLCHAINS (Datenbank)
+   Sequentielle BACH-Befehle ohne LLM. Gespeichert in bach.db.
+   Eignen sich fuer automatisierte Workflows.
+
+2. LLMAUTO-KETTEN (JSON-Dateien)
+   LLM-Agenten-Ketten via MarbleRun (llmauto). Laufen als
+   Hintergrundprozesse.
+
+CLI-BEFEHLE - TOOLCHAINS (DB)
+-----------------------------
+
+  list              Alle Chains anzeigen (Toolchains + llmauto)
+  run <id>          Toolchain ausfuehren
+  add "JSON"        Neue Toolchain erstellen
+  show <id>         Details ansehen
+  delete <id>       Toolchain loeschen
+  log <id>          Logs einer Toolchain anzeigen
+
+CLI-BEFEHLE - LLMAUTO-KETTEN (JSON)
+-------------------------------------
+
+  create <name>     Neue llmauto-Kette erstellen
+  start <name>      Kette starten (Hintergrundprozess)
+  stop <name>       Kette stoppen
+  status [name]     Status anzeigen (alle oder bestimmte Kette)
+  reset <name>      State einer Kette zuruecksetzen
+
+OPTIONEN FUER CREATE
+---------------------
+
+  --mode once|loop   Ausfuehrungs-Modus (Standard: once)
+  --skill PATH       SKILL.md-Pfad fuer den Agenten
+  --model MODEL      KI-Modell (sonnet, opus, haiku)
+
+BEISPIELE
+---------
+
+  # Toolchain auflisten
+  bach chain list
+
+  # Toolchain ausfuehren
+  bach chain run 1
+
+  # Toolchain erstellen (JSON-Format)
+  bach chain add '{"name":"taeglich","steps":["bach backup create","bach scan run"]}'
+
+  # Details einer Toolchain
+  bach chain show 1
+
+  # Logs anzeigen
+  bach chain log 1
+
+  # llmauto-Kette erstellen
+  bach chain create mein-workflow
+  bach chain create analyse --mode once --model opus
+
+  # llmauto-Kette steuern
+  bach chain start mein-workflow
+  bach chain status
+  bach chain status mein-workflow
+  bach chain stop mein-workflow
+  bach chain reset mein-workflow
+
+TOOLCHAIN JSON-FORMAT
+---------------------
+
+  {
+    "name": "Name der Kette",
+    "description": "Beschreibung",
+    "steps": [
+      "bach task list",
+      "bach backup create",
+      "bach scan run"
+    ]
+  }
+
+  Jeder Schritt ist ein vollstaendiger bach-Befehl.
+  Schritte werden sequentiell ausgefuehrt.
+
+LLMAUTO-KETTEN
+--------------
+
+llmauto-Ketten laufen als eigenstaendige Claude-Code-Prozesse
+im Hintergrund. Sie nutzen MarbleRun fuer die Orchestrierung.
+
+  data/chains/<name>/          Ketten-Verzeichnis
+    config.json                Ketten-Konfiguration
+    state.json                 Aktueller State
+    SKILL.md                   Agenten-Anweisung
+
+DATENBANK
+---------
+
+  toolchains:
+    id, name, description, steps_json, created_at, updated_at
+
+  chain_runs:
+    id, chain_id, status, started_at, ended_at, log
+
+DATEIEN
+-------
+  hub/chain.py         Handler-Implementation
+  data/chains/         llmauto-Ketten-Konfigurationen
+
+SIEHE AUCH
+----------
+  bach --help scheduler    Scheduler-System (Jobs)
+  bach --help agent        Agent-Launcher
+  bach --help tasks        Task-System

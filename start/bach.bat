@@ -56,6 +56,15 @@ echo   [L]  Loop alle 15 Min
 echo   [N]  Loop alle 30 Min
 echo   [H]  Loop jede Stunde
 echo.
+echo   --- AGENTEN -----------------------------------
+echo   [G]  Agent starten (Menue)
+echo.
+echo   --- AUTOMATISIERUNG ----------------------------
+echo   [C]  Neue Kette erstellen (Chain Creator)
+echo   [R]  MarbleRun Kette
+echo   [U]  llmauto Kette
+echo   [T]  Automation Status
+echo.
 echo   [Q]  Beenden
 echo   ==================================================
 echo.
@@ -81,6 +90,11 @@ if /i "!choice!"=="M" goto claude_maintenance
 if /i "!choice!"=="L" goto loop_15
 if /i "!choice!"=="N" goto loop_30
 if /i "!choice!"=="H" goto loop_1h
+if /i "!choice!"=="G" goto agent_start
+if /i "!choice!"=="C" goto automation_create
+if /i "!choice!"=="R" goto automation_marblerun
+if /i "!choice!"=="U" goto automation_llmauto
+if /i "!choice!"=="T" goto automation_status
 if /i "!choice!"=="Q" goto end
 
 echo   Ungueltige Auswahl.
@@ -425,6 +439,37 @@ echo.
 echo [%date% %time%] Session beendet. Naechste in 1 Stunde... (Ctrl+C = Stop)
 timeout /t 3600 /nobreak
 goto loop_1h_cycle
+
+REM ============================================================
+REM  AGENTEN
+REM ============================================================
+:agent_start
+title BACH Agent Starter
+call "%~dp0_internal\agent_start.bat"
+goto menu
+
+REM ============================================================
+REM  AUTOMATISIERUNG
+REM ============================================================
+:automation_create
+title BACH Chain Creator
+call "%~dp0_internal\automation_create.bat"
+goto menu
+
+:automation_marblerun
+title BACH MarbleRun
+call "%~dp0_internal\automation_marblerun.bat"
+goto menu
+
+:automation_llmauto
+title BACH llmauto
+call "%~dp0_internal\automation_llmauto.bat"
+goto menu
+
+:automation_status
+title BACH Automation Status
+call "%~dp0_internal\automation_status.bat"
+goto menu
 
 REM ============================================================
 :end

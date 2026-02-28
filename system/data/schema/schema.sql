@@ -57,6 +57,19 @@ CREATE TABLE IF NOT EXISTS distribution_manifest (
     updated_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
+-- ── SECRETS ─────────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS secrets (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    key TEXT NOT NULL UNIQUE,
+    value TEXT NOT NULL,
+    category TEXT DEFAULT 'general',
+    description TEXT,
+    source TEXT DEFAULT 'manual',
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
 -- ── TASKS ───────────────────────────────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS tasks (
@@ -344,16 +357,58 @@ CREATE TABLE IF NOT EXISTS automation_injectors (
         updated_at TEXT
     );
 
-CREATE TABLE IF NOT EXISTS daemon_jobs (
+-- ── PROMPTS ────────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS prompt_templates (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL UNIQUE,
-    profile_name TEXT,               -- Aus DaemonManager/profiles.json
+    purpose TEXT,
+    text TEXT NOT NULL,
+    tags TEXT,                       -- JSON array
+    category TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    dist_type INTEGER DEFAULT 1
+);
+
+CREATE TABLE IF NOT EXISTS prompt_versions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    prompt_id INTEGER NOT NULL REFERENCES prompt_templates(id),
+    version_number INTEGER NOT NULL,
+    text TEXT NOT NULL,
+    tags TEXT,                       -- JSON array
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(prompt_id, version_number)
+);
+
+CREATE TABLE IF NOT EXISTS prompt_boards (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
     description TEXT,
-    job_type TEXT NOT NULL CHECK(job_type IN ('cron', 'interval', 'event', 'manual')),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS prompt_board_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    board_id INTEGER NOT NULL REFERENCES prompt_boards(id),
+    prompt_id INTEGER NOT NULL REFERENCES prompt_templates(id),
+    version_id INTEGER REFERENCES prompt_versions(id),
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(board_id, prompt_id)
+);
+
+-- ── SCHEDULER ─────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS scheduler_jobs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE,
+    profile_name TEXT,               -- Aus SchedulerService/profiles.json
+    description TEXT,
+    job_type TEXT NOT NULL CHECK(job_type IN ('cron', 'interval', 'event', 'manual', 'chain')),
     schedule TEXT,                   -- Cron-Expression oder Interval
     command TEXT NOT NULL,           -- CLI-Befehl
-    script_path TEXT,                -- Pfad zum Script (aus DaemonManager)
-    arguments TEXT,                  -- Argumente (aus DaemonManager)
+    script_path TEXT,                -- Pfad zum Script
+    arguments TEXT,                  -- Argumente
     parameters TEXT,                 -- JSON mit Parametern
     is_active INTEGER DEFAULT 0,
     last_run TIMESTAMP,
@@ -367,20 +422,22 @@ CREATE TABLE IF NOT EXISTS daemon_jobs (
     retry_on_fail INTEGER DEFAULT 0,
     max_retries INTEGER DEFAULT 3,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-, dist_type INTEGER DEFAULT 1);
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    dist_type INTEGER DEFAULT 1
+);
 
-CREATE TABLE IF NOT EXISTS daemon_runs (
+CREATE TABLE IF NOT EXISTS scheduler_runs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    job_id INTEGER NOT NULL REFERENCES daemon_jobs(id),
+    job_id INTEGER NOT NULL REFERENCES scheduler_jobs(id),
     started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     finished_at TIMESTAMP,
     duration_seconds REAL,
     result TEXT CHECK(result IN ('success', 'failed', 'timeout', 'cancelled')),
     output TEXT,
     error TEXT,
-    triggered_by TEXT DEFAULT 'schedule'  -- 'schedule', 'manual', 'event'
-, dist_type INTEGER DEFAULT 0);
+    triggered_by TEXT DEFAULT 'schedule',  -- 'schedule', 'manual', 'event'
+    dist_type INTEGER DEFAULT 0
+);
 
 CREATE TABLE IF NOT EXISTS toolchains (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

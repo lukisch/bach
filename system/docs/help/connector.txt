@@ -136,7 +136,7 @@ Tabellen:
   connections         Connector-Konfiguration + Circuit-Breaker-Status
   connector_messages  Nachrichten-Queue (ein-/ausgehend, Retry-Tracking)
   messages            Inbox/Outbox (geroutete Nachrichten)
-  daemon_jobs         Automatische Poll/Dispatch-Jobs
+  scheduler_jobs         Automatische Poll/Dispatch-Jobs
 
 Relevante Spalten connector_messages:
   status          TEXT (pending/sent/failed/dead)
