@@ -11,13 +11,23 @@ Operationen:
   today             Was steht heute an?
   week              Wochenplan
   shopping          Einkaufsliste anzeigen/verwalten
-  inventory         Vorratsbestand
+  inventory         Vorratsbestand mit Ampel
+  add-item          Artikel zum Inventar hinzufuegen
+  stock-in          Wareneingang buchen
+  stock-out         Verbrauch buchen
+  pull-check        Einkaufs-Pull-Liste (Was muss gekauft werden?)
+  ampel             Ampel-Uebersicht aller Artikel
+  order             Order fuer Artikel anlegen
+  supplier          Lieferanten anzeigen
+  add-supplier      Lieferant hinzufuegen
   costs             Monatliche Fixkosten-Uebersicht
   kosten-monat      Erwartete irregulare Kosten pro Monat
   add-kosten        Irregulare Kosten hinzufuegen
   help              Hilfe anzeigen
 
-Nutzt: bach.db / household_routines, assistant_calendar, fin_contracts (Unified DB seit v1.1.84)
+Nutzt: bach.db / household_routines, household_inventory, household_orders,
+       household_suppliers, household_stock_transactions,
+       assistant_calendar, fin_contracts (Unified DB seit v1.1.84)
 """
 
 import sqlite3
@@ -58,6 +68,15 @@ class HaushaltHandler(BaseHandler):
             "shopping": "Einkaufsliste",
             "add-shopping": "Einkaufsartikel hinzufuegen",
             "done-shopping": "Einkaufsartikel als erledigt markieren",
+            "inventory": "Vorratsbestand mit Ampel",
+            "add-item": "Artikel zum Inventar hinzufuegen",
+            "stock-in": "Wareneingang buchen",
+            "stock-out": "Verbrauch buchen",
+            "pull-check": "Einkaufs-Pull-Liste",
+            "ampel": "Ampel-Uebersicht",
+            "order": "Order anlegen",
+            "supplier": "Lieferanten anzeigen",
+            "add-supplier": "Lieferant hinzufuegen",
             "help": "Hilfe",
         }
 
@@ -92,6 +111,24 @@ class HaushaltHandler(BaseHandler):
             return self._add_shopping(args)
         elif op == "done-shopping":
             return self._done_shopping(args)
+        elif op == "inventory":
+            return self._inventory(args)
+        elif op == "add-item":
+            return self._add_item(args)
+        elif op == "stock-in":
+            return self._stock_in(args)
+        elif op == "stock-out":
+            return self._stock_out(args)
+        elif op == "pull-check":
+            return self._pull_check(args)
+        elif op == "ampel":
+            return self._ampel(args)
+        elif op == "order":
+            return self._order(args)
+        elif op == "supplier":
+            return self._supplier(args)
+        elif op == "add-supplier":
+            return self._add_supplier(args)
         elif op in ("", "help"):
             return self._help()
         else:
@@ -162,6 +199,18 @@ class HaushaltHandler(BaseHandler):
                 ORDER BY next_due ASC LIMIT 5
             """, (now_str + " 23:59:59",)).fetchall()
 
+            # Inventar-Ampel
+            try:
+                from hub._services.household.inventory_engine import InventoryEngine, AMPEL_ROT, AMPEL_GELB, AMPEL_GRUEN
+                engine = InventoryEngine(self.user_db_path)
+                overview = engine.get_ampel_overview()
+                inv_total = len(overview)
+                inv_rot = sum(1 for x in overview if x["ampel"] == AMPEL_ROT)
+                inv_gelb = sum(1 for x in overview if x["ampel"] == AMPEL_GELB)
+                inv_gruen = sum(1 for x in overview if x["ampel"] == AMPEL_GRUEN)
+            except Exception:
+                inv_total = inv_rot = inv_gelb = inv_gruen = 0
+
             lines = [
                 "=== HAUSHALTS-DASHBOARD ===",
                 "",
@@ -170,12 +219,22 @@ class HaushaltHandler(BaseHandler):
                 f"  Diese Woche:       {due_week}",
                 f"  Einkaufsliste:     {shopping_count} Artikel",
                 "",
+            ]
+
+            if inv_total > 0:
+                lines.append(f"  VORRAT ({inv_total} Artikel):")
+                lines.append(f"    ROT: {inv_rot}  GELB: {inv_gelb}  GRUEN: {inv_gruen}")
+                if inv_rot > 0:
+                    lines.append(f"    -> bach haushalt pull-check")
+                lines.append("")
+
+            lines.extend([
                 f"  FIXKOSTEN/MONAT:",
                 f"    Vertraege:       {monthly_costs:,.2f} EUR",
                 f"    Versicherungen:  {insurance_monthly:,.2f} EUR",
                 f"    GESAMT:          {monthly_costs + insurance_monthly:,.2f} EUR",
                 "",
-            ]
+            ])
 
             if overdue_items:
                 lines.append("  UEBERFAELLIGE ROUTINEN:")
@@ -868,32 +927,436 @@ class HaushaltHandler(BaseHandler):
         return True, """HAUSHALT - Haushaltsmanagement
 =============================
 
-BEFEHLE:
+UEBERSICHT:
   bach haushalt status             Dashboard (Zusammenfassung)
   bach haushalt today              Was steht heute an?
   bach haushalt week               Wochenplan (Routinen + Termine)
-  bach haushalt due                Faellige Aufgaben (7 Tage)
-  bach haushalt due 14             Faellige Aufgaben (14 Tage)
+  bach haushalt due [tage]         Faellige Aufgaben (Standard: 7 Tage)
+
+FIXKOSTEN:
   bach haushalt costs              Monatliche Fixkosten-Uebersicht
+  bach haushalt kosten-monat [m]   Irregulare Kosten pro Monat
+  bach haushalt add-kosten "Name" --monat 3 --betrag 100
+  bach haushalt kosten-list        Alle irregularen Kosten
   bach haushalt insurance-check    Versicherungs-Portfolio analysieren
+
+EINKAUFSLISTE:
   bach haushalt shopping           Einkaufsliste anzeigen
   bach haushalt add-shopping "Milch" --cat Lebensmittel --qty 2
   bach haushalt done-shopping <id> Einkaufsartikel als erledigt markieren
 
-DASHBOARD ZEIGT:
-  - Aktive Routinen und ueberfaellige
-  - Monatliche Fixkosten (Vertraege + Versicherungen)
-  - Einkaufsliste
-  - Naechste faellige Aufgaben
+VORRATSMANAGEMENT (Pull-System):
+  bach haushalt inventory          Vorratsbestand mit Ampel anzeigen
+  bach haushalt add-item "Milch" --cat Lebensmittel --unit Liter --min 2
+  bach haushalt stock-in <id> <menge> [--price 1.29] [--supplier 1]
+  bach haushalt stock-out <id> <menge>
+  bach haushalt pull-check         Automatische Einkaufs-Pull-Liste
+  bach haushalt ampel              Ampel-Uebersicht (ROT/GELB/GRUEN)
+  bach haushalt order <id> --type routine --qty 6 --cycle 14
+  bach haushalt supplier           Lieferanten anzeigen
+  bach haushalt add-supplier "REWE" --type supermarket
 
-ZUSAMMENSPIEL:
-  - bach routine: Detaillierte Routinen-Verwaltung (add/done/show)
-  - bach calendar: Termine und Kalender
-  - bach abo: Abo-Verwaltung und -Erkennung
-  - bach gesundheit: Gesundheitsmanagement
+AMPEL-FARBEN:
+  ROT   = Leer und Bedarf vorhanden (sofort kaufen!)
+  GELB  = Weniger als 7 Tage Vorrat
+  GRUEN = Genug auf Lager
+  GRAU  = Kein Bedarf definiert"""
 
-DATENBANK: user.db / household_routines, fin_contracts, fin_insurances,
-           assistant_calendar, household_shopping"""
+    # ------------------------------------------------------------------
+    # INVENTORY - Vorratsbestand mit Ampel
+    # ------------------------------------------------------------------
+    def _inventory(self, args: List[str]) -> Tuple[bool, str]:
+        from hub._services.household.inventory_engine import InventoryEngine
+        engine = InventoryEngine(self.user_db_path)
+        overview = engine.get_ampel_overview()
+
+        if not overview:
+            return True, (
+                "[HAUSHALT] Kein Inventar vorhanden.\n"
+                "Nutze: bach haushalt add-item \"Milch\" --cat Lebensmittel --unit Liter --min 2"
+            )
+
+        # Optional: nach Kategorie filtern
+        cat_filter = self._get_arg(args, "--cat") or self._get_arg(args, "-c")
+
+        lines = [f"=== VORRATSBESTAND ({len(overview)} Artikel) ===\n"]
+        current_cat = None
+
+        for item in overview:
+            if cat_filter and item["category"].lower() != cat_filter.lower():
+                continue
+
+            cat = item["category"] or "Sonstige"
+            if cat != current_cat:
+                current_cat = cat
+                lines.append(f"  [{cat}]")
+
+            ampel = item["ampel"]
+            days = f"{item['days_left']:.0f}d" if item["days_left"] != float("inf") else "---"
+            lines.append(
+                f"    {ampel:<5} [{item['id']:>3}] {item['name']:<25} "
+                f"{item['stock']:>6.1f} {item['unit']:<5} (Vorrat: {days})"
+            )
+
+        lines.append(f"\n  Befehle: bach haushalt pull-check | ampel | add-item | stock-in | stock-out")
+        return True, "\n".join(lines)
+
+    # ------------------------------------------------------------------
+    # ADD-ITEM - Artikel anlegen
+    # ------------------------------------------------------------------
+    def _add_item(self, args: List[str]) -> Tuple[bool, str]:
+        if not args:
+            return False, (
+                "Usage: bach haushalt add-item \"Name\" [Optionen]\n\n"
+                "Optionen:\n"
+                "  --cat, -c       Kategorie (Lebensmittel, Hygiene, Medikamente, ...)\n"
+                "  --unit, -u      Einheit (Stueck, Liter, kg, Packung, ...)\n"
+                "  --min           Mindestbestand (Standard: 1)\n"
+                "  --pack-size     Packungsgroesse (Standard: 1)\n"
+                "  --priority      Prioritaet 1-3 (1=optional, 2=wichtig, 3=kritisch)\n"
+                "  --location      Lagerort"
+            )
+
+        name = None
+        for a in args:
+            if not a.startswith("-"):
+                name = a
+                break
+        if not name:
+            return False, "Kein Name angegeben."
+
+        cat = self._get_arg(args, "--cat") or self._get_arg(args, "-c") or "Sonstige"
+        unit = self._get_arg(args, "--unit") or self._get_arg(args, "-u") or "Stueck"
+        min_qty = self._get_arg(args, "--min")
+        pack_size = self._get_arg(args, "--pack-size")
+        priority = self._get_arg(args, "--priority")
+        location = self._get_arg(args, "--location")
+
+        try:
+            min_qty = int(min_qty) if min_qty else 1
+        except ValueError:
+            return False, f"Ungueltiger Mindestbestand: {min_qty}"
+        try:
+            pack_size = float(pack_size) if pack_size else 1.0
+        except ValueError:
+            return False, f"Ungueltige Packungsgroesse: {pack_size}"
+        try:
+            priority = int(priority) if priority else 2
+            if priority not in (1, 2, 3):
+                return False, "Prioritaet muss 1, 2 oder 3 sein."
+        except ValueError:
+            return False, f"Ungueltige Prioritaet: {priority}"
+
+        conn = self._get_db()
+        try:
+            cursor = conn.execute("""
+                INSERT INTO household_inventory
+                (name, category, unit, min_quantity, pack_size, priority, location, quantity)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 0)
+            """, (name, cat, unit, min_qty, pack_size, priority, location))
+            conn.commit()
+            return True, f"[OK] Artikel #{cursor.lastrowid}: {name} ({cat}, {unit}, Prio {priority})"
+        except sqlite3.IntegrityError as e:
+            return False, f"Fehler: {e}"
+        finally:
+            conn.close()
+
+    # ------------------------------------------------------------------
+    # STOCK-IN - Wareneingang
+    # ------------------------------------------------------------------
+    def _stock_in(self, args: List[str]) -> Tuple[bool, str]:
+        if len(args) < 2:
+            return False, (
+                "Usage: bach haushalt stock-in <artikel-id> <menge> [Optionen]\n\n"
+                "Optionen:\n"
+                "  --price    Preis pro Einheit\n"
+                "  --supplier Lieferanten-ID"
+            )
+
+        try:
+            article_id = int(args[0])
+            amount = float(args[1])
+        except (ValueError, IndexError):
+            return False, "Usage: bach haushalt stock-in <id> <menge>"
+
+        if amount <= 0:
+            return False, "Menge muss positiv sein."
+
+        price = self._get_arg(args, "--price")
+        supplier_id = self._get_arg(args, "--supplier")
+        try:
+            price = float(price) if price else None
+        except ValueError:
+            return False, f"Ungueltiger Preis: {price}"
+        try:
+            supplier_id = int(supplier_id) if supplier_id else None
+        except ValueError:
+            return False, f"Ungueltige Lieferanten-ID: {supplier_id}"
+
+        from hub._services.household.inventory_engine import InventoryEngine
+        engine = InventoryEngine(self.user_db_path)
+        try:
+            result = engine.stock_in(article_id, amount, supplier_id=supplier_id, price=price)
+            return True, (
+                f"[OK] Eingang: {result['name']}\n"
+                f"  {result['before']:.1f} + {result['amount']:.1f} = {result['after']:.1f}"
+            )
+        except ValueError as e:
+            return False, str(e)
+
+    # ------------------------------------------------------------------
+    # STOCK-OUT - Verbrauch
+    # ------------------------------------------------------------------
+    def _stock_out(self, args: List[str]) -> Tuple[bool, str]:
+        if len(args) < 2:
+            return False, "Usage: bach haushalt stock-out <artikel-id> <menge>"
+
+        try:
+            article_id = int(args[0])
+            amount = float(args[1])
+        except (ValueError, IndexError):
+            return False, "Usage: bach haushalt stock-out <id> <menge>"
+
+        if amount <= 0:
+            return False, "Menge muss positiv sein."
+
+        from hub._services.household.inventory_engine import InventoryEngine
+        engine = InventoryEngine(self.user_db_path)
+        try:
+            result = engine.stock_out(article_id, amount)
+            return True, (
+                f"[OK] Verbrauch: {result['name']}\n"
+                f"  {result['before']:.1f} - {result['amount']:.1f} = {result['after']:.1f}"
+            )
+        except ValueError as e:
+            return False, str(e)
+
+    # ------------------------------------------------------------------
+    # PULL-CHECK - Einkaufs-Pull-Liste
+    # ------------------------------------------------------------------
+    def _pull_check(self, args: List[str]) -> Tuple[bool, str]:
+        days = 30
+        for a in args:
+            try:
+                days = int(a)
+                break
+            except ValueError:
+                pass
+
+        from hub._services.household.inventory_engine import InventoryEngine
+        engine = InventoryEngine(self.user_db_path)
+        pull_list = engine.generate_pull_list(days_ahead=days)
+
+        if not pull_list:
+            return True, f"[HAUSHALT] Kein Einkaufsbedarf (naechste {days} Tage). Alles auf Lager!"
+
+        lines = [f"=== EINKAUFS-PULL-LISTE ({days} Tage) ===\n"]
+        lines.append(f"  {'Artikel':<25} {'Fehlmenge':>10} {'Packungen':>10} {'Dringlichkeit':>13}")
+        lines.append("  " + "-" * 62)
+
+        total_packs = 0
+        for item in pull_list:
+            total_packs += item["packs_needed"]
+            lines.append(
+                f"  {item['name']:<25} "
+                f"{item['missing']:>8.1f} {item['unit']:<1} "
+                f"{item['packs_needed']:>8}x     "
+                f"D={item['urgency']:>5.1f}"
+            )
+
+        lines.append("")
+        lines.append(f"  {len(pull_list)} Artikel, {total_packs} Packungen gesamt")
+        lines.append(f"\n  Eingang buchen: bach haushalt stock-in <id> <menge>")
+        return True, "\n".join(lines)
+
+    # ------------------------------------------------------------------
+    # AMPEL - Uebersicht
+    # ------------------------------------------------------------------
+    def _ampel(self, args: List[str]) -> Tuple[bool, str]:
+        from hub._services.household.inventory_engine import InventoryEngine
+        engine = InventoryEngine(self.user_db_path)
+        overview = engine.get_ampel_overview()
+
+        if not overview:
+            return True, "[HAUSHALT] Kein Inventar vorhanden."
+
+        rot = [x for x in overview if x["ampel"] == "ROT"]
+        gelb = [x for x in overview if x["ampel"] == "GELB"]
+        gruen = [x for x in overview if x["ampel"] == "GRUEN"]
+        grau = [x for x in overview if x["ampel"] == "GRAU"]
+
+        lines = [f"=== AMPEL-UEBERSICHT ({len(overview)} Artikel) ===\n"]
+
+        if rot:
+            lines.append(f"  ROT — Sofort kaufen! ({len(rot)})")
+            for item in rot:
+                lines.append(f"    [{item['id']:>3}] {item['name']:<25} Bestand: {item['stock']:.1f} {item['unit']}")
+            lines.append("")
+
+        if gelb:
+            lines.append(f"  GELB — Bald aufbrauchen ({len(gelb)})")
+            for item in gelb:
+                days = f"{item['days_left']:.0f} Tage" if item["days_left"] != float("inf") else "---"
+                lines.append(f"    [{item['id']:>3}] {item['name']:<25} Vorrat: {days}")
+            lines.append("")
+
+        if gruen:
+            lines.append(f"  GRUEN — OK ({len(gruen)})")
+            for item in gruen:
+                days = f"{item['days_left']:.0f} Tage" if item["days_left"] != float("inf") else "---"
+                lines.append(f"    [{item['id']:>3}] {item['name']:<25} Vorrat: {days}")
+            lines.append("")
+
+        if grau:
+            lines.append(f"  GRAU — Kein Bedarf definiert ({len(grau)})")
+            for item in grau:
+                lines.append(f"    [{item['id']:>3}] {item['name']:<25} Bestand: {item['stock']:.1f} {item['unit']}")
+
+        return True, "\n".join(lines)
+
+    # ------------------------------------------------------------------
+    # ORDER - Order anlegen
+    # ------------------------------------------------------------------
+    def _order(self, args: List[str]) -> Tuple[bool, str]:
+        if not args:
+            return False, (
+                "Usage: bach haushalt order <artikel-id> [Optionen]\n\n"
+                "Optionen:\n"
+                "  --type      Order-Typ: routine|period|oneshot|project (Standard: routine)\n"
+                "  --qty       Menge pro Zyklus/Zeitraum\n"
+                "  --cycle     Intervall in Tagen (fuer routine)\n"
+                "  --start     Startdatum YYYY-MM-DD (fuer period/project)\n"
+                "  --end       Enddatum YYYY-MM-DD (fuer period/project)\n"
+                "  --target    Zieldatum YYYY-MM-DD (fuer oneshot)\n"
+                "  --reason    Grund/Beschreibung\n"
+                "  --priority  1-3 (1=optional, 2=wichtig, 3=kritisch)"
+            )
+
+        try:
+            article_id = int(args[0])
+        except ValueError:
+            return False, f"Ungueltige Artikel-ID: {args[0]}"
+
+        order_type = self._get_arg(args, "--type") or "routine"
+        if order_type not in ("routine", "period", "oneshot", "project"):
+            return False, f"Ungueltiger Order-Typ: {order_type}. Erlaubt: routine|period|oneshot|project"
+
+        qty_str = self._get_arg(args, "--qty")
+        if not qty_str:
+            return False, "Menge erforderlich: --qty <zahl>"
+        try:
+            qty = float(qty_str)
+        except ValueError:
+            return False, f"Ungueltige Menge: {qty_str}"
+
+        cycle_str = self._get_arg(args, "--cycle")
+        start = self._get_arg(args, "--start")
+        end = self._get_arg(args, "--end")
+        target = self._get_arg(args, "--target")
+        reason = self._get_arg(args, "--reason")
+        prio_str = self._get_arg(args, "--priority")
+
+        try:
+            cycle = int(cycle_str) if cycle_str else None
+        except ValueError:
+            return False, f"Ungueltiges Intervall: {cycle_str}"
+        try:
+            priority = int(prio_str) if prio_str else 2
+        except ValueError:
+            return False, f"Ungueltige Prioritaet: {prio_str}"
+
+        if order_type == "routine" and not cycle:
+            return False, "Routine braucht --cycle <tage>"
+
+        conn = self._get_db()
+        try:
+            # Artikel pruefen
+            art = conn.execute("SELECT name FROM household_inventory WHERE id = ?", (article_id,)).fetchone()
+            if not art:
+                return False, f"Artikel {article_id} nicht gefunden."
+
+            cursor = conn.execute("""
+                INSERT INTO household_orders
+                (article_id, order_type, quantity_value, cycle_interval_days,
+                 start_date, end_date, target_date, reason, priority)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (article_id, order_type, qty, cycle, start, end, target, reason, priority))
+            conn.commit()
+
+            type_label = {"routine": "Routine", "period": "Zeitraum",
+                          "oneshot": "Einmalig", "project": "Projekt"}.get(order_type, order_type)
+            extra = f", alle {cycle} Tage" if cycle else ""
+            return True, f"[OK] Order #{cursor.lastrowid}: {type_label} fuer {art['name']} ({qty} Einheiten{extra})"
+        finally:
+            conn.close()
+
+    # ------------------------------------------------------------------
+    # SUPPLIER - Lieferanten anzeigen
+    # ------------------------------------------------------------------
+    def _supplier(self, args: List[str]) -> Tuple[bool, str]:
+        conn = self._get_db()
+        try:
+            rows = conn.execute("""
+                SELECT id, name, supplier_type, address, phone, website
+                FROM household_suppliers WHERE archived = 0
+                ORDER BY name
+            """).fetchall()
+
+            if not rows:
+                return True, (
+                    "[HAUSHALT] Keine Lieferanten erfasst.\n"
+                    "Nutze: bach haushalt add-supplier \"REWE\" --type supermarket"
+                )
+
+            lines = [f"=== LIEFERANTEN ({len(rows)}) ===\n"]
+            for r in rows:
+                typ = r["supplier_type"] or "other"
+                addr = f" | {r['address']}" if r["address"] else ""
+                lines.append(f"  [{r['id']:>3}] {r['name']:<25} ({typ}){addr}")
+
+            return True, "\n".join(lines)
+        finally:
+            conn.close()
+
+    # ------------------------------------------------------------------
+    # ADD-SUPPLIER - Lieferant anlegen
+    # ------------------------------------------------------------------
+    def _add_supplier(self, args: List[str]) -> Tuple[bool, str]:
+        if not args:
+            return False, (
+                "Usage: bach haushalt add-supplier \"Name\" [Optionen]\n\n"
+                "Optionen:\n"
+                "  --type      Typ: supermarket|drugstore|online|other\n"
+                "  --address   Adresse\n"
+                "  --phone     Telefon\n"
+                "  --website   Website"
+            )
+
+        name = None
+        for a in args:
+            if not a.startswith("-"):
+                name = a
+                break
+        if not name:
+            return False, "Kein Name angegeben."
+
+        supplier_type = self._get_arg(args, "--type") or "other"
+        address = self._get_arg(args, "--address")
+        phone = self._get_arg(args, "--phone")
+        website = self._get_arg(args, "--website")
+
+        conn = self._get_db()
+        try:
+            cursor = conn.execute("""
+                INSERT INTO household_suppliers (name, supplier_type, address, phone, website)
+                VALUES (?, ?, ?, ?, ?)
+            """, (name, supplier_type, address, phone, website))
+            conn.commit()
+            return True, f"[OK] Lieferant #{cursor.lastrowid}: {name} ({supplier_type})"
+        except sqlite3.IntegrityError:
+            return False, f"Lieferant '{name}' existiert bereits."
+        finally:
+            conn.close()
 
     # ------------------------------------------------------------------
     # Hilfsmethoden
