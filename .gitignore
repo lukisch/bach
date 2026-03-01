@@ -28,6 +28,8 @@
 # === SYSTEM LAUFZEIT-DATEN ===
 /system/data/.clock_state
 /system/data/.injector_cooldowns
+/system/data/build_db_log.json
+/system/data/config/db_sync_enabled
 /system/data/bach.db
 /system/data/bach-*.db
 /system/data/bach.db-journal
@@ -35,6 +37,7 @@
 /system/data/bach.db-shm
 /system/data/archive.db
 /system/data/directory_truth.json
+/system/data/config/directory_truth-*.json
 /system/data/user_config.json
 /system/data/skills_hierarchy.json
 /system/data/skills_hierarchy.backup.json
@@ -87,6 +90,12 @@ PLAN.txt
 .agent/
 .claude/
 
+# === LOKALE DEV-TOOLS (nicht committen) ===
+/system/_dev/
+
+# === USER-DATEN MIT ECHTEN NAMEN ===
+/system/data/anonymizer_whitelist.json
+
 # === USER-SPEZIFISCHE EXPERTEN (dist_type 0) ===
 # Portiert aus Vanilla, nicht im Release enthalten
 /system/agents/_experts/decision-briefing/
@@ -96,6 +105,7 @@ PLAN.txt
 /system/agents/_experts/worksheet_generator/
 /system/agents/_experts/steuer/
 /system/agents/_experts/foerderplaner/
+/system/agents/_experts/test-tool-demo/
 
 # === USER-SPEZIFISCHE SKILLS (dist_type 0) ===
 /system/skills/_os/

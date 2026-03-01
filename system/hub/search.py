@@ -7,14 +7,16 @@ SearchHandler - Unified Search CLI for BACH
 Implements: SQ064 (Semantische Suche) + SQ047 (Wissensindexierung)
 
 Operationen:
-  <query>         Unified Volltextsuche (FTS5) ueber alle Quellen
-  index           Alle Quellen indexieren (wiki, memory, documents)
-  index <path>    Verzeichnis scannen und indexieren (ProFiler-Stil)
-  status          Index-Statistiken
-  rebuild         Index leeren und komplett neu aufbauen
-  tags            Alle Tags anzeigen
-  dupes           Duplikate finden (gleicher Hash, verschiedene Pfade)
-  help            Hilfe
+  <query>                    Unified Volltextsuche (FTS5) ueber alle Quellen
+  index                      Alle Quellen indexieren (wiki, memory, documents, KD)
+  index knowledgedigest|kd   Nur KnowledgeDigest Skills + Wiki indexieren
+  index wiki|memory|docs     Einzelne Quelle indexieren
+  index <path>               Verzeichnis scannen und indexieren (ProFiler-Stil)
+  status                     Index-Statistiken
+  rebuild                    Index leeren und komplett neu aufbauen
+  tags                       Alle Tags anzeigen
+  dupes                      Duplikate finden (gleicher Hash, verschiedene Pfade)
+  help                       Hilfe
 
 Quellen (durchsucht gleichzeitig):
   - wiki_articles (413+ Artikel)
@@ -201,17 +203,40 @@ class SearchHandler(BaseHandler):
     # ------------------------------------------------------------------
 
     def _index(self, args: List[str]) -> Tuple[bool, str]:
-        """Index all sources, or scan a specific directory."""
+        """Index all sources, a specific source, or scan a directory.
+
+        Unterstuetzte Quellen:
+          bach search index                   -- Alle Quellen indexieren
+          bach search index knowledgedigest   -- Nur KnowledgeDigest indexieren
+          bach search index wiki              -- Nur Wiki indexieren
+          bach search index memory            -- Nur Memory indexieren
+          bach search index documents         -- Nur Dokumente indexieren
+          bach search index <pfad>            -- Verzeichnis scannen
+        """
         engine = self._get_engine()
 
-        if args:
-            # Specific directory scan
-            directory = args[0]
-            no_tags = "--no-tags" in args
-            return engine.scan_directory(directory, tags_from_path=not no_tags)
-        else:
+        if not args:
             # Index all BACH sources
             return engine.index_all()
+
+        # Spezifische Quellen-Keywords pruefen
+        source_keyword = args[0].lower().strip()
+        source_methods = {
+            "knowledgedigest": engine.index_knowledgedigest,
+            "kd": engine.index_knowledgedigest,
+            "wiki": engine.index_wiki,
+            "memory": engine.index_memory,
+            "documents": engine.index_documents,
+            "docs": engine.index_documents,
+        }
+
+        if source_keyword in source_methods:
+            return source_methods[source_keyword]()
+
+        # Fallback: Verzeichnis scannen
+        directory = args[0]
+        no_tags = "--no-tags" in args
+        return engine.scan_directory(directory, tags_from_path=not no_tags)
 
     # ------------------------------------------------------------------
     # STATUS
@@ -347,6 +372,10 @@ Befehle:
   bach search <query> --source wiki  Nur in Wiki suchen
   bach search <query> --tag health   Nur Eintraege mit Tag 'health'
   bach search index                Alle BACH-Quellen indexieren
+  bach search index knowledgedigest  Nur KnowledgeDigest indexieren (auch: kd)
+  bach search index wiki           Nur Wiki indexieren
+  bach search index memory         Nur Memory indexieren
+  bach search index documents      Nur Dokumente indexieren (auch: docs)
   bach search index <pfad>         Verzeichnis scannen + indexieren
   bach search status               Index-Statistiken
   bach search rebuild              Index komplett neu aufbauen
@@ -366,6 +395,7 @@ Beispiele:
   bach search "bridge connector"
   bach search "encoding" --source memory_lesson
   bach search "entwickler" --source knowledgedigest_skill
+  bach search index knowledgedigest
   bach search index C:\\Users\\YOUR_USERNAME\\Documents
   bach search tags health
 """

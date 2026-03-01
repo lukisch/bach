@@ -1,14 +1,22 @@
 """
-stigmergy_api.py — Pheromon-basierte Schwarm-Koordination (STUB)
+stigmergy_api.py — Pheromon-basierte Schwarm-Koordination
 
 Stigmergy: Agenten kommunizieren indirekt ueber Markierungen in der Umgebung,
 aehnlich wie Ameisen Pheromone hinterlassen.
 
 BACH-Implementierung: shared_memory_working als Pheromon-Traeger
-Namespace: 'stigmergy'
+Namespace: 'stigmergy' (gespeichert via tags + related_to)
+
+Mapping auf shared_memory_working Spalten:
+    type      = 'note'
+    content   = JSON: {namespace, path_id, strength, metadata, agent_id, timestamp}
+    tags      = '["stigmergy"]'
+    related_to = path_id (fuer schnelles Filtern)
+    priority  = int(strength * 10)  (0-10 Skala)
+    agent_id  = Agent der das Pheromon hinterlassen hat
 
 Stand: 2026-02-22 | Bezug: MASTERPLAN SQ051
-TODO: Vollstaendige Implementierung nach SQ073 (Scheduler) + SQ074 (llmauto)
+Implementierung: 2026-03-01
 """
 from __future__ import annotations
 from typing import Optional
@@ -27,7 +35,12 @@ class StigmergyAPI:
     Konzept aus vernunft_kantian.txt (V009: Self-Extension, Autonomie):
     Ein System das sich selbst koordinieren kann, braucht keine zentrale Steuerung.
 
-    TODO: Vollstaendige Implementierung nach SQ073 (Scheduler) + SQ074 (llmauto)
+    Tabellen-Mapping (shared_memory_working):
+        type       = 'note'
+        content    = JSON mit {namespace, path_id, strength, metadata, agent_id, timestamp}
+        tags       = '["stigmergy"]'
+        related_to = path_id
+        priority   = int(strength * 10)
     """
 
     NAMESPACE = 'stigmergy'
@@ -36,6 +49,34 @@ class StigmergyAPI:
     def __init__(self, db_path: str, agent_id: str = 'anonymous'):
         self.db_path = db_path
         self.agent_id = agent_id
+
+    def _connect(self) -> sqlite3.Connection:
+        """Erstelle eine DB-Verbindung mit Row-Factory."""
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row
+        return conn
+
+    def _make_content(self, path_id: str, strength: float,
+                      metadata: dict | None) -> str:
+        """Baue den JSON-Content-String fuer ein Pheromon."""
+        return json.dumps({
+            'namespace': self.NAMESPACE,
+            'path_id': path_id,
+            'strength': strength,
+            'metadata': metadata or {},
+            'agent_id': self.agent_id,
+            'timestamp': datetime.now().isoformat(),
+        }, ensure_ascii=False)
+
+    def _parse_content(self, content_str: str) -> dict | None:
+        """Parse den JSON-Content eines Pheromons. None bei Fehler."""
+        try:
+            data = json.loads(content_str)
+            if data.get('namespace') == self.NAMESPACE:
+                return data
+        except (json.JSONDecodeError, TypeError, AttributeError):
+            pass
+        return None
 
     def deposit(self, path_id: str, strength: float = 1.0, metadata: dict = None) -> bool:
         """
@@ -49,13 +90,54 @@ class StigmergyAPI:
         Returns:
             True bei Erfolg, False bei Fehler
 
-        TODO: Implementierung via shared_memory_working
-        Geplante SQL:
-            INSERT INTO shared_memory_working (namespace, key, value, source, visibility)
-            VALUES ('stigmergy', path_id, json.dumps({strength, metadata, agent_id}),
-                    agent_id, 'shared')
+        SQL-Strategie:
+            Pruefen ob bereits ein aktives Pheromon fuer diesen path_id existiert.
+            Falls ja: UPDATE (Staerke + Metadata aktualisieren)
+            Falls nein: INSERT neuen Eintrag
         """
-        raise NotImplementedError("StigmergyAPI.deposit() — TODO nach Release (SQ073/SQ074)")
+        try:
+            strength = max(0.0, min(1.0, strength))
+            content_json = self._make_content(path_id, strength, metadata)
+            priority = int(strength * 10)
+            now = datetime.now().isoformat()
+            tags_json = json.dumps([self.NAMESPACE])
+
+            conn = self._connect()
+            try:
+                # Pruefen ob schon ein aktives Stigmergy-Pheromon fuer diesen path_id existiert
+                cursor = conn.execute("""
+                    SELECT id FROM shared_memory_working
+                    WHERE type = 'note'
+                      AND is_active = 1
+                      AND tags = ?
+                      AND related_to = ?
+                """, (tags_json, path_id))
+                existing = cursor.fetchone()
+
+                if existing:
+                    # Update: Staerke und Metadata aktualisieren
+                    conn.execute("""
+                        UPDATE shared_memory_working
+                        SET content = ?, priority = ?, agent_id = ?, updated_at = ?
+                        WHERE id = ?
+                    """, (content_json, priority, self.agent_id, now, existing['id']))
+                else:
+                    # Insert: Neues Pheromon anlegen
+                    conn.execute("""
+                        INSERT INTO shared_memory_working
+                        (agent_id, session_id, type, content, priority,
+                         is_active, created_at, updated_at, tags, related_to)
+                        VALUES (?, NULL, 'note', ?, ?, 1, ?, ?, ?, ?)
+                    """, (self.agent_id, content_json, priority,
+                          now, now, tags_json, path_id))
+
+                conn.commit()
+                return True
+            finally:
+                conn.close()
+
+        except Exception:
+            return False
 
     def sense(self, path_prefix: str = '') -> list[dict]:
         """
@@ -65,15 +147,48 @@ class StigmergyAPI:
             path_prefix: Optional Filter fuer Pfad-IDs (z.B. 'approach_')
 
         Returns:
-            Liste von {path_id, strength, agent_id, timestamp}, sortiert nach strength DESC
+            Liste von {path_id, strength, agent_id, metadata, timestamp},
+            sortiert nach strength DESC
 
-        TODO: Implementierung via shared_memory_working
-        Geplante SQL:
-            SELECT key, value, source, created_at FROM shared_memory_working
-            WHERE namespace='stigmergy' AND key LIKE path_prefix + '%'
-            ORDER BY CAST(json_extract(value, '$.strength') AS REAL) DESC
+        SQL:
+            SELECT content, created_at FROM shared_memory_working
+            WHERE type='note' AND is_active=1 AND tags='["stigmergy"]'
+              AND related_to LIKE path_prefix || '%'
+            ORDER BY priority DESC, updated_at DESC
         """
-        raise NotImplementedError("StigmergyAPI.sense() — TODO nach Release (SQ073/SQ074)")
+        try:
+            tags_json = json.dumps([self.NAMESPACE])
+            like_pattern = f"{path_prefix}%"
+
+            conn = self._connect()
+            try:
+                cursor = conn.execute("""
+                    SELECT content, created_at, updated_at
+                    FROM shared_memory_working
+                    WHERE type = 'note'
+                      AND is_active = 1
+                      AND tags = ?
+                      AND related_to LIKE ?
+                    ORDER BY priority DESC, updated_at DESC
+                """, (tags_json, like_pattern))
+
+                results = []
+                for row in cursor.fetchall():
+                    data = self._parse_content(row['content'])
+                    if data:
+                        results.append({
+                            'path_id': data['path_id'],
+                            'strength': data['strength'],
+                            'agent_id': data['agent_id'],
+                            'metadata': data.get('metadata', {}),
+                            'timestamp': data.get('timestamp', row['created_at']),
+                        })
+                return results
+            finally:
+                conn.close()
+
+        except Exception:
+            return []
 
     def evaporate(self, decay_rate: float = 0.1) -> int:
         """
@@ -87,12 +202,60 @@ class StigmergyAPI:
                         0.1 = loeschung der schwachsten 10% der Pheromone
 
         Returns:
-            Anzahl geloeschter Pheromone
+            Anzahl geloeschter Pheromone (deaktiviert via is_active=0)
 
-        TODO: Implementierung via memory_decay.py
-        Verbindung zu: hub/_services/scheduling/memory_decay.py (falls vorhanden)
+        Strategie:
+            1. Alle Stigmergy-Eintraege zaehlen
+            2. Unterste X% nach priority ermitteln
+            3. Diese via is_active=0 deaktivieren
         """
-        raise NotImplementedError("StigmergyAPI.evaporate() — TODO nach Release (SQ073/SQ074)")
+        try:
+            decay_rate = max(0.0, min(1.0, decay_rate))
+            tags_json = json.dumps([self.NAMESPACE])
+            now = datetime.now().isoformat()
+
+            conn = self._connect()
+            try:
+                # Gesamtzahl aktiver Stigmergy-Pheromone
+                cursor = conn.execute("""
+                    SELECT COUNT(*) as cnt FROM shared_memory_working
+                    WHERE type = 'note' AND is_active = 1 AND tags = ?
+                """, (tags_json,))
+                total = cursor.fetchone()['cnt']
+
+                if total == 0:
+                    return 0
+
+                # Anzahl zu loeschender Eintraege (mindestens 1 wenn decay_rate > 0)
+                to_delete = max(1, int(total * decay_rate))
+
+                # IDs der schwachsten Pheromone ermitteln (niedrigste priority zuerst)
+                cursor = conn.execute("""
+                    SELECT id FROM shared_memory_working
+                    WHERE type = 'note' AND is_active = 1 AND tags = ?
+                    ORDER BY priority ASC, updated_at ASC
+                    LIMIT ?
+                """, (tags_json, to_delete))
+                ids_to_deactivate = [row['id'] for row in cursor.fetchall()]
+
+                if not ids_to_deactivate:
+                    return 0
+
+                # Deaktivieren statt Loeschen (sichereres Pattern)
+                placeholders = ','.join('?' for _ in ids_to_deactivate)
+                conn.execute(f"""
+                    UPDATE shared_memory_working
+                    SET is_active = 0, updated_at = ?
+                    WHERE id IN ({placeholders})
+                """, [now] + ids_to_deactivate)
+                conn.commit()
+
+                return len(ids_to_deactivate)
+            finally:
+                conn.close()
+
+        except Exception:
+            return 0
 
     def get_best_path(self, path_prefix: str = '') -> Optional[str]:
         """
@@ -105,21 +268,35 @@ class StigmergyAPI:
 
         Returns:
             path_id des besten Pfads, oder None wenn keine Pheromone
-
-        TODO: Implementierung nach deposit() und sense()
         """
-        raise NotImplementedError("StigmergyAPI.get_best_path() — TODO nach Release")
+        try:
+            results = self.sense(path_prefix)
+            if results:
+                return results[0]['path_id']
+            return None
+        except Exception:
+            return None
 
     def dump(self) -> dict:
         """
         Debug: Zeige alle Pheromone als dict.
 
         Returns:
-            {path_id: {strength, agent_id, timestamp}, ...}
-
-        TODO: Implementierung nach sense()
+            {path_id: {strength, agent_id, metadata, timestamp}, ...}
         """
-        raise NotImplementedError("StigmergyAPI.dump() — TODO nach Release")
+        try:
+            all_pheromones = self.sense()
+            return {
+                p['path_id']: {
+                    'strength': p['strength'],
+                    'agent_id': p['agent_id'],
+                    'metadata': p.get('metadata', {}),
+                    'timestamp': p['timestamp'],
+                }
+                for p in all_pheromones
+            }
+        except Exception:
+            return {}
 
 
 # ============================================================

@@ -34,6 +34,8 @@ from typing import Optional
 
 from .db import Database
 from .hooks import hooks
+from .instance_registry import InstanceRegistry
+from .instance_messaging import InstanceMessaging
 from .registry import HandlerRegistry
 from .aliases import COMMAND_ALIASES
 
@@ -54,6 +56,8 @@ class App:
         self.base_path = base_path
         self._db: Optional[Database] = None
         self._registry: Optional[HandlerRegistry] = None
+        self._instance_registry: Optional[InstanceRegistry] = None
+        self._messaging: Optional[InstanceMessaging] = None
         self._paths_loaded = False
         self.hooks = hooks  # Globale Hook-Registry
 
@@ -94,6 +98,62 @@ class App:
 
         import hub.bach_paths as bp
         return bp
+
+    @property
+    def data_dir(self) -> Path:
+        """Pfad zum data/ Verzeichnis."""
+        return self.base_path / "data"
+
+    @property
+    def instance_registry(self) -> InstanceRegistry:
+        """Lazy-Initialisierte Instance-Registry."""
+        if self._instance_registry is None:
+            self._instance_registry = InstanceRegistry(self.data_dir)
+        return self._instance_registry
+
+    @property
+    def messaging(self) -> InstanceMessaging:
+        """Lazy-Initialisiertes Inter-Instanz-Messaging."""
+        if self._messaging is None:
+            self._messaging = InstanceMessaging(
+                self.data_dir, self.instance_registry.instance_id
+            )
+        return self._messaging
+
+    def enable_messaging(self, source: str = "cli") -> str:
+        """Aktiviert Inter-Instanz-Messaging komplett.
+
+        Registriert diese Instanz, verbindet Messaging mit Hooks.
+        Sollte beim Startup aufgerufen werden.
+
+        Args:
+            source: Quelle dieser Instanz ("cli", "telegram", "claude", "gui")
+
+        Returns:
+            Instance-ID dieser Instanz
+        """
+        # Registry konfigurieren
+        self.instance_registry.source = source
+        self.instance_registry.register()
+
+        # Stale Instanzen aufraumen
+        self.instance_registry.cleanup_stale()
+
+        # Messaging mit Hooks verbinden
+        self.hooks.connect_messaging(self.messaging, self.instance_registry)
+
+        return self.instance_registry.instance_id
+
+    def disable_messaging(self):
+        """Deaktiviert Inter-Instanz-Messaging.
+
+        Deregistriert diese Instanz und trennt Messaging von Hooks.
+        Sollte beim Shutdown aufgerufen werden.
+        """
+        self.hooks.disconnect_messaging()
+
+        if self._instance_registry is not None:
+            self._instance_registry.deregister()
 
     def reload_registry(self) -> int:
         """Hot-Reload der Handler-Registry.

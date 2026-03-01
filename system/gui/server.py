@@ -187,6 +187,38 @@ class DaemonJobCreate(BaseModel):
 
 
 
+class ChainCreate(BaseModel):
+
+    name: str
+
+    description: Optional[str] = None
+
+    trigger_type: str = "manual"
+
+    trigger_value: Optional[str] = None
+
+    steps_json: str = "[]"
+
+    is_active: int = 1
+
+
+
+class ChainUpdate(BaseModel):
+
+    name: Optional[str] = None
+
+    description: Optional[str] = None
+
+    trigger_type: Optional[str] = None
+
+    trigger_value: Optional[str] = None
+
+    steps_json: Optional[str] = None
+
+    is_active: Optional[int] = None
+
+
+
 class ScanConfigUpdate(BaseModel):
 
     key: str
@@ -2097,6 +2129,250 @@ async def run_daemon_job(job_id: int, background_tasks: BackgroundTasks):
     return {"status": "started", "job_id": job_id}
 
 
+
+# ═══════════════════════════════════════════════════════════════
+
+# API ROUTES - CHAINS (B28)
+
+# ═══════════════════════════════════════════════════════════════
+
+
+
+@app.get("/api/daemon/chains")
+
+async def list_chains():
+
+    """Listet alle Toolchains aus der DB."""
+
+    conn = get_user_db()
+
+    rows = conn.execute("SELECT * FROM toolchains ORDER BY id").fetchall()
+
+    conn.close()
+
+    return {"chains": rows_to_list(rows), "count": len(rows)}
+
+
+
+@app.post("/api/daemon/chains")
+
+async def create_chain(chain: ChainCreate):
+
+    """Erstellt eine neue Toolchain."""
+
+    import json as _json
+
+    # steps_json validieren
+
+    try:
+
+        _json.loads(chain.steps_json)
+
+    except _json.JSONDecodeError:
+
+        raise HTTPException(status_code=400, detail="Ungueltiges JSON in steps_json")
+
+    conn = get_user_db()
+
+    cursor = conn.execute("""
+
+        INSERT INTO toolchains (name, description, trigger_type, trigger_value, steps_json, is_active)
+
+        VALUES (?, ?, ?, ?, ?, ?)
+
+    """, (chain.name, chain.description, chain.trigger_type, chain.trigger_value, chain.steps_json, chain.is_active))
+
+    chain_id = cursor.lastrowid
+
+    conn.commit()
+
+    conn.close()
+
+    return {"id": chain_id, "status": "created"}
+
+
+
+@app.put("/api/daemon/chains/{chain_id}")
+
+async def update_chain(chain_id: int, chain: ChainUpdate):
+
+    """Aktualisiert eine Toolchain."""
+
+    import json as _json
+
+    conn = get_user_db()
+
+    existing = conn.execute("SELECT * FROM toolchains WHERE id = ?", (chain_id,)).fetchone()
+
+    if not existing:
+
+        conn.close()
+
+        raise HTTPException(status_code=404, detail="Chain nicht gefunden")
+
+    # Dynamisch nur gesetzte Felder updaten
+
+    updates = {}
+
+    if chain.name is not None:
+
+        updates["name"] = chain.name
+
+    if chain.description is not None:
+
+        updates["description"] = chain.description
+
+    if chain.trigger_type is not None:
+
+        updates["trigger_type"] = chain.trigger_type
+
+    if chain.trigger_value is not None:
+
+        updates["trigger_value"] = chain.trigger_value
+
+    if chain.steps_json is not None:
+
+        try:
+
+            _json.loads(chain.steps_json)
+
+        except _json.JSONDecodeError:
+
+            conn.close()
+
+            raise HTTPException(status_code=400, detail="Ungueltiges JSON in steps_json")
+
+        updates["steps_json"] = chain.steps_json
+
+    if chain.is_active is not None:
+
+        updates["is_active"] = chain.is_active
+
+    if not updates:
+
+        conn.close()
+
+        return {"status": "no_changes"}
+
+    set_clause = ", ".join(f"{k} = ?" for k in updates.keys())
+
+    values = list(updates.values()) + [chain_id]
+
+    conn.execute(f"UPDATE toolchains SET {set_clause} WHERE id = ?", values)
+
+    conn.commit()
+
+    conn.close()
+
+    return {"status": "updated", "id": chain_id}
+
+
+
+@app.put("/api/daemon/chains/{chain_id}/toggle")
+
+async def toggle_chain(chain_id: int):
+
+    """Aktiviert/Deaktiviert eine Toolchain."""
+
+    conn = get_user_db()
+
+    current = conn.execute("SELECT is_active FROM toolchains WHERE id = ?", (chain_id,)).fetchone()
+
+    if not current:
+
+        conn.close()
+
+        raise HTTPException(status_code=404, detail="Chain nicht gefunden")
+
+    new_state = 0 if current[0] else 1
+
+    conn.execute("UPDATE toolchains SET is_active = ? WHERE id = ?", (new_state, chain_id))
+
+    conn.commit()
+
+    conn.close()
+
+    return {"is_active": bool(new_state)}
+
+
+
+@app.delete("/api/daemon/chains/{chain_id}")
+
+async def delete_chain(chain_id: int):
+
+    """Loescht eine Toolchain."""
+
+    conn = get_user_db()
+
+    existing = conn.execute("SELECT id FROM toolchains WHERE id = ?", (chain_id,)).fetchone()
+
+    if not existing:
+
+        conn.close()
+
+        raise HTTPException(status_code=404, detail="Chain nicht gefunden")
+
+    conn.execute("DELETE FROM toolchain_runs WHERE chain_id = ?", (chain_id,))
+
+    conn.execute("DELETE FROM toolchains WHERE id = ?", (chain_id,))
+
+    conn.commit()
+
+    conn.close()
+
+    return {"status": "deleted", "id": chain_id}
+
+
+
+@app.post("/api/daemon/chains/{chain_id}/run")
+
+async def run_chain(chain_id: int, background_tasks: BackgroundTasks):
+
+    """Fuehrt eine Toolchain sofort aus (im Hintergrund)."""
+
+    conn = get_user_db()
+
+    chain = conn.execute("SELECT * FROM toolchains WHERE id = ?", (chain_id,)).fetchone()
+
+    conn.close()
+
+    if not chain:
+
+        raise HTTPException(status_code=404, detail="Chain nicht gefunden")
+
+    def do_run():
+
+        from hub.chain import ChainHandler
+
+        handler = ChainHandler(BACH_DIR)
+
+        handler._run(str(chain_id), dry_run=False)
+
+    background_tasks.add_task(do_run)
+
+    return {"status": "started", "chain_id": chain_id}
+
+
+
+@app.get("/api/daemon/chains/{chain_id}/runs")
+
+async def list_chain_runs(chain_id: int, limit: int = 10):
+
+    """Listet Ausfuehrungen einer bestimmten Toolchain."""
+
+    conn = get_user_db()
+
+    rows = conn.execute(
+
+        "SELECT * FROM toolchain_runs WHERE chain_id = ? ORDER BY id DESC LIMIT ?",
+
+        (chain_id, limit)
+
+    ).fetchall()
+
+    conn.close()
+
+    return {"runs": rows_to_list(rows), "count": len(rows)}
 
 
 
