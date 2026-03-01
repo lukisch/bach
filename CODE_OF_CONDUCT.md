@@ -46,7 +46,7 @@ Raum, wenn eine Person das Projekt oder seine Gemeinschaft repräsentiert.
 ## Durchsetzung
 
 Fälle von missbräuchlichem, belästigendem oder anderweitig inakzeptablem Verhalten
-können über [GitHub Private Vulnerability Reporting](https://github.com/YOUR_USERNAME/bach/security/advisories/new) gemeldet werden.
+können über [GitHub Private Vulnerability Reporting](https://github.com/lukisch/bach/security/advisories/new) gemeldet werden.
 Alle Beschwerden werden geprüft und untersucht und führen zu einer Reaktion, die
 als notwendig und angemessen erachtet wird.
 

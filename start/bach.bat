@@ -22,7 +22,7 @@ echo  \ \  __^< \ \  __ \\ \ \____\ \  __ \
 echo   \ \_____\\ \_\ \_\\ \_____\\ \_\ \_\
 echo    \/_____/ \/_/\/_/ \/_____/ \/_/\/_/
 echo.
-echo   Personal AI Operating System v2.3
+echo   Personal AI Operating System v3.3.0
 echo   ==================================================
 echo.
 echo   --- TELEGRAM BRIDGE ---------------------------
@@ -41,14 +41,14 @@ echo   [4]  Prompt Manager GUI
 echo   [5]  Gemini-Partner Menue
 echo.
 echo   --- CLAUDE AUTO-SESSIONS ----------------------
-echo   [6]  Alle Tasks - 15 Min       (50 Turns)
-echo   [7]  Alle Tasks - 30 Min       (100 Turns)
-echo   [8]  Alle Tasks - 1 Stunde     (200 Turns)
-echo   [9]  Zugewiesene Tasks - 15 Min (50 Turns)
-echo   [0]  Zugewiesene Tasks - Unbegrenzt (200 Turns)
+echo   [6]  Alle Tasks - 15 Min
+echo   [7]  Alle Tasks - 30 Min
+echo   [8]  Alle Tasks - 1 Stunde
+echo   [9]  Zugewiesene Tasks - 15 Min
+echo   [0]  Zugewiesene Tasks - Unbegrenzt
 echo.
 echo   --- CLAUDE SPEZIAL ----------------------------
-echo   [F]  Full Access (skip-permissions, 200 Turns)
+echo   [F]  Full Access (skip-permissions)
 echo   [M]  Maintenance (Recurring/Backup/Docs)
 echo.
 echo   --- CLAUDE LOOP (Endlos) ----------------------
@@ -328,7 +328,7 @@ REM ============================================================
 :claude_all_15
 title BACH Auto: Alle Tasks (15min)
 pushd "!ROOT_DIR!"
-claude --print "Starte mit lesen und ausfuehren von SKILL.md. Bearbeite dann offene Tasks aus 'bach task list' - waehle selbststaendig die wichtigsten aus (P1 zuerst). Arbeite maximal 15 Minuten, dann fuehre 'bach --memory session' mit einer Zusammenfassung aus und beende mit 'bach --shutdown'." --max-turns 50
+claude --print "Starte mit lesen und ausfuehren von SKILL.md. Bearbeite dann offene Tasks aus 'bach task list' - waehle selbststaendig die wichtigsten aus (P1 zuerst). Arbeite maximal 15 Minuten, dann fuehre 'bach --memory session' mit einer Zusammenfassung aus und beende mit 'bach --shutdown'."
 popd
 echo.
 echo [FERTIG] Session beendet.
@@ -338,7 +338,7 @@ goto menu
 :claude_all_30
 title BACH Auto: Alle Tasks (30min)
 pushd "!ROOT_DIR!"
-claude --print "Starte mit lesen und ausfuehren von SKILL.md. Bearbeite dann offene Tasks aus 'bach task list' - waehle selbststaendig die wichtigsten aus (P1 zuerst). Arbeite maximal 30 Minuten, dann fuehre 'bach --memory session' mit einer Zusammenfassung aus und beende mit 'bach --shutdown'." --max-turns 100
+claude --print "Starte mit lesen und ausfuehren von SKILL.md. Bearbeite dann offene Tasks aus 'bach task list' - waehle selbststaendig die wichtigsten aus (P1 zuerst). Arbeite maximal 30 Minuten, dann fuehre 'bach --memory session' mit einer Zusammenfassung aus und beende mit 'bach --shutdown'."
 popd
 echo.
 echo [FERTIG] Session beendet.
@@ -348,7 +348,7 @@ goto menu
 :claude_all_1h
 title BACH Auto: Alle Tasks (1h)
 pushd "!ROOT_DIR!"
-claude --print "Starte mit lesen und ausfuehren von SKILL.md. Bearbeite dann offene Tasks aus 'bach task list' - waehle selbststaendig die wichtigsten aus (P1 zuerst). Arbeite maximal 60 Minuten, dann fuehre 'bach --memory session' mit einer Zusammenfassung aus und beende mit 'bach --shutdown'." --max-turns 200
+claude --print "Starte mit lesen und ausfuehren von SKILL.md. Bearbeite dann offene Tasks aus 'bach task list' - waehle selbststaendig die wichtigsten aus (P1 zuerst). Arbeite maximal 60 Minuten, dann fuehre 'bach --memory session' mit einer Zusammenfassung aus und beende mit 'bach --shutdown'."
 popd
 echo.
 echo [FERTIG] Session beendet.
@@ -358,7 +358,7 @@ goto menu
 :claude_assigned_15
 title BACH Auto: Zugewiesene Tasks (15min)
 pushd "!ROOT_DIR!"
-claude --print "Starte mit lesen und ausfuehren von SKILL.md. Bearbeite dann NUR dir (Claude) zugewiesene Tasks aus 'bach task list'. Arbeite maximal 15 Minuten, dann fuehre 'bach --memory session' mit einer Zusammenfassung aus und beende mit 'bach --shutdown'." --max-turns 50
+claude --print "Starte mit lesen und ausfuehren von SKILL.md. Bearbeite dann NUR dir (Claude) zugewiesene Tasks aus 'bach task list'. Arbeite maximal 15 Minuten, dann fuehre 'bach --memory session' mit einer Zusammenfassung aus und beende mit 'bach --shutdown'."
 popd
 echo.
 echo [FERTIG] Session beendet.
@@ -368,7 +368,7 @@ goto menu
 :claude_assigned_nolimit
 title BACH Auto: Zugewiesene Tasks (unbegrenzt)
 pushd "!ROOT_DIR!"
-claude --print "Starte mit lesen und ausfuehren von SKILL.md. Bearbeite dann NUR dir (Claude) zugewiesene Tasks aus 'bach task list'. Arbeite alle zugewiesenen Tasks ab. Nach jeder erledigten Aufgabe pruefe ob weitere zugewiesene Tasks offen sind. Wenn alle erledigt sind, fuehre 'bach --memory session' mit einer Zusammenfassung aus und beende mit 'bach --shutdown'." --max-turns 200
+claude --print "Starte mit lesen und ausfuehren von SKILL.md. Bearbeite dann NUR dir (Claude) zugewiesene Tasks aus 'bach task list'. Arbeite alle zugewiesenen Tasks ab. Nach jeder erledigten Aufgabe pruefe ob weitere zugewiesene Tasks offen sind. Wenn alle erledigt sind, fuehre 'bach --memory session' mit einer Zusammenfassung aus und beende mit 'bach --shutdown'."
 popd
 echo.
 echo [FERTIG] Session beendet.
@@ -381,7 +381,7 @@ REM ============================================================
 :claude_full
 title BACH Claude: Full Access
 pushd "!ROOT_DIR!"
-claude --print "Starte mit lesen und ausfuehren von SKILL.md. Du hast volle Rechte. Arbeite selbststaendig an offenen Tasks, erstelle neue Features, fixe Bugs und fuehre Wartungsaufgaben durch. Nutze 'bach --recurring check' fuer faellige periodische Aufgaben. Frage bei Unklarheiten den User." --max-turns 200 --dangerously-skip-permissions
+claude --print "Starte mit lesen und ausfuehren von SKILL.md. Du hast volle Rechte. Arbeite selbststaendig an offenen Tasks, erstelle neue Features, fixe Bugs und fuehre Wartungsaufgaben durch. Nutze 'bach --recurring check' fuer faellige periodische Aufgaben. Frage bei Unklarheiten den User." --dangerously-skip-permissions
 popd
 echo.
 echo [FERTIG] Session beendet.
@@ -391,7 +391,7 @@ goto menu
 :claude_maintenance
 title BACH Auto: Wartung
 pushd "!ROOT_DIR!"
-claude --print "Starte mit lesen und ausfuehren von SKILL.md. Fuehre dann folgende Wartungsaufgaben durch: 1) 'bach --recurring check' fuer faellige periodische Tasks 2) 'bach backup status' und bei Bedarf 'bach backup create' 3) 'bach --maintain docs' fuer Dokumentations-Check 4) 'bach consolidate run' fuer Memory-Konsolidierung. Erstelle abschliessend eine Session-Zusammenfassung mit 'bach --memory session' und beende mit 'bach --shutdown'." --max-turns 60
+claude --print "Starte mit lesen und ausfuehren von SKILL.md. Fuehre dann folgende Wartungsaufgaben durch: 1) 'bach --recurring check' fuer faellige periodische Tasks 2) 'bach backup status' und bei Bedarf 'bach backup create' 3) 'bach --maintain docs' fuer Dokumentations-Check 4) 'bach consolidate run' fuer Memory-Konsolidierung. Erstelle abschliessend eine Session-Zusammenfassung mit 'bach --memory session' und beende mit 'bach --shutdown'."
 popd
 echo.
 echo [FERTIG] Wartung beendet.

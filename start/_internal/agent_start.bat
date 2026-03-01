@@ -6,9 +6,9 @@ REM ============================================================
 title BACH Agent Starter
 setlocal enabledelayedexpansion
 
-set BACH_DIR=%~dp0..\..\system
-set AGENTS_DIR=%BACH_DIR%\agents
-set EXPERTS_DIR=%BACH_DIR%\agents\_experts
+set "BACH_DIR=%~dp0..\..\system"
+set "AGENTS_DIR=%BACH_DIR%\agents"
+set "EXPERTS_DIR=%BACH_DIR%\agents\_experts"
 
 echo.
 echo  ===================================================

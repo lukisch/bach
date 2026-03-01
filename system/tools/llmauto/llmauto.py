@@ -128,7 +128,7 @@ def cmd_pipe(args):
         print("Fehler: Leerer Prompt.")
         return 1
 
-    model = args.model or global_config.get("default_model", "claude-sonnet-4-5-20250929")
+    model = args.model or global_config.get("default_model", "claude-sonnet-4-6")
     runner = ClaudeRunner(
         model=model,
         fallback_model=args.fallback,

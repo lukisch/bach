@@ -346,7 +346,7 @@ async def system_status(_=Depends(verify_auth)):
         db_size = os.path.getsize(BACH_DB) / (1024 * 1024)
 
         return {
-            "version": "2.3.0",
+            "version": "3.3.0",
             "db_size_mb": round(db_size, 1),
             "tasks": {"total": tasks_total, "done": tasks_done, "pending": tasks_pending},
             "memory": {"facts": facts, "lessons": lessons, "sessions": sessions},

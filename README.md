@@ -2,10 +2,10 @@
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python)
 ![License](https://img.shields.io/badge/License-MIT-green)
-![Version](https://img.shields.io/badge/Version-v3.2.0--butternut-orange)
+![Version](https://img.shields.io/badge/Version-v3.3.0--peanut-orange)
 ![Status](https://img.shields.io/badge/Status-Production--Ready-brightgreen)
 
-**Version:** v3.2.0-butternut
+**Version:** v3.3.0-peanut
 
 ## Überblick
 
@@ -28,7 +28,7 @@ BACH ist ein textbasiertes Betriebssystem, das Large Language Models (LLMs) bef�
 
 ```bash
 # Repository klonen
-git clone https://github.com/YOUR_USERNAME/bach.git
+git clone https://github.com/lukisch/bach.git
 cd bach
 
 # Abhängigkeiten installieren
@@ -37,6 +37,21 @@ pip install -r requirements.txt
 # BACH initialisieren
 python system/setup.py
 ```
+
+## MCP-Server (Claude Code Integration)
+
+BACH bietet zwei MCP-Server fuer die Integration mit Claude Code, Cursor und anderen IDEs:
+
+```bash
+# MCP-Server installieren und konfigurieren (empfohlen)
+python system/bach.py setup mcp
+
+# Oder manuell via npm:
+npm install -g bach-codecommander-mcp bach-filecommander-mcp
+```
+
+- **[bach-codecommander-mcp](https://www.npmjs.com/package/bach-codecommander-mcp)** - Code-Analyse und Refactoring Tools
+- **[bach-filecommander-mcp](https://www.npmjs.com/package/bach-filecommander-mcp)** - Datei-Management und Batch-Operationen
 
 ## Quick Start
 
@@ -103,9 +118,9 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 
 ## Support
 
-- **Issues:** [GitHub Issues](https://github.com/YOUR_USERNAME/bach/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/YOUR_USERNAME/bach/discussions)
+- **Issues:** [GitHub Issues](https://github.com/lukisch/bach/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/lukisch/bach/discussions)
 
 ---
 
-*BACH v3.2.0-butternut - Best of Agentic Cognitive Helpers*
+*BACH v3.3.0-peanut - Best of Agentic Cognitive Helpers*
