@@ -1,8 +1,9 @@
 # EXPERTE: Haushaltsmanagement
 
 ## Status: AKTIV
-Version: 1.0.0
+Version: 2.0.0
 Erstellt: 2026-01-20
+Aktualisiert: 2026-03-01 (INT02: HausLagerist V4 Integration)
 Parent-Agent: persoenlicher-assistent
 
 ---
@@ -20,29 +21,44 @@ Der Haushaltsmanagement-Experte unterstuetzt bei der Organisation des Alltags:
 
 ## 2. Datenbank-Integration
 
-### Tabellen in user.db
+### Tabellen in bach.db
 
 | Tabelle | Beschreibung |
 |---------|--------------|
-| `household_inventory` | Lagerbestaende mit Mindestmengen |
+| `household_inventory` | Lagerbestaende mit Pull-Einstellungen (priority, pull_threshold, learning_alpha) |
+| `household_orders` | Bedarfs-Orders (routine, period, oneshot, project) |
+| `household_suppliers` | Lieferanten (Supermarkt, Drogerie, Online) |
+| `household_stock_transactions` | Bestandsbuchungen (Eingang, Verbrauch) |
 | `household_shopping_lists` | Einkaufslisten |
 | `household_shopping_items` | Items pro Liste |
 | `household_finances` | Haushaltsbuch |
 | `household_routines` | Wiederkehrende Aufgaben |
 
+### Pull-System (HausLagerist V4)
+
+Das Vorratsmanagement basiert auf dem **Pull-Quotient-Verfahren**:
+
+- **Pull-Quotient:** Q = Bestand / (Tagesbedarf * Planungstage)
+- **Dringlichkeit:** D = (Prioritaet / min(Q, 10)) * max(0, 1 - Q)
+- **Ampel:** ROT (leer+Bedarf), GELB (<7 Tage), GRUEN (OK), GRAU (kein Bedarf)
+- **Exponentielles Glaetten:** V_new = alpha * V_gemessen + (1-alpha) * V_alt
+
 ### Beispiel-Queries
 
 ```sql
--- Artikel mit niedrigem Bestand
-SELECT * FROM household_inventory
-WHERE quantity <= min_quantity;
+-- Pull-Kandidaten (Bestand unter Bedarf)
+SELECT i.name, i.quantity, i.min_quantity, i.priority,
+       o.quantity_value / o.cycle_interval_days as daily_demand
+FROM household_inventory i
+JOIN household_orders o ON o.article_id = i.id
+WHERE o.status = 'active' AND o.order_type = 'routine'
+AND i.quantity < (o.quantity_value / o.cycle_interval_days * 7);
 
--- Monatliche Ausgaben nach Kategorie
-SELECT category, SUM(amount) as total
-FROM household_finances
-WHERE entry_type = 'ausgabe'
-AND entry_date >= date('now', 'start of month')
-GROUP BY category;
+-- Letzte Bestandsbewegungen
+SELECT i.name, t.transaction_type, t.amount, t.stock_after, t.timestamp
+FROM household_stock_transactions t
+JOIN household_inventory i ON i.id = t.article_id
+ORDER BY t.timestamp DESC LIMIT 10;
 
 -- Ueberfaellige Routinen
 SELECT * FROM household_routines
@@ -104,23 +120,32 @@ def complete_routine(routine_id: int):
 ## 5. CLI-Befehle
 
 ```bash
-# Inventar
-bach haushalt inventar list
-bach haushalt inventar add "Klopapier" --quantity 24 --min 6
-bach haushalt inventar update "Klopapier" --quantity 12
+# Uebersicht
+bach haushalt status             # Dashboard mit Ampel
+bach haushalt today              # Was steht heute an?
+bach haushalt due 14             # Faellige Aufgaben
 
-# Einkaufsliste
-bach haushalt liste show
-bach haushalt liste add "Milch" --quantity 2
-bach haushalt liste generate  # Aus niedrigen Bestaenden
+# Vorratsmanagement (Pull-System)
+bach haushalt inventory          # Bestand mit Ampelfarben
+bach haushalt add-item "Milch" --cat Lebensmittel --unit Liter --min 2
+bach haushalt stock-in 1 6 --price 1.29   # Eingang buchen
+bach haushalt stock-out 1 2               # Verbrauch buchen
+bach haushalt pull-check         # Automatische Einkaufsliste
+bach haushalt ampel              # ROT/GELB/GRUEN Uebersicht
+bach haushalt order 1 --type routine --qty 6 --cycle 14
+
+# Lieferanten
+bach haushalt supplier           # Alle Lieferanten
+bach haushalt add-supplier "REWE" --type supermarket
+
+# Einkaufsliste (manuell)
+bach haushalt shopping
+bach haushalt add-shopping "Milch" --cat Lebensmittel
 
 # Finanzen
-bach haushalt ausgabe 45.99 --kategorie "Lebensmittel" --beschreibung "Wocheneinkauf"
-bach haushalt report --monat 1 --jahr 2026
-
-# Routinen
-bach haushalt routine list
-bach haushalt routine done "Waesche waschen"
+bach haushalt costs              # Fixkosten-Uebersicht
+bach haushalt kosten-monat 3     # Irregulare Kosten Maerz
+bach haushalt insurance-check    # Versicherungs-Check
 ```
 
 ---
@@ -172,12 +197,14 @@ Keine externen Dependencies erforderlich.
 - [x] Datenbank-Schema
 - [x] CONCEPT.md
 
-### Phase 2 (TODO)
-- [ ] CLI-Implementierung
-- [ ] Basis-CRUD-Operationen
-- [ ] Einkaufslisten-Generator
+### Phase 2 (DONE — INT02, v3.3.0)
+- [x] Pull-basiertes Vorratsmanagement (HausLagerist V4 Port)
+- [x] 9 neue CLI-Operationen (inventory, stock-in/out, pull-check, ampel, order, supplier)
+- [x] Inventory Engine (Pull-Quotient, Dringlichkeit, Exponentielles Glaetten)
+- [x] DB-Migration 025 (household_orders, household_suppliers, household_stock_transactions)
 
 ### Phase 3 (PLANNED)
 - [ ] GUI-Integration
-- [ ] Automatische Bestandswarnungen
+- [ ] Automatische Bestandswarnungen (Proaktive Meldungen)
 - [ ] Kassenbon-Scanner (OCR)
+- [ ] Intelligence: Auto-Routine-Vorschlaege basierend auf Verbrauchshistorie
