@@ -85,6 +85,31 @@ PLAN.txt
 .agent/
 .claude/
 
+# === USER-SPEZIFISCHE EXPERTEN (dist_type 0) ===
+# Portiert aus Vanilla, nicht im Release enthalten
+/system/agents/_experts/decision-briefing/
+/system/agents/_experts/press/
+/system/agents/_experts/report_generator/
+/system/agents/_experts/transkriptions-service/
+/system/agents/_experts/worksheet_generator/
+/system/agents/_experts/steuer/
+/system/agents/_experts/foerderplaner/
+
+# === USER-SPEZIFISCHE SKILLS (dist_type 0) ===
+/system/skills/_os/
+/system/skills/therapie/
+/system/skills/_services/notizblock.md
+/system/skills/_services/user-decide.md
+/system/skills/workflows/_archive/
+/system/skills/workflows/analysis/
+/system/skills/workflows/dev/
+/system/skills/workflows/integration/
+/system/skills/workflows/system/
+/system/skills/workflows/epstein_wissensindexierung.md
+/system/skills/workflows/schwarm-entscheidungsbaum.md
+/system/skills/workflows/schwarm-operationen.md
+/system/skills/workflows/translate_haiku.md
+
 # === DISTRIBUTION SNAPSHOTS (Optional behalten) ===
 # Auskommentieren wenn Snapshots versioniert werden sollen:
 # /system/dist/snapshots/
