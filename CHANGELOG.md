@@ -38,11 +38,10 @@ Copyright (c) 2026 Lukas Geiger. Alle Rechte vorbehalten.
   - Telegram-Connection in connections-Tabelle angelegt
 - **FIX:** Feste --max-turns Werte aus Einzel-Sessions entfernt (waren 50-200)
 
-### Portierung
+### Bereinigung
 
-- 5 CORE-Experten von Vanilla portiert: decision-briefing, press, report_generator, transkriptions-service, worksheet_generator
-- 35 fehlende Skills portiert (Therapie, OS, Workflows)
-- `directory_truth.json` Config portiert
+- `.gitignore` um USER-spezifische Experten und Skills erweitert (dist_type 0, nie veroeffentlicht)
+- `directory_truth.json` Config aktualisiert
 
 ### Installer
 
