@@ -45,19 +45,17 @@ Siehe: `../docs/WICHTIG_SYSTEMISCH_FIRST.md`
 
 ---
 
-## GitHub-Veroeffentlichung
+## GitHub-Veroeffentlichung (KOMPLETT)
 
-Alle technischen Go-Kriterien sind erfuellt. Der Release wartet auf den manuellen Push.
+Repo ist PUBLIC auf GitHub mit 14 Topics, Tags `v3.1.6` und `v3.3.0-peanut`.
 
 | Schritt | Status |
 |---------|--------|
-| Privates Repo erstellen & Push | Ausstehend |
-| Repo auf Public stellen | Ausstehend (nach Pruefung) |
-| Tag `v3.1.6-strawberry` setzen | Ausstehend |
-| Release-Announcement | Ausstehend |
-| Manuelle PII-Stichproben Prio 4-5 (optional, ~30 min) | Optional |
-
-> Checkliste: `../../BACH_Dev/archive/reports/ENDABNAHME_CHECKLISTE.md` | PII-Scan: `../docs/HQ9_PUBLIC_RELEASE_CHECKLIST.md`
+| Privates Repo erstellen & Push | KOMPLETT |
+| Repo auf Public stellen | KOMPLETT |
+| Tags setzen (v3.1.6, v3.3.0-peanut) | KOMPLETT |
+| GitHub Topics (14 Stueck) | KOMPLETT |
+| Release-Announcement | Ausstehend (Marketing) |
 
 ---
 
@@ -65,98 +63,53 @@ Alle technischen Go-Kriterien sind erfuellt. Der Release wartet auf den manuelle
 
 ### Prioritaet 1 — Kern-Architektur vervollstaendigen
 
-**SQ073: Scheduler-Migration abschliessen** (ENT-43)
-- DB-Tabellen `daemon_jobs`/`daemon_runs` -> `scheduler_jobs`/`scheduler_runs` umbenennen
-- `hub/chain.py` (ChainHandler) erstellen: `bach chain start/stop/status/list/log`
-- llmauto als `tools/llmauto/` in BACH einbinden
-- SessionDaemon + ATI SessionDaemon -> llmauto-Ketten konvertieren
-- GUI: Scheduler-Tab + Chain-Tab im FastAPI-Dashboard
-- Ref: `../../BACH_Dev/archive/reports/SQ073_DAEMON_SCHEDULER_PLANUNG.md`
-
-**SQ074: marble_run vollstaendig nach llmauto portieren** (ENT-43)
-- active_chain.md Generierung (dynamisches Worker-Briefing)
-- 6 Selection-Strategien portieren
-- 4 Original-Prompts uebernehmen
-- marble_run/ -> `_archive/` verschieben (nach Abschluss)
-- Chain-Config-Dateien: `SQ074_CHAIN_PORTS/` (9 JSONs bereits portiert)
-
-**SQ043: Memory-Migration Stufe D**
-- Sessions migrieren: `memory_sessions` -> `shared_memory_sessions` (1504 Eintraege)
-- context_triggers migrieren: 1024 Eintraege -> `shared_context_triggers`
-- Auto-expires Trigger implementieren
+**SQ043: Memory-Migration Stufe D** ⚠️ 40% PARTIAL
+- Tabellen `shared_memory_sessions` und `shared_context_triggers` existieren
+- **ABER:** Daten NICHT migriert (0/2046 Sessions, 0/1120 Triggers)
+- Python-Migration `024_memory_migration_stufe_d.py` wird von `core/db.py::run_migrations()` nicht ausgefuehrt (nur `.sql` Dateien)
+- **Naechster Schritt:** Migration als SQL umschreiben ODER db.py um Python-Support erweitern
 - Ref: `../../BACH_Dev/archive/reports/SQ043_STUFE_C_MEMORY_MIGRATION_KONZEPT.md`
 
-**HQ8/ENT-45: Installer CLI-Interface (Phase 3)**
-- Non-interaktiver CLI-Modus mit Validierung
-- Integrations-Level-Wahl in Installer einbauen (SQ038)
+**HQ8/ENT-45: Installer CLI-Interface (Phase 3)** — PARTIAL
+- CLI existiert, aber kein Non-interaktiver Modus
+- Integrations-Level-Wahl nicht implementiert
 
 ---
 
 ### Prioritaet 2 — Features & Qualitaet
 
-**SQ014: 7 verbleibende PARTIAL Usecases verbessern** (B27)
-- UC6/7/8 (Versicherung): Retest empfohlen
-- UC26/UC27 (Location/Reiseroute): Web-Features
-- UC43 (FinancialProof Dashboard): Externe App-Integration
-- UC46 (MediaBrain DB): Externe DB-Anbindung
-
-**SQ017: GUI aktualisieren** (B28, ENT-33)
-- Scheduler-Tab implementieren (Schicht 1 dockt an)
-- Chain-Tab implementieren (Schicht 2 dockt an)
-- Ref: `../../BACH_Dev/archive/reports/SQ017_GUI_STATUS.md`
-
-**SQ038: Claude Code Integration — offene Punkte** (B29)
-- Inter-Instanz-Messaging via Hooks
-- System-Injection-Log als Standard
-- Ref: `../../BACH_Dev/archive/reports/SQ038_MEMO_DEDUP_BERICHT.md`
-
-**SQ051: Stigmergy-API implementieren** (B33)
-- `hub/_services/stigmergy/stigmergy_api.py` vollstaendig (STUB vorhanden)
-- Abhaengig von: SQ073 (Scheduler) + SQ074 (llmauto)
-
-**SQ075: USER.md** (B34, ENT-41)
-- Installer-Integration: USER.md beim Setup generieren
-- Bidirektionaler SYNC fertigstellen
-
-**SQ036: Vernunftstests** (B36)
-- Ergebnisse in Forschung rueckfuehren
+**SQ014: Verbleibende PARTIAL Usecases verbessern** (B27) — TEILWEISE ERLEDIGT
+- UC46 (MediaBrain): Auf 100% gehoben (KOMPLETT)
+- UC26/UC27 (Location/Reiseroute): `location_search.py` + `route_planner.py` existieren, aber kein Web-Search-API angebunden
+- UC43 (FinancialProof Dashboard): Entscheidung: Standalone lassen
 
 ---
 
 ### Prioritaet 3 — Modulare Agenten & externe Tools
 
-**SQ080: ApiProber** (B36)
-- Timeout-Bug im Smoke-Test fixen (60s statt 10s)
-- Veraltete Import-Tests korrigieren
-- Sync mit `api_book`-Tabelle
-
-**SQ081: n8n Workflow Manager** (B37)
-- BACH-Handler vollstaendig implementieren (list, sync)
-- Smoke-Test gegen lokale n8n-Instanz
-- Sync mit `api_book`-Tabelle
-
-**SQ011: Pipeline-Framework** (B39)
-- Generischer Entscheidungsbaum fuer alle Pipelines
-- ATI Scan-Roots konfigurierbar machen
+**SQ011: Pipeline-Framework** (B39) — PARTIAL
+- Pipeline-Infrastruktur existiert (PipelineStep, PipelineRunner)
+- Decision-Briefing ist nur Konzept, nicht implementiert
+- ATI Scan-Roots nicht konfigurierbar
 
 ---
 
 ### Prioritaet 4 — Visionen & Experimente (nach Release)
 
-| SQ | Thema | Notiz |
-|----|-------|-------|
-| SQ016 | Schwarm-LLM-Haiku-Experimente | Multi-Agent-Forschung |
-| SQ018 | Plan-Agent & Planungsprotokoll | Formalisierung |
-| SQ028 | Multi-BACH (benannte Instanzen) | Ein Ordner = eine Instanz (ENT-11) |
-| SQ040 | Reminder-Injektor | LLM-Selbsterinnerung |
-| SQ042 | Meta-Feedback-Injektor | BACH korrigiert LLM-Ticks |
-| SQ044 | BACH-in-a-Database (Vision) | Alles lebt in DB, on-demand entpackt |
-| SQ048 | Arbeitsmodi & 24h-Agent | Persistenter Tages-Kontext |
-| SQ052 | Bridge Antwort-Modus & Server-Betrieb | Headless/Remote |
-| SQ054 | ResearchAgent BACH-Re-Integration | v0.3.0 Ziel |
-| SQ055 | devSoftAgent fertigstellen | 12 Module, 1244 LOC |
-| SQ056 | llmauto Standalone finalisieren | ENT-43 Schicht 2 |
-| ENT-25 | _CHIAH + recludOS als Legacy veroeffentlichen | Bereinigung noetig |
+| SQ | Thema | Status | Notiz |
+|----|-------|--------|-------|
+| SQ016 | Schwarm-LLM-Haiku-Experimente | OFFEN | Multi-Agent-Forschung |
+| SQ018 | Plan-Agent & Planungsprotokoll | OFFEN | Formalisierung |
+| SQ028 | Multi-BACH (benannte Instanzen) | OFFEN | Ein Ordner = eine Instanz (ENT-11) |
+| SQ040 | Reminder-Injektor | OFFEN | LLM-Selbsterinnerung |
+| SQ042 | Meta-Feedback-Injektor | OFFEN | BACH korrigiert LLM-Ticks |
+| SQ044 | BACH-in-a-Database (Vision) | OFFEN | Alles lebt in DB, on-demand entpackt |
+| SQ048 | Arbeitsmodi & 24h-Agent | OFFEN | Persistenter Tages-Kontext |
+| SQ052 | Bridge Antwort-Modus & Server-Betrieb | PARTIAL | `bridge_daemon.py` existiert, kein Remote-Modus |
+| SQ054 | ResearchAgent BACH-Re-Integration | PARTIAL | `research_agent.py` 695 LOC vorhanden |
+| SQ055 | devSoftAgent fertigstellen | PARTIAL | `entwickler_agent.py` 695 LOC, 6 Phasen |
+| SQ056 | llmauto Standalone finalisieren | PARTIAL | Funktional, aber nicht voll standalone |
+| ENT-25 | _CHIAH + recludOS als Legacy veroeffentlichen | OFFEN | Bereinigung noetig |
 
 ---
 
@@ -175,17 +128,28 @@ Alle technischen Go-Kriterien sind erfuellt. Der Release wartet auf den manuelle
 
 ---
 
-## Weitere abgeschlossene Bloecke (ehemals Prio 2-3)
+## Weitere abgeschlossene Bloecke (ehemals Prio 1-3)
 
 | Block | SQ | Aufgabe | Status |
 |-------|-----|---------|--------|
+| — | SQ073 | Scheduler-Migration (Tables, ChainHandler, llmauto, GUI-Tabs) | KOMPLETT (95%) |
+| — | SQ074 | marble_run -> llmauto portiert (7 Strategien, 13 Chain-Configs) | KOMPLETT |
+| B27 | SQ014 | UC46 MediaBrain auf 100% gehoben | KOMPLETT |
+| B28 | SQ017 | GUI: Scheduler-Tab + Chain-Tab im Dashboard | KOMPLETT |
+| B29 | SQ038 | Inter-Instanz-Messaging (Registry + Messaging + Hook-Extension) | KOMPLETT |
 | B31 | SQ047/SQ059 | Wissensindexierung / KnowledgeDigest | KOMPLETT |
+| B33 | SQ051 | Stigmergy-API vollstaendig implementiert | KOMPLETT |
+| B34 | SQ075 | USER.md Installer-Integration + bidirektionaler Sync | KOMPLETT |
 | B35 | SQ076 | Secrets-Management Installer-Integration | KOMPLETT |
+| B36 | SQ080 | ApiProber Timeout-Bug + Tests | KOMPLETT |
+| B37 | SQ081 | n8n MCP-Server als optionale Installation | KOMPLETT |
 | B38 | SQ010 | Foerderplaner-Extraktion (pdf_processor, ocr_service) | KOMPLETT |
 | B40 | SQ027 | Alt-Tests in pytest portieren | KOMPLETT |
 | — | SQ033 | BACH Mini (USMC-basiert) | KOMPLETT |
-| B30 | SQ046 | Therapie-Skills: Trauma + Systemisch | Verschoben -> `THE_RELEASE_AFTER.md` |
-| B32 | SQ049 | Agenten autonomer machen | Verschoben -> `THE_RELEASE_AFTER.md` |
+| — | SQ036 | Vernunftstests (12/12 bestanden) | KOMPLETT |
+| — | — | ROADMAP-Konsolidierung (4 Dateien → 1) | KOMPLETT |
+| B30 | SQ046 | Therapie-Skills: Trauma + Systemisch | Verschoben → NEXT_RELEASE |
+| B32 | SQ049 | Agenten autonomer machen | Verschoben → NEXT_RELEASE |
 
 ---
 
@@ -239,9 +203,9 @@ Grosse BUTTERNUT-Release mit Scheduler-Refactoring, Prompt-System, neuen Handler
 - `core/capabilities.py` - CapabilityManager mit 11 definierten Capabilities
 - Trust-Level Enforcement: goldstandard/trusted/untrusted/blacklist
 
-**Phase 4: Sandbox - Stufe 2+3 (GEPLANT)**
-- Stufe 2: Subprocess-Isolation (timeout, memory-limit)
-- Stufe 3: Container-Isolation (Docker/chroot)
+**Phase 4: Sandbox - Stufe 2+3 (OFFEN)**
+- Stufe 2: Subprocess-Isolation (timeout, memory-limit) — nicht begonnen
+- Stufe 3: Container-Isolation (Docker/chroot) — nicht begonnen
 - Rollback bei fehlerhaften Erweiterungen
 
 ### Weitere abgeschlossene Phasen
@@ -251,9 +215,9 @@ Grosse BUTTERNUT-Release mit Scheduler-Refactoring, Prompt-System, neuen Handler
 | 19 | Directory Restructuring v2.5 | agents/, connectors/, partners/ top-level | KOMPLETT |
 | 1 | Zeit-System v1.1.83 | clock, timer, countdown, between, beat | KOMPLETT |
 | 2 | Workflow-TUeV v1.1.83 | tuev status/check, usecase list/run | KOMPLETT |
-| 3 | Memory-Konsolidierung | CONSOL_001-007 | In Progress |
-| 4 | GUI-Erweiterungen | Dashboard, Tools, Inbox | Offen |
-| 5 | Steuer-Banking Integration | CAMT.053, Bank-Beleg-Matching | Offen |
+| 3 | Memory-Konsolidierung | CONSOL_001-007, Code komplett, Tasks in DB | In Progress |
+| 4 | GUI-Erweiterungen Phase 4 | 32 Templates, 16k+ LOC, Scheduler+Chain-Tabs | KOMPLETT |
+| 5 | Steuer-Banking Integration | CAMT.053 Parser existiert, Matching offen | PARTIAL |
 | 6 | Data-Import-Framework | CSV/JSON Import, Schema-Erkennung | KOMPLETT |
 | 7 | CLI-Handler Erweiterungen | contact, gesundheit, haushalt, steuer | KOMPLETT |
 | 8 | Connector & Message-System v2.1 | Queue, Retry, Circuit Breaker, 3 Adapter | KOMPLETT |
@@ -297,8 +261,21 @@ Grosse BUTTERNUT-Release mit Scheduler-Refactoring, Prompt-System, neuen Handler
 | B38 | Foerderplaner-Extraktion | 2026-03 |
 | B40 | Alt-Tests pytest-Portierung | 2026-03 |
 | — | BACH Mini (USMC-basiert) | 2026-03 |
+| SQ073 | Scheduler-Migration + ChainHandler | 2026-03 |
+| SQ074 | marble_run -> llmauto (7 Strategien, 13 Configs) | 2026-03 |
+| B27 | UC46 MediaBrain 100% | 2026-03 |
+| B28 | GUI: Scheduler-Tab + Chain-Tab | 2026-03 |
+| B29 | Inter-Instanz-Messaging | 2026-03 |
+| B33 | Stigmergy-API | 2026-03 |
+| B34 | USER.md Installer-Integration | 2026-03 |
+| B36 | ApiProber Timeout-Fix + Tests | 2026-03 |
+| B37 | n8n optionale Installation | 2026-03 |
+| SQ036 | Vernunftstests (12/12) | 2026-03 |
+| — | ROADMAP-Konsolidierung | 2026-03 |
+| — | GitHub PUBLIC + Tags | 2026-03 |
+| — | GUI Phase 4 (32 Templates) | 2026-03 |
 
-~140+ Tasks abgeschlossen in Phase 1-20 + Post-Release-Bloecke.
+~160+ Tasks abgeschlossen in Phase 1-20 + Post-Release-Bloecke.
 
 ### Abgeschlossene Release-Meilensteine (Strawberry v3.1.6)
 
@@ -403,6 +380,7 @@ Grosse BUTTERNUT-Release mit Scheduler-Refactoring, Prompt-System, neuen Handler
 | **3.7** | 2026-02-13 | **Directory Restructuring v2.5** |
 | **3.8** | 2026-02-28 | **BUTTERNUT v3.2.0: Scheduler, Prompt-System, USMC Bridge** |
 | **4.0** | 2026-03-01 | **Konsolidierung: BACH_Dev/ROADMAP.md + Post-Release-Prios integriert, INT01-06 + B31/B35/B38/B40/BACH Mini als KOMPLETT markiert** |
+| **4.1** | 2026-03-01 | **Verifizierung: Alle Items gegen Code geprueft. SQ073/074/036/051/075/080/081 + B27-29/33-34/36-37 als KOMPLETT. GitHub PUBLIC. GUI Phase 4 KOMPLETT. SQ043 Migrations-Blocker identifiziert.** |
 
 Detaillierte Historie: `CHANGELOG.md`
 Archivierte Versionen: `../docs/_archive/ROADMAP_*.md`
