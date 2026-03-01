@@ -8,33 +8,31 @@ Diese Dateien wurden durch System-Services ersetzt.
 - Service: `skills/_services/prompt_generator/`
 - Templates: `skills/_services/prompt_generator/templates/`
 - Config: `skills/_services/prompt_generator/config.json`
-- Dokumentation: `skills/docs/docs/docs/help/prompt-generator.txt`
+- Dokumentation: `skills/docs/docs/docs/docs/help/prompt-generator.txt`
 
-### Session-Daemon (Headless Sessions)
-- Session Daemon: `skills/_services/daemon/session_daemon.py`
-- Auto Session: `skills/_services/daemon/auto_session.py`
-- Profile: `skills/_services/daemon/profiles/ati.json`
-- Config: `skills/_services/daemon/config.json`
+### Session-Daemon (Headless Sessions) -- DEPRECATED
+- Session Daemon: `hub/_services/daemon/session_daemon.py` (legacy)
+- Auto Session: `hub/_services/daemon/auto_session.py` (legacy)
+- Profile: `hub/_services/daemon/profiles/ati.json` (legacy)
+
+### llmauto Chains (NEU, empfohlen)
+- ATI-Chain: `tools/llmauto/chains/session_ati.json`
+- Wartungs-Chain: `tools/llmauto/chains/session_wartung.json`
+- Finanz-Mail-Chain: `tools/llmauto/chains/session_financial_mail.json`
 
 ## Befehle
 
 ```bash
-# Prompt-Generator (NEU)
-python skills/_services/prompt_generator/prompt_generator.py list
-python skills/_services/prompt_generator/prompt_generator.py get agents/ati
-python skills/_services/prompt_generator/prompt_generator.py copy agents/ati
+# llmauto Chains (NEU, empfohlen)
+bach chain start session_ati
+bach chain stop session_ati
+bach chain status session_ati
+bach chain list
 
-# Session-Daemon verwalten
+# Legacy Session-Daemon (deprecated)
 bach daemon session start --profile ati
 bach daemon session stop
 bach daemon session status
-bach daemon session trigger --profile ati
-bach daemon session profiles
-
-# ATI-Kurzform (nutzt System-Service mit ati-Profil)
-bach ati start
-bach ati stop
-bach ati session --dry-run
 ```
 
 ## Migration
