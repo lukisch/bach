@@ -77,6 +77,7 @@ class HaushaltHandler(BaseHandler):
             "order": "Order anlegen",
             "supplier": "Lieferanten anzeigen",
             "add-supplier": "Lieferant hinzufuegen",
+            "export-routine": "Tagesplan als formatierten Text exportieren",
             "help": "Hilfe",
         }
 
@@ -129,6 +130,8 @@ class HaushaltHandler(BaseHandler):
             return self._supplier(args)
         elif op == "add-supplier":
             return self._add_supplier(args)
+        elif op == "export-routine":
+            return self._export_routine(args)
         elif op in ("", "help"):
             return self._help()
         else:
@@ -302,63 +305,12 @@ class HaushaltHandler(BaseHandler):
     # TODAY - Was steht heute an?
     # ------------------------------------------------------------------
     def _today(self, args: List[str]) -> Tuple[bool, str]:
-        conn = self._get_db()
         try:
-            now = datetime.now()
-            today_str = now.strftime("%Y-%m-%d")
-            weekday = self.WEEKDAYS_DE[now.weekday()]
-
-            lines = [f"=== HEUTE: {weekday} {now.strftime('%d.%m.%Y')} ===\n"]
-
-            # Faellige Routinen
-            routines = conn.execute("""
-                SELECT id, name, category, next_due FROM household_routines
-                WHERE is_active = 1 AND next_due <= ?
-                ORDER BY category ASC, name ASC
-            """, (today_str + " 23:59:59",)).fetchall()
-
-            if routines:
-                lines.append(f"  ROUTINEN ({len(routines)}):")
-                for r in routines:
-                    lines.append(f"    [{r['id']:>3}] {r['name']:<30} ({r['category']})")
-                lines.append("")
-            else:
-                lines.append("  Keine faelligen Routinen heute.\n")
-
-            # Termine
-            try:
-                appointments = conn.execute("""
-                    SELECT id, title, event_date, event_time, event_type
-                    FROM assistant_calendar
-                    WHERE date(event_date) = ? AND status != 'erledigt'
-                    ORDER BY event_time ASC
-                """, (today_str,)).fetchall()
-
-                if appointments:
-                    lines.append(f"  TERMINE ({len(appointments)}):")
-                    for a in appointments:
-                        time = a["event_time"] or "--:--"
-                        lines.append(f"    {time}  {a['title']}")
-                    lines.append("")
-            except Exception:
-                pass  # Calendar table might not exist
-
-            # Einkaufsliste
-            try:
-                shopping = conn.execute("SELECT COUNT(*) FROM household_shopping WHERE is_done = 0").fetchone()[0]
-                if shopping > 0:
-                    lines.append(f"  EINKAUFSLISTE: {shopping} Artikel offen")
-                    lines.append("    -> bach haushalt shopping")
-                    lines.append("")
-            except Exception:
-                pass
-
-            if routines:
-                lines.append(f"  Erledigen: bach routine done <id>")
-
-            return True, "\n".join(lines)
-        finally:
-            conn.close()
+            from hub._services.dashboard.daily_overview import DailyOverview
+            svc = DailyOverview(self.user_db_path)
+            return True, svc.format_today()
+        except Exception as e:
+            return False, f"Fehler beim Laden der Tagesuebersicht: {e}"
 
     # ------------------------------------------------------------------
     # WEEK - Wochenplan
@@ -960,7 +912,127 @@ AMPEL-FARBEN:
   ROT   = Leer und Bedarf vorhanden (sofort kaufen!)
   GELB  = Weniger als 7 Tage Vorrat
   GRUEN = Genug auf Lager
-  GRAU  = Kein Bedarf definiert"""
+  GRAU  = Kein Bedarf definiert
+
+EXPORT:
+  bach haushalt export-routine [--days N] [--out datei.md]
+                                Tagesplan als formatierten Text exportieren"""
+
+    # ------------------------------------------------------------------
+    # EXPORT-ROUTINE - Tagesplan-Export (INT04)
+    # ------------------------------------------------------------------
+    def _export_routine(self, args: List[str]) -> Tuple[bool, str]:
+        days_ahead = 1
+        out_file = None
+        i = 0
+        while i < len(args):
+            if args[i] == "--days" and i + 1 < len(args):
+                days_ahead = int(args[i + 1])
+                i += 2
+            elif args[i] == "--out" and i + 1 < len(args):
+                out_file = args[i + 1]
+                i += 2
+            else:
+                try:
+                    days_ahead = int(args[i])
+                except ValueError:
+                    pass
+                i += 1
+
+        conn = self._get_db()
+        try:
+            now = datetime.now()
+            lines = []
+            lines.append(f"# Tagesplan")
+            lines.append(f"Erstellt: {now.strftime('%d.%m.%Y %H:%M')}")
+            lines.append("")
+
+            for d in range(days_ahead):
+                day = now + timedelta(days=d)
+                day_str = day.strftime("%Y-%m-%d")
+                weekday = self.WEEKDAYS_DE[day.weekday()]
+
+                lines.append(f"## {weekday} {day.strftime('%d.%m.%Y')}")
+                lines.append("")
+
+                # Routinen
+                if d == 0:
+                    # Heute: auch ueberfaellige
+                    routines = conn.execute("""
+                        SELECT id, name, category, next_due FROM household_routines
+                        WHERE is_active = 1 AND next_due <= ?
+                        ORDER BY category ASC, name ASC
+                    """, (day_str + " 23:59:59",)).fetchall()
+                else:
+                    routines = conn.execute("""
+                        SELECT id, name, category, next_due FROM household_routines
+                        WHERE is_active = 1 AND date(next_due) = ?
+                        ORDER BY category ASC, name ASC
+                    """, (day_str,)).fetchall()
+
+                if routines:
+                    lines.append("### Routinen")
+                    lines.append("")
+                    current_cat = None
+                    for r in routines:
+                        cat = r["category"] or "Sonstige"
+                        if cat != current_cat:
+                            current_cat = cat
+                            lines.append(f"**{cat}:**")
+                        overdue = (r["next_due"] or "")[:10] < day_str
+                        marker = " (UEBERFAELLIG)" if overdue else ""
+                        lines.append(f"- [ ] {r['name']}{marker}")
+                    lines.append("")
+
+                # Termine
+                try:
+                    appointments = conn.execute("""
+                        SELECT title, event_time, event_type FROM assistant_calendar
+                        WHERE date(event_date) = ? AND status != 'erledigt'
+                        ORDER BY event_time ASC
+                    """, (day_str,)).fetchall()
+
+                    if appointments:
+                        lines.append("### Termine")
+                        lines.append("")
+                        for a in appointments:
+                            time = a["event_time"] or "--:--"
+                            lines.append(f"- {time} {a['title']}")
+                        lines.append("")
+                except Exception:
+                    pass
+
+                # Medikamente (nur am ersten Tag)
+                if d == 0:
+                    try:
+                        meds = conn.execute("""
+                            SELECT name, dosage, schedule FROM health_medications
+                            WHERE status = 'aktiv' ORDER BY name
+                        """).fetchall()
+                        if meds:
+                            lines.append("### Medikamente")
+                            lines.append("")
+                            for m in meds:
+                                schedule = m["schedule"] or ""
+                                lines.append(f"- [ ] {m['name']} {m['dosage'] or ''} {schedule}")
+                            lines.append("")
+                    except Exception:
+                        pass
+
+                lines.append("---")
+                lines.append("")
+
+            content = "\n".join(lines)
+
+            if out_file:
+                from pathlib import Path as P
+                out_path = P(out_file)
+                out_path.write_text(content, encoding="utf-8")
+                return True, f"Tagesplan exportiert: {out_path} ({days_ahead} Tag(e))"
+
+            return True, content
+        finally:
+            conn.close()
 
     # ------------------------------------------------------------------
     # INVENTORY - Vorratsbestand mit Ampel
