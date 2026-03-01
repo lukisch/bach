@@ -1,0 +1,11 @@
+{
+    "author": "Lukas Geiger",
+    "organization": "",
+    "contact_email": "",
+    "contact_phone": "",
+    "logo_path": "",
+    "default_language": "ngerman",
+    "output_dir": "user/press/",
+    "latex_compiler": "pdflatex",
+    "fallback_compiler": "xelatex"
+}

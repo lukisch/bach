@@ -1,0 +1,23 @@
+Erstelle ein Mathematik-Arbeitsblatt für einen Schüler mit folgenden Eigenschaften:
+
+Name: {{NAME}}
+Diagnose: {{DIAGNOSE}}
+Besondere Interessen/Stärken: {{INTERESSEN}}
+
+Aktuelle Förderziele:
+{{ZIELE}}
+
+Aufgabe:
+Erstelle ein ansprechendes Arbeitsblatt mit 3-5 Mathematik-Aufgaben.
+Die Aufgaben sollen thematisch an die Interessen ("{{INTERESSEN}}") anknüpfen, um die Motivation zu steigern.
+Das Niveau und die Hilfestellungen sollen den aktuellen Förderzielen entsprechen.
+
+Struktur:
+1. Titel ("Mathe mit {{NAME}}")
+2. Kurze, motivierende Einleitung
+3. Die Aufgaben (nummeriert, mit Platzhaltern für Lösungen)
+4. Kleines Rätsel oder Bonus-Aufgabe am Ende
+
+Formatierung:
+Gib das Ergebnis als sauberen Markdown-Code aus, den ich direkt in ein Dokument kopieren kann.
+Verwende Tabellen wenn sinnvoll.

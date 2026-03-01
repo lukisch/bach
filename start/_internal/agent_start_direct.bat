@@ -23,13 +23,13 @@ if "%AGENT_TYPE%"=="" set AGENT_TYPE=agent
 if "%AGENT_MODE%"=="" set AGENT_MODE=interaktiv
 if "%AGENT_MODEL%"=="" set AGENT_MODEL=sonnet
 
-set BACH_DIR=%~dp0..\..\system
+set "BACH_DIR=%~dp0..\..\system"
 
 REM SKILL.md finden
 if /I "%AGENT_TYPE%"=="expert" (
-    set SKILL_PATH=%BACH_DIR%\agents\_experts\%AGENT_NAME%\SKILL.md
+    set "SKILL_PATH=%BACH_DIR%\agents\_experts\%AGENT_NAME%\SKILL.md"
 ) else (
-    set SKILL_PATH=%BACH_DIR%\agents\%AGENT_NAME%\SKILL.md
+    set "SKILL_PATH=%BACH_DIR%\agents\%AGENT_NAME%\SKILL.md"
 )
 
 if not exist "%SKILL_PATH%" (
