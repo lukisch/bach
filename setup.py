@@ -56,11 +56,43 @@ class BACHSetup:
         self.sql_dir = self.data / "sql"
         self.user_dir = self.root / "user"
 
-    def run(self, skip_pip: bool = False, extras: list = None):
+    def check(self) -> bool:
+        """Prueft ob BACH korrekt installiert ist. Exit-Code 0=OK, 2=Probleme."""
+        checks = []
+        all_ok = True
+
+        # DB
+        if self.db_path.exists():
+            conn = sqlite3.connect(str(self.db_path))
+            count = conn.execute("SELECT COUNT(*) FROM sqlite_master WHERE type='table'").fetchone()[0]
+            conn.close()
+            checks.append(f"[OK] bach.db ({count} Tabellen)")
+        else:
+            checks.append("[!!] bach.db fehlt")
+            all_ok = False
+
+        # Verzeichnisse
+        for d in [self.data / "logs", self.user_dir]:
+            if d.exists():
+                checks.append(f"[OK] {d.name}/")
+            else:
+                checks.append(f"[!!] {d.name}/ fehlt")
+                all_ok = False
+
+        # requirements
+        req = self.root / "requirements.txt"
+        checks.append(f"[OK] requirements.txt" if req.exists() else "[!!] requirements.txt fehlt")
+
+        print("\n".join(checks))
+        print(f"\nStatus: {'OK' if all_ok else 'Probleme gefunden'}")
+        return all_ok
+
+    def run(self, skip_pip: bool = False, extras: list = None, quiet: bool = False):
         """Führt komplettes Setup aus."""
-        print("=" * 70)
-        print("  BACH Setup — Drei-Säulen-Modell")
-        print("=" * 70)
+        if not quiet:
+            print("=" * 70)
+            print("  BACH Setup — Drei-Säulen-Modell")
+            print("=" * 70)
         print(f"BACH Root: {self.root}")
         print(f"System:    {self.system}")
         print(f"DB:        {self.db_path}")
@@ -148,27 +180,43 @@ class BACHSetup:
         print(f"     DB initialisiert: {self.db_path}")
 
     def _step_s3_migrations(self, _):
-        """S3: Migrations ausführen."""
+        """S3: Migrations ausfuehren (SQL + Python)."""
         migrations_dir = self.schema_dir / "migrations"
 
         if not migrations_dir.exists():
             print(f"     [SKIP] Kein migrations-Ordner gefunden")
             return
 
-        migration_files = sorted(migrations_dir.glob("*.sql"))
+        # SQL-Migrations
+        sql_files = sorted(migrations_dir.glob("*.sql"))
+        py_files = sorted(migrations_dir.glob("*.py"))
+        all_files = sorted(sql_files + py_files, key=lambda f: f.stem)
 
-        if not migration_files:
+        if not all_files:
             print(f"     [SKIP] Keine Migrations gefunden")
             return
 
         conn = sqlite3.connect(str(self.db_path))
 
-        for migration_file in migration_files:
+        for migration_file in all_files:
             try:
-                script = migration_file.read_text(encoding='utf-8')
-                conn.executescript(script)
+                if migration_file.suffix == ".sql":
+                    script = migration_file.read_text(encoding='utf-8')
+                    conn.executescript(script)
+                elif migration_file.suffix == ".py":
+                    # Python-Migration: Modul laden und run(conn) aufrufen
+                    import importlib.util
+                    spec = importlib.util.spec_from_file_location(
+                        f"migration_{migration_file.stem}", migration_file
+                    )
+                    mod = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(mod)
+                    if hasattr(mod, 'run'):
+                        mod.run(conn)
+                    elif hasattr(mod, 'migrate'):
+                        mod.migrate(conn)
                 print(f"     Migration angewendet: {migration_file.name}")
-            except sqlite3.Error as e:
+            except Exception as e:
                 print(f"     [WARN] Migration {migration_file.name} fehlgeschlagen: {e}")
 
         conn.commit()
@@ -286,19 +334,36 @@ def main():
         help="Optionale Extra-Pakete installieren"
     )
     parser.add_argument(
+        "--non-interactive",
+        action="store_true",
+        help="Non-interactive Modus fuer CI/CD (Standard-Werte, keine Prompts)"
+    )
+    parser.add_argument(
+        "--quiet", "-q",
+        action="store_true",
+        help="Minimale Ausgabe (nur Fehler)"
+    )
+    parser.add_argument(
         "command",
         nargs="?",
         default="install",
-        choices=["install"],
-        help="Setup-Befehl (default: install)"
+        choices=["install", "check"],
+        help="Setup-Befehl (default: install). 'check' prueft ob alles installiert ist."
     )
 
     args = parser.parse_args()
 
     setup = BACHSetup()
 
-    if args.command == "install":
-        success = setup.run(skip_pip=args.skip_pip, extras=args.extras)
+    if args.command == "check":
+        ok = setup.check()
+        sys.exit(0 if ok else 2)
+    elif args.command == "install":
+        success = setup.run(
+            skip_pip=args.skip_pip,
+            extras=args.extras,
+            quiet=args.quiet
+        )
         sys.exit(0 if success else 1)
 
 
