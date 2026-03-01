@@ -360,7 +360,7 @@ def run_chain(chain_name, background=False):
 
                 link_name = link.get("name", f"link-{i+1}")
                 role = link.get("role", "worker")
-                model = link.get("model") or global_config.get("default_model", "claude-sonnet-4-5-20250929")
+                model = link.get("model") or global_config.get("default_model", "claude-sonnet-4-6")
                 fallback = link.get("fallback_model")
 
                 # Continue-Modus: Dediziertes CWD damit --continue

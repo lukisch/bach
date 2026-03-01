@@ -26,6 +26,8 @@
 /system/storage/**
 
 # === SYSTEM LAUFZEIT-DATEN ===
+/system/data/.clock_state
+/system/data/.injector_cooldowns
 /system/data/bach.db
 /system/data/bach-*.db
 /system/data/bach.db-journal
