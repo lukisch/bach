@@ -74,6 +74,8 @@ class DocHandler(BaseHandler):
             "recent": "Kuerzlich hinzugefuegte Dokumente",
             "folders": "Registrierte Scan-Ordner anzeigen",
             "scan": "Ordner scannen (Dateiliste)",
+            "dedup": "Duplikate finden (SHA256): dedup <pfad>",
+            "classify": "Datenschutz-Scan: classify <pfad>",
             "help": "Hilfe anzeigen",
         }
 
@@ -138,6 +140,10 @@ class DocHandler(BaseHandler):
             return self._folders()
         elif op == "scan":
             return self._scan(args, dry_run)
+        elif op == "dedup":
+            return self._dedup(args)
+        elif op == "classify":
+            return self._classify(args)
         elif op in ("", "help"):
             return self._show_help()
         else:
@@ -363,6 +369,78 @@ class DocHandler(BaseHandler):
             return (False, f"[ERROR] {e}")
 
     # ------------------------------------------------------------------
+    # DEDUP - Duplikat-Scan (INT06)
+    # ------------------------------------------------------------------
+    def _dedup(self, args: list) -> tuple:
+        if not args:
+            return False, "Usage: bach doc dedup <pfad> [--min-size 1024] [--no-recursive]"
+
+        scan_path = Path(args[0])
+        min_size = 0
+        recursive = True
+
+        i = 1
+        while i < len(args):
+            if args[i] == "--min-size" and i + 1 < len(args):
+                min_size = int(args[i + 1])
+                i += 2
+            elif args[i] in ("--no-recursive", "-n"):
+                recursive = False
+                i += 1
+            else:
+                i += 1
+
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "dedup_scanner",
+            str(self.base_path / "hub" / "_services" / "document" / "dedup_scanner.py"))
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        DedupScanner = mod.DedupScanner
+        scanner = DedupScanner(min_size=min_size)
+        try:
+            result = scanner.scan(scan_path, recursive=recursive)
+            return True, scanner.format_report(result)
+        except ValueError as e:
+            return False, str(e)
+
+    # ------------------------------------------------------------------
+    # CLASSIFY - Datenschutz-Scan (INT06)
+    # ------------------------------------------------------------------
+    def _classify(self, args: list) -> tuple:
+        if not args:
+            return False, "Usage: bach doc classify <pfad> [--no-recursive]"
+
+        scan_path = Path(args[0])
+        recursive = "--no-recursive" not in args and "-n" not in args
+
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "privacy_classifier",
+            str(self.base_path / "hub" / "_services" / "document" / "privacy_classifier.py"))
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        PrivacyClassifier = mod.PrivacyClassifier
+        classifier = PrivacyClassifier()
+
+        if scan_path.is_file():
+            result = classifier.classify_file(scan_path)
+            if result["error"]:
+                return False, f"Fehler: {result['error']}"
+            lines = [f"Datei: {scan_path}", f"Ampel: {result['ampel']}"]
+            for f in result["findings"]:
+                lines.append(f"  {f['pattern']}: {', '.join(f['matches'][:3])}")
+            if not result["findings"]:
+                lines.append("  Keine sensiblen Daten erkannt.")
+            return True, "\n".join(lines)
+        else:
+            try:
+                result = classifier.scan_directory(scan_path, recursive=recursive)
+                return True, classifier.format_report(result)
+            except ValueError as e:
+                return False, str(e)
+
+    # ------------------------------------------------------------------
     # HELP
     # ------------------------------------------------------------------
     def _show_help(self) -> tuple:
@@ -384,12 +462,17 @@ class DocHandler(BaseHandler):
             "  bach doc recent [tage]             Neue Dokumente (default: 7 Tage)",
             "  bach doc folders                   Registrierte Ordner anzeigen",
             "",
+            "ANALYSE (INT06):",
+            "  bach doc dedup <pfad>              Duplikate finden (SHA256)",
+            "  bach doc dedup <pfad> --min-size 1024  Nur Dateien >1KB",
+            "  bach doc classify <pfad>           Datenschutz-Scan (Ampel)",
+            "  bach doc classify <datei>          Einzelne Datei pruefen",
+            "",
             "UNTERSTUETZTE FORMATE (FTS5-Index):",
             "  Text:    .txt, .md, .html, .log, .cfg, .ini, .yaml, .yml",
             "  Code:    .py, .js, .json, .csv, .xml",
             "  Office:  .pdf (pypdf/pdfplumber), .docx (python-docx)",
             "",
             "DATENBANK: bach.db / document_index + document_fts (FTS5)",
-            "MIGRATION: data/migrations/doc_001_fts5.sql",
         ]
         return (True, "\n".join(lines))
