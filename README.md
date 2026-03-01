@@ -2,10 +2,10 @@
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python)
 ![License](https://img.shields.io/badge/License-MIT-green)
-![Version](https://img.shields.io/badge/Version-v3.2.0--butternut-orange)
+![Version](https://img.shields.io/badge/Version-v3.3.0--peanut-orange)
 ![Status](https://img.shields.io/badge/Status-Production--Ready-brightgreen)
 
-**Version:** v3.2.0-butternut
+**Version:** v3.3.0-peanut
 
 ## Überblick
 
@@ -123,4 +123,4 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 
 ---
 
-*BACH v3.2.0-butternut - Best of Agentic Cognitive Helpers*
+*BACH v3.3.0-peanut - Best of Agentic Cognitive Helpers*
