@@ -22,7 +22,7 @@ echo  \ \  __^< \ \  __ \\ \ \____\ \  __ \
 echo   \ \_____\\ \_\ \_\\ \_____\\ \_\ \_\
 echo    \/_____/ \/_/\/_/ \/_____/ \/_/\/_/
 echo.
-echo   Personal AI Operating System v2.3
+echo   Personal AI Operating System v3.3.0
 echo   ==================================================
 echo.
 echo   --- TELEGRAM BRIDGE ---------------------------

@@ -6,6 +6,56 @@ Copyright (c) 2026 Lukas Geiger. Alle Rechte vorbehalten.
 
 ---
 
+## [3.3.0-peanut] - 2026-03-01
+
+### Breaking Changes
+
+- **MCP-Server aus Repo entfernt:** `system/tools/mcp/bach-codecommander/`, `bach-filecommander/`, `n8n-manager-mcp/` sind nicht mehr im Repo enthalten. Stattdessen: `bach setup mcp` oder `npm install -g bach-codecommander-mcp bach-filecommander-mcp`
+- **--max-turns entfernt:** Einzel-Sessions haben kein festes Turns-Limit mehr. Loop-Sessions behalten Sicherheitslimits.
+
+### Neue Handler
+
+- **NEU:** `SetupHandler` (`hub/setup.py`)
+  - Befehl: `bach setup mcp` - MCP-Server global installieren und Claude Code konfigurieren
+  - Befehl: `bach setup check` - Abhaengigkeiten pruefen
+  - Befehl: `bach setup secrets` - Secrets-Datei synchen
+
+### Datenbankschema
+
+- **NEU:** 6 Shared-Memory-Tabellen (Migration 023, SQ043 Stufe D):
+  - `shared_memory_facts`, `shared_memory_lessons`, `shared_memory_sessions`
+  - `shared_memory_working`, `shared_memory_consolidation`, `shared_context_triggers`
+- **NEU:** TTL-Support (expires_at) fuer `shared_context_triggers`
+- **NEU:** Migration 024: Idempotente Daten-Migration von alten memory_* Tabellen
+- **NEU:** Performance-Indizes fuer alle shared_* Tabellen
+
+### Bug-Fixes
+
+- **FIX:** `&`-Zeichen im Pfad `KI&AI` brach Agent-Start und andere .bat-Operationen
+  - Alle `set`-Zuweisungen in .bat-Dateien verwenden jetzt Anfuehrungszeichen
+- **FIX:** Telegram Bridge fand keinen Bot-Token in Strawberry
+  - Secrets von `~/.bach/bach_secrets.json` in DB gesyncht
+  - Telegram-Connection in connections-Tabelle angelegt
+- **FIX:** Feste --max-turns Werte aus Einzel-Sessions entfernt (waren 50-200)
+
+### Portierung
+
+- 5 CORE-Experten von Vanilla portiert: decision-briefing, press, report_generator, transkriptions-service, worksheet_generator
+- 35 fehlende Skills portiert (Therapie, OS, Workflows)
+- `directory_truth.json` Config portiert
+
+### Installer
+
+- `setup.py` erweitert: `--non-interactive`, `--quiet`, `check` Subcommand
+- Python-Migrations-Support (`.py` neben `.sql`)
+
+### Dokumentation
+
+- `YOUR_USERNAME` Platzhalter durch `lukisch` ersetzt (7 Dateien)
+- MCP-Installationsanleitung im README hinzugefuegt
+
+---
+
 ## [3.2.0-butternut] - 2026-02-28
 
 ### Datenbankschema
