@@ -1,0 +1,116 @@
+---
+name: template-report-generator
+metadata:
+  version: 1.0.0
+  last_updated: 2026-01-27
+  type: expert
+  status: active
+  domain: document-automation
+description: >
+  LLM-gestuetzter Berichtsgenerator fuer Word-Templates.
+  Liest Quelldokumente, generiert strukturierten JSON-Output,
+  fuellt Word-Vorlagen ueber den Word Template Service.
+---
+
+============================================================
+TEMPLATE REPORT GENERATOR V1.0.0
+============================================================
+
+Allgemeiner Berichtsgenerator fuer Word-basierte Vorlagen.
+
+> Quelldokumente lesen, LLM-Output generieren, Word-Template fuellen
+
+
+KERNFUNKTIONEN
+--------------
+
+[Implementiert]
+- Quelldokument-Extraktion: Word, Text, PDF lesen
+- JSON-Schema-basierte LLM-Ausgabe
+- Word-Template-Befuellung via word_template_service.py
+- Tabellenzeilen-Filterung (behalten/entfernen)
+- Checkbox-Steuerung
+- Satzbausteine aktivieren/deaktivieren
+
+[Datenquellen]
+- Quelldokumente im Klienten-Ordner (Word, PDF, TXT)
+- Word-Vorlage als Template
+- JSON-Schema fuer die erwartete LLM-Ausgabe
+
+
+ARCHITEKTUR
+-----------
+
+Der Generator arbeitet in 3 Phasen:
+
+  Phase 1: EXTRAKTION
+    - Quelldokumente lesen (Word, PDF, Text)
+    - Text zusammenfuehren
+    - Template-Struktur analysieren
+
+  Phase 2: LLM-GENERIERUNG
+    - Extrahierten Text + JSON-Schema an LLM senden
+    - LLM generiert strukturierten Output
+    - JSON validieren
+
+  Phase 3: TEMPLATE-BEFUELLUNG
+    - JSON-Daten in Word-Vorlage einsetzen
+    - Tabellenzeilen filtern
+    - Checkboxen setzen
+    - Satzbausteine individualisieren
+    - Fertiges Dokument speichern
+
+
+VERWENDUNG
+----------
+
+[Python API]
+
+============================================================
+from skills._experts.report_generator.generator import ReportGenerator
+
+gen = ReportGenerator()
+result = gen.generate(
+    template_path="skills/_templates/Berichtsvorlage.docx",
+    source_folder="user/buero/foerderplanung/klienten/K_0042/",
+    schema_path="agents/_experts/report_generator/schemas/foerderbericht.json",
+    output_path="user/buero/foerderplanung/klienten/K_0042/output/bericht.docx"
+)
+============================================================
+
+
+JSON-SCHEMA SYSTEM
+------------------
+
+Jeder Berichtstyp hat ein eigenes JSON-Schema, das definiert:
+- Welche Felder das LLM generieren soll
+- Welche Datentypen erwartet werden
+- Wie die Felder auf die Word-Vorlage gemappt werden
+
+Schemas liegen in: agents/_experts/report_generator/schemas/
+
+
+SERVICE-ABHAENGIGKEITEN
+-----------------------
+
+| Service | Pfad | Funktion |
+|---------|------|----------|
+| WordTemplateService | skills/_services/document/word_template_service.py | Template-Befuellung |
+| DocumentAnonymizer | skills/_services/document/anonymizer_service.py | Pseudonymisierung |
+| PDFProcessor | skills/_services/document/pdf_service.py | PDF-Textextraktion |
+
+
+SICHERHEIT
+----------
+
+- Verarbeitet NUR anonymisierte Dokumente
+- Kein direkter API-Zugriff auf Klientendaten
+- LLM sieht nur Tarnnamen und pseudonymisierte Daten
+- Output muss de-anonymisiert werden bevor er den User erreicht
+
+
+---
+
+Status: AKTIV
+Domain: Dokumentenautomatisierung
+Dependencies: python-docx, WordTemplateService

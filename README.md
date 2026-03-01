@@ -28,7 +28,7 @@ BACH ist ein textbasiertes Betriebssystem, das Large Language Models (LLMs) bef�
 
 ```bash
 # Repository klonen
-git clone https://github.com/YOUR_USERNAME/bach.git
+git clone https://github.com/lukisch/bach.git
 cd bach
 
 # Abhängigkeiten installieren
@@ -37,6 +37,21 @@ pip install -r requirements.txt
 # BACH initialisieren
 python system/setup.py
 ```
+
+## MCP-Server (Claude Code Integration)
+
+BACH bietet zwei MCP-Server fuer die Integration mit Claude Code, Cursor und anderen IDEs:
+
+```bash
+# MCP-Server installieren und konfigurieren (empfohlen)
+python system/bach.py setup mcp
+
+# Oder manuell via npm:
+npm install -g bach-codecommander-mcp bach-filecommander-mcp
+```
+
+- **[bach-codecommander-mcp](https://www.npmjs.com/package/bach-codecommander-mcp)** - Code-Analyse und Refactoring Tools
+- **[bach-filecommander-mcp](https://www.npmjs.com/package/bach-filecommander-mcp)** - Datei-Management und Batch-Operationen
 
 ## Quick Start
 
@@ -103,8 +118,8 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 
 ## Support
 
-- **Issues:** [GitHub Issues](https://github.com/YOUR_USERNAME/bach/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/YOUR_USERNAME/bach/discussions)
+- **Issues:** [GitHub Issues](https://github.com/lukisch/bach/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/lukisch/bach/discussions)
 
 ---
 
