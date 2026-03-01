@@ -65,7 +65,7 @@ def _migrate_sessions(cursor):
     dst_cols = {row[1] for row in cursor.fetchall()}
 
     # Mapping: Alte Spalten -> Neue Spalten
-    common_cols = src_cols & dst_cols - {'id'}
+    common_cols = (src_cols & dst_cols) - {'id'}
 
     if not common_cols:
         # Fallback: Minimale Migration
@@ -111,7 +111,7 @@ def _migrate_triggers(cursor):
     cursor.execute("PRAGMA table_info(shared_context_triggers)")
     dst_cols = {row[1] for row in cursor.fetchall()}
 
-    common_cols = src_cols & dst_cols - {'id'}
+    common_cols = (src_cols & dst_cols) - {'id'}
 
     if 'agent_id' not in src_cols:
         # Alte Tabelle hat kein agent_id -> Default setzen

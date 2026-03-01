@@ -468,9 +468,9 @@ class PipelineHandler:
             if not entry_point:
                 raise ValueError("Kein entry_point in Pipeline-Definition")
 
-            # Pfad relativ zu BACH-Root (eine Ebene über system/)
-            script_dir = Path(self.db_path).parent.parent  # system/data/ -> system/ -> BACH_v2_vanilla/
-            entry_path = script_dir / entry_point
+            # Pfad relativ zu system/ (entry_points beginnen mit agents/...)
+            system_dir = Path(self.db_path).parent.parent  # system/data/ -> system/
+            entry_path = system_dir / entry_point
 
             if not entry_path.exists():
                 raise FileNotFoundError(f"entry_point nicht gefunden: {entry_path}")

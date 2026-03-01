@@ -120,13 +120,27 @@ class Database:
             applied = {row[0] for row in
                        conn.execute("SELECT filename FROM _migrations").fetchall()}
 
-            for sql_file in sorted(migrations_dir.glob("*.sql")):
-                if sql_file.name not in applied:
-                    print(f"  Migration: {sql_file.name}")
-                    conn.executescript(sql_file.read_text(encoding="utf-8"))
+            for mig_file in sorted(migrations_dir.glob("*")):
+                if mig_file.suffix not in (".sql", ".py") or mig_file.name.startswith("_"):
+                    continue
+                if mig_file.name not in applied:
+                    print(f"  Migration: {mig_file.name}")
+                    if mig_file.suffix == ".sql":
+                        conn.executescript(mig_file.read_text(encoding="utf-8"))
+                    elif mig_file.suffix == ".py":
+                        import importlib.util
+                        spec = importlib.util.spec_from_file_location(f"mig_{mig_file.stem}", mig_file)
+                        mod = importlib.util.module_from_spec(spec)
+                        spec.loader.exec_module(mod)
+                        if hasattr(mod, "run_migration"):
+                            mod.run_migration(conn)
+                        elif hasattr(mod, "run"):
+                            mod.run(conn)
+                        elif hasattr(mod, "main"):
+                            mod.main()
                     conn.execute(
                         "INSERT INTO _migrations (filename, applied_at) VALUES (?, ?)",
-                        (sql_file.name, datetime.now().isoformat())
+                        (mig_file.name, datetime.now().isoformat())
                     )
 
     def table_exists(self, name: str) -> bool:
