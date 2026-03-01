@@ -24,16 +24,17 @@ SOFTWARE.
 
 """
 Tool: route_planner
-Version: 1.0.0
+Version: 1.1.0
 Author: Claude
 Created: 2026-02-04
-Updated: 2026-02-04
+Updated: 2026-03-02
 Anthropic-Compatible: True
 
 Description:
     Plant Reiserouten fuer Zug und Auto.
+    - Echte Distanz-/Zeitberechnung via OSRM (routing_service)
     - Zug: Nutzt DB Navigator Deep-Links
-    - Auto: Nutzt OpenRouteService oder Google Maps Deep-Links
+    - Auto: Nutzt OSRM-Routing + Google Maps Deep-Links
     - Speichert haeufige Routen
 
 Usage:
@@ -44,7 +45,7 @@ Usage:
     python route_planner.py list
 """
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 __author__ = "Claude"
 
 import sqlite3
@@ -52,7 +53,7 @@ import sys
 import argparse
 from pathlib import Path
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple  # noqa: F401
 from urllib.parse import quote_plus
 
 
@@ -90,9 +91,16 @@ class RoutePlanner:
         """)
         conn.commit()
 
+    # Mapping von Route-Planner-Modi zu OSRM-Modi
+    _MODE_TO_OSRM = {
+        "auto": "car", "car": "car", "pkw": "car", "fahren": "car",
+        "fahrrad": "bike", "bike": "bike", "rad": "bike",
+        "fuss": "foot", "foot": "foot", "walk": "foot", "laufen": "foot",
+    }
+
     def plan_route(self, from_loc: str, to_loc: str, mode: str = "zug",
                   date: str = None, time: str = None) -> Tuple[bool, str]:
-        """Plant eine Route und generiert Links."""
+        """Plant eine Route mit echten Distanz-/Zeitdaten (OSRM) und Links."""
 
         # Datum/Zeit defaults
         if not date:
@@ -117,8 +125,21 @@ class RoutePlanner:
             "",
         ]
 
+        # === Echte Routendaten via OSRM (wenn Modus unterstuetzt) ===
+        osrm_mode = self._MODE_TO_OSRM.get(mode.lower())
+        route_data = None
+        if osrm_mode:
+            route_data = self._get_osrm_route(from_loc, to_loc, osrm_mode)
+
+        if route_data:
+            output.extend([
+                f"Entfernung: {route_data['distance_km']} km",
+                f"Fahrzeit:   ~{route_data['duration_str']}",
+                "",
+            ])
+
+        # === Links generieren (wie bisher) ===
         if mode.lower() in ["zug", "bahn", "train", "db"]:
-            # Deutsche Bahn Navigator Link
             db_link = self._get_db_link(from_loc, to_loc, db_date, db_time)
             output.extend([
                 "Bahn-Verbindung:",
@@ -129,7 +150,6 @@ class RoutePlanner:
             ])
 
         elif mode.lower() in ["auto", "car", "pkw", "fahren"]:
-            # Google Maps Driving Link
             maps_link = self._get_maps_link(from_loc, to_loc, "driving")
             output.extend([
                 "Auto-Route:",
@@ -139,8 +159,24 @@ class RoutePlanner:
                 f"  OpenStreetMap: https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route={quote_plus(from_loc)}%3B{quote_plus(to_loc)}",
             ])
 
+        elif mode.lower() in ["fahrrad", "bike", "rad"]:
+            maps_link = self._get_maps_link(from_loc, to_loc, "bicycling")
+            output.extend([
+                "Fahrrad-Route:",
+                f"  Google Maps: {maps_link}",
+                "",
+                "Alternativ:",
+                f"  OpenStreetMap: https://www.openstreetmap.org/directions?engine=fossgis_osrm_bike&route={quote_plus(from_loc)}%3B{quote_plus(to_loc)}",
+            ])
+
+        elif mode.lower() in ["fuss", "foot", "walk", "laufen"]:
+            maps_link = self._get_maps_link(from_loc, to_loc, "walking")
+            output.extend([
+                "Fuss-Route:",
+                f"  Google Maps: {maps_link}",
+            ])
+
         else:
-            # Generische Links
             output.extend([
                 "Route (alle Modi):",
                 f"  Google Maps: {self._get_maps_link(from_loc, to_loc, 'transit')}",
@@ -156,6 +192,24 @@ class RoutePlanner:
         ])
 
         return True, "\n".join(output)
+
+    def _get_osrm_route(self, from_loc: str, to_loc: str, osrm_mode: str) -> Optional[dict]:
+        """Berechnet Route via routing_service (OSRM). Gibt dict oder None zurueck."""
+        try:
+            import sys as _sys
+            _sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
+            from hub._services.routing.routing_service import get_route, geocode_place
+
+            start = geocode_place(from_loc)
+            end = geocode_place(to_loc)
+
+            if start and end:
+                result = get_route(start, end, mode=osrm_mode)
+                if result and "error" not in result:
+                    return result
+        except Exception:
+            pass
+        return None
 
     def _get_db_link(self, from_loc: str, to_loc: str, date: str, time: str) -> str:
         """Generiert DB Navigator Deep-Link."""

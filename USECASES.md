@@ -1,7 +1,7 @@
 # BACH Usecases
 
 Automatisch generiert aus der Datenbank (usecases).
-Letzte Aktualisierung: 2026-03-01 23:18
+Letzte Aktualisierung: 2026-03-02 00:16
 
 **Total:** 50 Usecases
 
@@ -31,17 +31,17 @@ Termine des Tages, offene Themen, wichtige Briefings bei besonderen Terminen pra
 
 **Letzter Test:** 2026-02-21 22:36:11 | **Score:** 80/100
 
-### ○ Location Restaurant Hotel suchen ⭐⭐
+### ○ Location Restaurant Hotel suchen ⭐⭐⭐
 
 Orte mit Kontaktdaten und Oeffnungszeiten finden. Passende Locations vorschlagen.
 
-**Letzter Test:** 2026-02-21 22:36:11 | **Score:** 50/100
+**Letzter Test:** 2026-02-21 22:36:11 | **Score:** 75/100
 
-### ○ Reiseroute planen ⭐⭐
+### ○ Reiseroute planen ⭐⭐⭐
 
 Zugverbindungen, Hotels suchen und zusammenstellen. Buchungslinks bereitstellen.
 
-**Letzter Test:** 2026-02-21 22:36:11 | **Score:** 50/100
+**Letzter Test:** 2026-02-21 22:36:11 | **Score:** 75/100
 
 ## CARE-MODUL
 

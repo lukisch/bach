@@ -61,36 +61,9 @@ Repo ist PUBLIC auf GitHub mit 14 Topics, Tags `v3.1.6` und `v3.3.0-peanut`.
 
 ## Aktuelle Fokus-Bereiche
 
-### Prioritaet 1 — Kern-Architektur vervollstaendigen
+### Prioritaet 1-3 — Alle erledigt (2026-03-02)
 
-**SQ043: Memory-Migration Stufe D** ⚠️ 40% PARTIAL
-- Tabellen `shared_memory_sessions` und `shared_context_triggers` existieren
-- **ABER:** Daten NICHT migriert (0/2046 Sessions, 0/1120 Triggers)
-- Python-Migration `024_memory_migration_stufe_d.py` wird von `core/db.py::run_migrations()` nicht ausgefuehrt (nur `.sql` Dateien)
-- **Naechster Schritt:** Migration als SQL umschreiben ODER db.py um Python-Support erweitern
-- Ref: `../../BACH_Dev/archive/reports/SQ043_STUFE_C_MEMORY_MIGRATION_KONZEPT.md`
-
-**HQ8/ENT-45: Installer CLI-Interface (Phase 3)** — PARTIAL
-- CLI existiert, aber kein Non-interaktiver Modus
-- Integrations-Level-Wahl nicht implementiert
-
----
-
-### Prioritaet 2 — Features & Qualitaet
-
-**SQ014: Verbleibende PARTIAL Usecases verbessern** (B27) — TEILWEISE ERLEDIGT
-- UC46 (MediaBrain): Auf 100% gehoben (KOMPLETT)
-- UC26/UC27 (Location/Reiseroute): `location_search.py` + `route_planner.py` existieren, aber kein Web-Search-API angebunden
-- UC43 (FinancialProof Dashboard): Entscheidung: Standalone lassen
-
----
-
-### Prioritaet 3 — Modulare Agenten & externe Tools
-
-**SQ011: Pipeline-Framework** (B39) — PARTIAL
-- Pipeline-Infrastruktur existiert (PipelineStep, PipelineRunner)
-- Decision-Briefing ist nur Konzept, nicht implementiert
-- ATI Scan-Roots nicht konfigurierbar
+Alle Prio 1-3 Items wurden implementiert und in die "Abgeschlossene Bloecke" verschoben.
 
 ---
 
@@ -147,6 +120,10 @@ Repo ist PUBLIC auf GitHub mit 14 Topics, Tags `v3.1.6` und `v3.3.0-peanut`.
 | B40 | SQ027 | Alt-Tests in pytest portieren | KOMPLETT |
 | — | SQ033 | BACH Mini (USMC-basiert) | KOMPLETT |
 | — | SQ036 | Vernunftstests (12/12 bestanden) | KOMPLETT |
+| — | SQ043 | Memory-Migration Stufe D (2046 Sessions + 1120 Triggers migriert, db.py Python-Support) | KOMPLETT |
+| — | HQ8 | Installer: full-install Orchestrator + Pre-Flight-Checks | KOMPLETT |
+| — | SQ014 | UC26/27: Overpass API + OSRM Routing-Integration (Score 50→75) | KOMPLETT |
+| — | SQ011 | Pipeline-Framework: DB-Tabellen + Decision-Briefing Scanner + 2 Pipeline-Definitionen | KOMPLETT |
 | — | — | ROADMAP-Konsolidierung (4 Dateien → 1) | KOMPLETT |
 | B30 | SQ046 | Therapie-Skills: Trauma + Systemisch | Verschoben → NEXT_RELEASE |
 | B32 | SQ049 | Agenten autonomer machen | Verschoben → NEXT_RELEASE |
@@ -274,8 +251,12 @@ Grosse BUTTERNUT-Release mit Scheduler-Refactoring, Prompt-System, neuen Handler
 | — | ROADMAP-Konsolidierung | 2026-03 |
 | — | GitHub PUBLIC + Tags | 2026-03 |
 | — | GUI Phase 4 (32 Templates) | 2026-03 |
+| SQ043 | Memory-Migration Stufe D | 2026-03 |
+| HQ8 | Installer Non-interaktiv | 2026-03 |
+| SQ014 | UC26/27 Overpass + OSRM | 2026-03 |
+| SQ011 | Pipeline-Framework + Decision-Briefing | 2026-03 |
 
-~160+ Tasks abgeschlossen in Phase 1-20 + Post-Release-Bloecke.
+~165+ Tasks abgeschlossen in Phase 1-20 + Post-Release-Bloecke.
 
 ### Abgeschlossene Release-Meilensteine (Strawberry v3.1.6)
 
@@ -380,7 +361,8 @@ Grosse BUTTERNUT-Release mit Scheduler-Refactoring, Prompt-System, neuen Handler
 | **3.7** | 2026-02-13 | **Directory Restructuring v2.5** |
 | **3.8** | 2026-02-28 | **BUTTERNUT v3.2.0: Scheduler, Prompt-System, USMC Bridge** |
 | **4.0** | 2026-03-01 | **Konsolidierung: BACH_Dev/ROADMAP.md + Post-Release-Prios integriert, INT01-06 + B31/B35/B38/B40/BACH Mini als KOMPLETT markiert** |
-| **4.1** | 2026-03-01 | **Verifizierung: Alle Items gegen Code geprueft. SQ073/074/036/051/075/080/081 + B27-29/33-34/36-37 als KOMPLETT. GitHub PUBLIC. GUI Phase 4 KOMPLETT. SQ043 Migrations-Blocker identifiziert.** |
+| **4.1** | 2026-03-01 | **Verifizierung: Alle Items gegen Code geprueft. SQ073/074/036/051/075/080/081 + B27-29/33-34/36-37 als KOMPLETT. GitHub PUBLIC. GUI Phase 4 KOMPLETT.** |
+| **4.2** | 2026-03-02 | **Prio 1-3 erledigt: SQ043 Memory-Migration (2046+1120 Datensaetze), HQ8 Installer (full-install+preflight), SQ014 UC26/27 (Overpass+OSRM), SQ011 Pipeline-Framework (DB+Scanner+Definitionen). Nur noch Prio 4 offen.** |
 
 Detaillierte Historie: `CHANGELOG.md`
 Archivierte Versionen: `../docs/_archive/ROADMAP_*.md`

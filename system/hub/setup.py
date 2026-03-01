@@ -8,6 +8,8 @@ bach setup n8n              n8n-manager-mcp optional installieren und konfigurie
 bach setup check             Pruefe ob alle Abhaengigkeiten konfiguriert sind
 bach setup secrets           Secrets-Datei initialisieren / synchen
 bach setup user              USER.md pruefen, personalisieren und mit DB synchronisieren
+bach setup preflight         Pre-Flight-Checks vor Installation (Python, npm, Speicher)
+bach setup full-install      Vollstaendige BACH-Installation in einem Durchlauf
 
 Teil von PEANUT Release: MCP-Server aus Repo entfernt, stattdessen via npm installieren.
 B37: Optionale MCP-Server (n8n-manager-mcp) separat installierbar.
@@ -55,6 +57,8 @@ class SetupHandler(BaseHandler):
             "check": "Pruefe ob alle Abhaengigkeiten konfiguriert sind",
             "secrets": "Secrets-Datei initialisieren / synchen",
             "user": "USER.md pruefen, personalisieren und mit DB synchronisieren",
+            "preflight": "Pre-Flight-Checks vor Installation (Python, npm, Speicher)",
+            "full-install": "Vollstaendige BACH-Installation in einem Durchlauf",
         }
 
     def handle(self, operation: str, args: list, dry_run: bool = False) -> tuple:
@@ -68,6 +72,10 @@ class SetupHandler(BaseHandler):
             return self._setup_secrets()
         elif operation == "user":
             return self._setup_user()
+        elif operation == "preflight":
+            return self._preflight(args)
+        elif operation == "full-install":
+            return self._full_install(args)
         elif operation is None or operation == "":
             return self._check()
         else:
@@ -272,6 +280,108 @@ class SetupHandler(BaseHandler):
         output = f"=== BACH Setup Check ===\n\n" + "\n".join(checks) + f"\n\nStatus: {status}"
 
         return all_ok, output
+
+    # =========================================================================
+    # Non-interaktiver Installer (preflight + full-install)
+    # =========================================================================
+
+    def _preflight(self, args):
+        """Pre-Flight-Checks vor Installation."""
+        import sys
+        import os
+        checks = []
+
+        # Python-Version
+        py_ok = sys.version_info >= (3, 10)
+        checks.append((
+            "Python >= 3.10", py_ok,
+            f"{sys.version_info.major}.{sys.version_info.minor}"
+        ))
+
+        # npm verfuegbar
+        npm_path = shutil.which("npm")
+        checks.append((
+            "npm verfuegbar", npm_path is not None,
+            str(npm_path or "nicht gefunden")
+        ))
+
+        # DB-Verzeichnis beschreibbar
+        db_dir = self.base_path / "data"
+        db_dir.mkdir(parents=True, exist_ok=True)
+        db_writable = os.access(str(db_dir), os.W_OK)
+        checks.append(("data/ beschreibbar", db_writable, str(db_dir)))
+
+        # Speicherplatz (>100MB frei)
+        usage = shutil.disk_usage(str(self.base_path))
+        free_mb = usage.free / (1024 * 1024)
+        checks.append((
+            "Speicher > 100MB", free_mb > 100,
+            f"{free_mb:.0f} MB frei"
+        ))
+
+        out = ["Pre-Flight Checks:"]
+        all_ok = True
+        for name, ok, detail in checks:
+            status = "OK" if ok else "FAIL"
+            out.append(f"  [{status}] {name}: {detail}")
+            if not ok:
+                all_ok = False
+
+        return all_ok, "\n".join(out)
+
+    def _full_install(self, args):
+        """Vollstaendige BACH-Installation in einem Durchlauf."""
+        config = {}
+        # --config flag parsen
+        if "--config" in args:
+            idx = args.index("--config")
+            if idx + 1 < len(args):
+                config_path = Path(args[idx + 1])
+                if config_path.exists():
+                    config = json.loads(config_path.read_text(encoding="utf-8"))
+                else:
+                    return False, f"Config-Datei nicht gefunden: {config_path}"
+
+        results = []
+        steps = [
+            ("Pre-Flight Check", self._preflight),
+            ("MCP-Server", lambda a: self._setup_mcp()),
+            ("Secrets", lambda a: self._setup_secrets()),
+            ("User-Profil", lambda a: self._setup_user()),
+        ]
+
+        # Optional: n8n
+        if config.get("install_n8n", False) or "--with-n8n" in args:
+            steps.insert(2, ("n8n Manager", lambda a: self._setup_n8n()))
+
+        out = []
+        out.append("=== BACH Full Install ===\n")
+
+        for name, step_fn in steps:
+            out.append(f"[...] {name}")
+            try:
+                ok, msg = step_fn([])
+                status = "OK" if ok else "FEHLER"
+                results.append((name, ok, msg))
+                out.append(f"  [{status}] {name}: {msg[:100]}")
+            except Exception as e:
+                results.append((name, False, str(e)))
+                out.append(f"  [FEHLER] {name}: {e}")
+
+        # Abschluss-Check
+        ok_check, msg_check = self._check()
+        results.append(("Validierung", ok_check, msg_check))
+
+        # Report
+        passed = sum(1 for _, ok, _ in results if ok)
+        total = len(results)
+        out.append(f"\n=== Ergebnis: {passed}/{total} Schritte erfolgreich ===")
+
+        if passed < total:
+            failed = [name for name, ok, _ in results if not ok]
+            out.append(f"Fehlgeschlagen: {', '.join(failed)}")
+
+        return passed == total, "\n".join(out)
 
     # =========================================================================
     # USER.md Setup (B34)
