@@ -50,7 +50,11 @@ Version: 1.0.0
 """
 
 from datetime import datetime
-from typing import Callable, Optional
+from typing import Callable, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .instance_messaging import InstanceMessaging
+    from .instance_registry import InstanceRegistry
 
 
 class HookRegistry:
@@ -58,7 +62,19 @@ class HookRegistry:
 
     Stellt vordefinierte Events bereit, erlaubt aber auch
     custom Events ohne Vorab-Deklaration.
+
+    Distributed Messaging (B29):
+        Events in DISTRIBUTED_EVENTS koennen via broadcast=True
+        an andere BACH-Instanzen weitergeleitet werden.
+        Dazu muss connect_messaging() aufgerufen worden sein.
     """
+
+    # Events die bei broadcast=True an andere Instanzen gesendet werden
+    DISTRIBUTED_EVENTS = {
+        'after_task_done',
+        'after_memory_write',
+        'after_task_create',
+    }
 
     # Vordefinierte Events (Dokumentation, nicht Einschraenkung)
     KNOWN_EVENTS = {
@@ -100,6 +116,8 @@ class HookRegistry:
         self._listeners: dict[str, list] = {}
         self._log: list[dict] = []  # Letzte N Events fuer Debugging
         self._log_max = 50
+        self._messaging: Optional['InstanceMessaging'] = None
+        self._registry: Optional['InstanceRegistry'] = None
 
     def on(self, event: str, handler: Callable,
            priority: int = 50, name: str = None):
@@ -145,12 +163,16 @@ class HookRegistry:
                 if e['name'] != name
             ]
 
-    def emit(self, event: str, context: dict = None) -> list:
+    def emit(self, event: str, context: dict = None,
+             broadcast: bool = False) -> list:
         """Feuert ein Event und ruft alle registrierten Handler auf.
 
         Args:
             event: Event-Name
             context: Dict mit Event-spezifischen Daten
+            broadcast: Wenn True UND Event in DISTRIBUTED_EVENTS,
+                       wird das Event auch an andere BACH-Instanzen gesendet.
+                       Erfordert vorherigen Aufruf von connect_messaging().
 
         Returns:
             Liste von Handler-Ergebnissen (nur non-None)
@@ -170,12 +192,34 @@ class HookRegistry:
             except Exception as e:
                 results.append(f"[HOOK-ERROR] {event}/{entry['name']}: {e}")
 
+        # Distributed Broadcast (nur wenn aktiviert und nicht selbst remote)
+        if (broadcast
+                and event in self.DISTRIBUTED_EVENTS
+                and self._messaging is not None
+                and not ctx.get('_remote')):
+            try:
+                # Kontext fuer Serialisierung aufbereiten (interne Keys entfernen)
+                broadcast_ctx = {
+                    k: v for k, v in ctx.items()
+                    if not k.startswith('_')
+                }
+                sent = self._messaging.broadcast(
+                    event=event,
+                    context=broadcast_ctx,
+                    registry=self._registry,
+                )
+                if sent > 0:
+                    results.append(f"[BROADCAST] {event} -> {sent} Instanz(en)")
+            except Exception as e:
+                results.append(f"[BROADCAST-ERROR] {event}: {e}")
+
         # Log fuehren
         self._log.append({
             'event': event,
             'timestamp': ctx['_timestamp'],
             'listeners': len(listeners),
             'results': len(results),
+            'broadcast': broadcast and event in self.DISTRIBUTED_EVENTS,
         })
         if len(self._log) > self._log_max:
             self._log = self._log[-self._log_max:]
@@ -246,6 +290,47 @@ class HookRegistry:
                     'listeners': len(self._listeners[event])
                 }
         return result
+
+    # ─── Distributed Messaging (B29) ────────────────────────────────
+
+    def connect_messaging(self, messaging: 'InstanceMessaging',
+                          registry: 'InstanceRegistry' = None):
+        """Verbindet das Hook-System mit dem Inter-Instanz-Messaging.
+
+        Nach dem Aufruf kann emit(broadcast=True) Nachrichten an
+        andere BACH-Instanzen senden.
+
+        Args:
+            messaging: InstanceMessaging-Instanz
+            registry: Optional InstanceRegistry fuer gezielte Zustellung
+        """
+        self._messaging = messaging
+        self._registry = registry
+
+    def disconnect_messaging(self):
+        """Trennt das Messaging vom Hook-System.
+
+        Sollte beim Shutdown aufgerufen werden.
+        """
+        self._messaging = None
+        self._registry = None
+
+    @property
+    def messaging_connected(self) -> bool:
+        """Prueft ob Messaging verbunden ist."""
+        return self._messaging is not None
+
+    def poll_messages(self) -> int:
+        """Pollt eingehende Nachrichten und emittiert sie als lokale Events.
+
+        Convenience-Methode die InstanceMessaging.process_incoming() aufruft.
+
+        Returns:
+            Anzahl verarbeiteter Nachrichten (0 wenn Messaging nicht verbunden)
+        """
+        if self._messaging is None:
+            return 0
+        return self._messaging.process_incoming(self)
 
 
 # Singleton-Instanz (globaler Zugriff)

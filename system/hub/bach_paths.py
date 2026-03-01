@@ -123,6 +123,7 @@ BACKUPS_DIR = DATA_DIR / "_backups"
 ARCHIVE_DIR = DATA_DIR / "_archive"
 TRASH_DIR = DATA_DIR / "_trash"
 MESSAGES_DIR = DATA_DIR / "messages"
+INSTANCES_DIR = DATA_DIR / "instances"
 
 # ============================================================================
 # ROOT-VERZEICHNISSE (auf Repository-Ebene)
@@ -237,6 +238,7 @@ _PATH_REGISTRY = {
     "archive": ARCHIVE_DIR,
     "trash": TRASH_DIR,
     "messages": MESSAGES_DIR,
+    "instances": INSTANCES_DIR,
 
     # Root-Verzeichnisse
     "user": USER_DIR,

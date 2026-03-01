@@ -4,9 +4,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BACH - Wartung</title>
+    <title>BACH - Daemon &amp; Chains</title>
     <link rel="stylesheet" href="/static/css/main.css">
     <style>
+        /* ── Tab Navigation ── */
+        .tab-nav {
+            display: flex;
+            gap: 0;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-nav button {
+            padding: 0.75rem 1.5rem;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .tab-nav button:hover {
+            color: var(--text);
+            background: var(--bg-secondary);
+        }
+
+        .tab-nav button.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            font-weight: 600;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* ── Existing daemon styles ── */
         .daemon-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -126,8 +166,10 @@
             background: var(--bg);
             padding: 2rem;
             border-radius: 8px;
-            max-width: 500px;
+            max-width: 600px;
             width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
         }
 
         .form-group {
@@ -150,6 +192,11 @@
             font-size: 1rem;
         }
 
+        .form-group textarea {
+            font-family: monospace;
+            min-height: 80px;
+        }
+
         .stat-card {
             text-align: center;
             padding: 1rem;
@@ -166,7 +213,7 @@
         }
 
         .stat-value.stopped {
-            color: #6c757d;  /* Grau statt Rot - Stopped ist OK, nicht Fehler */
+            color: #6c757d;
         }
 
         .stat-label {
@@ -208,6 +255,150 @@
             font-family: monospace;
             font-size: 0.9rem;
         }
+
+        /* ── Scheduler-Tab ── */
+        .filter-bar {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .filter-bar button {
+            padding: 0.4rem 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--bg);
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .filter-bar button.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .filter-bar button:hover:not(.active) {
+            background: var(--bg-secondary);
+        }
+
+        .quick-create-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .quick-card {
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .quick-card h4 {
+            margin: 0 0 0.5rem 0;
+            font-size: 0.95rem;
+        }
+
+        .quick-card p {
+            margin: 0;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* ── Chain-Tab ── */
+        .chain-card {
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-bottom: 1rem;
+        }
+
+        .chain-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .chain-card-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        .chain-steps {
+            padding: 0.5rem 0;
+        }
+
+        .chain-step {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 0.75rem;
+            margin-bottom: 0.25rem;
+            background: var(--bg);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-family: monospace;
+        }
+
+        .chain-step .step-num {
+            color: var(--text-muted);
+            font-weight: 600;
+            min-width: 24px;
+        }
+
+        .chain-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        /* ── Step Editor ── */
+        .step-editor-list {
+            margin: 0.5rem 0;
+        }
+
+        .step-editor-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            align-items: center;
+        }
+
+        .step-editor-row input {
+            flex: 1;
+            padding: 0.4rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .step-editor-row button {
+            padding: 0.3rem 0.6rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--bg);
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .step-editor-row button:hover {
+            background: #f8d7da;
+        }
     </style>
 </head>
 
@@ -216,34 +407,94 @@
 
     <main class="main-content">
         <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-            <h1 style="margin: 0;">⚙️ Daemon Jobs</h1>
+            <h1 style="margin: 0;">Daemon &amp; Chains</h1>
             <div class="page-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                <button class="btn btn-danger" onclick="killAllDaemons()" title="Alle Daemon/Session-Prozesse sofort beenden">☠️ Kill All</button>
+                <button class="btn btn-danger" onclick="killAllDaemons()" title="Alle Daemon/Session-Prozesse sofort beenden">Kill All</button>
+                <button class="btn btn-secondary" onclick="refreshAll()">Aktualisieren</button>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tab-nav" id="tab-nav">
+            <button class="active" onclick="switchTab('jobs')">Jobs</button>
+            <button onclick="switchTab('scheduler')">Scheduler</button>
+            <button onclick="switchTab('chains')">Chains</button>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <!-- TAB 1: JOBS (bestehender Content) -->
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <div class="tab-content active" id="tab-jobs">
+            <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-bottom: 1rem;">
                 <button class="btn btn-primary" onclick="showAddJobModal()">+ Neuer Job</button>
-                <button class="btn btn-secondary" onclick="refreshDaemon()">🔄</button>
+            </div>
+
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                Jobs sind standardmaessig deaktiviert. Manuelle Ausfuehrung empfohlen.
+            </p>
+
+            <!-- Recurring Tasks -->
+            <div class="card" style="margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h2>Wiederkehrende Aufgaben</h2>
+                    <button class="btn btn-sm" onclick="checkRecurringTasks()" title="Faellige Tasks pruefen">Check</button>
+                </div>
+                <div id="recurring-tasks-container">
+                    <p class="loading">Lade...</p>
+                </div>
+            </div>
+
+            <div class="daemon-grid">
+                <!-- Jobs Liste -->
+                <div class="card">
+                    <h2>Jobs</h2>
+                    <table class="jobs-table">
+                        <thead>
+                            <tr>
+                                <th>Status</th>
+                                <th>Name</th>
+                                <th>Typ</th>
+                                <th>Schedule</th>
+                                <th>Aktionen</th>
+                            </tr>
+                        </thead>
+                        <tbody id="jobs-body">
+                            <tr>
+                                <td colspan="5" class="loading">Lade...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Run History -->
+                <div class="card">
+                    <h2>Letzte Ausfuehrungen</h2>
+                    <div class="run-log" id="run-log">
+                        <p class="loading">Lade...</p>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
-            ⚠️ Jobs sind standardmäßig deaktiviert. Manuelle Ausführung über 🚀 empfohlen.
-        </p>
-
-        <!-- Recurring Tasks -->
-        <div class="card" style="margin-bottom: 2rem;">
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <!-- TAB 2: SCHEDULER -->
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <div class="tab-content" id="tab-scheduler">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <h2>🔄 Wiederkehrende Aufgaben</h2>
-                <button class="btn btn-sm" onclick="checkRecurringTasks()" title="Faellige Tasks pruefen">🔍
-                    Check</button>
+                <h2 style="margin: 0;">Scheduler-Uebersicht</h2>
+                <button class="btn btn-primary" onclick="showAddJobModal()">+ Neuer Job</button>
             </div>
-            <div id="recurring-tasks-container">
-                <p class="loading">Lade...</p>
-            </div>
-        </div>
 
-        <div class="daemon-grid">
-            <!-- Jobs Liste -->
-            <div class="card">
-                <h2>Jobs</h2>
+            <!-- Filter Bar -->
+            <div class="filter-bar" id="scheduler-filter">
+                <button class="active" onclick="filterSchedulerJobs('all')">Alle</button>
+                <button onclick="filterSchedulerJobs('cron')">Cron</button>
+                <button onclick="filterSchedulerJobs('interval')">Interval</button>
+                <button onclick="filterSchedulerJobs('manual')">Manuell</button>
+            </div>
+
+            <!-- Gefilterte Job-Tabelle -->
+            <div class="card" style="margin-bottom: 2rem;">
                 <table class="jobs-table">
                     <thead>
                         <tr>
@@ -251,26 +502,77 @@
                             <th>Name</th>
                             <th>Typ</th>
                             <th>Schedule</th>
+                            <th>Naechster Lauf</th>
+                            <th>Statistik</th>
                             <th>Aktionen</th>
                         </tr>
                     </thead>
-                    <tbody id="jobs-body">
+                    <tbody id="scheduler-jobs-body">
                         <tr>
-                            <td colspan="5" class="loading">Lade...</td>
+                            <td colspan="7" class="loading">Lade...</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
-            <!-- Run History -->
+            <!-- Cron Preview -->
+            <div class="card" style="margin-bottom: 2rem;">
+                <h3>Cron-Ausdruck Vorschau</h3>
+                <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1rem;">
+                    <input type="text" id="cron-preview-input" placeholder="z.B. 0 3 * * * (Minute Stunde Tag Monat Wochentag)"
+                        style="flex: 1; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px; font-family: monospace;">
+                    <button class="btn btn-secondary" onclick="previewCron()">Vorschau</button>
+                </div>
+                <div id="cron-preview-result" style="font-size: 0.9rem; color: var(--text-muted);"></div>
+            </div>
+
+            <!-- Quick Create -->
             <div class="card">
-                <h2>Letzte Ausfuehrungen</h2>
-                <div class="run-log" id="run-log">
-                    <p class="loading">Lade...</p>
+                <h3>Schnell-Erstellen</h3>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">Haeufige Job-Muster mit einem Klick erstellen</p>
+                <div class="quick-create-grid">
+                    <div class="quick-card" onclick="quickCreateJob('backup-daily', 'interval', '24h', 'python tools/backup.py')">
+                        <h4>Taegliches Backup</h4>
+                        <p>Alle 24 Stunden, Backup-Script</p>
+                    </div>
+                    <div class="quick-card" onclick="quickCreateJob('health-check', 'interval', '30m', 'python bach.py status')">
+                        <h4>Health Check</h4>
+                        <p>Alle 30 Minuten, Status pruefen</p>
+                    </div>
+                    <div class="quick-card" onclick="quickCreateJob('nightly-scan', 'cron', '0 3 * * *', 'python bach.py scan run --mode quick')">
+                        <h4>Nightly Scan</h4>
+                        <p>Taeglich um 03:00, Quick-Scan</p>
+                    </div>
+                    <div class="quick-card" onclick="quickCreateJob('weekly-report', 'cron', '0 8 * * 1', 'python bach.py status --format json')">
+                        <h4>Woechentlicher Report</h4>
+                        <p>Montag 08:00, Status-Report</p>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <!-- TAB 3: CHAINS -->
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <div class="tab-content" id="tab-chains">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h2 style="margin: 0;">Toolchains</h2>
+                <button class="btn btn-primary" onclick="showAddChainModal()">+ Neue Chain</button>
+            </div>
+
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                Toolchains fuehren mehrere BACH-Befehle sequentiell oder parallel aus.
+            </p>
+
+            <div id="chains-container">
+                <p class="loading">Lade...</p>
+            </div>
+        </div>
     </main>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- MODALS -->
+    <!-- ═══════════════════════════════════════════════════════ -->
 
     <!-- Add Job Modal -->
     <div class="modal" id="add-job-modal">
@@ -303,7 +605,91 @@
                 </div>
                 <div class="form-group" style="display: flex; gap: 1rem;">
                     <button type="submit" class="btn btn-primary">Erstellen</button>
-                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Abbrechen</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('add-job-modal')">Abbrechen</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Chain Modal -->
+    <div class="modal" id="add-chain-modal">
+        <div class="modal-content">
+            <h2>Neue Toolchain</h2>
+            <form id="add-chain-form" onsubmit="submitNewChain(event)">
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" name="name" required placeholder="z.B. nightly-maintenance">
+                </div>
+                <div class="form-group">
+                    <label>Beschreibung</label>
+                    <input type="text" name="description" placeholder="Optional">
+                </div>
+                <div class="form-group">
+                    <label>Trigger-Typ</label>
+                    <select name="trigger_type">
+                        <option value="manual">Manuell</option>
+                        <option value="time">Zeitgesteuert</option>
+                        <option value="event">Event-basiert</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Trigger-Wert</label>
+                    <input type="text" name="trigger_value" placeholder="z.B. 02:00 oder task_completed">
+                </div>
+                <div class="form-group">
+                    <label>Steps (BACH-Befehle)</label>
+                    <div class="step-editor-list" id="new-chain-steps">
+                        <div class="step-editor-row">
+                            <span style="color: var(--text-muted); font-weight: 600; min-width: 24px;">1.</span>
+                            <input type="text" placeholder='Tool z.B. "scan"' class="step-tool">
+                            <input type="text" placeholder='Args z.B. "run --mode quick"' class="step-args">
+                            <button type="button" onclick="removeStepRow(this)" title="Entfernen">x</button>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-sm" onclick="addStepRow()" style="margin-top: 0.5rem;">+ Step</button>
+                </div>
+                <div class="form-group" style="display: flex; gap: 1rem;">
+                    <button type="submit" class="btn btn-primary">Erstellen</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('add-chain-modal')">Abbrechen</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Chain Edit Modal -->
+    <div class="modal" id="edit-chain-modal">
+        <div class="modal-content">
+            <h2>Chain bearbeiten</h2>
+            <form id="edit-chain-form" onsubmit="submitEditChain(event)">
+                <input type="hidden" name="chain_id">
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label>Beschreibung</label>
+                    <input type="text" name="description">
+                </div>
+                <div class="form-group">
+                    <label>Trigger-Typ</label>
+                    <select name="trigger_type">
+                        <option value="manual">Manuell</option>
+                        <option value="time">Zeitgesteuert</option>
+                        <option value="event">Event-basiert</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Trigger-Wert</label>
+                    <input type="text" name="trigger_value">
+                </div>
+                <div class="form-group">
+                    <label>Steps (BACH-Befehle)</label>
+                    <div class="step-editor-list" id="edit-chain-steps"></div>
+                    <button type="button" class="btn btn-sm" onclick="addStepRow('edit-chain-steps')" style="margin-top: 0.5rem;">+ Step</button>
+                </div>
+                <div class="form-group" style="display: flex; gap: 1rem;">
+                    <button type="submit" class="btn btn-primary">Speichern</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('edit-chain-modal')">Abbrechen</button>
                 </div>
             </form>
         </div>
@@ -313,24 +699,49 @@
     <script src="/static/js/nav.js"></script>
     <script>
         // ═══════════════════════════════════════════════════════════════
-        // DAEMON DASHBOARD - JavaScript
+        // DAEMON & CHAINS DASHBOARD - JavaScript (B28)
         // ═══════════════════════════════════════════════════════════════
 
         let daemonStartTime = null;
         let uptimeInterval = null;
+        let currentSchedulerFilter = 'all';
+        let allSchedulerJobs = [];
+
+        // ─────────────────────────────────────────────────────────────────
+        // TAB NAVIGATION
+        // ─────────────────────────────────────────────────────────────────
+
+        function switchTab(tabName) {
+            // Buttons
+            document.querySelectorAll('.tab-nav button').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Content
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + tabName).classList.add('active');
+
+            // Daten laden beim Tab-Wechsel
+            if (tabName === 'jobs') {
+                loadJobs();
+                loadRuns();
+            } else if (tabName === 'scheduler') {
+                loadSchedulerJobs();
+            } else if (tabName === 'chains') {
+                loadChains();
+            }
+        }
 
         // ─────────────────────────────────────────────────────────────────
         // STATUS & CONTROLS
         // ─────────────────────────────────────────────────────────────────
 
-        // Max Sessions speichern (DAEMON_005)
         async function saveMaxSessions() {
             const input = document.getElementById('max-sessions-input');
+            if (!input) return;
             const value = parseInt(input.value) || 0;
 
             try {
                 await api.put('/api/daemon/config', { max_sessions: value });
-                // Kurze Bestätigung
                 input.style.borderColor = '#28a745';
                 setTimeout(() => { input.style.borderColor = 'var(--border)'; }, 1000);
                 loadStatus();
@@ -344,62 +755,64 @@
             try {
                 const data = await api.get('/api/daemon/status');
 
-                // Status-Anzeige
                 const statusEl = document.getElementById('stat-status');
                 const btnStart = document.getElementById('btn-start');
                 const btnStop = document.getElementById('btn-stop');
                 const dotEl = document.getElementById('daemon-status-dot');
                 const textEl = document.getElementById('daemon-status-text');
 
-                if (data.running) {
-                    statusEl.textContent = '🟢 Running';
-                    statusEl.className = 'stat-value running';
-                    btnStart.style.display = 'none';
-                    btnStop.style.display = 'inline-block';
-                    dotEl.className = 'status-dot online';
-                    textEl.textContent = 'Daemon aktiv';
+                // Elemente koennen fehlen wenn nicht im Jobs-Tab
+                if (!statusEl) return;
 
-                    // Uptime starten
+                if (data.running) {
+                    statusEl.textContent = 'Running';
+                    statusEl.className = 'stat-value running';
+                    if (btnStart) btnStart.style.display = 'none';
+                    if (btnStop) btnStop.style.display = 'inline-block';
+                    if (dotEl) dotEl.className = 'status-dot online';
+                    if (textEl) textEl.textContent = 'Daemon aktiv';
+
                     if (!daemonStartTime) {
                         daemonStartTime = new Date();
                         startUptimeTimer();
                     }
                 } else {
-                    statusEl.textContent = '⏸️ Bereit';
+                    statusEl.textContent = 'Bereit';
                     statusEl.className = 'stat-value stopped';
-                    btnStart.style.display = 'inline-block';
-                    btnStop.style.display = 'none';
-                    dotEl.className = 'status-dot offline';
-                    textEl.textContent = 'Daemon inaktiv';
+                    if (btnStart) btnStart.style.display = 'inline-block';
+                    if (btnStop) btnStop.style.display = 'none';
+                    if (dotEl) dotEl.className = 'status-dot offline';
+                    if (textEl) textEl.textContent = 'Daemon inaktiv';
 
-                    // Uptime stoppen
                     daemonStartTime = null;
                     if (uptimeInterval) {
                         clearInterval(uptimeInterval);
                         uptimeInterval = null;
                     }
-                    document.getElementById('stat-uptime').textContent = '-';
+                    const uptimeEl = document.getElementById('stat-uptime');
+                    if (uptimeEl) uptimeEl.textContent = '-';
                 }
 
-                // Statistiken
                 if (data.stats) {
-                    document.getElementById('stat-jobs').textContent = data.stats.active_jobs || 0;
-                    document.getElementById('stat-runs').textContent = data.stats.runs_today || 0;
+                    const jobsEl = document.getElementById('stat-jobs');
+                    const runsEl = document.getElementById('stat-runs');
+                    if (jobsEl) jobsEl.textContent = data.stats.active_jobs || 0;
+                    if (runsEl) runsEl.textContent = data.stats.runs_today || 0;
                 }
 
-                // Session-Statistiken (NEU v1.1.45)
-                document.getElementById('stat-sessions').textContent = data.sessions_generated || 0;
+                const sessEl = document.getElementById('stat-sessions');
+                if (sessEl) sessEl.textContent = data.sessions_generated || 0;
 
-                // Countdown für nächste Session
                 if (data.next_session_in && data.next_session_in > 0) {
                     updateSessionCountdown(data.next_session_in);
                 } else if (data.running) {
-                    document.getElementById('stat-next-session').textContent = 'Bald';
+                    const nextEl = document.getElementById('stat-next-session');
+                    if (nextEl) nextEl.textContent = 'Bald';
                 } else {
-                    document.getElementById('stat-next-session').textContent = '--:--';
+                    const nextEl = document.getElementById('stat-next-session');
+                    if (nextEl) nextEl.textContent = '--:--';
                 }
 
-                // Max Sessions Input und Fortschritt (DAEMON_005)
                 const maxSessions = data.config?.max_sessions || 0;
                 const sessionsGenerated = data.sessions_generated || 0;
                 const maxInput = document.getElementById('max-sessions-input');
@@ -411,18 +824,16 @@
                     maxInput.value = maxSessions;
                 }
 
-                // Fortschrittsanzeige wenn max_sessions > 0
                 if (maxSessions > 0 && progressContainer) {
                     progressContainer.style.display = 'block';
                     const percent = Math.min((sessionsGenerated / maxSessions) * 100, 100);
                     progressFill.style.width = `${percent}%`;
                     progressText.textContent = `${sessionsGenerated}/${maxSessions}`;
 
-                    // Farbe je nach Fortschritt
                     if (percent >= 100) {
-                        progressFill.style.background = '#dc3545'; // Rot - Limit erreicht
+                        progressFill.style.background = '#dc3545';
                     } else if (percent >= 80) {
-                        progressFill.style.background = '#ffc107'; // Gelb - fast erreicht
+                        progressFill.style.background = '#ffc107';
                     } else {
                         progressFill.style.background = 'var(--primary)';
                     }
@@ -446,8 +857,11 @@
                 const mins = Math.floor((diff % 3600) / 60);
                 const secs = diff % 60;
 
-                document.getElementById('stat-uptime').textContent =
-                    `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                const el = document.getElementById('stat-uptime');
+                if (el) {
+                    el.textContent =
+                        `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                }
             }, 1000);
         }
 
@@ -493,7 +907,7 @@
         }
 
         // ─────────────────────────────────────────────────────────────────
-        // JOBS
+        // JOBS (Tab 1)
         // ─────────────────────────────────────────────────────────────────
 
         async function loadJobs() {
@@ -523,9 +937,9 @@
                         <td><code>${job.schedule || '-'}</code></td>
                         <td class="job-actions">
                             <button onclick="toggleJob(${job.id})" title="${job.is_active ? 'Deaktivieren' : 'Aktivieren'}">
-                                ${job.is_active ? '⏸️' : '▶️'}
+                                ${job.is_active ? 'Pause' : 'Start'}
                             </button>
-                            <button onclick="runJobNow(${job.id})" title="Jetzt ausfuehren">🚀</button>
+                            <button onclick="runJobNow(${job.id})" title="Jetzt ausfuehren">Run</button>
                         </td>
                     </tr>
                 `}).join('');
@@ -540,6 +954,7 @@
                 await api.put(`/api/daemon/jobs/${jobId}/toggle`);
                 loadJobs();
                 loadStatus();
+                loadSchedulerJobs();
             } catch (e) {
                 alert('Toggle fehlgeschlagen: ' + e.message);
             }
@@ -592,15 +1007,15 @@
         }
 
         // ─────────────────────────────────────────────────────────────────
-        // MODALS & FORMS
+        // MODALS & FORMS (Jobs)
         // ─────────────────────────────────────────────────────────────────
 
         function showAddJobModal() {
             document.getElementById('add-job-modal').classList.add('active');
         }
 
-        function closeModal() {
-            document.getElementById('add-job-modal').classList.remove('active');
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
         }
 
         async function submitNewJob(e) {
@@ -616,17 +1031,18 @@
 
             try {
                 await api.post('/api/daemon/jobs', data);
-                closeModal();
+                closeModal('add-job-modal');
                 form.reset();
                 loadJobs();
                 loadStatus();
+                loadSchedulerJobs();
             } catch (e) {
                 alert('Erstellen fehlgeschlagen: ' + e.message);
             }
         }
 
         // ─────────────────────────────────────────────────────────────────
-        // RECURRING TASKS (NEU RECURRING_002 v1.1.48)
+        // RECURRING TASKS
         // ─────────────────────────────────────────────────────────────────
 
         async function loadRecurringTasks() {
@@ -636,7 +1052,6 @@
             try {
                 const data = await api.get('/api/recurring');
 
-                // API gibt Object zurück, nicht Array - konvertieren
                 const tasksObj = data.tasks || {};
                 const taskIds = Object.keys(tasksObj);
 
@@ -645,13 +1060,11 @@
                     return;
                 }
 
-                // Konvertiere Object zu Array mit ID
                 const tasksArray = taskIds.map(id => ({
                     id: id,
                     ...tasksObj[id]
                 }));
 
-                // Sortiere: fällige zuerst, dann nach Name
                 const sortedTasks = tasksArray.sort((a, b) => {
                     if (a.is_due && !b.is_due) return -1;
                     if (!a.is_due && b.is_due) return 1;
@@ -666,7 +1079,7 @@
 
             } catch (e) {
                 if (e.message && e.message.includes('503')) {
-                    container.innerHTML = '<p style="color: var(--text-muted);">⚠️ Recurring Tasks Modul nicht verfuegbar</p>';
+                    container.innerHTML = '<p style="color: var(--text-muted);">Recurring Tasks Modul nicht verfuegbar</p>';
                 } else {
                     console.error('Recurring Tasks laden fehlgeschlagen:', e);
                     container.innerHTML = '<p style="color: #dc3545;">Fehler beim Laden</p>';
@@ -676,17 +1089,14 @@
 
         function renderRecurringTask(task) {
             const isDue = task.is_due;
-            const statusColor = isDue ? '#28a745' : 'var(--text-muted)';
-            const statusIcon = isDue ? '🟢' : '⏸️';
+            const statusIcon = isDue ? '[FAELLIG]' : '[WARTEN]';
             const enabled = task.enabled !== false;
 
-            // Formatiere letzte Ausführung
             let lastRun = 'Noch nie';
             if (task.last_run) {
                 lastRun = formatDateTime(task.last_run);
             }
 
-            // Formatiere Intervall
             let interval = task.interval_days ? `${task.interval_days}d` : (task.interval || '-');
             if (task.frequency) {
                 interval = task.frequency;
@@ -699,14 +1109,14 @@
                         ${!enabled ? '<span style="font-size: 0.7rem; color: #dc3545;">DEAKTIVIERT</span>' : ''}
                     </div>
                     <div style="font-size: 0.8rem; color: var(--text-muted);">
-                        <div>📅 Intervall: ${interval}</div>
-                        <div>⏰ Letzte: ${lastRun}</div>
-                        ${isDue ? '<div style="color: #28a745; font-weight: 500; margin-top: 0.25rem;">✅ FÄLLIG</div>' : ''}
+                        <div>Intervall: ${interval}</div>
+                        <div>Letzte: ${lastRun}</div>
+                        ${isDue ? '<div style="color: #28a745; font-weight: 500; margin-top: 0.25rem;">FAELLIG</div>' : ''}
                     </div>
-                    <button onclick="triggerRecurringTask('${task.id}')" 
+                    <button onclick="triggerRecurringTask('${task.id}')"
                             style="margin-top: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.75rem; cursor: pointer; border: 1px solid var(--border); border-radius: 4px; background: var(--bg);"
                             ${!enabled ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
-                        🚀 Ausloesen
+                        Ausloesen
                     </button>
                 </div>
             `;
@@ -739,6 +1149,483 @@
         }
 
         // ─────────────────────────────────────────────────────────────────
+        // SCHEDULER TAB (Tab 2)
+        // ─────────────────────────────────────────────────────────────────
+
+        async function loadSchedulerJobs() {
+            try {
+                const data = await api.get('/api/daemon/jobs');
+                allSchedulerJobs = data.jobs || [];
+                renderSchedulerJobs();
+            } catch (e) {
+                console.error('Scheduler-Jobs laden fehlgeschlagen:', e);
+            }
+        }
+
+        function filterSchedulerJobs(type) {
+            currentSchedulerFilter = type;
+
+            // Filter-Buttons aktualisieren
+            document.querySelectorAll('#scheduler-filter button').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent.trim().toLowerCase() === type || (type === 'all' && btn.textContent.trim() === 'Alle'));
+            });
+
+            renderSchedulerJobs();
+        }
+
+        function renderSchedulerJobs() {
+            const tbody = document.getElementById('scheduler-jobs-body');
+            let jobs = allSchedulerJobs;
+
+            if (currentSchedulerFilter !== 'all') {
+                jobs = jobs.filter(j => j.job_type === currentSchedulerFilter);
+            }
+
+            if (jobs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="color: var(--text-muted);">Keine Jobs ${currentSchedulerFilter !== 'all' ? 'vom Typ "' + currentSchedulerFilter + '"' : 'definiert'}</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = jobs.map(job => {
+                const nextRun = job.next_run ? formatDateTime(job.next_run) : '-';
+                const scheduleReadable = describeCron(job.schedule, job.job_type);
+                const totalRuns = (job.success_count || 0) + (job.fail_count || 0);
+                const successRate = totalRuns > 0 ? Math.round((job.success_count / totalRuns) * 100) : '-';
+
+                return `
+                <tr>
+                    <td>
+                        <span class="job-status ${job.is_active ? 'active' : 'inactive'}">
+                            ${job.is_active ? 'Aktiv' : 'Inaktiv'}
+                        </span>
+                    </td>
+                    <td>
+                        <strong>${escapeHtml(job.name)}</strong>
+                        ${job.description ? `<div style="font-size: 0.8rem; color: var(--text-muted);">${escapeHtml(job.description)}</div>` : ''}
+                    </td>
+                    <td><code>${job.job_type}</code></td>
+                    <td>
+                        <code>${escapeHtml(job.schedule || '-')}</code>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">${scheduleReadable}</div>
+                    </td>
+                    <td>${nextRun}</td>
+                    <td>
+                        <span title="${job.success_count || 0} OK / ${job.fail_count || 0} Fehler">
+                            ${totalRuns} Laeufe (${successRate}${successRate !== '-' ? '%' : ''})
+                        </span>
+                    </td>
+                    <td class="job-actions">
+                        <button onclick="toggleJob(${job.id})" title="${job.is_active ? 'Deaktivieren' : 'Aktivieren'}">
+                            ${job.is_active ? 'Pause' : 'Start'}
+                        </button>
+                        <button onclick="runJobNow(${job.id})" title="Jetzt ausfuehren">Run</button>
+                    </td>
+                </tr>
+                `;
+            }).join('');
+        }
+
+        function describeCron(schedule, jobType) {
+            if (!schedule) return '';
+            if (jobType === 'interval') {
+                // z.B. "30m" -> "Alle 30 Minuten"
+                const match = schedule.match(/^(\d+)(s|m|h|d)$/);
+                if (match) {
+                    const val = match[1];
+                    const units = { s: 'Sekunde(n)', m: 'Minute(n)', h: 'Stunde(n)', d: 'Tag(e)' };
+                    return `Alle ${val} ${units[match[2]] || match[2]}`;
+                }
+                return '';
+            }
+            if (jobType === 'cron') {
+                // Einfache Cron-Interpretation
+                const parts = schedule.trim().split(/\s+/);
+                if (parts.length >= 5) {
+                    const [min, hour, dom, mon, dow] = parts;
+                    let desc = '';
+                    if (dom === '*' && mon === '*' && dow === '*') {
+                        desc = `Taeglich um ${hour.padStart(2, '0')}:${min.padStart(2, '0')}`;
+                    } else if (dow !== '*' && dom === '*') {
+                        const days = { '0': 'So', '1': 'Mo', '2': 'Di', '3': 'Mi', '4': 'Do', '5': 'Fr', '6': 'Sa', '7': 'So' };
+                        desc = `${days[dow] || dow} um ${hour.padStart(2, '0')}:${min.padStart(2, '0')}`;
+                    } else {
+                        desc = `${min} ${hour} ${dom} ${mon} ${dow}`;
+                    }
+                    return desc;
+                }
+                return '';
+            }
+            if (jobType === 'manual') {
+                return 'Nur manuell';
+            }
+            return '';
+        }
+
+        function previewCron() {
+            const input = document.getElementById('cron-preview-input').value.trim();
+            const result = document.getElementById('cron-preview-result');
+
+            if (!input) {
+                result.textContent = '';
+                return;
+            }
+
+            const parts = input.split(/\s+/);
+            if (parts.length < 5) {
+                result.innerHTML = '<span style="color: #dc3545;">Ungueltiger Cron-Ausdruck. Format: Minute Stunde Tag Monat Wochentag</span>';
+                return;
+            }
+
+            const [min, hour, dom, mon, dow] = parts;
+            const days = { '0': 'Sonntag', '1': 'Montag', '2': 'Dienstag', '3': 'Mittwoch', '4': 'Donnerstag', '5': 'Freitag', '6': 'Samstag', '7': 'Sonntag' };
+
+            let lines = [];
+            lines.push(`<strong>Minute:</strong> ${min === '*' ? 'Jede' : min}`);
+            lines.push(`<strong>Stunde:</strong> ${hour === '*' ? 'Jede' : hour}`);
+            lines.push(`<strong>Tag (Monat):</strong> ${dom === '*' ? 'Jeder' : dom}`);
+            lines.push(`<strong>Monat:</strong> ${mon === '*' ? 'Jeder' : mon}`);
+            lines.push(`<strong>Wochentag:</strong> ${dow === '*' ? 'Jeder' : (days[dow] || dow)}`);
+
+            // Human-readable summary
+            let summary = describeCron(input, 'cron');
+            if (summary) {
+                lines.push(`<br><strong>Zusammenfassung:</strong> ${summary}`);
+            }
+
+            result.innerHTML = lines.join('<br>');
+        }
+
+        async function quickCreateJob(name, jobType, schedule, command) {
+            if (!confirm(`Job "${name}" erstellen?\n\nTyp: ${jobType}\nSchedule: ${schedule}\nCommand: ${command}`)) return;
+
+            try {
+                await api.post('/api/daemon/jobs', {
+                    name: name,
+                    description: `Schnell erstellt am ${new Date().toLocaleDateString('de-DE')}`,
+                    job_type: jobType,
+                    schedule: schedule,
+                    command: command
+                });
+                alert(`Job "${name}" erstellt (deaktiviert)`);
+                loadSchedulerJobs();
+                loadJobs();
+            } catch (e) {
+                alert('Erstellen fehlgeschlagen: ' + e.message);
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────────────
+        // CHAINS TAB (Tab 3)
+        // ─────────────────────────────────────────────────────────────────
+
+        async function loadChains() {
+            const container = document.getElementById('chains-container');
+
+            try {
+                const data = await api.get('/api/daemon/chains');
+
+                if (!data.chains || data.chains.length === 0) {
+                    container.innerHTML = '<div class="card"><p style="color: var(--text-muted);">Keine Toolchains definiert. Erstelle eine mit "+ Neue Chain".</p></div>';
+                    return;
+                }
+
+                container.innerHTML = data.chains.map(chain => renderChainCard(chain)).join('');
+
+            } catch (e) {
+                console.error('Chains laden fehlgeschlagen:', e);
+                container.innerHTML = '<p style="color: #dc3545;">Fehler beim Laden der Chains</p>';
+            }
+        }
+
+        function renderChainCard(chain) {
+            let steps = [];
+            try {
+                steps = JSON.parse(chain.steps_json || '[]');
+            } catch (e) {
+                steps = [];
+            }
+
+            const lastRun = chain.last_run ? formatDateTime(chain.last_run) : 'Noch nie';
+
+            let stepsHtml = '';
+            if (steps.length === 0) {
+                stepsHtml = '<div style="color: var(--text-muted); font-size: 0.85rem;">Keine Steps definiert</div>';
+            } else {
+                stepsHtml = steps.map((step, i) => {
+                    if (step.parallel) {
+                        const subtools = step.tools || [];
+                        return `
+                            <div class="chain-step" style="background: #fff3cd;">
+                                <span class="step-num">${i + 1}.</span>
+                                <span>[PARALLEL] ${subtools.length} Tasks: ${subtools.map(s => s.tool).join(', ')}</span>
+                            </div>`;
+                    }
+                    const args = Array.isArray(step.args) ? step.args.join(' ') : (step.args || '');
+                    return `
+                        <div class="chain-step">
+                            <span class="step-num">${i + 1}.</span>
+                            <span><strong>${escapeHtml(step.tool || '')}</strong> ${escapeHtml(args)}</span>
+                        </div>`;
+                }).join('');
+            }
+
+            return `
+                <div class="chain-card">
+                    <div class="chain-card-header">
+                        <div>
+                            <h3>${escapeHtml(chain.name)}</h3>
+                            ${chain.description ? `<div style="font-size: 0.85rem; color: var(--text-muted);">${escapeHtml(chain.description)}</div>` : ''}
+                        </div>
+                        <div class="job-actions">
+                            <span class="job-status ${chain.is_active ? 'active' : 'inactive'}">
+                                ${chain.is_active ? 'Aktiv' : 'Inaktiv'}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="chain-steps">
+                        ${stepsHtml}
+                    </div>
+                    <div class="chain-meta">
+                        <span>Trigger: <strong>${escapeHtml(chain.trigger_type || 'manual')}</strong> ${chain.trigger_value ? '(' + escapeHtml(chain.trigger_value) + ')' : ''}</span>
+                        <span>Letzter Lauf: ${lastRun}</span>
+                        <span>${steps.length} Step(s)</span>
+                    </div>
+                    <div style="margin-top: 0.75rem; display: flex; gap: 0.5rem;">
+                        <button class="btn btn-sm btn-primary" onclick="runChain(${chain.id})">Run</button>
+                        <button class="btn btn-sm" onclick="toggleChain(${chain.id})">${chain.is_active ? 'Deaktivieren' : 'Aktivieren'}</button>
+                        <button class="btn btn-sm" onclick="editChain(${chain.id})">Bearbeiten</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteChain(${chain.id}, '${escapeHtml(chain.name)}')">Loeschen</button>
+                        <button class="btn btn-sm btn-secondary" onclick="showChainRuns(${chain.id}, '${escapeHtml(chain.name)}')">History</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function runChain(chainId) {
+            if (!confirm('Chain jetzt ausfuehren?')) return;
+
+            try {
+                await api.post(`/api/daemon/chains/${chainId}/run`);
+                alert('Chain gestartet! Ergebnis erscheint in der History.');
+                setTimeout(() => loadChains(), 3000);
+            } catch (e) {
+                alert('Start fehlgeschlagen: ' + e.message);
+            }
+        }
+
+        async function toggleChain(chainId) {
+            try {
+                await api.put(`/api/daemon/chains/${chainId}/toggle`);
+                loadChains();
+            } catch (e) {
+                alert('Toggle fehlgeschlagen: ' + e.message);
+            }
+        }
+
+        async function deleteChain(chainId, name) {
+            if (!confirm(`Chain "${name}" wirklich loeschen? (inkl. History)`)) return;
+
+            try {
+                await api.delete(`/api/daemon/chains/${chainId}`);
+                loadChains();
+            } catch (e) {
+                alert('Loeschen fehlgeschlagen: ' + e.message);
+            }
+        }
+
+        async function showChainRuns(chainId, name) {
+            try {
+                const data = await api.get(`/api/daemon/chains/${chainId}/runs?limit=10`);
+                const runs = data.runs || [];
+
+                if (runs.length === 0) {
+                    alert(`Keine Ausfuehrungen fuer "${name}"`);
+                    return;
+                }
+
+                const lines = runs.map(r => {
+                    const date = formatDateTime(r.started_at);
+                    const dur = r.duration_seconds ? r.duration_seconds.toFixed(1) + 's' : '-';
+                    return `${date} | ${r.status} | ${dur} | ${r.steps_completed}/${r.steps_total} Steps | ${r.triggered_by || 'manual'}`;
+                });
+
+                alert(`History: ${name}\n\n${lines.join('\n')}`);
+            } catch (e) {
+                alert('History laden fehlgeschlagen: ' + e.message);
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────────────
+        // CHAIN FORMS
+        // ─────────────────────────────────────────────────────────────────
+
+        function showAddChainModal() {
+            // Reset
+            document.getElementById('add-chain-form').reset();
+            const stepsContainer = document.getElementById('new-chain-steps');
+            stepsContainer.innerHTML = `
+                <div class="step-editor-row">
+                    <span style="color: var(--text-muted); font-weight: 600; min-width: 24px;">1.</span>
+                    <input type="text" placeholder='Tool z.B. "scan"' class="step-tool">
+                    <input type="text" placeholder='Args z.B. "run --mode quick"' class="step-args">
+                    <button type="button" onclick="removeStepRow(this)" title="Entfernen">x</button>
+                </div>`;
+            document.getElementById('add-chain-modal').classList.add('active');
+        }
+
+        function addStepRow(containerId) {
+            const container = document.getElementById(containerId || 'new-chain-steps');
+            const rows = container.querySelectorAll('.step-editor-row');
+            const num = rows.length + 1;
+
+            const row = document.createElement('div');
+            row.className = 'step-editor-row';
+            row.innerHTML = `
+                <span style="color: var(--text-muted); font-weight: 600; min-width: 24px;">${num}.</span>
+                <input type="text" placeholder='Tool z.B. "task"' class="step-tool">
+                <input type="text" placeholder='Args z.B. "list --prio P1"' class="step-args">
+                <button type="button" onclick="removeStepRow(this)" title="Entfernen">x</button>`;
+            container.appendChild(row);
+        }
+
+        function removeStepRow(btn) {
+            const container = btn.closest('.step-editor-list');
+            const rows = container.querySelectorAll('.step-editor-row');
+            if (rows.length <= 1) return; // Mindestens 1 Row
+            btn.closest('.step-editor-row').remove();
+
+            // Nummern aktualisieren
+            container.querySelectorAll('.step-editor-row').forEach((row, i) => {
+                row.querySelector('span').textContent = (i + 1) + '.';
+            });
+        }
+
+        function collectStepsFromEditor(containerId) {
+            const container = document.getElementById(containerId);
+            const rows = container.querySelectorAll('.step-editor-row');
+            const steps = [];
+
+            rows.forEach(row => {
+                const tool = row.querySelector('.step-tool').value.trim();
+                const argsStr = row.querySelector('.step-args').value.trim();
+
+                if (tool) {
+                    const args = argsStr ? argsStr.split(/\s+/) : [];
+                    steps.push({ tool: tool, args: args });
+                }
+            });
+
+            return steps;
+        }
+
+        async function submitNewChain(e) {
+            e.preventDefault();
+            const form = e.target;
+            const steps = collectStepsFromEditor('new-chain-steps');
+
+            if (steps.length === 0) {
+                alert('Mindestens ein Step mit Tool-Name ist erforderlich.');
+                return;
+            }
+
+            const data = {
+                name: form.name.value,
+                description: form.description.value || null,
+                trigger_type: form.trigger_type.value,
+                trigger_value: form.trigger_value.value || null,
+                steps_json: JSON.stringify(steps),
+                is_active: 1
+            };
+
+            try {
+                await api.post('/api/daemon/chains', data);
+                closeModal('add-chain-modal');
+                form.reset();
+                loadChains();
+            } catch (e) {
+                alert('Erstellen fehlgeschlagen: ' + e.message);
+            }
+        }
+
+        async function editChain(chainId) {
+            try {
+                const data = await api.get('/api/daemon/chains');
+                const chain = (data.chains || []).find(c => c.id === chainId);
+
+                if (!chain) {
+                    alert('Chain nicht gefunden');
+                    return;
+                }
+
+                const form = document.getElementById('edit-chain-form');
+                form.chain_id.value = chain.id;
+                form.name.value = chain.name;
+                form.description.value = chain.description || '';
+                form.trigger_type.value = chain.trigger_type || 'manual';
+                form.trigger_value.value = chain.trigger_value || '';
+
+                // Steps laden
+                let steps = [];
+                try {
+                    steps = JSON.parse(chain.steps_json || '[]');
+                } catch (e) {
+                    steps = [];
+                }
+
+                const container = document.getElementById('edit-chain-steps');
+                if (steps.length === 0) {
+                    container.innerHTML = `
+                        <div class="step-editor-row">
+                            <span style="color: var(--text-muted); font-weight: 600; min-width: 24px;">1.</span>
+                            <input type="text" placeholder='Tool' class="step-tool">
+                            <input type="text" placeholder='Args' class="step-args">
+                            <button type="button" onclick="removeStepRow(this)">x</button>
+                        </div>`;
+                } else {
+                    container.innerHTML = steps.map((step, i) => {
+                        const tool = step.tool || '';
+                        const args = Array.isArray(step.args) ? step.args.join(' ') : (step.args || '');
+                        return `
+                            <div class="step-editor-row">
+                                <span style="color: var(--text-muted); font-weight: 600; min-width: 24px;">${i + 1}.</span>
+                                <input type="text" value="${escapeHtml(tool)}" class="step-tool">
+                                <input type="text" value="${escapeHtml(args)}" class="step-args">
+                                <button type="button" onclick="removeStepRow(this)">x</button>
+                            </div>`;
+                    }).join('');
+                }
+
+                document.getElementById('edit-chain-modal').classList.add('active');
+
+            } catch (e) {
+                alert('Chain laden fehlgeschlagen: ' + e.message);
+            }
+        }
+
+        async function submitEditChain(e) {
+            e.preventDefault();
+            const form = e.target;
+            const chainId = form.chain_id.value;
+            const steps = collectStepsFromEditor('edit-chain-steps');
+
+            const data = {
+                name: form.name.value,
+                description: form.description.value || null,
+                trigger_type: form.trigger_type.value,
+                trigger_value: form.trigger_value.value || null,
+                steps_json: JSON.stringify(steps)
+            };
+
+            try {
+                await api.put(`/api/daemon/chains/${chainId}`, data);
+                closeModal('edit-chain-modal');
+                loadChains();
+            } catch (e) {
+                alert('Speichern fehlgeschlagen: ' + e.message);
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────────────
         // HELPERS
         // ─────────────────────────────────────────────────────────────────
 
@@ -751,7 +1638,13 @@
             });
         }
 
-        // Session-Countdown formatieren (NEU v1.1.45)
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         function updateSessionCountdown(seconds) {
             const el = document.getElementById('stat-next-session');
             if (!el) return;
@@ -766,20 +1659,26 @@
             const secs = Math.floor(seconds % 60);
             el.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 
-            // Farbe je nach Dringlichkeit
             if (seconds < 60) {
-                el.style.color = '#dc3545'; // Rot - unter 1 Minute
+                el.style.color = '#dc3545';
             } else if (seconds < 300) {
-                el.style.color = '#ffc107'; // Gelb - unter 5 Minuten
+                el.style.color = '#ffc107';
             } else {
                 el.style.color = 'var(--primary)';
             }
         }
 
-        function refreshDaemon() {
+        function refreshAll() {
             loadStatus();
             loadJobs();
             loadRuns();
+            loadRecurringTasks();
+            loadSchedulerJobs();
+            loadChains();
+        }
+
+        function refreshDaemon() {
+            refreshAll();
         }
 
         // ─────────────────────────────────────────────────────────────────
@@ -792,12 +1691,12 @@
             loadRuns();
             await loadRecurringTasks();
 
-            // Auto-Check: Fällige Recurring Tasks automatisch erstellen (silent)
+            // Auto-Check: Faellige Recurring Tasks automatisch erstellen (silent)
             try {
                 const result = await api.post('/api/recurring/check');
                 if (result.created_count > 0) {
                     console.log(`[Recurring] ${result.created_count} Task(s) automatisch erstellt`);
-                    loadRecurringTasks(); // Refresh nach Check
+                    loadRecurringTasks();
                 }
             } catch(e) {
                 console.log('[Recurring] Auto-Check fehlgeschlagen:', e.message);

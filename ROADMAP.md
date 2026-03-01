@@ -1,19 +1,20 @@
 # BACH ROADMAP - Strategische Vision
 
-**Stand:** 2026-02-28 | **Version:** 3.8.0
+**Stand:** 2026-03-01 | **Version:** 4.0.0
 
 Copyright (c) 2026 Lukas Geiger. Alle Rechte vorbehalten.
 
 > Die ROADMAP definiert Vision und Phasen. Konkrete Tasks siehe: `bach task list`
+> Post-Release-Details (SQ-Nummern): ehemals `BACH_Dev/ROADMAP.md` — jetzt hier konsolidiert.
 
 ---
 
 ## Vision
 
-BACH definiert sich als **Personal Agentic Operating System**. Es entwickelt sich zu einem autonomen, lernfähigen System mit:
+BACH definiert sich als **Personal Agentic Operating System**. Es entwickelt sich zu einem autonomen, lernfaehigen System mit:
 
-- **Kognitives Memory-System** (menschliches Gedächtnis als Vorbild)
-- **Selbstständige Sessions** (Headless AI ohne User-Interaktion)
+- **Kognitives Memory-System** (menschliches Gedaechtnis als Vorbild)
+- **Selbststaendige Sessions** (Headless AI ohne User-Interaktion)
 - **Aktive Konsolidierung** (Lernen, Vergessen, Zusammenfassen)
 - **Multi-Partner Delegation** (Claude, Gemini, Ollama, lokale Modelle)
 
@@ -44,14 +45,158 @@ Siehe: `../docs/WICHTIG_SYSTEMISCH_FIRST.md`
 
 ---
 
+## GitHub-Veroeffentlichung
+
+Alle technischen Go-Kriterien sind erfuellt. Der Release wartet auf den manuellen Push.
+
+| Schritt | Status |
+|---------|--------|
+| Privates Repo erstellen & Push | Ausstehend |
+| Repo auf Public stellen | Ausstehend (nach Pruefung) |
+| Tag `v3.1.6-strawberry` setzen | Ausstehend |
+| Release-Announcement | Ausstehend |
+| Manuelle PII-Stichproben Prio 4-5 (optional, ~30 min) | Optional |
+
+> Checkliste: `../../BACH_Dev/archive/reports/ENDABNAHME_CHECKLISTE.md` | PII-Scan: `../docs/HQ9_PUBLIC_RELEASE_CHECKLIST.md`
+
+---
+
 ## Aktuelle Fokus-Bereiche
+
+### Prioritaet 1 — Kern-Architektur vervollstaendigen
+
+**SQ073: Scheduler-Migration abschliessen** (ENT-43)
+- DB-Tabellen `daemon_jobs`/`daemon_runs` -> `scheduler_jobs`/`scheduler_runs` umbenennen
+- `hub/chain.py` (ChainHandler) erstellen: `bach chain start/stop/status/list/log`
+- llmauto als `tools/llmauto/` in BACH einbinden
+- SessionDaemon + ATI SessionDaemon -> llmauto-Ketten konvertieren
+- GUI: Scheduler-Tab + Chain-Tab im FastAPI-Dashboard
+- Ref: `../../BACH_Dev/archive/reports/SQ073_DAEMON_SCHEDULER_PLANUNG.md`
+
+**SQ074: marble_run vollstaendig nach llmauto portieren** (ENT-43)
+- active_chain.md Generierung (dynamisches Worker-Briefing)
+- 6 Selection-Strategien portieren
+- 4 Original-Prompts uebernehmen
+- marble_run/ -> `_archive/` verschieben (nach Abschluss)
+- Chain-Config-Dateien: `SQ074_CHAIN_PORTS/` (9 JSONs bereits portiert)
+
+**SQ043: Memory-Migration Stufe D**
+- Sessions migrieren: `memory_sessions` -> `shared_memory_sessions` (1504 Eintraege)
+- context_triggers migrieren: 1024 Eintraege -> `shared_context_triggers`
+- Auto-expires Trigger implementieren
+- Ref: `../../BACH_Dev/archive/reports/SQ043_STUFE_C_MEMORY_MIGRATION_KONZEPT.md`
+
+**HQ8/ENT-45: Installer CLI-Interface (Phase 3)**
+- Non-interaktiver CLI-Modus mit Validierung
+- Integrations-Level-Wahl in Installer einbauen (SQ038)
+
+---
+
+### Prioritaet 2 — Features & Qualitaet
+
+**SQ014: 7 verbleibende PARTIAL Usecases verbessern** (B27)
+- UC6/7/8 (Versicherung): Retest empfohlen
+- UC26/UC27 (Location/Reiseroute): Web-Features
+- UC43 (FinancialProof Dashboard): Externe App-Integration
+- UC46 (MediaBrain DB): Externe DB-Anbindung
+
+**SQ017: GUI aktualisieren** (B28, ENT-33)
+- Scheduler-Tab implementieren (Schicht 1 dockt an)
+- Chain-Tab implementieren (Schicht 2 dockt an)
+- Ref: `../../BACH_Dev/archive/reports/SQ017_GUI_STATUS.md`
+
+**SQ038: Claude Code Integration — offene Punkte** (B29)
+- Inter-Instanz-Messaging via Hooks
+- System-Injection-Log als Standard
+- Ref: `../../BACH_Dev/archive/reports/SQ038_MEMO_DEDUP_BERICHT.md`
+
+**SQ051: Stigmergy-API implementieren** (B33)
+- `hub/_services/stigmergy/stigmergy_api.py` vollstaendig (STUB vorhanden)
+- Abhaengig von: SQ073 (Scheduler) + SQ074 (llmauto)
+
+**SQ075: USER.md** (B34, ENT-41)
+- Installer-Integration: USER.md beim Setup generieren
+- Bidirektionaler SYNC fertigstellen
+
+**SQ036: Vernunftstests** (B36)
+- Ergebnisse in Forschung rueckfuehren
+
+---
+
+### Prioritaet 3 — Modulare Agenten & externe Tools
+
+**SQ080: ApiProber** (B36)
+- Timeout-Bug im Smoke-Test fixen (60s statt 10s)
+- Veraltete Import-Tests korrigieren
+- Sync mit `api_book`-Tabelle
+
+**SQ081: n8n Workflow Manager** (B37)
+- BACH-Handler vollstaendig implementieren (list, sync)
+- Smoke-Test gegen lokale n8n-Instanz
+- Sync mit `api_book`-Tabelle
+
+**SQ011: Pipeline-Framework** (B39)
+- Generischer Entscheidungsbaum fuer alle Pipelines
+- ATI Scan-Roots konfigurierbar machen
+
+---
+
+### Prioritaet 4 — Visionen & Experimente (nach Release)
+
+| SQ | Thema | Notiz |
+|----|-------|-------|
+| SQ016 | Schwarm-LLM-Haiku-Experimente | Multi-Agent-Forschung |
+| SQ018 | Plan-Agent & Planungsprotokoll | Formalisierung |
+| SQ028 | Multi-BACH (benannte Instanzen) | Ein Ordner = eine Instanz (ENT-11) |
+| SQ040 | Reminder-Injektor | LLM-Selbsterinnerung |
+| SQ042 | Meta-Feedback-Injektor | BACH korrigiert LLM-Ticks |
+| SQ044 | BACH-in-a-Database (Vision) | Alles lebt in DB, on-demand entpackt |
+| SQ048 | Arbeitsmodi & 24h-Agent | Persistenter Tages-Kontext |
+| SQ052 | Bridge Antwort-Modus & Server-Betrieb | Headless/Remote |
+| SQ054 | ResearchAgent BACH-Re-Integration | v0.3.0 Ziel |
+| SQ055 | devSoftAgent fertigstellen | 12 Module, 1244 LOC |
+| SQ056 | llmauto Standalone finalisieren | ENT-43 Schicht 2 |
+| ENT-25 | _CHIAH + recludOS als Legacy veroeffentlichen | Bereinigung noetig |
+
+---
+
+## Softwareprojekt-Integrationen (KOMPLETT - 2026-03-01)
+
+6 Integrations-Aufgaben aus der Analyse aller 11 Tools vs. BACH (73 Handler, 23 Experten, 25+ Services).
+
+| Integration | Beschreibung | Status |
+|-------------|-------------|--------|
+| INT01 | LitZentrum -> `literatur.py` + Expert `literaturverwalter` | KOMPLETT |
+| INT02 | HausLagerist V4 -> `haushalt.py` erweitern + Expert | KOMPLETT |
+| INT03 | MediaBrain -> `media.py` + Expert `mediaverwalter` | KOMPLETT |
+| INT04 | MasterRoutine -> Routine-Export-Skill | KOMPLETT |
+| INT05 | UpToday -> Dashboard-Aggregator `bach today` | KOMPLETT |
+| INT06 | ProFiler -> Dedup + Datenschutz-Ampel | KOMPLETT |
+
+---
+
+## Weitere abgeschlossene Bloecke (ehemals Prio 2-3)
+
+| Block | SQ | Aufgabe | Status |
+|-------|-----|---------|--------|
+| B31 | SQ047/SQ059 | Wissensindexierung / KnowledgeDigest | KOMPLETT |
+| B35 | SQ076 | Secrets-Management Installer-Integration | KOMPLETT |
+| B38 | SQ010 | Foerderplaner-Extraktion (pdf_processor, ocr_service) | KOMPLETT |
+| B40 | SQ027 | Alt-Tests in pytest portieren | KOMPLETT |
+| — | SQ033 | BACH Mini (USMC-basiert) | KOMPLETT |
+| B30 | SQ046 | Therapie-Skills: Trauma + Systemisch | Verschoben -> `THE_RELEASE_AFTER.md` |
+| B32 | SQ049 | Agenten autonomer machen | Verschoben -> `THE_RELEASE_AFTER.md` |
+
+---
+
+## Abgeschlossene Phasen (BACH-internes Entwicklungsprotokoll)
 
 ### 0b.2 Release v3.2.0-butternut (KOMPLETT - 2026-02-28)
 
 Grosse BUTTERNUT-Release mit Scheduler-Refactoring, Prompt-System, neuen Handlern und Portierungen.
 
 **DB-Schema:**
-- `daemon_jobs` → `scheduler_jobs`, `daemon_runs` → `scheduler_runs`
+- `daemon_jobs` -> `scheduler_jobs`, `daemon_runs` -> `scheduler_runs`
 - 4 neue Tabellen: `prompt_templates`, `prompt_versions`, `prompt_boards`, `prompt_board_items`
 - 8 Migrationen (012-020) nachgezogen
 
@@ -72,190 +217,54 @@ Grosse BUTTERNUT-Release mit Scheduler-Refactoring, Prompt-System, neuen Handler
 - Stigmergy-Service
 
 **Archivierungen:**
-- marble_run → `_archive/marble_run/`
-- ATI SessionDaemon → Ersetzt durch SchedulerService
+- marble_run -> `_archive/marble_run/`
+- ATI SessionDaemon -> Ersetzt durch SchedulerService
 
-### 0. Adaptionsfaehigkeit & Self-Extension (In Progress)
-
-BACH wird zu einem sich selbst erweiternden System. AI-Partner sollen
-aktiv neue Faehigkeiten erstellen, statt nur bestehende zu nutzen.
+### 0. Adaptionsfaehigkeit & Self-Extension (Phase 1-3 KOMPLETT, Phase 4 Stufe 2+3 GEPLANT)
 
 **Phase 1: Quick Wins (KOMPLETT)**
 - Registry Hot-Reload (`core/registry.py` reload-Methode)
 - `bach skills create <name> --type <typ>` (5 Typen: tool, agent, expert, handler, service)
 - `bach skills reload` (Hot-Reload ohne Neustart)
-- Self-Extension Workflow (`skills/workflows/self-extension.md`)
 
 **Phase 2: Hook-Framework (KOMPLETT)**
 - `core/hooks.py` - HookRegistry mit 14 Events
 - `hub/hooks.py` - CLI-Handler (`bach hooks status/events/log/test`)
-- Hooks in Startup, Shutdown, Task, Memory, Lesson, Skills, App
-- Hooks != Injektoren: Technisches Framework vs. kognitives Subsystem
 
 **Phase 3: Plugin-API (KOMPLETT)**
 - `core/plugin_api.py` - PluginRegistry-Singleton
 - `hub/plugins.py` - CLI-Handler (`bach plugins list/load/unload/tools/info/create`)
-- `plugins.register_tool(name, handler)` - Dynamisch Tools registrieren
-- `plugins.register_hook(event, callback)` - Hooks ueber API registrieren
-- `plugins.register_workflow(name, steps)` - Workflows programmatisch erstellen
-- `plugins.register_handler(name, class)` - Handler zur Laufzeit hinzufuegen
-- `plugins.load_plugin(path)` - Deklarativ via plugin.json Manifest
-- `plugins.unload_plugin(name)` - Plugin sauber entladen
 
 **Phase 4: Sandbox & Security - Stufe 1 Capability System (KOMPLETT)**
 - `core/capabilities.py` - CapabilityManager mit 11 definierten Capabilities
 - Trust-Level Enforcement: goldstandard/trusted/untrusted/blacklist
-- Capability-Profile in `data/skill_sources.json` integriert
-- Enforcement in allen `register_*()` Methoden der Plugin-API
-- Statische Code-Analyse (eval, exec, subprocess, os.system, requests)
-- Audit-Log (`data/logs/capability_audit.log`) mit Rotation
-- CLI: `bach plugins caps/trust/audit`
-- Hook: `after_capability_denied` bei Verweigerung
 
 **Phase 4: Sandbox - Stufe 2+3 (GEPLANT)**
 - Stufe 2: Subprocess-Isolation (timeout, memory-limit)
 - Stufe 3: Container-Isolation (Docker/chroot)
 - Rollback bei fehlerhaften Erweiterungen
 
-Analyse: `docs/openclaw_architektur_analyse.md`
-Vergleich: `docs/vergleich_bach_vs_openclaw.md`
-Plan: `docs/adaptions_plan_bach.md`
+### Weitere abgeschlossene Phasen
 
-### 0b. Phase 19: Directory Restructuring (v2.5 - KOMPLETT)
+| # | Phase | Bereich | Status |
+|---|-------|---------|--------|
+| 19 | Directory Restructuring v2.5 | agents/, connectors/, partners/ top-level | KOMPLETT |
+| 1 | Zeit-System v1.1.83 | clock, timer, countdown, between, beat | KOMPLETT |
+| 2 | Workflow-TUeV v1.1.83 | tuev status/check, usecase list/run | KOMPLETT |
+| 3 | Memory-Konsolidierung | CONSOL_001-007 | In Progress |
+| 4 | GUI-Erweiterungen | Dashboard, Tools, Inbox | Offen |
+| 5 | Steuer-Banking Integration | CAMT.053, Bank-Beleg-Matching | Offen |
+| 6 | Data-Import-Framework | CSV/JSON Import, Schema-Erkennung | KOMPLETT |
+| 7 | CLI-Handler Erweiterungen | contact, gesundheit, haushalt, steuer | KOMPLETT |
+| 8 | Connector & Message-System v2.1 | Queue, Retry, Circuit Breaker, 3 Adapter | KOMPLETT |
+| 9 | bach.py v2.0 Registry-Architecture | 1636->563 Zeilen, Auto-Discovery | KOMPLETT |
+| 10 | MCP-Server v2.2.0 | 23 Tools, 8 Resources, 3 Prompts | KOMPLETT |
 
-Vereinheitlichung der Verzeichnisstruktur unter `system/` fuer Standards-Compliance
-und klarere Trennung von Agents, Connectors und Partners.
+### Langfristige Ziele (P4)
 
-**Aenderungen:**
-- `agents/` -> `agents/` (top-level unter system/)
-- `agents/_experts/` -> `agents/_experts/` (Experts gehoeren zu Agents)
-- `skills/workflows/` -> `skills/workflows/` (Umbenennung, praeziserer Begriff)
-- `connectors/` -> `connectors/` (top-level unter system/)
-- `partners/` -> `partners/` (top-level unter system/)
-
-**Ergebnis:**
-- Agents, Connectors und Partners sind eigenstaendige Top-Level-Verzeichnisse
-- Skills-Verzeichnis enthaelt nur noch `_services/`, `workflows/` und `docs/docs/docs/help/`
-- Klarere Architektur-Schichten sichtbar in der Verzeichnisstruktur
-
-### 1. Zeit-System (v1.1.83 - KOMPLETT)
-
-Unified Zeit-Management fuer LLM-Sessions.
-
-- `bach clock` - Uhrzeit-Anzeige mit Intervall
-- `bach timer` - Stoppuhr (mehrere parallel)
-- `bach countdown` - Countdown mit Trigger
-- `bach between` - Profile-basierte Zwischen-Checks
-- `bach beat` - Unified Zeit-Anzeige
-
-Konzept: `skills/docs/docs/docs/help/beat.txt`, `skills/docs/docs/docs/help/clock.txt`, `skills/docs/docs/docs/help/timer.txt`, `skills/docs/docs/docs/help/countdown.txt`, `skills/docs/docs/docs/help/between.txt`
-
-### 2. Workflow-TUeV (v1.1.83 - KOMPLETT)
-
-Qualitaetssicherung fuer Workflows.
-
-- `bach tuev status` - TUeV-Status aller Workflows
-- `bach tuev check` - Einzelnen Workflow pruefen
-- `bach usecase list` - Testfaelle anzeigen
-- `bach usecase run` - Testfall ausfuehren
-
-Konzept: `skills/docs/docs/docs/help/workflow-tuev.txt`
-
-### 3. Memory-Konsolidierung (In Progress)
-
-Aktives Lernen und Vergessen wie beim Menschen.
-
-- Tasks: CONSOL_001 - CONSOL_007
-- Konzept: `skills/docs/docs/docs/help/consolidation.txt`
-
-### 4. GUI-Erweiterungen
-
-Dashboard, Tools, Inbox, Help/Wiki Trennung.
-
-- Diverse GUI-Tasks (P1-P2)
-
-### 5. Steuer-Banking Integration
-
-CAMT.053, Bank-Beleg-Matching, Watch-Ordner.
-
-- Tasks: STEUER_007 - STEUER_010
-
-### 6. Data-Import-Framework
-
-Generisches Import-System fuer alle DB-Tabellen.
-
-- `tools/data_importer.py` - CSV/JSON Import, Schema-Erkennung, Duplikaterkennung
-- `tools/folder_diff_scanner.py` - Verzeichnis-Ueberwachung, Datei-Tracking
-- Workflow: Ordner scannen -> neue Dateien -> OCR/Parse -> DB-Import
-- Alle Imports protokolliert, rollback-faehig, idempotent
-
-### 7. CLI-Handler Erweiterungen
-
-Vollstaendige CLI-Steuerung aller Lebensbereiche.
-
-- `bach contact` - Kontaktverwaltung (CRUD, Suche, Geburtstage)
-- `bach gesundheit` - Gesundheitsmanagement (Diagnosen, Medis, Labor, Termine)
-- `bach haushalt` - Haushalt (Routinen, Kalender, Fixkosten, Einkaufsliste)
-- `bach steuer export --format vorsorge` - Steuer-Export Vorsorgeaufwand
-
-### 8. Connector & Message-System (v2.1.0 - KOMPLETT)
-
-Zuverlaessige Nachrichtenzustellung auch ohne aktive CLI-Session.
-
-- Queue-Processor mit Retry/Backoff und Circuit Breaker
-- Daemon-Integration (2 automatische Jobs: poll_and_route, dispatch)
-- REST-API (4 Endpoints: send, queue, inbox, route)
-- ContextInjector + context_triggers Integration beim Routing
-- 3 Runtime-Adapter: Telegram, Discord, HomeAssistant
-
-Konzept: `../docs/PLAN_MESSAGE_SYSTEM_UPGRADE.md`
-
-### 9. bach.py v2.0 Registry-Architecture (KOMPLETT)
-
-Refactoring von 1.636 auf 563 Zeilen mit Auto-Discovery.
-
-- Registry-basiertes Routing via `core/registry.py`
-- Library-API `bach_api.py` fuer LLM/Script-Zugriff
-- Dual-Init BaseHandler (Path und App)
-- 50 Tests bestanden
-
-### 10. MCP-Server Integration (v2.2.0 - KOMPLETT)
-
-Model Context Protocol fuer IDE-Integration (Claude Code, Cursor, etc.).
-
-- MCP Server v2.2.0 (`tools/mcp_server.py`) - 610 Zeilen
-- 23 Tools, 8 Resources, 3 Prompts (alle drei MCP-Primitives)
-- Backend: bach_api (Handler-basiert, kein direkter SQLite)
-- Session-Tools: session_startup, session_shutdown
-- Partner-Tools: partner_list, partner_status
-- db_query mit 110-Table Whitelist (Credentials geschuetzt)
-- Konformitaet: 95% (fehlend: Pagination, Events - bewusst deferred)
-- Doku: `../docs/_archive/con4_MCP_CONFORMITY_60.md`
-
----
-
-## Langfristige Ziele (P4)
-
-### Headless AI-Sessions
-
-Autonomer Betrieb ohne User-Interaktion.
-
-- Tasks: AI_001 - AI_004 (KOMPLETT)
-- Multi-Job Daemon, Zeitbudget, Reporting integriert.
-
-### Filesystem-Schutz
-
-Backup, Critical-Check, Mode-Switch.
-
-- Tasks: FS_001 - FS_004
-- Konzept: `../docs/CONCEPT_filesystem_protection.md`
-
-### DB-Content-Sync
-
-Automatische Synchronisation Skills/Tools.
-
-- Task: SYNC_004 (in Progress)
-- Konzept: `../docs/CONCEPT_db_content_sync.md`
+**Headless AI-Sessions** — Tasks AI_001-AI_004 (KOMPLETT)
+**Filesystem-Schutz** — Tasks FS_001-FS_004, Konzept: `../docs/CONCEPT_filesystem_protection.md`
+**DB-Content-Sync** — Task SYNC_004 (in Progress), Konzept: `../docs/CONCEPT_db_content_sync.md`
 
 ---
 
@@ -263,7 +272,7 @@ Automatische Synchronisation Skills/Tools.
 
 | Phase | Bereich | Abschluss |
 |-------|---------|-----------|
-| 1-3 | Autonomie, Funktionalität, Dashboard | 2026-01 |
+| 1-3 | Autonomie, Funktionalitaet, Dashboard | 2026-01 |
 | 4 | Session, Token, GUI, Prompt-Generator | 2026-01 |
 | 5 | Integration Services | 2026-01 |
 | 6.1-6.2 | Steuer Phase 1-2, Workflows | 2026-01 |
@@ -276,18 +285,43 @@ Automatische Synchronisation Skills/Tools.
 | 15 | MCP-Server v2.2 (23 Tools, 8 Resources, 3 Prompts) | 2026-02 |
 | 16 | BachFliege/BachForelle Analyse + Archivierung | 2026-02 |
 | 17 | Email-Handler (Gmail API, Draft-Safety) | 2026-02 |
-| 18.1 | Self-Extension Quick Wins (skills create/reload, hot-reload) | 2026-02 |
-| 18.2 | Hook-Framework (14→16 Events, CLI-Handler, Kern-Integration) | 2026-02 |
-| 18.3 | Plugin-API (register_tool/hook/workflow/handler, plugin.json) | 2026-02 |
-| 18.4 | Capability System Stufe 1 (11 Caps, Trust-Enforcement, Audit-Log) | 2026-02 |
-| 19 | Directory Restructuring v2.5 (agents/, connectors/, partners/ top-level, workflows/) | 2026-02 |
-| 20 | BUTTERNUT v3.2.0: Scheduler, Prompt-System, USMC Bridge, 4 Portierungen | 2026-02 |
+| 18.1 | Self-Extension Quick Wins | 2026-02 |
+| 18.2 | Hook-Framework (14->16 Events) | 2026-02 |
+| 18.3 | Plugin-API | 2026-02 |
+| 18.4 | Capability System Stufe 1 | 2026-02 |
+| 19 | Directory Restructuring v2.5 | 2026-02 |
+| 20 | BUTTERNUT v3.2.0 | 2026-02 |
+| INT01-06 | Softwareprojekt-Integrationen (6 Tools) | 2026-03 |
+| B31 | KnowledgeDigest / Wissensindexierung | 2026-03 |
+| B35 | Secrets-Management | 2026-03 |
+| B38 | Foerderplaner-Extraktion | 2026-03 |
+| B40 | Alt-Tests pytest-Portierung | 2026-03 |
+| — | BACH Mini (USMC-basiert) | 2026-03 |
 
-~120+ Tasks abgeschlossen in Phase 1-20.
+~140+ Tasks abgeschlossen in Phase 1-20 + Post-Release-Bloecke.
+
+### Abgeschlossene Release-Meilensteine (Strawberry v3.1.6)
+
+| Meilenstein | Version | Status |
+|-------------|---------|--------|
+| HQ0 DB-Konsolidierung | — | 142 Tabellen |
+| HQ1 Dateizuordnung (dist_type) | — | CORE/TEMPLATE/USER |
+| HQ2 Distribution-System | — | distribution.py v1.0.0 |
+| HQ3 Strawberry Build | v3.1.6 | 669 Dateien, 99.0% pytest |
+| HQ4 Integritaet & PII | — | 0 PII-Leaks |
+| HQ5 Nutzertest | — | 83.3% EXCELLENT |
+| HQ6 Reset/Restore | — | 3 Varianten, 15/15 Tests |
+| HQ7 Neuinstallation | — | 3 Varianten definiert & getestet |
+| HQ8 Installer-Workflow | — | ENT-45 3D-Modell (Phase 1-2+4) |
+| HQ9 GitHub-Vorbereitung | — | 7/7 Go-Kriterien erfuellt |
+| SQ027 Testabdeckung | — | 390/391 (99.7%) |
+| SQ014 Usecase-Coverage | — | 50/50 (100%), Score 80.0% |
+
+> Vollstaendige Erledigungsliste: `../../BACH_Dev/archive/masterplan/MASTERPLAN_DONE.txt`
 
 ---
 
-## Architektur-Übersicht
+## Architektur-Uebersicht
 
 ```
                         BACH v2.5 GESAMTARCHITEKTUR
@@ -348,14 +382,15 @@ Automatische Synchronisation Skills/Tools.
 | Systemisch-First | `../docs/WICHTIG_SYSTEMISCH_FIRST.md` |
 | Distribution-System | `data/schema_distribution.sql` |
 | Architektur-Diagramme | `../docs/ARCHITECTURE_DIAGRAMS.md` |
+| Policy-Entscheidungen | `../../BACH_Dev/POLICY.md` (alle 44 ENTs) |
 
 ---
 
 ## Changelog (komprimiert)
 
-| Version | Datum | Änderung |
+| Version | Datum | Aenderung |
 |---------|-------|----------|
-| 1.0-1.5 | 2026-01 | Phase 1-3 (Autonomie, Funktionalität) |
+| 1.0-1.5 | 2026-01 | Phase 1-3 (Autonomie, Funktionalitaet) |
 | 2.0 | 2026-01-24 | Phase 4-11 konsolidiert |
 | 2.1 | 2026-01-25 | Erledigte Phasen zusammengefasst |
 | 3.0 | 2026-01-25 | Transformation zu strategischem Dokument |
@@ -364,14 +399,13 @@ Automatische Synchronisation Skills/Tools.
 | **3.3** | 2026-02-08 | **bach.py v2.0 Registry, Connector Runtime, Message-System v2.0** |
 | **3.4** | 2026-02-08 | **MCP v2.2 (23 Tools), Email-Adapter, BachFliege/BachForelle archiviert** |
 | **3.5** | 2026-02-13 | **Self-Extension: Skills Create/Reload, Hook-Framework (14 Events), Email-Handler** |
-| **3.6** | 2026-02-13 | **Capability System Stufe 1: 11 Caps, Trust-Enforcement, Audit-Log, Plugin-API Security** |
-| **3.7** | 2026-02-13 | **Directory Restructuring v2.5: agents/, connectors/, partners/ top-level; _workflows/ -> workflows/** |
-| **3.8** | 2026-02-28 | **BUTTERNUT v3.2.0: Scheduler, Prompt-System, USMC Bridge, bach://, 4 Handler portiert** |
+| **3.6** | 2026-02-13 | **Capability System Stufe 1: 11 Caps, Trust-Enforcement, Audit-Log** |
+| **3.7** | 2026-02-13 | **Directory Restructuring v2.5** |
+| **3.8** | 2026-02-28 | **BUTTERNUT v3.2.0: Scheduler, Prompt-System, USMC Bridge** |
+| **4.0** | 2026-03-01 | **Konsolidierung: BACH_Dev/ROADMAP.md + Post-Release-Prios integriert, INT01-06 + B31/B35/B38/B40/BACH Mini als KOMPLETT markiert** |
 
 Detaillierte Historie: `CHANGELOG.md`
 Archivierte Versionen: `../docs/_archive/ROADMAP_*.md`
-
----
 
 ---
 
@@ -382,8 +416,17 @@ Archivierte Versionen: `../docs/_archive/ROADMAP_*.md`
   Enthaelt: 11 Hauptquests, 29 Sidequests, 7 Cluster, Abhaengigkeitskarte.
   Die ROADMAP beschreibt WAS BACH kann, der MASTERPLAN beschreibt WIE wir releasen.
 
+- **NEXT_RELEASE (naechste Tasks):** `../../BACH_Dev/NEXT_RELEASE.md`
+  Konkrete Aufgaben fuer das naechste Release.
+
+- **THE_RELEASE_AFTER (verschoben):** `../../BACH_Dev/THE_RELEASE_AFTER.md`
+  Items die nicht release-kritisch sind (B30/SQ046, B32/SQ049).
+
+- **POLICY (Entscheidungen):** `../../BACH_Dev/POLICY.md`
+  Alle 44 ENT-Entscheidungen.
+
 - **SKILL.md (Einstiegspunkt):** `../../SKILL.md`
 
 ---
 
-*BACH Session 2026-02-28, BUTTERNUT Release v3.2.0 dokumentiert*
+*Konsolidiert am 2026-03-01 — BACH_Dev/ROADMAP.md und BACH/ROADMAP.md zu einem Dokument zusammengefuehrt*

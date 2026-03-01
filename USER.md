@@ -4,7 +4,7 @@
 > This file contains your profile, preferences, and context for BACH and LLM assistants.
 > BACH synchronizes this bidirectionally with the database (`assistant_user_profile`, `profile.json`).
 > You can edit this file directly, or let BACH/LLMs update it during onboarding and sessions.
-> **Type:** TEMPLATE (dist_type=1) — customizable, resettable.
+> **Type:** PERSONALIZED (dist_type=1) -- customized from DB.
 
 ---
 
@@ -73,16 +73,13 @@
 
 ## 🔄 Synchronization Status
 
-**Last Updated:** 2026-02-20
-**Sync Source:** profile.json → USER.md (initial)
+**Last Updated:** 2026-03-01
+**Sync Source:** USER.md -> DB (setup user)
 **Next Sync:** On shutdown or via `bach user sync`
 
 ---
 
-<!-- BACH-INTERNAL-MARKER: dist_type=1 TEMPLATE -->
+<!-- BACH-INTERNAL-MARKER: dist_type=1 PERSONALIZED -->
 <!-- This file is part of the BACH template system. Users can customize freely. -->
 <!-- Generated from: profile.json, assistant_user_profile (DB) -->
 <!-- Related: SKILL.md, MEMORY.md, CLAUDE.md (for Claude Code users) -->
-# TEST MODIFICATION
-# TEST MODIFIKATION - RUNDE 29
-# SECOND TEST MODIFICATION

@@ -35,6 +35,34 @@
 
 <!-- BACH:END -->
 
+## Entwicklungs-Workflow (Single Installation Model, ab v3.3.0)
+
+### Code aendern
+```bash
+# Direkt im Git-Repo entwickeln
+cd /c/Users/lukas/OneDrive/KI&AI/BACH
+# CORE-Aenderungen: git add + commit + push
+git add system/hub/neuer_handler.py
+git commit -m "feat: neuer Handler"
+git push origin main
+```
+
+### User-Daten sind geschuetzt
+- `.gitignore` schuetzt: `bach.db`, `data/config/`, `_dev/`, persoenliche Experten, Credentials
+- `git status` darf KEINE User-Dateien zeigen — sonst `.gitignore` erweitern
+
+### Neue Tabellen anlegen
+1. SQL-Schema in `system/data/schema/migrations/XXX_beschreibung.sql` erstellen
+2. Migration ausfuehren: `bach upgrade` oder manuell via `python -c "import sqlite3..."`
+3. Tracking in `_migrations`-Tabelle eintragen
+
+### Verzeichnisstruktur
+```
+KI&AI/BACH/                    ← Git-Repo (github.com/lukisch/bach)
+KI&AI/BACH_Dev/                ← Companion-Toolbox (Release-Doku, Tests, Scripts)
+KI&AI/_ARCHIVED_BACH_vanilla_20260301/  ← Read-only Archiv
+```
+
 ## Arbeitsprinzipien & Knowledge Capture
 
 Diese Prinzipien gelten für alle Arbeiten mit BACH. Beachte sie IMMER:
