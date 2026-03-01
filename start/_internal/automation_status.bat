@@ -6,8 +6,8 @@ REM ============================================================
 title BACH Automation Status
 setlocal
 
-set LLMAUTO_DIR=%~dp0..\..\..\..\MODULAR_AGENTS\llmauto
-set MARBLE_DIR=%~dp0..\..\..\..\BACH_Dev\marble_run
+set "LLMAUTO_DIR=%~dp0..\..\..\..\MODULAR_AGENTS\llmauto"
+set "MARBLE_DIR=%~dp0..\..\..\..\BACH_Dev\marble_run"
 set PYTHONIOENCODING=utf-8
 
 echo.

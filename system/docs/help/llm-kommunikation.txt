@@ -86,7 +86,7 @@ Die BACH-spezifischen nutzen BACHs eigene Infrastruktur.
    Beispiel:   Marble-Run: handoff.md mit Task, Status, Ergebnis, Feedback
    Staerke:    Volle Kontextweitergabe, strukturiert, nachvollziehbar
    Schwaeche:  Nur fuer serielle Ketten, nicht fuer parallele Kommunikation
-   BACH:       marble_run/state/handoff.md (Murmelbahn-Pipeline)
+   BACH:       tools/llmauto/state/handoff.md (Murmelbahn-Pipeline)
 
 7. BRIDGE / CONNECTORS (Externe Kanaele)
 ------------------------------------------
@@ -162,7 +162,7 @@ Die BACH-spezifischen nutzen BACHs eigene Infrastruktur.
     Beispiel:   Marble-Run: Opus Worker beendet sich, .bat startet Sonnet Reviewer
     Staerke:    Deterministisch, keine Infrastruktur, BS-nativ
     Schwaeche:  Nur serielle Ketten, kein Feedback-Kanal (braucht Handoff-Datei)
-    BACH:       marble_run/launchers/ (Murmelbahn-System)
+    BACH:       tools/llmauto/ (llmauto-CLI) (Murmelbahn-System)
 
 14. SHARED FILESYSTEM (File-Watcher)
 --------------------------------------

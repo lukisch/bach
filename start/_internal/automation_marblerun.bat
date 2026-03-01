@@ -1,21 +1,21 @@
 @echo off
 REM ============================================================
-REM BACH Automatisierung - MarbleRun Ketten
-REM Scannt und startet MarbleRun Chains
+REM BACH Automatisierung - llmauto Ketten (ehemals MarbleRun)
+REM Startet llmauto Chains aus system/tools/llmauto/
 REM ============================================================
-title BACH MarbleRun
+title BACH llmauto
 setlocal enabledelayedexpansion
 
-set MARBLE_DIR=%~dp0..\..\..\..\BACH_Dev\marble_run
+set "LLMAUTO_DIR=%~dp0..\..\system\tools"
 
 echo.
 echo  ===================================================
-echo   BACH MarbleRun - Ketten starten
+echo   BACH llmauto - Ketten starten
 echo  ===================================================
 echo.
 
-if not exist "%MARBLE_DIR%\marble.py" (
-    echo  MarbleRun nicht gefunden: %MARBLE_DIR%
+if not exist "%LLMAUTO_DIR%\llmauto\llmauto.py" (
+    echo  llmauto nicht gefunden: %LLMAUTO_DIR%\llmauto\
     pause
     exit /b 1
 )
@@ -25,6 +25,7 @@ echo.
 echo   [1]  Kette starten (Name eingeben)
 echo   [S]  Status anzeigen
 echo   [X]  Kette stoppen
+echo   [L]  Ketten auflisten
 echo   [0]  Abbrechen
 echo.
 
@@ -32,33 +33,44 @@ set /P CHOICE=  Auswahl:
 if /I "%CHOICE%"=="0" exit /b 0
 if /I "%CHOICE%"=="" exit /b 0
 
-if /I "%CHOICE%"=="S" (
-    cd /d "%MARBLE_DIR%"
+if /I "%CHOICE%"=="L" (
+    cd /d "%LLMAUTO_DIR%"
     set PYTHONIOENCODING=utf-8
-    python marble.py status
+    python -m llmauto chain list
+    echo.
+    pause
+    exit /b 0
+)
+
+if /I "%CHOICE%"=="S" (
+    cd /d "%LLMAUTO_DIR%"
+    set PYTHONIOENCODING=utf-8
+    python -m llmauto chain status
     echo.
     pause
     exit /b 0
 )
 
 if /I "%CHOICE%"=="X" (
-    cd /d "%MARBLE_DIR%"
+    set /P CHAIN_ID=  Ketten-Name zum Stoppen:
+    if "!CHAIN_ID!"=="" exit /b 0
+    cd /d "%LLMAUTO_DIR%"
     set PYTHONIOENCODING=utf-8
-    python marble.py stop
+    python -m llmauto chain stop !CHAIN_ID!
     echo.
     pause
     exit /b 0
 )
 
 if "%CHOICE%"=="1" (
-    set /P CHAIN_ID=  Ketten-ID eingeben:
+    set /P CHAIN_ID=  Ketten-Name eingeben:
     if "!CHAIN_ID!"=="" exit /b 0
 
     echo.
-    echo  Starte MarbleRun: !CHAIN_ID!
+    echo  Starte llmauto: !CHAIN_ID!
     echo.
 
-    start cmd /k "title MarbleRun: !CHAIN_ID! && cd /d "%MARBLE_DIR%" && set PYTHONIOENCODING=utf-8 && python marble.py start --chain !CHAIN_ID!"
+    start cmd /k "title llmauto: !CHAIN_ID! && cd /d "%LLMAUTO_DIR%" && set PYTHONIOENCODING=utf-8 && python -m llmauto chain start !CHAIN_ID!"
 
     echo  [OK] Kette !CHAIN_ID! gestartet (neues Fenster^).
     echo.
