@@ -337,7 +337,7 @@ class DocHandler(BaseHandler):
     # ------------------------------------------------------------------
     def _scan(self, args: list, dry_run: bool) -> tuple:
         if not args:
-            return (False, "Fehler: Pfad fehlt.\nBeispiel: bach doc scan C:/Users/User/Documents")
+            return (False, "Fehler: Pfad fehlt.\nBeispiel: bach doc scan ~/Documents")
 
         folder_path = args[0]
         if not Path(folder_path).exists():

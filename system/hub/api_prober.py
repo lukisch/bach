@@ -25,7 +25,7 @@ from typing import List, Tuple
 from .base import BaseHandler
 
 # Absoluter Pfad zum MODULAR_AGENTS/ApiProber Modul
-_API_PROBER_ROOT = Path(r"C:\Users\lukas\OneDrive\KI&AI\MODULAR_AGENTS\ApiProber")
+_API_PROBER_ROOT = Path.home() / "OneDrive" / "KI&AI" / "MODULAR_AGENTS" / "ApiProber"
 _MODULAR_AGENTS_ROOT = _API_PROBER_ROOT.parent
 
 

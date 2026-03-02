@@ -12,7 +12,7 @@ from pathlib import Path
 from datetime import datetime
 
 from ..core.runner import ClaudeRunner
-from ..core.config import load_chain, list_chains, load_global_config, _ACTUAL_HOME
+from ..core.config import load_chain, list_chains, load_global_config, _ACTUAL_HOME, BACH_AVAILABLE, BACH_ROOT
 from ..core.state import ChainState
 
 
@@ -37,24 +37,25 @@ def resolve_prompt(link, chain_config):
     prompts_section = chain_config.get("prompts", {})
     base_dir = Path(__file__).parent.parent
 
-    # B45: bach:// URL-Schema fuer DB-Prompts
+    # B45: bach:// URL-Schema fuer DB-Prompts (nur wenn BACH verfuegbar)
     if prompt_key.startswith("bach://"):
         prompt_name = prompt_key[len("bach://"):]
-        try:
-            import sqlite3
-            db_path = base_dir / ".." / ".." / "data" / "bach.db"
-            if db_path.exists():
-                conn = sqlite3.connect(str(db_path.resolve()))
-                cursor = conn.execute(
-                    "SELECT text FROM prompt_templates WHERE name = ?",
-                    (prompt_name,)
-                )
-                row = cursor.fetchone()
-                conn.close()
-                if row:
-                    return row[0]
-        except Exception:
-            pass  # Fallback auf Datei-Suche
+        if BACH_AVAILABLE and BACH_ROOT is not None:
+            try:
+                import sqlite3
+                db_path = BACH_ROOT / "system" / "data" / "bach.db"
+                if db_path.exists():
+                    conn = sqlite3.connect(str(db_path.resolve()))
+                    cursor = conn.execute(
+                        "SELECT text FROM prompt_templates WHERE name = ?",
+                        (prompt_name,)
+                    )
+                    row = cursor.fetchone()
+                    conn.close()
+                    if row:
+                        return row[0]
+            except Exception:
+                pass  # Fallback auf Datei-Suche
         # Wenn nicht in DB gefunden, prompt_key ohne Prefix weiterverwenden
         prompt_key = prompt_name
 

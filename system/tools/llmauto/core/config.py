@@ -10,11 +10,14 @@ from copy import deepcopy
 
 BASE_DIR = Path(__file__).parent.parent
 
-# Bekannte User-Home-Pfade
-_KNOWN_USER_HOMES = [
-    "C:\\Users\\User\\",
-]
-_ACTUAL_HOME = str(Path.home()) + os.sep  # z.B. "C:\Users\YourUsername\"
+# BACH_ROOT: aus Umgebungsvariable oder dynamisch aus Dateipfad ableiten
+# config.py -> core -> llmauto -> tools -> system -> BACH root
+# Im Standalone-Modus existiert der BACH-Pfad moeglicherweise nicht
+_bach_root_candidate = Path(os.environ.get("BACH_ROOT", str(Path(__file__).parents[4])))
+BACH_AVAILABLE = _bach_root_candidate.exists() and (_bach_root_candidate / "system").exists()
+BACH_ROOT = _bach_root_candidate if BACH_AVAILABLE else None
+
+_ACTUAL_HOME = str(Path.home()) + os.sep
 
 
 DEFAULT_GLOBAL_CONFIG = {
@@ -77,15 +80,23 @@ def save_global_config(config):
 
 
 def _normalize_paths(obj):
-    """Ersetzt bekannte User-Home-Pfade durch den aktuellen.
+    """Ersetzt User-Home-Pfade durch den aktuellen.
 
     Damit funktionieren Chain-Configs auf allen Systemen unabhaengig vom Username.
-    und Laptop (C:\\Users\\User) ohne Anpassung.
+    Erkennt Windows-Pfade (C:\\Users\\<Name>\\) und Unix-Pfade (/home/<Name>/).
     """
+    import re
+    _repl = _ACTUAL_HOME.replace('\\', '\\\\')  # Backslashes fuer re.sub escapen
     if isinstance(obj, str):
-        for known in _KNOWN_USER_HOMES:
-            if known in obj and known != _ACTUAL_HOME:
-                obj = obj.replace(known, _ACTUAL_HOME)
+        # Windows: C:\Users\<Name>\ oder C:/Users/<Name>/
+        obj = re.sub(
+            r'[Cc]:[/\\]Users[/\\][^/\\]+[/\\]',
+            _repl,
+            obj,
+        )
+        # Unix: /home/<Name>/
+        if os.name != 'nt':
+            obj = re.sub(r'/home/[^/]+/', _repl, obj)
         return obj
     elif isinstance(obj, dict):
         return {k: _normalize_paths(v) for k, v in obj.items()}
