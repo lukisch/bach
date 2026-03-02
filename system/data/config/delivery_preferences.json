@@ -54,9 +54,9 @@
       "enabled": false,
       "description": "Lokale Cloud-Ordner (Sync läuft durch Cloud-Client)",
       "paths": {
-        "google_drive": "C:\\Users\\User\\Google Drive\\BACH\\",
-        "onedrive": "C:\\Users\\User\\OneDrive\\BACH_Delivery\\",
-        "dropbox": "C:\\Users\\User\\Dropbox\\BACH\\"
+        "google_drive": "~/Google Drive/BACH/",
+        "onedrive": "~/OneDrive/BACH_Delivery/",
+        "dropbox": "~/Dropbox/BACH/"
       },
       "active_clouds": ["onedrive"],
       "create_subdirs": true,

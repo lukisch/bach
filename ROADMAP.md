@@ -1,6 +1,6 @@
 # BACH ROADMAP - Strategische Vision
 
-**Stand:** 2026-03-01 | **Version:** 4.0.0
+**Stand:** 2026-03-02 | **Version:** 4.0.0
 
 Copyright (c) 2026 Lukas Geiger. Alle Rechte vorbehalten.
 
@@ -47,7 +47,7 @@ Siehe: `../docs/WICHTIG_SYSTEMISCH_FIRST.md`
 
 ## GitHub-Veroeffentlichung (KOMPLETT)
 
-Repo ist PUBLIC auf GitHub mit 14 Topics, Tags `v3.1.6` und `v3.3.0-peanut`.
+Repo ist PUBLIC auf GitHub mit 14 Topics, Tags `v3.1.6`, `v3.3.0-peanut` und `v3.4.0-pizza`.
 
 | Schritt | Status |
 |---------|--------|
@@ -71,18 +71,18 @@ Alle Prio 1-3 Items wurden implementiert und in die "Abgeschlossene Bloecke" ver
 
 | SQ | Thema | Status | Notiz |
 |----|-------|--------|-------|
-| SQ016 | Schwarm-LLM-Haiku-Experimente | OFFEN | Multi-Agent-Forschung |
-| SQ018 | Plan-Agent & Planungsprotokoll | OFFEN | Formalisierung |
-| SQ028 | Multi-BACH (benannte Instanzen) | OFFEN | Ein Ordner = eine Instanz (ENT-11) |
-| SQ040 | Reminder-Injektor | OFFEN | LLM-Selbsterinnerung |
-| SQ042 | Meta-Feedback-Injektor | OFFEN | BACH korrigiert LLM-Ticks |
-| SQ044 | BACH-in-a-Database (Vision) | OFFEN | Alles lebt in DB, on-demand entpackt |
-| SQ048 | Arbeitsmodi & 24h-Agent | OFFEN | Persistenter Tages-Kontext |
-| SQ052 | Bridge Antwort-Modus & Server-Betrieb | PARTIAL | `bridge_daemon.py` existiert, kein Remote-Modus |
-| SQ054 | ResearchAgent BACH-Re-Integration | PARTIAL | `research_agent.py` 695 LOC vorhanden |
-| SQ055 | devSoftAgent fertigstellen | PARTIAL | `entwickler_agent.py` 695 LOC, 6 Phasen |
-| SQ056 | llmauto Standalone finalisieren | PARTIAL | Funktional, aber nicht voll standalone |
-| ENT-25 | _CHIAH + recludOS als Legacy veroeffentlichen | OFFEN | Bereinigung noetig |
+| SQ016 | Schwarm-LLM-Haiku-Experimente | DONE | Chain-Configs + Konzeptpapier (PIZZA v3.4.0) |
+| SQ018 | Plan-Agent & Planungsprotokoll | DONE | JSON-Schema + CLI (PIZZA v3.4.0) |
+| SQ028 | Multi-BACH (benannte Instanzen) | DONE | BACH_ROOT ENV, Pfade bereinigt (PIZZA v3.4.0) |
+| SQ040 | Reminder-Injektor | DONE | DB + JSON-Fallback (PIZZA v3.4.0) |
+| SQ042 | Meta-Feedback-Injektor | DONE | Pattern-DB Auto-Korrektur (PIZZA v3.4.0) |
+| SQ044 | BACH-in-a-Database (Vision) | DONE | Konzeptpapier + Inventar (PIZZA v3.4.0) |
+| SQ048 | Arbeitsmodi & 24h-Agent | DONE | 3 Modi + Session-Kontext (PIZZA v3.4.0) |
+| SQ052 | Bridge Antwort-Modus & Server-Betrieb | DONE | FastAPI REST-API (PIZZA v3.4.0) |
+| SQ054 | ResearchAgent BACH-Re-Integration | DONE | PubMed-API + Perplexity (PIZZA v3.4.0) |
+| SQ055 | devSoftAgent fertigstellen | DONE | 6-Phasen, standalone (PIZZA v3.4.0) |
+| SQ056 | llmauto Standalone finalisieren | DONE | pyproject.toml, BACH_AVAILABLE (PIZZA v3.4.0) |
+| ENT-25 | _CHIAH + recludOS als Legacy veroeffentlichen | DONE | READMEs, RECLUDOS_ROOT eliminiert (PIZZA v3.4.0) |
 
 ---
 
@@ -125,8 +125,8 @@ Alle Prio 1-3 Items wurden implementiert und in die "Abgeschlossene Bloecke" ver
 | — | SQ014 | UC26/27: Overpass API + OSRM Routing-Integration (Score 50→75) | KOMPLETT |
 | — | SQ011 | Pipeline-Framework: DB-Tabellen + Decision-Briefing Scanner + 2 Pipeline-Definitionen | KOMPLETT |
 | — | — | ROADMAP-Konsolidierung (4 Dateien → 1) | KOMPLETT |
-| B30 | SQ046 | Therapie-Skills: Trauma + Systemisch | Verschoben → NEXT_RELEASE |
-| B32 | SQ049 | Agenten autonomer machen | Verschoben → NEXT_RELEASE |
+| B30 | SQ046 | Therapie-Skills: Trauma + Systemisch | DONE (Recherche, PIZZA v3.4.0) |
+| B32 | SQ049 | Agenten autonomer machen | DONE (PortableAgent, PIZZA v3.4.0) |
 
 ---
 

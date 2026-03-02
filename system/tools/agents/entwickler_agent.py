@@ -25,20 +25,21 @@ from dataclasses import dataclass, asdict
 import hashlib
 import difflib
 
-# Lokale Module
-from code_analyzer import CodeAnalyzer, AnalysisResult
-from code_generator import CodeGenerator
+from portable_base import PortableAgent, BACH_ROOT, BACH_AVAILABLE
 
-# Logging Setup
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s [%(levelname)s] %(message)s',
-    handlers=[
-        logging.FileHandler("entwickler_agent.log", encoding='utf-8'),
-        logging.StreamHandler()
-    ]
-)
-logger = logging.getLogger("EntwicklerAgent")
+# Coding-Module aus system/tools/coding/ importieren
+_CODING_DIR = Path(__file__).parents[1] / "coding"
+try:
+    if str(_CODING_DIR) not in sys.path:
+        sys.path.insert(0, str(_CODING_DIR))
+    from code_analyzer import CodeAnalyzer, AnalysisResult
+    from code_generator import CodeGenerator
+    _CODING_AVAILABLE = True
+except ImportError:
+    _CODING_AVAILABLE = False
+    CodeAnalyzer = None  # type: ignore
+    AnalysisResult = None  # type: ignore
+    CodeGenerator = None  # type: ignore
 
 
 @dataclass
@@ -52,11 +53,12 @@ class DebugResult:
     timestamp: str
 
 
-class EntwicklerAgent:
+class EntwicklerAgent(PortableAgent):
     """Autonomer Software-Entwicklungs-Agent v1.0.0"""
-    
+
+    AGENT_NAME = "EntwicklerAgent"
     VERSION = "1.0.0"
-    
+
     # Design Patterns Bibliothek (Phase 4)
     PATTERNS = {
         "singleton": {
@@ -86,49 +88,26 @@ class EntwicklerAgent:
         }
     }
     
-    def __init__(self, config_path: str = "config.json"):
+    def __init__(self, config_path: str = None):
+        super().__init__(config_path)
         self.base_dir = Path(__file__).parent
-        self.config = self._load_config(config_path)
         self.project_registry = self._load_project_registry()
         self.task_queue = self._load_task_queue()
-        
-        # Phase 2: Code-Module
-        self.analyzer = CodeAnalyzer()
-        self.generator = CodeGenerator()
-        
+
+        # Phase 2: Code-Module (optional)
+        self.analyzer = CodeAnalyzer() if _CODING_AVAILABLE else None
+        self.generator = CodeGenerator() if _CODING_AVAILABLE else None
+
         # Phase 3: Service-Pfade
-        self.services_dir = self.base_dir.parent.parent / "services"
-        
+        self.services_dir = BACH_ROOT / "system" / "tools" / "services" if BACH_AVAILABLE else self.base_dir
+
         # Phase 5: Feedback-System
         self.feedback_log = []
-        
-        logger.info(f"Entwickler-Agent v{self.VERSION} initialisiert")
+
+        self.logger.info(f"Entwickler-Agent v{self.VERSION} initialisiert")
     
     # ========== CONFIG & REGISTRY (Phase 1) ==========
-    
-    def _load_config(self, config_path: str) -> Dict:
-        """Lädt Agent-Konfiguration"""
-        path = self.base_dir / config_path
-        if path.exists():
-            with open(path, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        return self._create_default_config(path)
-    
-    def _create_default_config(self, path: Path) -> Dict:
-        """Erstellt Standard-Konfiguration"""
-        config = {
-            "meta": {"version": self.VERSION, "created": datetime.now().isoformat()},
-            "paths": {"projects": "projects", "tasks": "tasks", "reports": "reports"},
-            "settings": {
-                "auto_save": True,
-                "max_complexity": 20,
-                "code_style": "pep8"
-            }
-        }
-        with open(path, 'w', encoding='utf-8') as f:
-            json.dump(config, f, indent=2)
-        return config
-    
+
     def _load_project_registry(self) -> Dict:
         path = self.base_dir / "projects" / "project_registry.json"
         if path.exists():
@@ -185,7 +164,7 @@ class EntwicklerAgent:
         self.project_registry['meta']['total_projects'] += 1
         self._save_project_registry()
         
-        logger.info(f"Projekt erstellt: {name} ({project_id})")
+        self.logger.info(f"Projekt erstellt: {name} ({project_id})")
         return project_id
     
     def list_projects(self, status: str = None) -> List[Dict]:
@@ -217,7 +196,7 @@ class EntwicklerAgent:
         self.task_queue['meta']['total_tasks'] += 1
         self._save_task_queue()
         
-        logger.info(f"Task hinzugefügt: {title} ({task_id})")
+        self.logger.info(f"Task hinzugefuegt: {title} ({task_id})")
         return task_id
     
     def get_next_task(self) -> Optional[Dict]:
@@ -238,7 +217,7 @@ class EntwicklerAgent:
                 if artifacts:
                     task['artifacts'] = artifacts
                 self._save_task_queue()
-                logger.info(f"Task abgeschlossen: {task_id}")
+                self.logger.info(f"Task abgeschlossen: {task_id}")
                 return True
         return False
     
@@ -246,8 +225,10 @@ class EntwicklerAgent:
     
     def analyze_file(self, file_path: str) -> AnalysisResult:
         """Analysiert eine Code-Datei"""
+        if not self.analyzer:
+            raise RuntimeError("Coding-Module nicht verfuegbar (code_analyzer.py nicht gefunden)")
         result = self.analyzer.analyze_file(file_path)
-        logger.info(f"Analyse abgeschlossen: {file_path}")
+        self.logger.info(f"Analyse abgeschlossen: {file_path}")
         return result
     
     def analyze_project(self, project_id: str) -> Dict:
@@ -265,7 +246,7 @@ class EntwicklerAgent:
                     result = self.analyze_file(str(py_file))
                     results[str(py_file)] = self.analyzer.to_dict(result)
                 except Exception as e:
-                    logger.error(f"Fehler bei {py_file}: {e}")
+                    self.logger.error(f"Fehler bei {py_file}: {e}")
         
         # Cache aktualisieren
         project['analysis_cache'] = {
@@ -281,6 +262,8 @@ class EntwicklerAgent:
     
     def generate_code(self, spec: Dict) -> str:
         """Generiert Code aus Spezifikation"""
+        if not self.generator:
+            raise RuntimeError("Coding-Module nicht verfuegbar (code_generator.py nicht gefunden)")
         return self.generator.generate_from_spec(spec)
     
     def create_file(self, project_id: str, filename: str, spec: Dict) -> str:
@@ -296,7 +279,7 @@ class EntwicklerAgent:
         project['files'].append(str(file_path))
         self._save_project_registry()
         
-        logger.info(f"Datei erstellt: {file_path}")
+        self.logger.info(f"Datei erstellt: {file_path}")
         return str(file_path)
     
     # ========== SERVICE-INTEGRATION (Phase 3) ==========
@@ -306,7 +289,7 @@ class EntwicklerAgent:
         editor_path = self.services_dir / "code-editor" / "editor.py"
         
         if not editor_path.exists():
-            logger.error("Editor-Service nicht gefunden")
+            self.logger.error("Editor-Service nicht gefunden")
             return False
         
         try:
@@ -314,10 +297,10 @@ class EntwicklerAgent:
             if file_path:
                 cmd.append(file_path)
             subprocess.Popen(cmd)
-            logger.info(f"Editor gestartet: {file_path or 'Neu'}")
+            self.logger.info(f"Editor gestartet: {file_path or 'Neu'}")
             return True
         except Exception as e:
-            logger.error(f"Editor-Fehler: {e}")
+            self.logger.error(f"Editor-Fehler: {e}")
             return False
     
     def call_compiler(self, file_path: str, output_dir: str = None) -> Dict:
@@ -337,10 +320,10 @@ class EntwicklerAgent:
             py_compile.compile(file_path, doraise=True)
             result['success'] = True
             result['output'] = "Syntax OK"
-            logger.info(f"Kompilierung erfolgreich: {file_path}")
+            self.logger.info(f"Kompilierung erfolgreich: {file_path}")
         except py_compile.PyCompileError as e:
             result['errors'].append(str(e))
-            logger.error(f"Kompilierungsfehler: {e}")
+            self.logger.error(f"Kompilierungsfehler: {e}")
         
         return result
     
@@ -499,7 +482,7 @@ class EntwicklerAgent:
             "rating": rating,
             "timestamp": datetime.now().isoformat()
         })
-        logger.info(f"Feedback erhalten für {task_id}: {rating}/5")
+        self.logger.info(f"Feedback erhalten fuer {task_id}: {rating}/5")
     
     def get_task_feedback(self, task_id: str) -> List[Dict]:
         """Holt Feedback für einen Task"""
@@ -594,6 +577,8 @@ class EntwicklerAgent:
     
     def generate_test(self, file_path: str) -> str:
         """Generiert Test-Datei für eine Python-Datei"""
+        if not self.generator:
+            raise RuntimeError("Coding-Module nicht verfuegbar (code_generator.py nicht gefunden)")
         analysis = self.analyze_file(file_path)
         tests = []
         
@@ -627,27 +612,55 @@ class EntwicklerAgent:
         """Generiert Status-Bericht"""
         report = []
         report.append(f"=== ENTWICKLER-AGENT v{self.VERSION} ===\n")
-        
+        report.append(f"BACH: {'verfuegbar' if self.bach_available else 'nicht verfuegbar'}")
+        report.append(f"Coding-Module: {'geladen' if _CODING_AVAILABLE else 'nicht verfuegbar'}")
+
         # Projekte
         total = self.project_registry['meta']['total_projects']
         active = len([p for p in self.list_projects() if p['status'] == 'active'])
-        report.append(f"📂 Projekte: {total} (Aktiv: {active})")
-        
+        report.append(f"Projekte: {total} (Aktiv: {active})")
+
         # Tasks
         pending = len([t for t in self.task_queue['queue'] if t['status'] == 'pending'])
         completed = len([t for t in self.task_queue['queue'] if t['status'] == 'completed'])
-        report.append(f"📋 Tasks: {pending} offen, {completed} erledigt")
-        
-        # Features
-        report.append(f"\n🔧 Features aktiv:")
-        report.append(f"  • Code-Analyse: ✅")
-        report.append(f"  • Code-Generation: ✅")
-        report.append(f"  • Service-Integration: ✅")
-        report.append(f"  • Debugging: ✅")
-        report.append(f"  • Pattern-Erkennung: ✅")
-        report.append(f"  • Testing: ✅")
-        
+        report.append(f"Tasks: {pending} offen, {completed} erledigt")
+
         return "\n".join(report)
+
+    # --- PortableAgent Interface ---
+
+    def run(self, **kwargs) -> Any:
+        """Hauptfunktion: naechsten Task bearbeiten oder Kommando ausfuehren."""
+        command = kwargs.get("command", "status")
+        if command == "status":
+            return self.status()
+        if command == "analyze" and kwargs.get("file"):
+            return self.analyze_file(kwargs["file"])
+        return self.status()
+
+    def status(self) -> Dict:
+        return {
+            "agent": self.AGENT_NAME,
+            "version": self.VERSION,
+            "bach_available": self.bach_available,
+            "coding_available": _CODING_AVAILABLE,
+            "projects": self.project_registry['meta']['total_projects'],
+            "tasks_pending": len([t for t in self.task_queue['queue'] if t['status'] == 'pending']),
+        }
+
+    def config(self) -> Dict:
+        return self._config
+
+    def standalone_config_template(self) -> Dict:
+        return {
+            "meta": {"version": self.VERSION, "created": datetime.now().isoformat()},
+            "paths": {"projects": "projects", "tasks": "tasks", "reports": "reports"},
+            "settings": {
+                "auto_save": True,
+                "max_complexity": 20,
+                "code_style": "pep8"
+            }
+        }
 
 
 def main():

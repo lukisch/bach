@@ -522,7 +522,7 @@ class DeliveryEngine:
             if not cloud_path:
                 continue
 
-            cloud_base = Path(cloud_path)
+            cloud_base = Path(cloud_path).expanduser()
 
             # Subdir-Pattern?
             if config.get("create_subdirs", True):

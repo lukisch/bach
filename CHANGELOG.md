@@ -6,6 +6,48 @@ Copyright (c) 2026 Lukas Geiger. Alle Rechte vorbehalten.
 
 ---
 
+## [3.4.0-pizza] - 2026-03-02
+
+### Neu
+
+- **Agent Portability Framework (B32/SQ049):** PortableAgent-Basisklasse -- Agenten funktionieren standalone ohne BACH
+- **Plan-Agent (SQ018):** Strukturierte Planungsprotokolle mit JSON-Schema und CLI
+- **Bridge Server Mode (SQ052):** FastAPI REST-API fuer server-deployable Bridge (POST /api/message, GET /api/status, POST /api/control)
+- **Reminder-Injektor (SQ040):** LLM-Selbsterinnerung vor jedem Call, DB + JSON-Fallback
+- **Meta-Feedback-Injektor (SQ042):** Auto-Korrektur wiederkehrender LLM-Ticks mit Pattern-DB
+- **Arbeitsmodi & 24h-Agent (SQ048):** Session-Kontext-Persistenz, Tageswechsel-Logik, Modi focused/assistant/autonomous
+- **Schwarm-LLM-Haiku (SQ016):** Chain-Configs fuer Haiku-Worker-Schwarm mit Sonnet-Coordinator
+
+### Verbessert
+
+- **ResearchAgent (SQ054):** Echte PubMed-API-Integration (NCBI E-Utilities), optionale Perplexity-API
+- **EntwicklerAgent (SQ055):** 6-Phasen-Architektur verifiziert, standalone-faehig, robuste Imports
+- **llmauto Standalone (SQ056):** pyproject.toml, BACH_AVAILABLE Flag, Chains laufen ohne DB
+- **Multi-BACH Vorbereitung (SQ028):** BACH_ROOT ENV, _KNOWN_USER_HOMES eliminiert, hardcodierte Pfade bereinigt
+
+### Dokumentation
+
+- **BACH-in-a-Database Vision (SQ044):** Konzeptpapier mit Inventar (1.819 Dateien) und Architekturvorschlag
+- **Therapie-Skills Recherche (B30/SQ046):** 25 Methoden inventarisiert, Gap-Analyse, Implementierbarkeitsbewertung
+- **Legacy (ENT-25):** CHIAH + recludOS Publikations-Vorbereitung, READMEs erstellt, RECLUDOS_ROOT eliminiert
+- **Schwarm-Haiku Konzeptpapier (SQ016):** Architektur, Kosten-Analyse, Benchmark-Plan
+- **Bridge Deployment-Doku:** SSH-Tunnel + Systemd-Service Anleitung
+
+### Schema
+
+- Migration 030: `reminders` + `meta_feedback_patterns` Tabellen
+- Migration 031: `session_context` Tabelle
+- Gesamt: 135 Tabellen
+
+### Tests
+
+- 248/249 Tests bestanden (99.6%), 1 vorbestehender Fehler
+- 109/109 Handler importierbar
+- PII-Scan: Keine neuen Findings in PIZZA-Dateien
+- Migration-Integritaet: Schema auf frische DB fehlerfrei
+
+---
+
 ## [3.3.0-peanut] - 2026-03-01
 
 ### Breaking Changes

@@ -24,7 +24,7 @@ SOFTWARE.
 """
 
 """
-BACH Claude Bridge Daemon v2.2
+BACH Claude Bridge Daemon v2.3
 ===============================
 Verbindet Telegram direkt mit Claude Code CLI.
 
@@ -52,20 +52,32 @@ Fixes in v2.2:
 - Permission-Fixes: P1 (Hint nach Toggle), P2 (State-Logging), P3 (Worker-Rechte)
 - Capability-Parity: Teams, Tasks, Skills via Telegram verfuegbar
 
+New in v2.3:
+- SERVER MODE: FastAPI REST layer fuer Server-Deployment (config: mode=server)
+- Endpoints: POST /api/message, GET /api/status, POST /api/control
+- Bearer-Token Auth, konfigurierbare CORS-Origins
+- Deployment via SSH-Tunnel + systemd auf Hetzner
+
 Architektur: Persistent Chat + Sandboxed Workers + Async Main Loop
 - Chat-Claude: EINE Session pro Tag, --continue fuer Kontext-Erhalt
 - Worker-Claude: Laeuft autonom, DARF bridge_daemon.py NICHT editieren
 - Async: Chat laeuft im Thread, Main-Loop pollt weiter, Messages queued
 
 Usage:
-  python bridge_daemon.py                # Starten
+  python bridge_daemon.py                # Starten (local mode)
+  python bridge_daemon.py --server       # Starten (server mode, FastAPI)
   python bridge_daemon.py --stop         # Stoppen
   python bridge_daemon.py --status       # Status anzeigen
   python bridge_daemon.py --test "msg"   # Test-Nachricht simulieren
 
-Version: 2.2.0
+Deployment (Hetzner):
+  ssh -L 8080:localhost:8080 root@46.225.30.98
+  systemctl start bach-bridge
+  # Siehe DEPLOYMENT.md fuer Details
+
+Version: 2.3.0
 Erstellt: 2026-02-11
-Updated: 2026-02-12
+Updated: 2026-03-02
 """
 
 import json
@@ -1273,6 +1285,114 @@ Sende Updates bei: Beginn, wichtigen Fortschritten, Problemen, Abschluss.
 - Schreibe Zusammenfassung als letzte Ausgabe (wird in DB gespeichert)"""
 
 
+# ============ SESSION CONTEXT / 24h-AGENT (SQ048) ============
+
+class SessionContextManager:
+    """Verwaltet tagesbasierte Session-Kontexte und Arbeitsmodi."""
+
+    VALID_MODES = ("focused", "assistant", "autonomous")
+
+    def __init__(self, config: dict):
+        self._config = config
+        wm = config.get("work_modes", {})
+        self._default_mode = wm.get("default", "assistant")
+
+    def get_today_context(self) -> dict:
+        """Laedt oder erstellt den Session-Kontext fuer heute."""
+        today = date.today().isoformat()
+        row = db_execute(
+            "SELECT * FROM session_context WHERE date = ?",
+            (today,), fetchone=True
+        )
+        if row:
+            ctx = dict(row)
+            try:
+                ctx["context_json"] = json.loads(ctx.get("context_json", "{}"))
+            except (json.JSONDecodeError, TypeError):
+                ctx["context_json"] = {}
+            return ctx
+
+        # Neuen Eintrag erstellen
+        db_execute(
+            "INSERT INTO session_context (date, work_mode) VALUES (?, ?)",
+            (today, self._default_mode)
+        )
+        return {
+            "date": today, "context_json": {},
+            "summary": None, "handover_notes": None,
+            "work_mode": self._default_mode
+        }
+
+    def save_context(self, context_json: dict, summary: str = None):
+        """Aktualisiert den heutigen Session-Kontext."""
+        today = date.today().isoformat()
+        self.get_today_context()  # Sicherstellen, dass Eintrag existiert
+        if summary:
+            db_execute(
+                "UPDATE session_context SET context_json = ?, summary = ?, "
+                "updated_at = datetime('now') WHERE date = ?",
+                (json.dumps(context_json, ensure_ascii=False), summary, today)
+            )
+        else:
+            db_execute(
+                "UPDATE session_context SET context_json = ?, "
+                "updated_at = datetime('now') WHERE date = ?",
+                (json.dumps(context_json, ensure_ascii=False), today)
+            )
+
+    def day_transition(self, old_summary: str = None):
+        """Tageswechsel: Alten Kontext zusammenfassen, neuen Tag mit Handover starten."""
+        yesterday = (date.today() - timedelta(days=1)).isoformat()
+        today = date.today().isoformat()
+
+        # Gestern: Summary setzen falls vorhanden
+        if old_summary:
+            db_execute(
+                "UPDATE session_context SET summary = ?, updated_at = datetime('now') "
+                "WHERE date = ?",
+                (old_summary, yesterday)
+            )
+
+        # Handover-Notes vom Vortag holen
+        prev_row = db_execute(
+            "SELECT summary FROM session_context WHERE date = ? ",
+            (yesterday,), fetchone=True
+        )
+        handover = prev_row["summary"] if prev_row and prev_row["summary"] else None
+
+        # Heute erstellen (falls noch nicht vorhanden)
+        existing = db_execute(
+            "SELECT id FROM session_context WHERE date = ?",
+            (today,), fetchone=True
+        )
+        if not existing:
+            db_execute(
+                "INSERT INTO session_context (date, work_mode, handover_notes) VALUES (?, ?, ?)",
+                (today, self._default_mode, handover)
+            )
+            log(f"DAY TRANSITION: Neuer Tag {today}, Handover: {'ja' if handover else 'nein'}")
+        return handover
+
+    def get_work_mode(self) -> str:
+        """Gibt den aktuellen Arbeitsmodus zurueck."""
+        ctx = self.get_today_context()
+        return ctx.get("work_mode", self._default_mode)
+
+    def set_work_mode(self, mode: str) -> bool:
+        """Setzt den Arbeitsmodus fuer heute. Gibt False zurueck bei ungueltigem Modus."""
+        if mode not in self.VALID_MODES:
+            return False
+        today = date.today().isoformat()
+        self.get_today_context()  # Sicherstellen, dass Eintrag existiert
+        db_execute(
+            "UPDATE session_context SET work_mode = ?, updated_at = datetime('now') "
+            "WHERE date = ?",
+            (mode, today)
+        )
+        log(f"WORK MODE: {mode}")
+        return True
+
+
 # ============ BRIDGE DAEMON ============
 
 class BridgeDaemon:
@@ -1327,6 +1447,11 @@ class BridgeDaemon:
         self.current_model = state.get("current_model",
                                        self.config.get("claude_cli", {}).get("model", "sonnet"))
 
+        # SQ048: Session Context Manager & Arbeitsmodus
+        self.session_ctx = SessionContextManager(self.config)
+        self.work_mode = state.get("work_mode",
+                                   self.config.get("work_modes", {}).get("default", "assistant"))
+
     def _save_state(self):
         """Speichert aktuellen State persistent."""
         save_state({
@@ -1341,6 +1466,7 @@ class BridgeDaemon:
             "max_turns": self.max_turns,
             "chat_timeout": self.chat_timeout,
             "current_model": self.current_model,
+            "work_mode": self.work_mode,
         })
 
     # ---------- POLLING ----------
@@ -1438,13 +1564,30 @@ class BridgeDaemon:
             return True
 
         if first_word == "mode":
-            info = f"Modus: {self.permission_mode}"
-            if self.permission_mode == "full" and self.full_mode_since:
-                timeout = self.config.get("permissions", {}).get("full_access_timeout_seconds", 3600)
-                remaining = int(timeout - (time.time() - self.full_mode_since))
-                if remaining > 0:
-                    info += f" (Auto-Lock in {remaining // 60} Min)"
-            send_telegram(info, self.config)
+            parts = content_lower.split()
+            new_mode = parts[1] if len(parts) > 1 else ""
+            if new_mode in SessionContextManager.VALID_MODES:
+                # SQ048: Arbeitsmodus setzen
+                self.work_mode = new_mode
+                self.session_ctx.set_work_mode(new_mode)
+                self._save_state()
+                labels = {
+                    "focused": "Fokussiert (minimale Unterbrechungen)",
+                    "assistant": "Assistent (Standard, reagiert auf alles)",
+                    "autonomous": "Autonom (proaktive Aktionen)"
+                }
+                send_telegram(f"Arbeitsmodus: {labels.get(new_mode, new_mode)}", self.config)
+            else:
+                # Status beider Modi anzeigen
+                info = f"Rechte: {self.permission_mode}"
+                if self.permission_mode == "full" and self.full_mode_since:
+                    timeout = self.config.get("permissions", {}).get("full_access_timeout_seconds", 3600)
+                    remaining = int(timeout - (time.time() - self.full_mode_since))
+                    if remaining > 0:
+                        info += f" (Auto-Lock in {remaining // 60} Min)"
+                info += f"\nArbeitsmodus: {self.work_mode}"
+                info += "\nVerfuegbar: mode focused / assistant / autonomous"
+                send_telegram(info, self.config)
             return True
 
         if first_word == "budget":
@@ -1678,7 +1821,7 @@ class BridgeDaemon:
             help_text = (
                 "BACH Bridge Befehle:\n"
                 "  toggle - Vollzugriff ein/aus\n"
-                "  mode - Aktuellen Modus anzeigen\n"
+                "  mode - Arbeitsmodus (focused/assistant/autonomous)\n"
                 "  turns <n> - Max-Turns setzen (z.B. turns 50)\n"
                 "  turns unlimited - Kein Turn-Limit (Default)\n"
                 "  turns - Aktuellen Wert anzeigen\n"
@@ -1838,14 +1981,24 @@ class BridgeDaemon:
         today = date.today()
         if today > self.daily_date:
             # Neuer Tag: Session-Summary speichern und Session zuruecksetzen
+            old_summary = None
             if self.has_active_session:
                 log("NEUER TAG: Speichere Session-Summary...")
                 self._save_session_summary()
+                old_summary = f"Session vom {self.daily_date.isoformat()}"
                 self.has_active_session = False
                 self.session_start_time = None
                 log("NEUER TAG: Session zurueckgesetzt, Budget zurueckgesetzt")
             self.daily_spent = 0.0
             self.daily_date = today
+            # SQ048: Day-Transition mit Handover
+            try:
+                handover = self.session_ctx.day_transition(old_summary)
+                self.work_mode = self.session_ctx.get_work_mode()
+                if handover:
+                    log(f"HANDOVER: {handover[:100]}")
+            except Exception as e:
+                log(f"DAY TRANSITION Fehler: {e}", "WARN")
             self._save_state()
 
         # Budget deaktiviert = immer erlaubt
@@ -2494,7 +2647,16 @@ class BridgeDaemon:
         log(f"Budget: ${self.daily_spent:.2f} / ${self.config.get('budget', {}).get('daily_limit_usd', 5.0)}/Tag")
         log(f"Max Nachrichten-Alter: {MAX_MESSAGE_AGE}s")
         log(f"Memory: {MEMORY_FILE}")
+        log(f"Arbeitsmodus: {self.work_mode}")
         log("=" * 50)
+
+        # SQ048: Session-Kontext fuer heute laden/erstellen
+        try:
+            ctx = self.session_ctx.get_today_context()
+            if ctx.get("handover_notes"):
+                log(f"HANDOVER vom Vortag: {ctx['handover_notes'][:100]}")
+        except Exception as e:
+            log(f"Session-Kontext Fehler (Tabelle existiert evtl. noch nicht): {e}", "WARN")
 
         # Heartbeat-Thread
         heartbeat_thread = Thread(target=self._heartbeat_loop, daemon=True, name="HeartbeatThread")
@@ -2654,6 +2816,7 @@ def show_status():
     print(f"  Session:    {'aktiv' if session_active else 'keine'}")
     if state.get("session_start_time"):
         print(f"  Seit:       {state['session_start_time'][:16]}")
+    print(f"  Arbeitsmodus: {state.get('work_mode', 'assistant')}")
 
     # Memory
     mem = load_bridge_memory()
@@ -2708,6 +2871,52 @@ def test_message(text: str):
     print("Der Bridge-Daemon wird sie beim naechsten Poll verarbeiten.")
 
 
+# ============ SERVER MODE ============
+
+def start_server_mode(config: dict):
+    """Startet die Bridge im Server-Modus mit FastAPI/Uvicorn."""
+    try:
+        from server_api import create_app, HAS_FASTAPI
+    except ImportError:
+        from .server_api import create_app, HAS_FASTAPI
+
+    if not HAS_FASTAPI:
+        log("FastAPI nicht installiert! pip install fastapi uvicorn", "ERROR")
+        print("ERROR: FastAPI nicht installiert.")
+        print("Installiere mit: pip install fastapi uvicorn")
+        sys.exit(1)
+
+    try:
+        import uvicorn
+    except ImportError:
+        log("Uvicorn nicht installiert! pip install uvicorn", "ERROR")
+        print("ERROR: Uvicorn nicht installiert.")
+        print("Installiere mit: pip install uvicorn")
+        sys.exit(1)
+
+    server_cfg = config.get("server", {})
+    host = server_cfg.get("host", "127.0.0.1")
+    port = server_cfg.get("port", 8080)
+
+    app = create_app(config)
+
+    # Daemon im Hintergrund starten (optional: auch den Poll-Loop laufen lassen)
+    daemon = BridgeDaemon()
+    app.state.daemon = daemon
+
+    # Daemon-Loop in eigenem Thread
+    from threading import Thread
+    daemon_thread = Thread(target=daemon.run, daemon=True, name="BridgeDaemonThread")
+    daemon_thread.start()
+
+    log(f"Server-Modus: FastAPI auf {host}:{port}", "INFO")
+    log(f"API-Docs: http://{host}:{port}/docs", "INFO")
+    print(f"BACH Bridge Server startet auf http://{host}:{port}")
+    print(f"API-Docs: http://{host}:{port}/docs")
+
+    uvicorn.run(app, host=host, port=port, log_level="info")
+
+
 # ============ CLI ============
 
 def main():
@@ -2725,7 +2934,15 @@ def main():
         test_message(text)
         return
 
-    # Daemon starten
+    config = load_config()
+    mode = config.get("mode", "local")
+
+    # --server Flag oder config mode=server
+    if "--server" in sys.argv or mode == "server":
+        start_server_mode(config)
+        return
+
+    # Daemon starten (local mode)
     daemon = BridgeDaemon()
     daemon.run()
 

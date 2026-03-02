@@ -2139,6 +2139,52 @@ CREATE INDEX IF NOT EXISTS idx_snapshots_type ON session_snapshots(snapshot_type
 CREATE INDEX IF NOT EXISTS idx_task_history_action ON task_history(action);
 CREATE INDEX IF NOT EXISTS idx_task_history_task_id ON task_history(task_id);
 
+-- ── INJECTORS ─────────────────────────────────────────────────────────
+
+-- SQ040: Reminder Injector
+CREATE TABLE IF NOT EXISTS reminders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    trigger_condition TEXT NOT NULL DEFAULT 'always',
+    trigger_value TEXT,
+    message TEXT NOT NULL,
+    active INTEGER NOT NULL DEFAULT 1,
+    priority INTEGER NOT NULL DEFAULT 5,
+    last_triggered TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- SQ042: Meta-Feedback Injector
+CREATE TABLE IF NOT EXISTS meta_feedback_patterns (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    pattern TEXT NOT NULL,
+    pattern_type TEXT NOT NULL DEFAULT 'substring',
+    correction TEXT NOT NULL,
+    frequency INTEGER NOT NULL DEFAULT 0,
+    max_inactive_count INTEGER NOT NULL DEFAULT 10,
+    inactive_count INTEGER NOT NULL DEFAULT 0,
+    active INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_reminders_active ON reminders(active);
+CREATE INDEX IF NOT EXISTS idx_reminders_trigger ON reminders(trigger_condition);
+CREATE INDEX IF NOT EXISTS idx_meta_feedback_active ON meta_feedback_patterns(active);
+
+-- SQ048: Session Context / 24h-Agent
+CREATE TABLE IF NOT EXISTS session_context (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT NOT NULL,
+    context_json TEXT NOT NULL DEFAULT '{}',
+    summary TEXT,
+    handover_notes TEXT,
+    work_mode TEXT NOT NULL DEFAULT 'assistant',
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE(date)
+);
+
 -- ── FULL TEXT SEARCH ──────────────────────────────────────────────────
 
 -- FTS table (requires special handling, cannot use IF NOT EXISTS)

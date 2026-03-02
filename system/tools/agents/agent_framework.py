@@ -22,6 +22,7 @@ Usage:
 """
 
 import json
+import os
 import sys
 import io
 from pathlib import Path
@@ -33,10 +34,10 @@ if sys.platform == 'win32':
 
 # Pfade
 SCRIPT_DIR = Path(__file__).parent
-RECLUDOS_ROOT = SCRIPT_DIR.parents[2]
+BACH_ROOT = Path(os.environ.get("BACH_ROOT", Path(__file__).parents[3]))
 AGENTS_DIR = SCRIPT_DIR
-SERVICES_DIR = RECLUDOS_ROOT / "main" / "tools" / "services"
-CONNECTIONS_DIR = RECLUDOS_ROOT / "main" / "connections"
+SERVICES_DIR = BACH_ROOT / "system" / "tools" / "services"
+CONNECTIONS_DIR = BACH_ROOT / "system" / "connectors"
 
 # Registries
 AGENT_REGISTRY = AGENTS_DIR / "registry.json"
@@ -185,7 +186,7 @@ def main():
     framework = AgentFramework()
     
     if args.command == "list":
-        print("\n🤖 RECLUDOS AGENTEN")
+        print("\n🤖 BACH AGENTEN")
         print("=" * 60)
         for agent in framework.list_agents():
             status_icon = "✅" if agent["status"] == "active" else "⏳"

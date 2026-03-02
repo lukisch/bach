@@ -2,10 +2,10 @@
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python)
 ![License](https://img.shields.io/badge/License-MIT-green)
-![Version](https://img.shields.io/badge/Version-v3.3.0--peanut-orange)
+![Version](https://img.shields.io/badge/Version-v3.4.0--pizza-orange)
 ![Status](https://img.shields.io/badge/Status-Production--Ready-brightgreen)
 
-**Version:** v3.3.0-peanut
+**Version:** v3.4.0-pizza
 
 ## Überblick
 
@@ -13,7 +13,7 @@ BACH ist ein textbasiertes Betriebssystem, das Large Language Models (LLMs) bef�
 
 ### Kernfunktionen
 
-- **98+ Handler** - Vollständige CLI- und API-Abdeckung aller Systemfunktionen
+- **109+ Handler** - Vollständige CLI- und API-Abdeckung aller Systemfunktionen
 - **373+ Tools** - Umfangreiche Tool-Bibliothek für Dateiverarbeitung, Analyse, Automation
 - **932+ Skills** - Wiederverwendbare Workflows und Templates
 - **26 Protokoll-Workflows** - Vorgefertigte Prozess-Workflows
@@ -123,4 +123,18 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 
 ---
 
-*BACH v3.3.0-peanut - Best of Agentic Cognitive Helpers*
+---
+
+## English Summary
+
+BACH (Best of Agentic Cognitive Helpers) is a text-based operating system that empowers Large Language Models to work autonomously, learn, and self-organize. It provides comprehensive infrastructure for task management, knowledge management, automation, and LLM orchestration.
+
+**Key features:** 109+ handlers, 373+ tools, 932+ skills, agent framework with portable agents, LLM chain orchestration (llmauto), shared memory bus, bridge system (Telegram, Email, REST API), and a PySide6 GUI dashboard.
+
+**Quick start:** `git clone`, `pip install -r requirements.txt`, `python system/setup.py`, `python bach.py --startup`
+
+For full documentation in German, see [BACH_USER_MANUAL.md](BACH_USER_MANUAL.md) and [QUICKSTART.md](QUICKSTART.md).
+
+---
+
+*BACH v3.4.0-pizza - Best of Agentic Cognitive Helpers*
