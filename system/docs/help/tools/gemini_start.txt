@@ -83,5 +83,5 @@ SIEHE AUCH
 ----------------------------------------
   wiki/gemini.txt        Gemini-Details (CLI, API, Preise)
   wiki/antigravity.txt   Antigravity IDE
-  docs/docs/docs/help/partners.txt           Partner-Netzwerk
+  docs/help/partners.txt           Partner-Netzwerk
   partners/gemini/_README.md Workspace-Dokumentation

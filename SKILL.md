@@ -1,6 +1,6 @@
 ---
 name: bach-strawberry
-version: 3.2.0
+version: 3.6.0
 type: skill
 author: BACH Team
 created: 2025-12-01
@@ -38,7 +38,7 @@ bach skills version bach-vanilla   # Prueft ob aktuellere Version existiert
 ```
 
 **(2) BETRIEBSSYSTEM-CHECK:** Erkenne ob du auf Windows, Mac oder Linux arbeitest.
-- Windows: Keine `/dev/null`, nutze `NUL:`, vermeide `&&`, Befehle einzeln ausfuehren
+- Windows: Keine `/dev/null` UND kein `NUL:`. Stattdessen Ausgabe weglassen oder `2>&1` nutzen. Vermeide `&&`, Befehle einzeln ausfuehren
 - Bei nul-Dateien: `python tools/c_nul_cleaner.py --dir <pfad> --delete`
 
 ---
@@ -194,7 +194,11 @@ description: >
 ---
 ```
 
-**Templates:** `system/_templates/TEMPLATE_*.md`
+**Templates:** `system/skills/_templates/TEMPLATE_*.md`
+
+#### Ausbaustufen
+
+BACH existiert in drei Stufen: **USMC** (Memory-Kern), **Rinnsal** (+ LLM-Orchestrierung), **BACH** (vollstaendiges System). Details: [README.md](README.md#ausbaustufen)
 
 #### Drei Zugriffsmodi
 
@@ -289,7 +293,7 @@ from bach_api import (
 | Dateien lesen, Code suchen | Direkt (Glob/Grep/Read) |
 | Handler nicht in bach_api | `app().execute("handler", "op", ["args"])` |
 
-**Architektur:** `core/registry.py` erkennt 98+ Handler automatisch (Auto-Discovery). Neue Handler brauchen nur eine `.py`-Datei in `hub/` -- kein manuelles Mapping. Hot-Reload: `app().reload_registry()`
+**Architektur:** `core/registry.py` erkennt 109+ Handler automatisch (Auto-Discovery). Neue Handler brauchen nur eine `.py`-Datei in `hub/` -- kein manuelles Mapping. Hot-Reload: `app().reload_registry()`
 
 #### Komponenten-Typen
 
@@ -298,7 +302,7 @@ from bach_api import (
 | **Agent** | `agents/<name>/` | Orchestriert Experten, eigener Ordner |
 | **Expert** | `agents/_experts/<name>/` | Tiefes Domänenwissen, eigener Ordner |
 | **Service** | `hub/_services/<name>/` | Allgemein, Handler-nah, eigener Ordner |
-| **Protocol** | `skills/workflows/` | KEIN Ordner (1 Datei = 1 Protokoll, ehem. Workflow) |
+| **Protocol** | `skills/workflows/` | 1 Datei = 1 Protokoll (ehem. Workflow), Kategorie-Unterordner erlaubt |
 | **Connector** | `connectors/` | Externe Anbindungen (MCP, APIs) |
 | **Tool (allg.)** | `tools/` | Wiederverwendbar |
 | **Tool (spez.)** | Im Skill-Ordner | Nur für diesen Skill |
@@ -398,7 +402,7 @@ Sechs Grundregeln fuer alle BACH-Partner (LLMs, Agenten, Experten):
 
 Diese Dateien enthalten detaillierte Knowledge-Capture-Regeln und Partner-spezifische Einstellungen.
 
-#### Datenbank-Schema (142 Tabellen in bach.db)
+#### Datenbank-Schema (138 Tabellen in bach.db)
 
 | # | Bereich | Wichtigste Tabellen |
 |---|---------|---------------------|
@@ -417,7 +421,7 @@ Diese Dateien enthalten detaillierte Knowledge-Capture-Regeln und Partner-spezif
 | 13 | Wiki | `wiki` (87 Artikel) |
 | 14 | Usecases | `usecases`, `toolchains` |
 
-Vollstaendiges Schema: `system/data/schema/schema.sql` (127 Tabellen + 2 Views + FTS)
+Vollstaendiges Schema: `system/data/schema/schema.sql` (138 Tabellen + Views + FTS)
 
 ---
 
@@ -820,7 +824,7 @@ injector.set_mode("api")              # CLI-Hinweise aus Kontext filtern
 - **Neue API-Module**: `agent`, `prompt` in `bach_api`
 - **Portierungen**: SharedMemoryHandler, ApiProberHandler, N8nManagerHandler, UserSyncHandler, Stigmergy-Service
 - **Tabellen**: 4 neue DB-Tabellen: `prompt_templates`, `prompt_versions`, `prompt_boards`, `prompt_board_items`
-- **98+ Handler** (bisher: 75+)
+- **109+ Handler** (bisher: 75+)
 
 ### v2.6.0 (2026-02-13)
 

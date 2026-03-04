@@ -1,0 +1,59 @@
+# Portabilitaet: UNIVERSAL
+# Version: 1.0.0
+# Zuletzt validiert: 2026-03-04
+
+SYNC HANDLER
+============
+
+BESCHREIBUNG
+============
+Synchronisiert Dateisystem-Inhalte mit der BACH-Datenbank. Liest Skills und
+Tools aus Dateien (Markdown, Text, Python) und aktualisiert/erstellt entsprechende
+Datenbankeintraege. Vergleicht Aenderungen mittels SHA256-Hashing.
+
+OPERATIONEN
+===========
+skills              Skills-Inhalte von Dateien in DB laden
+tools               Tools-Inhalte von Dateien in DB laden
+all                 Beides synchronisieren (Skills + Tools)
+status              Sync-Status anzeigen, aenderte Dateien hervorheben
+
+OPTIONEN
+========
+--dry-run           Aenderungen nur anzeigen, nicht ausfuehren
+--force             Hash-Vergleich ignorieren, alles neu laden
+
+BEISPIELE
+=========
+bach --sync skills
+    Synchronisiert alle Skills aus skills/ in die Datenbank.
+    Findet: .md, .txt, .py Dateien (rekursiv).
+    Ueberspringt: Dateien mit _ oder . am Anfang (ausser .py).
+
+bach --sync tools
+    Synchronisiert alle Python-Tools aus tools/ in die Datenbank.
+    Findet: *.py Dateien (rekursiv).
+    Ueberspringt: Dateien mit _ oder . am Anfang.
+
+bach --sync all --dry-run
+    Zeigt geplante Aenderungen ohne sie auszufuehren.
+
+bach --sync status
+    Prueft Aenderungen: vergleicht Datei-Hashes mit DB-Hashes.
+    Meldet: [GEAENDERT], [FEHLT], [NEU], [OK].
+
+bach --sync all --force
+    Erzwingt Reload aller Dateien (ignoriert Hash-Vergleich).
+
+DATEIEN
+=======
+skills/                 Quelle fuer Skill-Dateien (.md, .txt, .py)
+tools/                  Quelle fuer Tool-Python-Dateien (.py)
+data/bach.db            Zieldatenbank
+                        Tabellen: skills, tools
+                        Spalten: name, path, content_hash, description, ...
+
+SIEHE AUCH
+==========
+docs/help/              Weitere Handler-Dokumentation
+hub/sync.py            Implementierung (Sourcecode)

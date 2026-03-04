@@ -8,7 +8,7 @@ BESCHREIBUNG
 backup_manager.py - BACH Backup & Restore System
 
 Verwaltet:
-- User-Backup (dist_type=0) -> _system/data/system/data/system/data/system/data/backups/*.zip
+- User-Backup (dist_type=0) -> data/_backups/*.zip
 - Template-Snapshots (dist_type=1) -> dist/snapshots/*.orig
 - Distribution-Restore (dist_type=2) -> [NOCH NICHT IMPLEMENTIERT]
 

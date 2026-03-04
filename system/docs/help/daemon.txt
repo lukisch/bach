@@ -98,7 +98,7 @@ GUI
 SIEHE AUCH
 ----------
   docs/CONCEPT_daemon_policy.md   Daemon-Richtlinien
-  docs/docs/docs/help/connector.txt              Connector-System (Queue, Retry)
-  docs/docs/docs/help/maintain.txt               Wartungs-Tools
-  docs/docs/docs/help/backup.txt                 Backup-System
-  docs/docs/docs/help/consolidation.txt          Memory-Konsolidierung
+  docs/help/connector.txt              Connector-System (Queue, Retry)
+  docs/help/maintain.txt               Wartungs-Tools
+  docs/help/backup.txt                 Backup-System
+  docs/help/consolidation.txt          Memory-Konsolidierung

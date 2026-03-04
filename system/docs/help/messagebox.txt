@@ -20,7 +20,7 @@ AKTUELLER ERSATZ:
 
 SIEHE:
   bach msg --help           Aktuelle Befehle
-  system/docs/docs/docs/docs/help/messages.txt  Neue Dokumentation
+  docs/help/messages.txt  Neue Dokumentation
 
 ARCHIVIERTER CODE:
   system/data/_archive/gui_Entwuerfe/inbox/

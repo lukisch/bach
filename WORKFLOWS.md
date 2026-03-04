@@ -1,7 +1,7 @@
 # BACH Workflows
 
 Automatisch generiert aus dem Dateisystem (skills/workflows/).
-Letzte Aktualisierung: 2026-03-03 11:57
+Letzte Aktualisierung: 2026-03-04 19:24
 
 **Total:** 54 Workflows
 

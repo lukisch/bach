@@ -9,7 +9,7 @@ STAND: 2026-02-08
 
 DREISTUFIGES SYSTEM
 -------------------
-1. OPERATIV (docs/docs/docs/help/*.txt)
+1. OPERATIV (docs/help/*.txt)
    - WIE benutze ich BACH?
    - Fokus: CLI-Befehle, Anleitungen, Referenzen.
    - Format: TXT (ASCII-kompatibel, max. 250 Zeilen).
@@ -54,18 +54,18 @@ TX/TXT-STRUKTUR (Klassisch)
   [Konkrete Anwendungsfälle]
 
   SIEHE AUCH
-  [Links zu anderen docs/docs/docs/help/ oder wiki/ Dateien]
+  [Links zu anderen docs/help/ oder wiki/ Dateien]
 
 LEBENSZYKLUS ANALYSEN
 ---------------------
 1. ERSTELLUNG: user/ANALYSE_Thema.md
-2. AUSWERTUNG: Erkenntnisse → docs/docs/docs/help/ ODER wiki/. Aufgaben → Tasksystem.
+2. AUSWERTUNG: Erkenntnisse → docs/help/ ODER wiki/. Aufgaben → Tasksystem.
 3. ARCHIVIERUNG: Verschieben nach user/_archive/ nach Abschluss.
 
 NAMING CONVENTIONS
 ------------------
-docs/docs/docs/help/<thema>.txt          Einfaches Thema
-docs/docs/docs/help/<befehl>.txt         CLI-Befehl-Dokumentation
+docs/help/<thema>.txt          Einfaches Thema
+docs/help/<befehl>.txt         CLI-Befehl-Dokumentation
 wiki/<spezial>.txt   Externes Wissen
 
 SKILL_<n>.md              Skill-Dokumentation
@@ -75,7 +75,7 @@ KONZEPT_<n>.md            Konzept-Dokument
 
 QUALITAETSKRITERIEN
 -------------------
-docs/docs/docs/help/*.txt Dateien:
+docs/help/*.txt Dateien:
 - Max. 250 Zeilen (empfohlen unter 150)
 - Keine Markdown-Syntax (ASCII-kompatibel)
 - Alle Befehle dokumentiert

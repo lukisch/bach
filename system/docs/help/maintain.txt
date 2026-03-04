@@ -43,7 +43,7 @@ DOKUMENTATIONS-CHECK
 SKILL GENERATOR
 ---------------
   bach --maintain generate <n> [profil] [zielordner]
-  
+
   Profile:
     MICRO    - Nur Datei(en)
     LIGHT    - Minimal (SKILL.md + config + data)
@@ -52,7 +52,7 @@ SKILL GENERATOR
 
   Beispiele:
     bach --maintain generate mein-skill STANDARD skills/
-    bach --maintain generate analyse MICRO skills/_protocols/
+    bach --maintain generate analyse MICRO skills/workflows/
 
 EXPORT TOOLS
 ------------
@@ -153,7 +153,7 @@ REGISTRY WATCHER (NEU)
     - Cross-Referenzen zwischen Tabellen
     - partner_recognition + delegation_rules Konsistenz
 
-  Hinweis: partner_registry.json ist DEPRECATED (siehe docs/docs/docs/help/formats.txt)
+  Hinweis: partner_registry.json ist DEPRECATED (siehe docs/help/formats.txt)
     
   Beispiele:
     bach --maintain registry               # Quick-Check
@@ -239,7 +239,7 @@ SKILL-HELP TOOL (NEU)
 ---------------------
   bach --maintain skill-help [optionen]
 
-  Generiert docs/docs/docs/help/*.txt Dateien aus SKILL.md.
+  Generiert docs/help/*.txt Dateien aus SKILL.md.
 
   Optionen:
     <name>       Einzelner Skill-Name
@@ -265,7 +265,7 @@ WORKFLOWS TOOL (NEU)
     - Schritte/Phasen-Struktur
     - Versions-Angabe (optional)
 
-  Erwartet in: skills/_protocols/*.md
+  Erwartet in: skills/workflows/*.md
 
   Beispiele:
     bach --maintain workflows        # Alle Workflows validieren
@@ -344,7 +344,7 @@ AKTUELLE TOOL-UBERSICHT (16 Befehle)
 
 SIEHE AUCH
 ----------
-  docs/docs/docs/help/backup.txt   Backup-System
-  docs/docs/docs/help/test.txt     Test-System
-  docs/docs/docs/help/tools.txt    Tool-Inventar
-  docs/docs/docs/help/formats.txt  Datenbank-Formate
+  docs/help/backup.txt   Backup-System
+  docs/help/test.txt     Test-System
+  docs/help/tools.txt    Tool-Inventar
+  docs/help/formats.txt  Datenbank-Formate

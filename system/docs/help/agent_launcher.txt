@@ -1,0 +1,117 @@
+# Portabilitaet: UNIVERSAL
+# Version: 1.0.0
+# Zuletzt validiert: 2026-03-04
+
+AGENT LAUNCHER - Agent-Verwaltung und -Prozesssteuerung
+=======================================================
+
+Startet und verwaltet BACH Agenten (Boss-Agenten und Experten) als eigenstaendige
+Claude-Prozesse mit Modell- und Modusparametrisierung.
+
+
+BESCHREIBUNG
+------------
+
+Der agent_launcher Handler ermoeglicht das Lifecycle-Management von Agenten. Agenten
+werden als separate Prozesse gestartet und ueberwacht. Jeder Agent erhaelt eine
+temporaere CLAUDE.md Datei mit seiner SKILL.md als Identitaetsdefinition.
+Prozess-IDs werden persistiert zur Ueberwachung und Kontrolle.
+
+
+OPERATIONEN
+-----------
+
+  bach agent list                               Alle verfuegbaren Agents auflisten
+
+  bach agent start <name> [OPTIONS]             Agent als neuen Prozess starten
+    --mode MODE                                   Modus: plan (Planungsmodus) oder
+                                                  default (Standard, default)
+    --model MODEL                                 Modell: sonnet, opus oder haiku
+                                                  (default: sonnet)
+
+  bach agent stop <name>                        Laufenden Agent stoppen (Process
+                                                beenden, PID-File aufgeraeumt)
+
+  bach agent status                             Alle laufenden Agents anzeigen
+                                                mit PID, Modell, Startzeit
+
+
+BEISPIELE
+---------
+
+  # Verfuegbare Agents anzeigen
+  bach agent list
+  Ausgabe: Tabelle mit Name, Typ (boss/expert), Status [RUNNING:pid]/[STOPPED]
+
+  # Agent im Standard-Modus starten (sonnet)
+  bach agent start ati
+  Ausgabe: [OK] Agent 'ati' gestartet, PID und Temp-Ordner angezeigt
+
+  # Agent mit spezifischem Modell und Modus starten
+  bach agent start research --model opus --mode plan
+  Prozess mit Claude Opus im Plan-Mode
+
+  # Laufende Agents anzeigen
+  bach agent status
+  Ausgabe: Tabelle aller laufenden Prozesse mit PID, Startzeit, Status
+
+  # Agent beenden
+  bach agent stop ati
+  Ausgabe: [OK] Agent 'ati' (PID xyz) gestoppt
+
+
+DETAILS
+-------
+
+Agenten-Scanning:
+  - Boss-Agenten: agents/ (Verzeichnisse mit SKILL.md)
+  - Experten: agents/_experts/ (Verzeichnisse mit SKILL.md)
+  - Ignoriert Eintraege mit underscore-Praefixen
+
+Prozessausfuehrung:
+  - Windows: start.bat in Temp-Ordner, neues CMD-Fenster
+  - Unix/Linux: detached Process mit start_new_session
+  - Modell-Optionen: sonnet (default), opus, haiku
+  - Mode-Optionen: default (default), plan
+
+Persistierung:
+  - PID-File: data/agent_pids/<name>.pid (JSON)
+  - Inhalt: pid, name, type, model, mode, started, temp_dir
+  - Automatische Aufraeumung toter Prozesse bei Status-Checks
+  - Temperaere CLAUDE.md: data/temp/agent_<name>/CLAUDE.md
+
+
+FEHLERBEHANDLUNG
+----------------
+
+  [ERROR] Agent-Name erforderlich               Operand fehlt (list und status
+                                                 brauchen keinen Namen)
+
+  [WARN] Agent '<name>' laeuft bereits (PID..) Agent ist schon aktiv
+
+  [ERROR] Agent '<name>' nicht gefunden         Keine SKILL.md gefunden oder
+                                                Verzeichnis existiert nicht
+
+  [ERROR] Ungueltiger Modus: X                  Nur 'plan' oder 'default' erlaubt
+
+  [ERROR] Ungueltiges Modell: X                 Nur 'sonnet', 'opus', 'haiku'
+
+  [ERROR] 'claude' CLI nicht gefunden           Claude Code nicht installiert
+
+
+DATEIEN
+-------
+
+  Handler: hub/agent_launcher.py
+  Agenten: agents/*/SKILL.md
+  Experten: agents/_experts/*/SKILL.md
+  PID-Registry: data/agent_pids/*.pid (JSON)
+  Temporaere Dateien: data/temp/agent_*/
+
+
+SIEHE AUCH
+----------
+
+  help agents              Agenten-Ueberblick (Boss, Experten, Struktur)
+  help bash_paths          Verzeichnisstruktur und Pfade
+  help develop             Neue Agenten entwickeln

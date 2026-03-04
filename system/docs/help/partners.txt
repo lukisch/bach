@@ -60,9 +60,9 @@ KOMMUNIKATIONS-HYGIENE
 
 SIEHE AUCH
 ----------
-  docs/docs/docs/help/partner.txt                     Delegations-Logik und Rollen
-  docs/docs/docs/help/communicate.txt                 Interaktions-Protokoll
-  docs/docs/docs/help/messages.txt                    Nachrichten-Syntax
+  docs/help/partner.txt                     Delegations-Logik und Rollen
+  docs/help/communicate.txt                 Interaktions-Protokoll
+  docs/help/messages.txt                    Nachrichten-Syntax
   system/partners/_README.md   Struktur des Partner-Ordners
 
 CLI-ZUGRIFF

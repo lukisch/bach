@@ -2,10 +2,10 @@
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python)
 ![License](https://img.shields.io/badge/License-MIT-green)
-![Version](https://img.shields.io/badge/Version-v3.4.0--pizza-orange)
+![Version](https://img.shields.io/badge/Version-v3.6.0--spaghetti-orange)
 ![Status](https://img.shields.io/badge/Status-Production--Ready-brightgreen)
 
-**Version:** v3.4.0-pizza
+**Version:** v3.6.0-spaghetti
 
 ## Überblick
 
@@ -16,7 +16,7 @@ BACH ist ein textbasiertes Betriebssystem, das Large Language Models (LLMs) bef�
 - **109+ Handler** - Vollständige CLI- und API-Abdeckung aller Systemfunktionen
 - **373+ Tools** - Umfangreiche Tool-Bibliothek für Dateiverarbeitung, Analyse, Automation
 - **932+ Skills** - Wiederverwendbare Workflows und Templates
-- **26 Protokoll-Workflows** - Vorgefertigte Prozess-Workflows
+- **54 Protokoll-Workflows** - Vorgefertigte Prozess-Workflows
 - **Wissensspeicher** - Lessons, Facts und Multi-Level-Memory-System
 - **Agent-CLI** - `bach agent start/stop/list` für direkte Agent-Steuerung
 - **Prompt-System** - Zentrale Prompt-Verwaltung mit Board-System und Versionierung
@@ -103,13 +103,23 @@ Multi-Agent-Koordination mit Kontext-Generierung, Konflikt-Erkennung, Decay und 
 ### 8. llmauto-Integration
 Chain-Steps als LLM-Prompts mit `bach://`-URL-Resolution für dynamische Kontext-Einbindung.
 
+## Ausbaustufen
+
+BACH ist in drei Ausbaustufen verfuegbar -- vom minimalistischen Kern bis zum vollstaendigen System:
+
+| Stufe | Projekt | Beschreibung | Repository |
+|-------|---------|-------------|------------|
+| 1 | **USMC** | Ultra Simple Memory Core -- minimalistisches geteiltes Memory-System | [github.com/lukisch/usmc](https://github.com/lukisch/usmc) |
+| 2 | **Rinnsal** | BACH Mini -- USMC + llmauto (LLM-Orchestrierung), extrem eingedampft | [github.com/lukisch/rinnsal](https://github.com/lukisch/rinnsal) |
+| 3 | **BACH** | Vollstaendiges System -- 109+ Handler, 932+ Skills, Agenten, GUI, Bridge | [github.com/lukisch/bach](https://github.com/lukisch/bach) |
+
 ## Dokumentation
 
 - **[Quickstart Guide](QUICKSTART.md)** - In 5 Minuten zum ersten Workflow
 - **[User Manual](BACH_USER_MANUAL.md)** - Vollständiges Handbuch
 - **[Skills Katalog](SKILLS.md)** - Alle verfügbaren Skills
 - **[Agents Katalog](AGENTS.md)** - Alle verfügbaren Agenten und Experten
-- **[Workflows](WORKFLOWS.md)** - 26 Protokoll-Workflows
+- **[Workflows](WORKFLOWS.md)** - 54 Protokoll-Workflows
 - **[SKILL.md](SKILL.md)** - LLM-Betriebsanleitung (für Claude, Gemini, Ollama)
 
 ## Lizenz
@@ -137,4 +147,4 @@ For full documentation in German, see [BACH_USER_MANUAL.md](BACH_USER_MANUAL.md)
 
 ---
 
-*BACH v3.4.0-pizza - Best of Agentic Cognitive Helpers*
+*BACH v3.6.0-spaghetti - Best of Agentic Cognitive Helpers*

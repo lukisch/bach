@@ -1,0 +1,86 @@
+# Portabilitaet: UNIVERSAL
+# Version: 1.0.0
+# Zuletzt validiert: 2026-03-04
+
+HANDLER-NAME
+=============================================================================
+Reminder Injector (SQ040) -- Erinnerungen in LLM-Prompts injizieren
+
+BESCHREIBUNG
+=============================================================================
+Der Reminder Injector verwaltet und injiziert Erinnerungen in LLM-Prompts
+vor jedem Call. Erinnerungen werden basierend auf Triggerbedingungen
+selektiv in einen [BACH-REMINDERS] Block eingefuegt. Die Implementierung
+unterstuetzt DB- und JSON-Fallback-Speicherung.
+
+Unterstuetzte Triggerbedingungen:
+  - always: Immer aktiv (keine Bedingung)
+  - on_task: Nur wenn ein Task laeuft
+  - time_based: Nur in bestimmtem Zeitfenster (HH:MM-HH:MM)
+  - keyword_match: Nur wenn Keyword im User-Input auftritt
+
+OPERATIONEN
+=============================================================================
+list_reminders(active_only=True)
+  Gibt alle aktiven Reminders (oder alle) als Liste[dict] zurueck.
+
+add_reminder(message, trigger_condition="always", trigger_value=None,
+             priority=5)
+  Neuen Reminder anlegen. Trigger-Werte je nach Bedingung:
+    - always: trigger_value ignoriert
+    - on_task: trigger_value ignoriert
+    - time_based: "HH:MM-HH:MM" (z.B. "09:00-17:00")
+    - keyword_match: "keyword1, keyword2, ..." (komma-separiert)
+  Prioritaet: Niedrige Werte = wichtiger (0 = hoechste Prioritaet).
+
+update_reminder(reminder_id, **kwargs)
+  Reminder aktualisieren. Erlaubte Felder: message, trigger_condition,
+  trigger_value, active, priority. Gibt True bei Erfolg zurueck.
+
+delete_reminder(reminder_id)
+  Reminder loeschen (wird von list_reminders danach ignoriert).
+  Gibt True bei Erfolg zurueck.
+
+get_active_reminders(context)
+  Gibt Liste von Reminder-Texten zurueck, die zum aktuellen Kontext
+  passen. Context-Dict kann enthalten: active_task, user_input.
+
+inject(prompt, context)
+  Haengt aktive Reminders vor den Prompt an. Rueckgabe:
+    [BACH-REMINDERS]
+      1. <Reminder mit hoechster Prioritaet>
+      2. <Naechster Reminder>
+    [/BACH-REMINDERS]
+    <Original-Prompt>
+
+BEISPIELE
+=============================================================================
+# Reminder fuer aktive Tasks erstellen
+inj = ReminderInjector(Path("system"), db=None)
+inj.add_reminder("Nutze Fokus-Modus fuer lange Tasks.",
+                 trigger_condition="on_task", priority=1)
+
+# Zeitbasierte Erinnerung (9-17 Uhr)
+inj.add_reminder("Stellt sicher, dass Backups laufen.",
+                 trigger_condition="time_based",
+                 trigger_value="09:00-17:00", priority=3)
+
+# Keyword-basierte Erinnerung
+inj.add_reminder("Nutze BACH API, nicht direkte DB-Zugriffe!",
+                 trigger_condition="keyword_match",
+                 trigger_value="database, db, sql", priority=2)
+
+# Reminder in Prompt injizieren
+context = {"active_task": "research", "user_input": "database query"}
+modified_prompt = inj.inject("Wie funktioniert XYZ?", context)
+
+DATEIEN
+=============================================================================
+hub/reminder_injector.py         Hauptimplementierung
+data/reminders.json              JSON Fallback (DB-Fehlerfall)
+docs/help/reminder_injector.txt  Diese Hilfedatei
+
+SIEHE AUCH
+=============================================================================
+task_manager.py   -- Task-Verwaltung (Kontext fuer on_task Trigger)
+bach_api.py       -- Hub-übergreifende API

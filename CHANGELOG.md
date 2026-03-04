@@ -6,6 +6,33 @@ Copyright (c) 2026 Lukas Geiger. Alle Rechte vorbehalten.
 
 ---
 
+## [3.6.0-spaghetti] - 2026-03-04
+
+### Qualitaetssicherung
+
+- **Help-Expert-Review:** 192+ Help-Dateien validiert, 6 Strukturfixes, 64 neue Help-Dateien per Haiku-Schwarm generiert
+- **Root-Docs-Review:** Zwei-Experten-Pipeline (Leser + Fixer), 31 Issues gefunden, 25 korrigiert, 10 Dateien angepasst
+- **docs/README.md:** Zentrale Doku-Referenz erstellt (~110 Handler + ~80 Tools)
+- **exports.txt:** Neue Help-Datei fuer DB-Export-Scripts
+- **FEATURES.md Rewrite:** Komplett neu geschrieben (v2.1.0 → v3.6.0), korrekte Zahlen (138 Tabellen, 109+ Handler, 373+ Tools, 932+ Skills)
+- **Kataloge regeneriert:** AGENTS.md, CHAINS.md, PARTNERS.md, WORKFLOWS.md, USECASES.md via Export-Scripts
+
+### Neu
+
+- **Drei-Ausbaustufen-Dokumentation (E02):** USMC → Rinnsal → BACH als aufeinander aufbauende Stufen
+  - README.md: Neue Sektion "Ausbaustufen" mit Tabelle und Links
+  - SKILL.md: Verweis auf Ausbaustufen in der Architektur-Sektion
+  - Landingpage (index.html): Drei-Stufen-Badge-Cards mit GitHub-Links
+- **version_bump.py:** Automatisches Version-Bump-Tool fuer Releases (10 Ersetzungen in 6 Dateien)
+- **Englisch-Uebersetzung (E03, 1. Durchlauf):** German Scanner auf Hub-Layer ausgefuehrt, 300+ deutsche Strings identifiziert
+
+### Dokumentation
+
+- **NEXT_RELEASE.md:** Marketing-Sektion nach THE_RELEASE_AFTER.md verschoben
+- **Version Bump:** Alle Root-Dokumente auf v3.6.0-spaghetti aktualisiert (README, QUICKSTART, SKILL, BACH_USER_MANUAL, ARCHITECTURE, features.txt)
+
+---
+
 ## [3.5.0-milk] - 2026-03-04
 
 ### Neu

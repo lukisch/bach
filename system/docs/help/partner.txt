@@ -113,7 +113,7 @@ SIEHE AUCH
   bach llm --help           Multi-LLM Protokoll (Locks)
   bach msg --help           Messaging System
   bach tokens --help        Token-Monitor & Quotas
-  docs/docs/docs/help/maintain.txt         Integritäts-Check des Netzwerks
+  docs/help/maintain.txt         Integritäts-Check des Netzwerks
 
 VERSION: v1.2.0 (2026-02-08)
 Quelle: hub/partner.py, tools/mcp_server.py, partners/

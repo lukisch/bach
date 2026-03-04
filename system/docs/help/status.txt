@@ -1,0 +1,89 @@
+# Portabilitaet: UNIVERSAL
+# Version: 1.0.0
+# Zuletzt validiert: 2026-03-04
+
+HANDLER-NAME
+============
+
+Status Handler - Schnelle Systemuebersicht des BACH-Systems
+
+
+BESCHREIBUNG
+============
+
+Der Status Handler bietet einen schnellen Ueberblick ueber den aktuellen Zustand
+des BACH-Systems. Er zeigt Informationen ueber Memory-Status, Chat-Queue, offene
+Tasks, registrierte Tools und die Systemgesundheit an. Alle Informationen werden
+aus den zentralen JSON-Dateien und Memory-Dateien extrahiert.
+
+
+OPERATIONEN
+===========
+
+show
+    Zeigt den kompletten Systemstatus an (Standard-Operation).
+    Befehl: bach --status [show]
+    Rueckgabe: Formatierte Text-Ausgabe mit allen Statusmeldungen
+
+
+BEISPIELE
+=========
+
+1. Systemstatus anzeigen (Standardform)
+   $ bach --status
+
+2. Status-Abfrage mit expliziter Operation
+   $ bach --status show
+
+
+AUSGABE-FELDER
+==============
+
+Memory
+    - Status (BEREIT/AKTIV/UNTERBROCHEN)
+    - Zeilenzahl der aktuellen Memory-Datei
+    - Meldung wenn keine aktive Session vorhanden ist
+
+Chat
+    - Anzahl ungeloster (nicht resolved) Chat-Nachrichten
+    - Fehler-Indikator bei JSON-Leseproblemen
+    - Standard: 0 offen, wenn Datei fehlt
+
+Tasks
+    - Gesamtzahl offener Tasks
+    - Separat: Anzahl Tasks mit hoher/kritischer Prioritaet
+    - Fehler-Indikator bei JSON-Leseproblemen
+
+Tools
+    - Gesamtzahl registrierter Tools aus tools.json
+    - Fehler-Indikator bei Leseproblemen
+
+Health
+    - OK: Alle JSON-Dateien (chat.json, tasks.json, tools.json) sind valid
+    - FEHLER: Mindestens eine JSON-Datei ist korrupt oder lesbar
+
+
+DATEIEN (relativ zu system/)
+=============================
+
+memory/current.md
+    Aktuelle Memory-Session mit Status-Marken (BEREIT/AKTIV/UNTERBROCHEN)
+
+memory/chat.json
+    Chat-Nachrichten mit resolved-Feld fuer Offene-Zaehlung
+
+memory/tasks.json
+    Task-Objekte mit status- und priority-Feldern
+
+tools/tools.json
+    Registrierte Tools und deren Konfiguration
+
+
+SIEHE AUCH
+==========
+
+- hub/base.py: BaseHandler-Klasse
+- hub/lang.py: Uebersetzungs-Funktion t()
+- memory/current.md: Detaillierter Memory-Status
+- memory/chat.json: Chat-Queue-Details
+- memory/tasks.json: Aufgaben-Verwaltung

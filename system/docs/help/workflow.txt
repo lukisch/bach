@@ -13,7 +13,7 @@ Ein Workflow ist eine Anleitung zum strategischen Einsatz von Skills.
 
 WORKFLOW-SPEICHERORT
 --------------------
-  skills/_protocols/          Alle BACH Workflows (22 .md Dateien)
+  skills/workflows/          Alle BACH Workflows (22 .md Dateien)
   agents/_experts/steuer/     Steuer-Workflows (7 .md Dateien)
   DB: skills-Tabelle          type='workflow' (automatisch synchronisiert)
 
@@ -119,7 +119,7 @@ ABGRENZUNG: WORKFLOW vs TEAM-FLOW
   │  EIN Akteur                │  MEHRERE Akteure               │
   │  Schritt-Anleitung         │  Uebergabe-Management          │
   │  Text in .md Datei         │  Strukturiert in DB/JSON       │
-  │  skills/_protocols/        │  GUI Skills-Board (geplant)    │
+  │  skills/workflows/        │  GUI Skills-Board (geplant)    │
   └────────────────────────────┴────────────────────────────────┘
 
 CLI-BEFEHLE
@@ -142,7 +142,7 @@ CLI-BEFEHLE
 WORKFLOW LESEN
 --------------
   # Direkt im File-System:
-  skills/_protocols/<name>.md
+  skills/workflows/<name>.md
   agents/_experts/steuer/<name>.md
 
   # Mit Help-System (Alias-Unterstuetzung):
@@ -150,11 +150,11 @@ WORKFLOW LESEN
   bach help workflow/help-forensic
 
   # Im Chat-Client:
-  Read-Tool: skills/_protocols/bugfix-protokoll.md
+  Read-Tool: skills/workflows/bugfix-protokoll.md
 
 NEUEN WORKFLOW ERSTELLEN
 ------------------------
-1. Datei anlegen: skills/_protocols/mein-workflow.md
+1. Datei anlegen: skills/workflows/mein-workflow.md
 2. Format beachten:
    - Titel mit #
    - Schritte nummeriert

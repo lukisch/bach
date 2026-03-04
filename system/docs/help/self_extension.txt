@@ -125,10 +125,10 @@ WAS KANN ERWEITERT WERDEN?
   Agents           Agent-Ordner mit SKILL.md          agents/<name>/
   Experts          Expert-Ordner mit SKILL.md         agents/_experts/<name>/
   Services         Service-Ordner erstellen           skills/_services/<name>/
-  Workflows        Markdown-Datei erstellen           skills/_protocols/<name>.md
+  Workflows        Markdown-Datei erstellen           skills/workflows/<name>.md
   Hooks            Listener registrieren              core/hooks.py: hooks.on()
   DB-Schema        Migration in db/ erstellen         db/migrations/
-  Help-Dateien     Textdatei in docs/docs/docs/help/ erstellen       docs/docs/docs/help/<topic>.txt
+  Help-Dateien     Textdatei in docs/help/ erstellen       docs/help/<topic>.txt
   Aliases          Kurzform in aliases.py             core/aliases.py
 
 REGELN FUER SELBSTERWEITERUNG
@@ -146,4 +146,4 @@ SIEHE AUCH
   bach help skills           Skill-System
   bach help cli              CLI-Konventionen
   bach help architecture     System-Architektur
-  skills/_protocols/self-extension.md  Detaillierter Workflow
+  skills/workflows/self-extension.md  Detaillierter Workflow

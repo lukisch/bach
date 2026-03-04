@@ -60,5 +60,5 @@ CLI (MANUELL):
 
 DATEIEN:
   - Tool: system/tools/c_dirscan.py (DirectoryScanner-Klasse)
-  - Daten: system/data/directory_truth.json
+  - Daten: system/data/directory_truth.json (wird bei erstem Scan erzeugt)
   - Struktur: {timestamp, directories[], files{path: {hash, size}}}

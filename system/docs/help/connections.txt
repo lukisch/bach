@@ -1,7 +1,7 @@
 # Portabilitaet: UNIVERSAL
 # Zuletzt validiert: 2026-02-08
 # Naechste Pruefung: 2026-08-08
-# Ressourcen: [connections table, hub/connector.py, docs/docs/docs/help/connector.txt]
+# Ressourcen: [connections table, hub/connector.py, docs/help/connector.txt]
 
 CONNECTIONS - Verbindungen & Integrationen (Uebersicht)
 =======================================================
@@ -17,7 +17,7 @@ mit unterschiedlichen Zwecken:
 Externe Kommunikationsverbindungen (Telegram, Discord, HomeAssistant).
 Vollstaendiges Message-System mit Queue, Retry, Circuit Breaker.
 
-**DETAILS → siehe docs/docs/docs/help/connector.txt**
+**DETAILS → siehe docs/help/connector.txt**
 
 CLI: bach connector <operation>
 Operationen: list, status, add, remove, poll, dispatch, setup-daemon, etc.
@@ -65,7 +65,7 @@ Die meisten Nutzer benoetigen NUR das **Connector-System**.
 
 Fuer externe Kommunikation (Telegram, Discord, HomeAssistant):
   → bach connector --help
-  → docs/docs/docs/help/connector.txt (dedizierte Dokumentation)
+  → docs/help/connector.txt (dedizierte Dokumentation)
 
 Fuer AI-Partner und MCP-Server:
   → bach --connections list
@@ -73,7 +73,7 @@ Fuer AI-Partner und MCP-Server:
 
 SIEHE AUCH
 ----------
-  docs/docs/docs/help/connector.txt     Connector-System (Telegram, Discord, HA)
+  docs/help/connector.txt     Connector-System (Telegram, Discord, HA)
   bach --help partner    Logische Delegation & Zonen
   bach --help messages   Internes Nachrichtensystem
   bach --help daemon     Hintergrund-Jobs (poll_and_route, dispatch)

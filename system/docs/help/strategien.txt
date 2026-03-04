@@ -7,7 +7,7 @@ STRATEGIEN
 ==========
 Grundlegende Handlungsstrategien fuer Problemloesung und Automatisierung.
 
-Bezug: docs/docs/docs/help/operatoren.txt, docs/docs/docs/help/denkstrategien.txt
+Bezug: docs/help/operatoren.txt, docs/help/denkstrategien.txt
 
 
 1. KATEGORISIEREN

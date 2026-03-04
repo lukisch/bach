@@ -44,7 +44,7 @@ ABGRENZUNG: DREI HANDLER-SYSTEME
   └─────────────────────────────────────────────────────────────────┘
 
   ┌─────────────────────────────────────────────────────────────────┐
-  │  WARTUNG (docs/docs/docs/help/wartung.txt)                                     │
+  │  WARTUNG (docs/help/wartung.txt)                                     │
   ├─────────────────────────────────────────────────────────────────┤
   │  Fuehrt Shell/Python-Befehle AUS                                │
   │  Zeitgesteuert (cron/interval)                                  │
@@ -56,7 +56,7 @@ ABGRENZUNG: DREI HANDLER-SYSTEME
   └─────────────────────────────────────────────────────────────────┘
 
   ┌─────────────────────────────────────────────────────────────────┐
-  │  PROMPT-GENERATOR (docs/docs/docs/help/prompt-generator.txt)                   │
+  │  PROMPT-GENERATOR (docs/help/prompt-generator.txt)                   │
   ├─────────────────────────────────────────────────────────────────┤
   │  Sendet Prompts an Claude-Sessions                              │
   │  Manuell oder automatisiert                                     │
@@ -110,7 +110,7 @@ AKTUELLE RECURRING TASKS
 
   6. integration_check (30d)
      Anschlussanalyse durchfuehren
-     Workflow: skills/_protocols/system-anschlussanalyse.md
+     Workflow: skills/workflows/system-anschlussanalyse.md
 
   Dokumentations-Tasks:
   ---------------------
@@ -119,11 +119,11 @@ AKTUELLE RECURRING TASKS
 
   8. wiki_author (21d)
      Wiki-Autoren: Agenten-Wissensluecken identifizieren + fuellen
-     Workflow: skills/_protocols/wiki-author.md
+     Workflow: skills/workflows/wiki-author.md
 
   9. help_forensic (14d)
      Help-Forensik: Ist vs Soll pruefen, bei Abweichung korrigieren
-     Workflow: skills/_protocols/help-forensic.md
+     Workflow: skills/workflows/help-forensic.md
 
   10. doc_freshness (60d)
       Dokumentations-Frische: bach --maintain docs report

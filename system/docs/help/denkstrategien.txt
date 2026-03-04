@@ -7,7 +7,7 @@ DENKSTRATEGIEN
 ==============
 Kognitive und metakognitive Strategien fuer Informationsverarbeitung.
 
-Bezug: Lernsystem-Analyse, docs/docs/docs/help/operatoren.txt, docs/docs/docs/help/rhetorik.txt
+Bezug: Lernsystem-Analyse, docs/help/operatoren.txt, docs/help/rhetorik.txt
 
 
 1. KOGNITIVE STRATEGIEN (Informationsverarbeitung)

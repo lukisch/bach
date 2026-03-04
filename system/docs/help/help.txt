@@ -8,7 +8,7 @@ HELP - Das BACH Hilfe-System
 
 BESCHREIBUNG
 Das help-System bietet kontextbezogene Dokumentation fuer alle BACH-Komponenten.
-Jedes Thema hat eine eigene .txt Datei im docs/docs/docs/help/-Verzeichnis.
+Jedes Thema hat eine eigene .txt Datei im docs/help/-Verzeichnis.
 
 CLI-BEFEHLE
 -----------
@@ -41,14 +41,14 @@ STRUKTUR EINER HELP-DATEI
 
 NEUE HELP-DATEI ERSTELLEN
 -------------------------
-1. Datei unter docs/docs/docs/help/[thema].txt anlegen
+1. Datei unter docs/help/[thema].txt anlegen
 2. Format von bestehender Datei uebernehmen
 3. Mindestens: Titel, Beschreibung, CLI-Befehle
 4. Registrierung in bach --help automatisch
 
 HELP-DATEIEN VS ANDERE DOCS
 ---------------------------
-docs/docs/docs/help/*.txt      CLI-Referenz, schnelle Nachschau
+docs/help/*.txt      CLI-Referenz, schnelle Nachschau
 skills/*.md     Agenten-Profile, komplexe Konzepte
 docs/*.md       Entwickler-Dokumentation, Konzepte
 SKILL.md        Haupt-Einstiegspunkt
@@ -75,7 +75,7 @@ Tool-Datenbank-Zugriff (NEU v1.1.38):
 
 Skill-Aliase (NEU v1.1.85):
   bach --help agent/ati       Zeigt agents/ati/ATI.md
-  bach --help workflow/bugfix Zeigt skills/_protocols/bugfix-protokoll.md
+  bach --help workflow/bugfix Zeigt skills/workflows/bugfix-protokoll.md
   bach --help expert/steuer   Zeigt agents/_experts/steuer/STEUER.md
 
 SIEHE AUCH

@@ -1,7 +1,7 @@
 # BACH User Manual
 
-**Version:** v3.2.0-butternut
-**Generiert:** 2026-02-28
+**Version:** v3.6.0-spaghetti
+**Generiert:** 2026-03-04
 **Lizenz:** MIT
 
 ---
@@ -23,7 +23,7 @@ Dieses Handbuch beschreibt Installation, Nutzung und Erweiterung von BACH.
 
 # BACH - Textbasiertes Betriebssystem für LLMs
 
-**Version:** v3.2.0-butternut
+**Version:** v3.6.0-spaghetti
 **Status:** Production-Ready
 **Lizenz:** MIT
 
@@ -33,10 +33,10 @@ BACH ist ein textbasiertes Betriebssystem, das Large Language Models (LLMs) bef�
 
 ### Kernfunktionen
 
-- **🤖 5 KI-Agenten** - Spezialisierte Agenten für verschiedene Aufgabenbereiche
-- **🛠️ 420 Tools** - Umfangreiche Tool-Bibliothek für Dateiverarbeitung, Analyse, Automation
-- **📚 940 Skills** - Wiederverwendbare Workflows und Templates
-- **🔄 0 Workflows** - Vorgefertigte Prozess-Protokolle
+- **🤖 5 Boss-Agenten + 15 Experten** - Spezialisierte Agenten für verschiedene Aufgabenbereiche
+- **🛠️ 373+ Tools** - Umfangreiche Tool-Bibliothek für Dateiverarbeitung, Analyse, Automation (DB-registriert)
+- **📚 932+ Skills** - Wiederverwendbare Workflows und Templates (DB-registriert)
+- **🔄 54 Workflows** - Vorgefertigte Prozess-Protokolle
 - **💾 Wissensspeicher** - 138 Lessons + 248 Facts
 
 ## Installation

@@ -2,7 +2,7 @@ PARTNER-KOMMUNIKATION TOOLS - Partner-Erkennung und Message-Routing
 ===================================================================
 
 Stand: 2026-01-23
-Pfad: docs/docs/docs/help/tools/partner.txt
+Pfad: docs/help/tools/partner.txt
 
 BESCHREIBUNG
 ------------
@@ -181,10 +181,10 @@ PARTNER-WORKSPACE
 
 SIEHE AUCH
 ----------
-  docs/docs/docs/help/partner.txt        Partner-System CLI-Befehle
-  docs/docs/docs/help/partners.txt       Partner-Netzwerk Uebersicht
-  docs/docs/docs/help/delegate.txt       Delegation-Details
-  docs/docs/docs/help/communicate.txt    Kommunikationsprotokolle
+  docs/help/partner.txt        Partner-System CLI-Befehle
+  docs/help/partners.txt       Partner-Netzwerk Uebersicht
+  docs/help/delegate.txt       Delegation-Details
+  docs/help/communicate.txt    Kommunikationsprotokolle
   
   skills/_services/communicate.md   Skill-Definition
   tools/partner_communication/README.md   Entwickler-Doku

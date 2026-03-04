@@ -12,4 +12,4 @@
 # - CLI-Befehle: bach between on/off/status/use
 # - Profil-Verwaltung: bach between profile list/show (add/edit/delete noch nicht implementiert)
 #
-# Vollstaendige Dokumentation: docs/docs/docs/help/between.txt
+# Vollstaendige Dokumentation: docs/help/between.txt

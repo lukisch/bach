@@ -2,7 +2,7 @@ RESEARCH-TOOLS - Wissenschaftliche Recherche
 ============================================
 
 Stand: 2026-01-23
-Pfad: docs/docs/docs/help/tools/research.txt
+Pfad: docs/help/tools/research.txt
 
 BESCHREIBUNG
 ------------
@@ -136,8 +136,8 @@ Zukuenftig geplant:
 SIEHE AUCH
 ----------
   wiki/ai_portable.txt      AI Portable RAG-Pipeline
-  docs/docs/docs/help/tools/partner.txt         Partner-Tools (Perplexity-Integration)
-  docs/docs/docs/help/delegate.txt              Delegation an Research-Partner
+  docs/help/tools/partner.txt         Partner-Tools (Perplexity-Integration)
+  docs/help/delegate.txt              Delegation an Research-Partner
 
   PubMed:     https:/pubmed.ncbi.nlm.nih.gov/
   Perplexity: https:/www.perplexity.ai/

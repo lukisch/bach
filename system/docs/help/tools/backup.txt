@@ -2,7 +2,7 @@ BACKUP TOOLS - Datensicherung und Wiederherstellung
 ===================================================
 
 Stand: 2026-01-23
-Pfad: docs/docs/docs/help/tools/backup.txt
+Pfad: docs/help/tools/backup.txt
 
 BESCHREIBUNG
 ------------
@@ -42,7 +42,7 @@ Das Backup-System basiert auf Distribution-Typen:
 
   dist_type = 2 (CORE)
     -> Distribution IST das Backup
-    -> bach.py, hub/, tools/, skills/, docs/docs/docs/help/
+    -> bach.py, hub/, tools/, skills/, docs/help/
     -> NICHT separat gesichert
 
   dist_type = 1 (TEMPLATE)
@@ -63,20 +63,20 @@ USER_DATA (dist_type = 0):
 
 NICHT gesichert (CORE/TEMPLATE):
   bach.py, schema.sql, hub/
-  tools/, skills/, docs/docs/docs/help/
+  tools/, skills/, docs/help/
   (sind Teil der Distribution)
 
 BACKUP-ROTATION
 ===============
 Automatische Rotation verhindert Speicherueberlauf:
 
-  Lokal (system/data/system/data/system/data/system/data/backups/):     7 Backups behalten
+  Lokal (data/_backups/):            7 Backups behalten
   NAS:                  30 Backups behalten
   OneDrive:             Automatisch (Versionsverlauf)
 
 SPEICHERORTE
 ============
-  Lokal:    BACH_v2_vanilla/system/data/system/data/system/data/system/data/backups/
+  Lokal:    BACH_v2_vanilla/system/data/_backups/
   NAS:      \\NAS-HOST\fritz.nas\Extreme_SSD\BACKUP\BACH_Backups
   Dist:     BACH_v2_vanilla/distributions/
 
@@ -142,7 +142,7 @@ TYPISCHE ANWENDUNGSFAELLE
 
 VERWANDTE SKILLS
 ================
-  skills/_service/builder.md    CREATE, EXPORT, DISTRIBUTE, BACKUP
+  skills/_services/builder.md   CREATE, EXPORT, DISTRIBUTE, BACKUP
   docs/BACKUP_SYSTEM.md         Urspruengliches Konzept
 
 SIEHE AUCH

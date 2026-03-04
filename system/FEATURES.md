@@ -1,90 +1,69 @@
-# Feature-Analyse: BACH v2 Vanilla
+# Feature-Analyse: BACH v3.6.0-spaghetti
 
-## Projektübersicht
+## Projektuebersicht
 
-**Projektname:** BACH v2 Vanilla (Best-of BATCH + CHIAH)
-**Version:** 2.1.0
-**Status:** Development
-**Typ:** Personal Agentic Operating System
+**Projektname:** BACH (Best of Agentic Cognitive Helpers)
+**Version:** 3.6.0-spaghetti
+**Status:** Production-Ready
+**Typ:** Textbasiertes Betriebssystem fuer LLMs
 
-BACH ist ein persönliches, portables Betriebssystem für KI-Agenten, das als Orchestrierungs- und Verwaltungsschicht für große Sprachmodelle (Claude, Gemini, Ollama) fungiert.
+BACH ist ein textbasiertes Betriebssystem, das Large Language Models (LLMs) befaehigt, eigenstaendig zu arbeiten, zu lernen und sich zu organisieren. Es fungiert als Middleware zwischen Mensch und KI und bietet eine vollstaendige Infrastruktur fuer Task-Management, Wissensmanagement, Automatisierung und Multi-Agent-Orchestrierung -- lokal, portabel und datenbankseitig auf SQLite basierend.
 
 ---
 
 ## Kernfeatures
 
-### 1. Kognitives Memory-Modell (5-Typen)
+### 1. Kognitives Memory-Modell (5 Typen)
 
-- **Working Memory:** Kurzzeit/Session-Notizen
-- **Episodic Memory:** Abgeschlossene Sessions, Tagebuch
-- **Semantic Memory:** Fakten, Wiki, Help-Inhalte
-- **Procedural Memory:** Tools, Skills, Workflows
-- **Associative Memory:** Konsolidierung, Trigger
+- **Working Memory:** Kurzzeit/Session-Notizen (`bach mem write`)
+- **Episodic Memory:** Abgeschlossene Sessions, Tagebuch (`bach --memory session`)
+- **Semantic Memory:** Fakten, Wiki, Help-Inhalte (`bach --memory fact`)
+- **Procedural Memory:** Tools, Skills, Workflows (`bach help tools`)
+- **Associative Memory:** Konsolidierung, Trigger (`bach consolidate`)
 
-### 2. Aktive Konsolidierung
+### 2. Multi-Agent Orchestrierung
 
-- KI-Gedächtnis mit automatischem "Vergessen" und "Lernen"
-- Lernvorgänge explizit speichern (Lessons Learned)
-- Session-Tracking und Konsolidierungs-Pipeline
+- Netzwerk von Partner-Modellen (Claude, Gemini, Ollama)
+- Chat-System fuer Multi-LLM-Kommunikation
+- Lock-System fuer Datei-Koordination (Datei- und Ordner-Locks)
+- Partner-Awareness mit Stempelkarten-System (Clock-In/Clock-Out)
+- SharedMemory-Bus mit Konflikt-Erkennung und Relevanz-Decay
+- USMC Bridge fuer Cross-Instanz-Kommunikation (local/tcp/file)
+- Schwarm-LLM mit parallelen Workern (ThreadPoolExecutor)
 
-### 3. Multi-Partner Delegation
+### 3. Drei Zugriffsmodi (CLI + API + MCP)
 
-- Netzwerk von Partner-Modellen (Claude, Gemini, lokale LLMs)
-- Chat-System für Multi-LLM Kommunikation
-- Automatisches Lock-System für Datei-Koordination
-- Partner-Awareness und Presence-Tracking
+- **CLI/Terminal:** `python bach.py` -- Hauptschnittstelle fuer Menschen
+- **Library-API:** `from bach_api import task, memory` -- Programmatischer Zugriff fuer LLMs
+- **MCP-Server:** 23 MCP-Tools fuer IDE-Integration (Claude Code, Cursor)
+- **GUI/Browser:** FastAPI-basiertes Web-Dashboard (`server.py`)
 
-### 4. CLI-First + GUI
+### 4. Self-Extension und Self-Healing
 
-- Nahtlose Terminal-Steuerung (Hauptfokus)
-- Optional: FastAPI-basiertes Web-Dashboard
-- Seitenloses Design, komplette Terminal-Bedienbarkeit
+- Self-Extension: `bach skills create <name> --type <typ>` (6 Typen)
+- Hot-Reload: `bach skills reload` ohne Neustart
+- Plugin-API: Dynamische Erweiterung zur Laufzeit
+- Automatische Pfad-Korrektur und Verzeichnis-Heilung
+- Identity Seal und Integritaetspruefung
 
-### 5. Portable und Lokal
+### 5. Execution Stack (3-Schichten-Modell)
 
-- SQLite-Datenbank, keine Cloud-Abhängigkeiten
-- 100% Kontrolle über Daten
-- Plug-and-Play Installation
-- Selbstheilung durch automatische Pfad-Korrektur
+- **Schicht 1 -- Zeitsteuerung:** SchedulerService mit Cron-basierter Job-Ausfuehrung
+- **Schicht 2 -- Orchestrierung:** ChainHandler + llmauto-Ketten mit `bach://` URL-Resolution
+- **Schicht 3 -- Ausfuehrung:** AgentLauncherHandler startet Claude/Gemini/Ollama-Sessions
 
-### 6. Domain-Agenten (15+ Spezialisten)
+### 6. Portable Agent Framework
 
-- Autonomous Agents für spezialisierte Aufgaben
-- Experten für Fachbereiche
-- Services für Cross-Domain Funktionen
+- PortableAgent-Basisklasse: Agenten funktionieren standalone ohne BACH
+- Arbeitsmodi: focused, assistant, autonomous
+- 24h-Agent mit Session-Kontext-Persistenz und Tageswechsel-Logik
 
-### 7. Self-Healing
+### 7. Wiki-in-Database mit FTS5
 
-- Automatische Pfad-Korrektur
-- System-Registry und Verifikation
-- Integritätsprüfung (Identity Seal)
-
----
-
-## Technologie-Stack
-
-### Programmiersprachen
-- **Python 3.x** (100%)
-
-### Frameworks und Bibliotheken
-- **FastAPI** - Web-Framework für Dashboard/API
-- **SQLite3** - Datenbank-Engine
-- **Pathlib** - Cross-Platform Dateisystem
-- **Pydantic** - Datenvalidierung
-- **Uvicorn** - ASGI-Server
-- **Anthropic SDK** - Claude API Integration
-
-### Datenbank
-- **bach.db** (SQLite) mit 27+ Tabellen
-- Kategorien: System, Tasks, Memory, Tools, Skills, Agents, Files, Automation, Monitoring, Connections, Languages
-
-### Externe Integrationen
-- Claude API (Anthropic)
-- Gemini API (Google)
-- Ollama (lokale Modelle)
-- OCR Tools (Tesseract)
-- ELSTER (deutsche Steuerverwaltung)
-- Banking APIs (CAMT-Parser)
+- 263 Wiki-Artikel als BLOBs in bach.db
+- FTS5-Volltextsuche mit Snippets
+- Aenderungsverfolgung via `bach_blob_history`
+- Dateisystem als Fallback
 
 ---
 
@@ -94,217 +73,323 @@ BACH ist ein persönliches, portables Betriebssystem für KI-Agenten, das als Or
 
 ```
 USER INTERFACES
-  ├── CLI/Terminal (bach.py)
-  ├── GUI/Browser (server.py)
-  └── MCP/IDE (mcp_server.py)
-       │
-HUB LAYER (~62 Handler-Module)
-  ├── System: startup, shutdown, status
-  ├── Domain: steuer, abo, haushalt, gesundheit
-  ├── Data: task, memory, db, session, logs
-  └── Multi-AI: agents, partner, ati, daemon
-       │
-SKILLS LAYER
-  ├── _agents/ (Autonome Agenten)
-  ├── _experts/ (Domain-Experten)
-  ├── _services/ (Allgemeine Services)
-  └── _workflows/ (~25 Prozessabläufe)
-       │
-DATA LAYER
-  ├── bach.db (SQLite)
-  └── FileSystem
+  +-- CLI/Terminal (bach.py)
+  +-- Lib-API (bach_api.py -- 14+ Module)
+  +-- GUI/Browser (server.py)
+  +-- MCP/IDE (mcp_server.py -- 23 Tools)
+       |
+CORE LAYER (core/*.py)
+  app.py -> registry.py -> Auto-Discovery von 109+ Handlern
+  base.py (BaseHandler) | db.py (Schema-First) | hooks.py (14 Events)
+       |
+HUB LAYER (hub/*.py -- 109+ Handler-Module)
+  System: startup, shutdown, status, backup, tokens, inject, hooks, setup
+  Domain: steuer, abo, haushalt, gesundheit, contact, calendar, email
+  Data: task, memory, db, session, logs, wiki, docs, inbox, prompt
+  Multi-AI: agents, partner, scheduler, ollama, ati, chain, shared-memory
+  Extension: skills (create/reload), hooks (status/events/log/test)
+       |
+  +----+----+                       +----+----+
+  |         |                       |         |
+  v         v                       v         v
+AGENTS    SKILLS & TOOLS          CONNECTORS  DATA LAYER
+agents/   skills/workflows/       connectors/ bach.db (138 Tabellen)
+  _experts/ skills/_templates/    partners/   Dateisystem
+            hub/_services/                    inbox/outbox/
+            tools/*.py
+       |
+SELF-EXTENSION LAYER
+  skills create (6 Typen)
+  skills reload (Hot-Reload)
+  hooks.on/emit (14 Events)
+  Plugin-API
 ```
 
 ### Verzeichnisstruktur
 
 ```
 BACH_ROOT/
-├── system/
-│   ├── bach.py (CLI Entry Point)
-│   ├── data/ (Datenbanken, Logs)
-│   ├── gui/ (FastAPI Dashboard)
-│   ├── hub/ (~62 Handler-Module)
-│   └── skills/ (Tools, Agents, Experts)
-├── docs/ (Dokumentation)
-├── system/system/system/system/exports/ (Generierte Exporte)
-├── extensions/ (Third-Party Tools)
-└── user/ (User-Daten)
++-- system/
+|   +-- bach.py           (CLI Entry Point)
+|   +-- bach_api.py       (Library-API)
+|   +-- core/             (Registry, BaseHandler, Hooks, DB)
+|   +-- hub/              (109+ Handler-Module)
+|   +-- hub/_services/    (Services -- je eigener Ordner)
+|   +-- agents/           (Boss-Agenten -- je eigener Ordner)
+|   +-- agents/_experts/  (Domain-Experten -- je eigener Ordner)
+|   +-- skills/           (Workflows, Templates, Tools)
+|   +-- connectors/       (MCP, APIs, Bridges)
+|   +-- partners/         (Multi-LLM-Konfigurationen)
+|   +-- gui/              (FastAPI Dashboard)
+|   +-- data/             (bach.db, Logs, Configs)
+|   +-- tools/            (MCP-Server, Migrations-Tools)
++-- docs/                 (Dokumentation)
++-- user/                 (User-Daten, isoliert)
++-- extensions/           (Third-Party Tools)
 ```
 
 ---
 
-## Handler-Module (Hub-Layer)
+## Datenbank-Schema (138 Tabellen)
 
-### System-Handler (~10)
-startup.py, shutdown.py, status.py, backup.py, tokens.py, db.py, logs.py
+**Datenbank:** `bach.db` (SQLite mit FTS5-Erweiterung)
 
-### Domain-Handler (~8)
-steuer.py, abo.py, haushalt.py, gesundheit.py, contact.py, doc.py, bericht.py
+| # | Bereich | Wichtigste Tabellen | Anzahl |
+|---|---------|---------------------|--------|
+| 1 | System | `system_identity`, `system_config`, `instance_identity` | ~5 |
+| 2 | Tasks | `tasks` | 1 |
+| 3 | Memory | `memory_working`, `memory_facts`, `memory_lessons`, `memory_sessions` | ~8 |
+| 4 | Shared Memory | `shared_memory_facts`, `shared_memory_lessons`, `shared_memory_sessions`, `shared_memory_working`, `shared_memory_consolidation`, `shared_context_triggers` | 6 |
+| 5 | Tools | `tools` (373 Eintraege) | 1 |
+| 6 | Skills | `skills` (932 Eintraege) | 1 |
+| 7 | Agents | `bach_agents`, `bach_experts`, `agent_synergies` | ~4 |
+| 8 | Files | `files_truth`, `files_trash`, `dist_files` | ~5 |
+| 9 | Automation | `automation_triggers`, `automation_routines`, `automation_injectors`, `scheduler_jobs`, `scheduler_runs` | ~8 |
+| 10 | Monitoring | `monitor_tokens`, `monitor_success`, `monitor_processes`, `monitor_pricing` | ~6 |
+| 11 | Connections | `connections`, `connector_messages`, `partner_presence` | ~5 |
+| 12 | Languages | `languages_config`, `languages_translations` | 2 |
+| 13 | Distribution | `distribution_manifest`, `dist_type_defaults`, `releases`, `snapshots` | ~6 |
+| 14 | Wiki / Blobs | `wiki`, `bach_blobs`, `bach_blobs_fts`, `bach_blob_history` | ~4 |
+| 15 | Usecases | `usecases`, `toolchains` | ~3 |
+| 16 | Prompts | `prompt_templates`, `prompt_versions`, `prompt_boards`, `prompt_board_items` | 4 |
+| 17 | Session-Kontext | `session_context`, `reminders`, `meta_feedback_patterns` | 3 |
 
-### Data-Handler (~8)
-task.py, memory.py, lesson.py, context.py, session.py, wiki.py, inbox.py, fs.py
-
-### Multi-AI Handler (~6)
-agents.py, ati.py, daemon.py, partner.py, chain.py, consolidation.py
-
-### Services Layer (~13)
-daemon/, financial/, household/, document/, recurring/, wiki/, mail/, market/, scheduling/
-
----
-
-## CLI-Befehle (Auszug)
-
-### System
-```
-python bach.py --startup [--mode=text|gui|dual]
-python bach.py --shutdown
-python bach.py status [detail]
-python bach.py backup [create|restore|list]
-```
-
-### Aufgabenmanagement
-```
-bach task list
-bach task add "Titel"
-bach task done <id>
-```
-
-### Memory-Management
-```
-bach mem write "Notiz"
-bach mem read [n]
-bach mem fact "key:value"
-bach mem search "keyword"
-```
-
-### Multi-Partner
-```
-bach msg send <partner> "Text"
-bach msg read <id>
-bach llm lock <datei>
-bach llm status
-```
-
-### Domain-spezifisch
-```
-bach steuer scan
-bach haushalt inventory
-bach abo list
-bach gesundheit import
-```
+Schema-Quelle: `system/data/schema/schema.sql` + 32 Migrationen (`.sql` und `.py`)
 
 ---
 
-## Konfiguration
+## Handler-Module (109+ Handler)
 
-### Startup-Modi
-- **gui** - GUI Dashboard + Browser (Standard)
-- **text** - Nur CLI/Terminal
-- **dual** - GUI + Terminal
-- **silent** - Nichts automatisch starten
+Alle Handler werden per Auto-Discovery ueber `core/registry.py` erkannt. Jeder Handler erbt von `BaseHandler`, definiert einen `profile_name` und implementiert `handle(operation, args)`. Neue Handler brauchen nur eine `.py`-Datei in `hub/` -- kein manuelles Mapping noetig.
 
-### Path-Verwaltung (bach_paths.py)
-- Single Source of Truth für alle Pfade
-- Self-Healing: Pfade relativ zum Script berechnet
-- get_path(name) für einfachen Zugriff
+### System-Handler
 
-### Skill-Architektur (v2.0)
-Komponenten-Typen:
+| Handler | Befehl | Funktion |
+|---------|--------|----------|
+| StartupHandler | `--startup` | Session-Start, Partner-Clock-In, Nachrichten-Injektion |
+| ShutdownHandler | `--shutdown` | Session-Ende, Partner-Clock-Out, Memory-Konsolidierung |
+| StatusHandler | `--status` | Systemstatus, Health-Check |
+| BackupHandler | `bach backup` | Datenbank-Backup und -Restore |
+| TokensHandler | `bach tokens` | Token-Verbrauch, Emergency-Shutdown bei 95%+ |
+| SetupHandler | `bach setup` | MCP-Installation, Abhaengigkeiten-Check, Secrets-Sync |
+| HooksHandler | `bach hooks` | Hook-Events verwalten, testen, loggen |
+| InjectHandler | `--inject` | Injektor-Status und -Steuerung |
+
+### Domain-Handler
+
+| Handler | Befehl | Funktion |
+|---------|--------|----------|
+| SteuerHandler | `bach steuer` | Steuererklarung, OCR-Scanning, ELSTER-Export, DATEV-CSV |
+| AboHandler | `bach abo` | Abonnement-Verwaltung |
+| HaushaltHandler | `bach haushalt` | Inventar, Einkaufslisten, Budget |
+| GesundheitHandler | `bach gesundheit` | Health-Data Import, Medikamenten-Tracking |
+| ContactHandler | `bach contact` | Kontaktverwaltung |
+| CalendarHandler | `bach calendar` | Kalender-Integration |
+| EmailHandler | `bach email` | Gmail API, Draft-Safety (send, draft, confirm) |
+| NotifyHandler | `bach notify` | Benachrichtigungen (SMTP, Push) |
+| DocHandler | `bach doc` | Dokumenten-Verwaltung |
+
+### Daten-Handler
+
+| Handler | Befehl | Funktion |
+|---------|--------|----------|
+| TaskHandler | `bach task` | GTD-System mit Prioritaeten, Deadlines, Tags |
+| MemoryHandler | `bach mem` | 5-Typen-Memory mit Relevanz-Scoring |
+| LessonHandler | `bach lesson` | Lessons Learned, Deaktivierung, Audit |
+| SessionHandler | `bach session` | Session-Tracking |
+| LogsHandler | `bach logs` | Log-Verwaltung |
+| WikiHandler | `bach wiki` | FTS5-Volltextsuche, DB-Lookup, Dateisystem-Fallback |
+| HelpHandler | `bach help` | 93+ Help-Dateien, kontextbezogene Hilfe |
+| InboxHandler | `bach inbox` | Dokumenten-Scanner mit OCR und Auto-Sortierung |
+| PromptHandler | `bach prompt` | Prompt-Templates, Boards, Versionierung |
+| DbHandler | `bach db` | Direkte DB-Abfragen (mit Table-Whitelist) |
+
+### Multi-AI Handler
+
+| Handler | Befehl | Funktion |
+|---------|--------|----------|
+| AgentLauncherHandler | `bach agent` | Agenten starten, stoppen, auflisten |
+| PartnerHandler | `bach partner` | Multi-LLM-Koordination, Delegation |
+| SchedulerHandler | `bach scheduler` | Cron-basierte Jobs (tool, chain, agent) |
+| OllamaHandler | `bach ollama` | Lokale LLM-Integration, Offline-Fallback |
+| AtiHandler | `bach ati` | Software-Entwicklung, Project Bootstrapper |
+| ChainHandler | `bach chain` | Toolchains + llmauto-Ketten, bach://-URLs |
+| SharedMemoryHandler | `bach shared-mem` | Cross-Agent-Koordination, Decay, Konflikte |
+| ConnectorHandler | `bach connector` | Externe Bridges (Telegram, Discord, Email) |
+| MessagesHandler | `bach msg` | Nachrichtensystem mit Queue, Retry, Dead-Letter |
+
+### Extension-Handler
+
+| Handler | Befehl | Funktion |
+|---------|--------|----------|
+| SkillsHandler | `bach skills` | Create, Reload, Version-Check |
+| SyncHandler | `bach sync` | Skills/Tools DB-Synchronisation |
+| SnapshotHandler | `bach snapshot` | System-Snapshots |
+| ApiProberHandler | `bach api-probe` | HTTP-Endpoint-Tests |
+| N8nManagerHandler | `bach n8n` | n8n-Workflow-Verwaltung via REST |
+| UserSyncHandler | `bach user-sync` | User-Profile zwischen Instanzen synchronisieren |
+| MaintenanceHandler | `bach --maintain` | Dokumenten-Checker, Registry-Watcher |
+
+---
+
+## Skills & Tools
+
+### Zahlen
+
+| Kategorie | Anzahl | Speicherort |
+|-----------|--------|-------------|
+| Skills (gesamt) | 932+ | `skills`-Tabelle in bach.db |
+| Tools | 373+ | `tools`-Tabelle in bach.db |
+| Protokoll-Workflows | 54 | `skills/workflows/` |
+| Wiki-Artikel | 263 | `bach_blobs`-Tabelle (FTS5) |
+| Help-Dateien | 93+ | `skills/docs/help/` |
+
+### Komponenten-Typen
+
 | Typ | Ordner | Charakteristik |
 |-----|--------|----------------|
-| Agent | _agents/ | Orchestriert Experten |
-| Expert | _experts/ | Tiefes Domänenwissen |
-| Service | _services/ | Allgemein, Handler-nah |
-| Workflow | _workflows/ | 1 Datei = 1 Workflow |
-| Tool | tools/ | Wiederverwendbar |
+| Agent | `agents/<name>/` | Orchestriert Experten, eigener Ordner, standalone-faehig |
+| Expert | `agents/_experts/<name>/` | Tiefes Domaenenwissen, eigener Ordner |
+| Service | `hub/_services/<name>/` | Allgemein, Handler-nah, eigener Ordner |
+| Protocol | `skills/workflows/` | 1 Datei = 1 Protokoll, Kategorie-Unterordner erlaubt |
+| Connector | `connectors/` | Externe Anbindungen (MCP, APIs) |
+| Tool (allg.) | `tools/` | Wiederverwendbare Python-Scripts |
+| Tool (spez.) | Im Skill-Ordner | Nur fuer diesen Skill |
 
----
+### Agenten
 
-## Automation und Injektoren
-
-### 4 Kognitive Injektoren
-| Injektor | Funktion |
-|----------|----------|
-| strategy_injector | Metakognition, Entscheidungen |
-| context_injector | Aufgaben-Erinnerung, Tool-Empfehlung |
-| between_injector | Qualitätskontrolle, Task-Übergänge |
-| time_injector | Zeitgefühl, Nachrichten-Check |
-
----
-
-## Domain-Agenten
-
-### Aktive Agenten
 | Agent | Fokus |
 |-------|-------|
-| ATI | Software-Entwicklung, Task Scanner |
-| Persönlicher-Assistent | Briefings, Kalender |
-| Büro-Assistent | Dokumente, Mails |
-| Entwickler | GitHub, Code-Review |
-| Gesundheits-Assistent | Import, Reports |
-| Versicherungen | Verträge, Claims |
+| ATI | Software-Entwicklung, Task Scanner, Project Bootstrapper |
+| Persoenlicher-Assistent | Briefings, Kalender, Tagesplanung |
+| Buero-Assistent | Dokumente, Mails, Organisation |
+| Entwickler-Agent | GitHub, Code-Review, 6-Phasen-Architektur |
+| Gesundheits-Assistent | Health-Data Import, Reports |
+| Versicherungen | Vertraege, Claims |
 | Production | Media/Studio |
-| Research | Recherche, Analyse |
+| Research-Agent | PubMed-API, Perplexity, Recherche |
+| Plan-Agent | Strukturierte Planungsprotokolle mit JSON-Schema |
 
-### Spezialisierte Experten (~18)
-- steuer (Steuererklärung)
-- aboservice (Abonnements)
-- foerderplaner (Förderungen)
-- haushaltsmanagement (Budget)
-- gesundheitsverwalter (Medical records)
-- psycho-berater (Psychological support)
-- report_generator (Reports)
+### Experten (18+)
+
+Steuer, Aboservice, Foerderplaner, Haushaltsmanagement, Gesundheitsverwalter, Psycho-Berater, Report-Generator, PMR/Autogenes Training, Psychoedukation, Positive Psychologie und weitere.
 
 ---
 
-## Besondere Merkmale
+## Automation
 
-### Kognitive Memory-Architektur
-Human-inspired 5-Teil Memory-System mit aktiver Konsolidierung
+### 6 Kognitive Injektoren
 
-### Multi-Partner Lock-System
-```
-bach llm lock <datei>    # Lock VORM Schreiben
-bach llm unlock [datei]  # Lock freigeben
-bach llm status          # Alle Locks zeigen
-```
+Die Injektoren simulieren Denken und Assoziationen als Zentrale Exekutive. Alle sind ueber CLI (`bach --inject`) und API (`from bach_api import injector`) steuerbar.
 
-### Self-Healing und Path Correction
-- Alle Pfade relativ vom Script-Standort berechnet
-- Gegen directory_truth.json validiert
-- Fehlende Verzeichnisse neu erstellt
+| Injektor | Funktion |
+|----------|----------|
+| strategy_injector | Metakognition, Entscheidungshilfe, Fehleranalyse |
+| context_injector | Tool-Empfehlung, Memory-Abruf, Anforderungsanalyse |
+| between_injector | Qualitaetskontrolle, Task-Uebergaenge, Ergebnis-Validierung |
+| time_injector | Zeitgefuehl (Timebeat), Nachrichten-Check |
+| tool_injector | Tool-Erinnerung, Duplikat-Warnung |
+| task_assigner | Auto-Zuweisung, Task-Zerlegung |
 
-### Workflow-TÜV und Quality Assurance
-```
-bach tuev status        # TÜV-Status aller Workflows
-bach tuev check <wf>    # Einzelnen prüfen
-bach usecase run <case> # Testfall ausführen
-```
+Zusaetzlich seit v3.4.0:
+- **Reminder-Injektor:** LLM-Selbsterinnerung vor jedem Call (DB + JSON-Fallback)
+- **Meta-Feedback-Injektor:** Auto-Korrektur wiederkehrender LLM-Ticks mit Pattern-DB
 
-### Spezialisierte Domain-Features
-- **Steuer:** OCR-Scanning, ELSTER-Export
-- **Haushalt:** Inventar, Einkaufslisten
-- **Gesundheit:** Health-Data Import, Tracking
-- **ATI:** Headless AI-Sessions, Project Bootstrapper
+### 14 Hook-Events
+
+Das Hook-Framework erlaubt es, eigene Logik an Lifecycle-Events zu haengen -- ohne bestehenden Code zu aendern.
+
+Events: `before_startup`, `after_startup`, `before_shutdown`, `after_shutdown`, `before_command`, `after_command`, `after_task_create`, `after_task_done`, `after_task_delete`, `after_memory_write`, `after_lesson_add`, `after_skill_create`, `after_skill_reload`, `after_email_send`
+
+### SchedulerService
+
+- Cron-basierte Job-Ausfuehrung (`0 8 * * *`, `@hourly`, etc.)
+- Job-Typen: `tool`, `chain`, `agent`
+- Tracking: last_run, next_run, run_count, error_count
+- Integration mit ChainHandler und AgentLauncherHandler
+
+### Connector-Queue
+
+- Retry/Backoff: 5 Versuche, exponentieller Backoff (30s-480s)
+- Dead-Letter-Queue mit manuellem Recovery
+- Circuit Breaker: 5 Fehler -> 5 Min Sperre, Auto-Reset
+
+---
+
+## Externe Integrationen
+
+### MCP-Server (23 Tools)
+
+- 23 Tools via Handler-Logik (task, memory, lesson, backup, steuer, contact, msg, etc.)
+- 8 Resources (tasks/active, status, memory/lessons, skills/list, etc.)
+- 3 MCP-Prompts (daily_briefing, task_review, session_summary)
+- db_query mit Table-Whitelist (110 erlaubte Tabellen)
+
+### Connectors & Bridges
+
+| Connector | Status | Funktion |
+|-----------|--------|----------|
+| Telegram | Aktiv | Bot mit Owner-Filter, Polling, Threaded |
+| Discord | Aktiv | Incremental Polling, Bot-Filter |
+| Email (SMTP) | Aktiv | Gmail App-Password, Self-Notification |
+| USMC Bridge | Aktiv | Cross-Instanz-Kommunikation (local/tcp/file) |
+| Bridge Server | Aktiv | FastAPI REST-API (POST /api/message, GET /api/status) |
+| Stigmergy | Aktiv | Pheromon-basiertes Signal-Routing fuer Agenten |
+| n8n | Aktiv | Workflow-Verwaltung via REST-API |
+
+### Externe APIs
+
+- Claude API (Anthropic) -- Haupt-LLM
+- Gemini API (Google) -- Partner-LLM
+- Ollama -- Lokale Modelle, Offline-Fallback
+- PubMed API (NCBI E-Utilities) -- Research-Agent
+- Perplexity API (optional) -- Research-Agent
+- Tesseract OCR -- Dokumenten-Scanning
+- ELSTER -- Deutsche Steuerverwaltung
+
+---
+
+## Technologie-Stack
+
+| Komponente | Technologie |
+|------------|-------------|
+| Programmiersprache | Python 3.10+ (100%) |
+| Datenbank | SQLite3 mit FTS5-Erweiterung |
+| Web-Framework | FastAPI + Uvicorn (ASGI) |
+| GUI-Framework | PySide6 (geplant) |
+| Datenvalidierung | Pydantic |
+| LLM-SDK | Anthropic SDK (Claude), Google GenAI (Gemini) |
+| MCP | bach-codecommander-mcp, bach-filecommander-mcp (npm) |
+| Pfad-Verwaltung | Pathlib (Cross-Platform), bach_paths.py (Self-Healing) |
+| Parallelisierung | ThreadPoolExecutor (Schwarm-LLM) |
+| OCR | pytesseract + pdf2image |
 
 ---
 
 ## Zusammenfassung
 
-BACH v2 Vanilla ist ein hochmodernes, modulares KI-Betriebssystem mit:
+BACH v3.6.0-spaghetti ist ein vollstaendiges textbasiertes Betriebssystem fuer KI-Agenten mit folgenden Kennzahlen:
 
-- Professioneller Hub+Handler+Skills-Architektur
-- Intelligenter 5-Teil Memory-Verwaltung
-- Multi-Agent Koordination (Claude, Gemini, Ollama)
-- Vollständiger Automation (Workflows, Trigger, Injektoren)
-- Selbstheilendem System
-- 15+ Domain-Experten
-- CLI-First + Optional GUI
-- 100% Lokal und Portable
+| Metrik | Wert |
+|--------|------|
+| Tabellen in bach.db | 138 |
+| Handler-Module | 109+ |
+| Tools | 373+ |
+| Skills | 932+ |
+| Protokoll-Workflows | 54 |
+| Kognitive Injektoren | 6 (+2 seit v3.4) |
+| Hook-Events | 14 |
+| MCP-Tools | 23 |
+| Wiki-Artikel | 263 |
+| Help-Dateien | 93+ |
+| Schema-Migrationen | 32 |
+| Zugriffsmodi | 4 (CLI, API, GUI, MCP) |
+| Partner-LLMs | 3 (Claude, Gemini, Ollama) |
 
-**Ideal für:** Power-User und Entwickler, die ein vollständiges KI-Betriebssystem mit Hub-basierter Orchestrierung benötigen.
+**Kernprinzipien:** Database-First, Handler-First, Self-Healing, Self-Extension, Portable, Multi-Agent-faehig, 100% lokal.
 
 ---
 
 *Erstellt: 2026-02-05*
-*System: BACH Feature-Analyse*
+*Aktualisiert: 2026-03-04*
+*System: BACH Feature-Analyse v3.6.0-spaghetti*

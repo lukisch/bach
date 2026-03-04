@@ -39,4 +39,4 @@ SCHNELL-CHECK:
 | Encoding/BOM        | c_standard_fixer.py       |
 
 HINWEIS: Diese Datei dokumentiert standalone Tools, keinen Handler.
-         Detaillierte Bugfix-Workflows: skills/_protocols/bugfix-protokoll.md
+         Detaillierte Bugfix-Workflows: skills/workflows/bugfix-protokoll.md

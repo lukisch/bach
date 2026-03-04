@@ -40,7 +40,7 @@
 ### Code aendern
 ```bash
 # Direkt im Git-Repo entwickeln
-cd /c/Users/lukas/OneDrive/KI&AI/BACH
+cd /c/Users/User/OneDrive/KI\&AI/BACH
 # CORE-Aenderungen: git add + commit + push
 git add system/hub/neuer_handler.py
 git commit -m "feat: neuer Handler"
