@@ -87,6 +87,19 @@ Thumbs.db
 MEMORY.md
 USER.md
 
+# === DB-GENERIERTE DOKUMENTATION (user-spezifisch) ===
+# Diese Dateien werden aus bach.db generiert und enthalten user-spezifische Daten.
+# Fuer Repo-Besucher liegen *.template.md Versionen bei.
+CLAUDE.md
+OLLAMA.md
+GEMINI.md
+SKILLS.md
+CHAINS.md
+PARTNERS.md
+AGENTS.md
+WORKFLOWS.md
+BACH_HELP_REFERENCE.md
+
 # === SESSION-LOGS (Enthalten private Daten) ===
 logs/daily/
 
