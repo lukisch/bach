@@ -162,10 +162,43 @@ class WikiHandler(BaseHandler):
                     folders.append((item.name, txt_count))
         return sorted(folders)
 
+    def _read_from_db(self, thema):
+        """Versucht Wiki-Artikel aus bach_blobs zu lesen."""
+        db_path = self.base_path / "data" / "bach.db"
+        if not db_path.exists():
+            return None
+        try:
+            conn = sqlite3.connect(str(db_path))
+            # Pfad-Varianten probieren
+            if "/" not in thema:
+                # Auch in Unterordnern suchen
+                cursor = conn.execute(
+                    "SELECT path, content FROM bach_blobs WHERE path LIKE ? AND category != 'wiki' LIMIT 1",
+                    (f"wiki/%/{thema}.txt",)
+                )
+            else:
+                cursor = conn.execute(
+                    "SELECT path, content FROM bach_blobs WHERE path = ?",
+                    (f"wiki/{thema}.txt",)
+                )
+            row = cursor.fetchone()
+            conn.close()
+            if row:
+                return row[1]
+            return None
+        except Exception:
+            return None
+
     def _show(self, thema: str) -> tuple:
         """Wiki-Artikel anzeigen (unterstuetzt Unterordner)"""
         # Normalisieren: Backslash zu Slash
         thema = thema.replace("\\", "/").lower()
+
+        # DB-Lookup versuchen (SQ044: Wiki-in-DB)
+        db_content = self._read_from_db(thema)
+        if db_content:
+            display_name = thema.upper().replace("/", " / ")
+            return True, f"WIKI: {display_name}\n{'='*50}\n\n{db_content}"
 
         # Unterordner-Pfad?
         if "/" in thema:
@@ -246,8 +279,47 @@ class WikiHandler(BaseHandler):
         except Exception as e:
             return False, f"Fehler beim Lesen: {e}"
 
+    def _fts_search(self, keyword):
+        """FTS5-basierte Suche in bach_blobs."""
+        db_path = self.base_path / "data" / "bach.db"
+        if not db_path.exists():
+            return None
+
+        try:
+            conn = sqlite3.connect(str(db_path))
+            cursor = conn.execute("""
+                SELECT path, snippet(bach_blobs_fts, 1, '>>>', '<<<', '...', 32)
+                FROM bach_blobs_fts
+                WHERE bach_blobs_fts MATCH ?
+                ORDER BY rank
+                LIMIT 20
+            """, (keyword,))
+            results = cursor.fetchall()
+            conn.close()
+
+            if not results:
+                return None
+
+            lines = [f"WIKI-SUCHE (FTS5): {keyword}", "=" * 50, ""]
+            for path, snippet_text in results:
+                display_name = path.replace("wiki/", "").replace(".txt", "")
+                lines.append(f"  {display_name}")
+                if snippet_text:
+                    lines.append(f"    ...{snippet_text}...")
+                lines.append("")
+            lines.append(f"{len(results)} Treffer")
+            return "\n".join(lines)
+        except Exception:
+            return None
+
     def _search(self, keyword: str) -> tuple:
         """Wiki-Artikel durchsuchen (inkl. Unterordner)"""
+        # Versuche FTS5 zuerst
+        fts_result = self._fts_search(keyword)
+        if fts_result:
+            return True, fts_result
+
+        # Fallback: Dateisystem-Suche (bestehender Code)
         matches = []
         keyword_lower = keyword.lower()
 

@@ -116,6 +116,50 @@ class ClaudeRunner:
                 "model": overrides.get("model", self.model),
             }
 
+    def run_parallel(self, prompts, max_workers=3, **overrides):
+        """Fuehrt mehrere Claude-Aufrufe parallel aus.
+
+        Args:
+            prompts: Liste von Prompt-Strings oder Liste von Dicts mit {prompt, **overrides}
+            max_workers: Maximale Anzahl paralleler Worker
+            **overrides: Default-Overrides fuer alle Aufrufe
+
+        Returns:
+            Liste von Result-Dicts (gleiche Struktur wie run())
+        """
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+
+        tasks = []
+        for item in prompts:
+            if isinstance(item, dict):
+                item_copy = dict(item)
+                prompt = item_copy.pop("prompt")
+                merged = {**overrides, **item_copy}
+                tasks.append((prompt, merged))
+            else:
+                tasks.append((item, overrides))
+
+        results = [None] * len(tasks)
+
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            future_to_idx = {}
+            for idx, (prompt, ovr) in enumerate(tasks):
+                future = executor.submit(self.run, prompt, **ovr)
+                future_to_idx[future] = idx
+
+            for future in as_completed(future_to_idx):
+                idx = future_to_idx[future]
+                try:
+                    results[idx] = future.result()
+                except Exception as e:
+                    results[idx] = {
+                        "success": False, "output": "", "stderr": str(e),
+                        "returncode": -4, "duration_s": 0,
+                        "model": overrides.get("model", self.model),
+                    }
+
+        return results
+
     def pipe(self, prompt, **overrides):
         """Kurzform: Prompt rein, Text raus. Wirft Exception bei Fehler."""
         result = self.run(prompt, **overrides)

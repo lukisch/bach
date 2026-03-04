@@ -297,6 +297,91 @@ def generate_active_chain_md(chain_name, config, state, base_dir):
     out_path.write_text("\n".join(lines), encoding="utf-8")
 
 
+def run_parallel_workers(chain_name, worker_links, config, state, global_config, base_dir):
+    """Fuehrt Worker-Links parallel aus (SQ016).
+
+    Args:
+        chain_name: Name der Kette
+        worker_links: Liste von Link-Dicts mit role="worker"
+        config: Chain-Konfiguration
+        state: ChainState-Objekt
+        global_config: Globale llmauto-Konfiguration
+        base_dir: llmauto Base-Verzeichnis
+
+    Returns:
+        dict: Mapping link_name -> Result-Dict
+    """
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    def _execute_worker(link):
+        link_name = link.get("name", "worker")
+        model = link.get("model") or global_config.get("default_model", "claude-sonnet-4-6")
+        fallback = link.get("fallback_model")
+
+        runner = ClaudeRunner(
+            model=model,
+            fallback_model=fallback,
+            permission_mode=global_config.get("default_permission_mode", "dontAsk"),
+            allowed_tools=global_config.get("default_allowed_tools"),
+            timeout=global_config.get("default_timeout_seconds", 1800),
+            cwd=str(base_dir),
+        )
+
+        prompt_text = resolve_prompt(link, config)
+        home_win = _ACTUAL_HOME.rstrip(os.sep)
+        drive, rest = home_win.split(":", 1)
+        home_bash = "/" + drive.lower() + rest.replace("\\", "/")
+        prompt_text = prompt_text.replace("{HOME}", home_win)
+        prompt_text = prompt_text.replace("{BASH_HOME}", home_bash)
+
+        if link.get("until_full", False):
+            prompt_text += UNTIL_FULL_SUFFIX
+
+        log(f"[PARALLEL] {link_name}: Starte {model}...", chain_name)
+        result = runner.run(prompt_text)
+
+        return link_name, result
+
+    max_workers = min(len(worker_links), 4)
+    results = {}
+
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = {executor.submit(_execute_worker, link): link for link in worker_links}
+
+        for future in as_completed(futures):
+            link = futures[future]
+            link_name = link.get("name", "worker")
+            try:
+                name, result = future.result()
+                results[name] = result
+
+                # Output-Log schreiben
+                output_log = LOG_DIR / f"{chain_name}_{name}.log"
+                try:
+                    with open(output_log, "a", encoding="utf-8") as f:
+                        ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        f.write(f"\n{'='*60}\n[{ts}] PARALLEL | {name}\n{'='*60}\n")
+                        if result["output"]:
+                            f.write(result["output"] + "\n")
+                        if result["stderr"]:
+                            f.write(f"\n--- STDERR ---\n{result['stderr']}\n")
+                except Exception:
+                    pass
+
+                if result["success"]:
+                    log(f"[PARALLEL] {name}: OK ({result['duration_s']:.0f}s)", chain_name)
+                else:
+                    log(f"[PARALLEL] {name}: FEHLER (rc={result['returncode']})", chain_name)
+            except Exception as e:
+                log(f"[PARALLEL] {link_name}: EXCEPTION: {e}", chain_name)
+                results[link_name] = {
+                    "success": False, "output": "", "stderr": str(e),
+                    "returncode": -4, "duration_s": 0, "model": "unknown",
+                }
+
+    return results
+
+
 def run_chain(chain_name, background=False):
     """Startet eine Kette (Hauptfunktion)."""
     base_dir = Path(__file__).parent.parent
@@ -349,7 +434,112 @@ def run_chain(chain_name, background=False):
 
     try:
         while True:
-            # Ein voller Zyklus (alle Links durchlaufen)
+            # SQ016: Parallele Worker-Ausfuehrung wenn aktiviert
+            if config.get("parallel_workers", False):
+                worker_links = [l for l in links if l.get("role") == "worker"]
+                non_worker_links = [(i, l) for i, l in enumerate(links) if l.get("role") != "worker"]
+
+                if len(worker_links) > 1:
+                    # Shutdown-Check
+                    should_stop, reason = state.check_shutdown(config)
+                    if should_stop:
+                        log(f"SHUTDOWN: {reason}", chain_name)
+                        state.set_status("STOPPED")
+                        send_telegram_update(chain_name, state)
+                        return 0
+
+                    # Worker parallel ausfuehren
+                    log(f"PARALLEL-MODUS: {len(worker_links)} Worker starten...", chain_name)
+                    run_parallel_workers(
+                        chain_name, worker_links, config, state, global_config, base_dir
+                    )
+
+                    # Status-Schutz nach paralleler Ausfuehrung
+                    current_status = state.get_status()
+                    if current_status not in ("RUNNING", "ALL_DONE"):
+                        log(f"  STATUS-KORREKTUR: '{current_status}' -> 'RUNNING'", chain_name)
+                        state.set_status("RUNNING")
+
+                    # Non-Worker (Reviewer etc.) sequentiell ausfuehren
+                    for i, link in non_worker_links:
+                        should_stop, reason = state.check_shutdown(config)
+                        if should_stop:
+                            log(f"SHUTDOWN: {reason}", chain_name)
+                            state.set_status("STOPPED")
+                            send_telegram_update(chain_name, state)
+                            return 0
+
+                        link_name = link.get("name", f"link-{i+1}")
+                        role = link.get("role", "worker")
+                        model = link.get("model") or global_config.get("default_model", "claude-sonnet-4-6")
+                        fallback = link.get("fallback_model")
+
+                        runner = ClaudeRunner(
+                            model=model,
+                            fallback_model=fallback,
+                            permission_mode=global_config.get("default_permission_mode", "dontAsk"),
+                            allowed_tools=global_config.get("default_allowed_tools"),
+                            timeout=global_config.get("default_timeout_seconds", 1800),
+                            cwd=str(base_dir),
+                        )
+
+                        prompt_text = resolve_prompt(link, config)
+                        home_win = _ACTUAL_HOME.rstrip(os.sep)
+                        drive, rest = home_win.split(":", 1)
+                        home_bash = "/" + drive.lower() + rest.replace("\\", "/")
+                        prompt_text = prompt_text.replace("{HOME}", home_win)
+                        prompt_text = prompt_text.replace("{BASH_HOME}", home_bash)
+
+                        if link.get("until_full", False):
+                            prompt_text += UNTIL_FULL_SUFFIX
+
+                        log(f"{link_name} ({role}): Starte {model}...", chain_name)
+                        result = runner.run(prompt_text)
+
+                        # Output-Log
+                        output_log = LOG_DIR / f"{chain_name}_{link_name}.log"
+                        try:
+                            with open(output_log, "a", encoding="utf-8") as f:
+                                ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                                f.write(f"\n{'='*60}\n")
+                                f.write(f"[{ts}] Runde {state.get_round()+1} | {link_name} | {model}\n")
+                                f.write(f"{'='*60}\n")
+                                if result["output"]:
+                                    f.write(result["output"] + "\n")
+                                if result["stderr"]:
+                                    f.write(f"\n--- STDERR ---\n{result['stderr']}\n")
+                        except Exception as e:
+                            log(f"  WARNUNG: Output-Log fehlgeschlagen: {e}", chain_name)
+
+                        if result["success"]:
+                            log(f"{link_name}: OK ({result['duration_s']:.0f}s)", chain_name)
+                        else:
+                            log(f"{link_name}: FEHLER (rc={result['returncode']}, {result['duration_s']:.0f}s)", chain_name)
+                            time.sleep(30)
+
+                        current_status = state.get_status()
+                        if current_status not in ("RUNNING", "ALL_DONE"):
+                            log(f"  STATUS-KORREKTUR: '{current_status}' -> 'RUNNING'", chain_name)
+                            state.set_status("RUNNING")
+
+                        if link.get("telegram_update", False):
+                            send_telegram_update(chain_name, state)
+
+                        time.sleep(5)
+
+                    # Runde abschliessen
+                    current_round = state.increment_round()
+                    log(f"RUNDE {current_round} ABGESCHLOSSEN (parallel)", chain_name)
+
+                    if mode in ("once", "deadend"):
+                        log(f"Modus '{mode}': Kette beendet nach einem Durchlauf.", chain_name)
+                        state.set_status("COMPLETED")
+                        send_telegram_update(chain_name, state)
+                        return 0
+
+                    continue
+
+            # Bestehende sequentielle Logik (unveraendert)
             for i, link in enumerate(links):
                 # Shutdown-Check vor jedem Glied
                 should_stop, reason = state.check_shutdown(config)
