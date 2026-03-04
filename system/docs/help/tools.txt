@@ -460,15 +460,15 @@ Quelle: Archiviert in user/_archive/BACH_NATIVE_TOOLS_MAPPING.md
 
 DETAILLIERTE TOOL-DOKUMENTATION
 --------------------------------
-Fuer komplexe Tools gibt es ausfuehrliche Dokumentation in docs/docs/docs/help/tools/:
+Fuer komplexe Tools gibt es ausfuehrliche Dokumentation in docs/help/tools/:
 
   Verfuegbare Dokumentationen:
   ---------------------------
-  docs/docs/docs/help/tools/python_cli_editor.txt   Python-Dateien strukturiert bearbeiten
+  docs/help/tools/python_cli_editor.txt   Python-Dateien strukturiert bearbeiten
                                      (Klassen/Methoden anzeigen, einfuegen,
                                      loeschen, Edit-Workflow, Export)
 
-  docs/docs/docs/help/tools/_index.txt              Index aller Tool-Dokumentationen
+  docs/help/tools/_index.txt              Index aller Tool-Dokumentationen
 
   Abruf:
   ------
@@ -509,9 +509,9 @@ Siehe: bach --help injectors (vollstaendige Trigger-Liste)
 
 SIEHE AUCH
 ----------
-docs/docs/docs/help/tools/_index.txt      Detaillierte Tool-Dokumentation (Index)
-docs/docs/docs/help/tools/*.txt           Einzelne Tool-Dokumentationen
-docs/docs/docs/help/injectors.txt         Automatische Tool-Hinweise (ContextInjector)
+docs/help/tools/_index.txt      Detaillierte Tool-Dokumentation (Index)
+docs/help/tools/*.txt           Einzelne Tool-Dokumentationen
+docs/help/injectors.txt         Automatische Tool-Hinweise (ContextInjector)
 bach --help connections    Connections-Verwaltung
 bach --help dirscan           Directory Scanner (Aenderungsueberwachung)
 bach --help maintain       Wartungs-Tools

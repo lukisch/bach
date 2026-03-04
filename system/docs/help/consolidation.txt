@@ -56,7 +56,7 @@ Die Konsolidierung kann als Hintergrund-Job laufen (scheduler_jobs):
 - `consolidate-archive`: Wöchentlich (Archiv-Prüfung).
 - `consolidate-index`: Facts-Index aktualisieren.
 
-(Hinweis: Daemon-Jobs müssen konfiguriert werden - siehe docs/docs/docs/help/daemon.txt)
+(Hinweis: Daemon-Jobs müssen konfiguriert werden - siehe docs/help/daemon.txt)
 
 TRUTHFULNESS:
 Jeder Konsolidierungslauf erzeugt Log-Einträge und bei Zweifeln 
@@ -64,9 +64,9 @@ Review-Tasks (#category: maintenance).
 
 SIEHE AUCH
 ----------
-  docs/docs/docs/help/memory.txt          Kognitives Gedaechtnis Modell
-  docs/docs/docs/help/lessons.txt         Best Practices & Erkenntnisse
-  docs/docs/docs/help/daemon.txt          Daemon-Jobs
+  docs/help/memory.txt          Kognitives Gedaechtnis Modell
+  docs/help/lessons.txt         Best Practices & Erkenntnisse
+  docs/help/daemon.txt          Daemon-Jobs
   hub/consolidation.py     Implementation der Logik
   ARCHITECTURE.md          System-Architektur (Memory-Modell)
 
@@ -76,8 +76,8 @@ Diese existierenden Tools sind Teil der Konsolidierung:
 
   tools/autolog_analyzer.py     Session-Analyse (ASM_003)
   tools/context_compressor.py   Komprimierung (ASM_004/005)
-  skills/_protocols/wiki-*      Wiki-Autoren
-  skills/_protocols/help-*      Help-Autoren
+  skills/workflows/wiki-*      Wiki-Autoren
+  skills/workflows/help-*      Help-Autoren
 
 DATENBANK-SCHEMA
 ----------------
@@ -116,7 +116,7 @@ WORKFLOW: FACT -> WIKI/HELP
 
 WORKFLOW: WIKI/HELP -> FACTS INDEX
 ----------------------------------
-1. consolidate-index scannt docs/docs/docs/help/*.txt und wiki/*.txt
+1. consolidate-index scannt docs/help/*.txt und wiki/*.txt
 2. Fuer jeden Eintrag: Existiert Fact?
 3. Falls nein: Fact erstellen als Index
    HELP.memory -> "Memory-System Dokumentation"

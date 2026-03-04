@@ -96,7 +96,7 @@ TUEV-VERWALTUNG:
   bach tuev check <workflow>         Einzelnen Workflow pruefen
   bach tuev run                      Alle faelligen Pruefungen
   bach tuev renew <workflow>         TUeV erneuern nach Pruefung
-  bach tuev init                     Workflows aus skills/_protocols/ registrieren
+  bach tuev init                     Workflows aus skills/workflows/ registrieren
 
 USECASE ERSTELLEN
 -----------------
@@ -144,7 +144,7 @@ SIEHE AUCH
   bach tuev status                          TUeV-Dashboard
   bach --help dev                           Entwicklungszyklus (8 Phasen)
   bach --help test                          Technische Testverfahren (B/O/E)
-  system/skills/_protocols/dev-zyklus.md    Detaillierter Dev-Workflow
+  system/skills/workflows/dev-zyklus.md    Detaillierter Dev-Workflow
   system/hub/tuev.py                        Handler-Implementierung
   system/db/schema.sql                      DB-Schema (usecases + workflow_tuev)
 

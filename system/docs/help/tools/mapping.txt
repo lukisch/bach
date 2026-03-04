@@ -2,7 +2,7 @@ MAPPING-TOOLS - Feature-Vergleich zwischen Systemen
 ===================================================
 
 Stand: 2026-01-23
-Pfad: docs/docs/docs/help/tools/mapping.txt
+Pfad: docs/help/tools/mapping.txt
 
 BESCHREIBUNG
 ------------
@@ -102,7 +102,7 @@ Siehe auch: docs/con2_ANFORDERUNGSANALYSE.md
 
 SIEHE AUCH
 ----------
-  docs/docs/docs/help/architecture.txt           BACH-Systemarchitektur
+  docs/help/architecture.txt           BACH-Systemarchitektur
   docs/consense_diff_2.md         Offene Anforderungen
   ROADMAP.md                      Roadmap mit Todos
   skills/SKILL_ANALYSE.md         Abdeckungskoeffizienten

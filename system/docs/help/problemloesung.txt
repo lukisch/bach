@@ -66,6 +66,6 @@ PRAKTISCHE TIPPS
 
 SIEHE AUCH
 ----------
-docs/docs/docs/help/denkstrategien.txt       Kognitive und metakognitive Strategien
-docs/docs/docs/help/strategien.txt           Kategorisieren, Bewerten, Testen
-docs/docs/docs/help/operatoren.txt           Basis-Operatoren und Patterns
+docs/help/denkstrategien.txt       Kognitive und metakognitive Strategien
+docs/help/strategien.txt           Kategorisieren, Bewerten, Testen
+docs/help/operatoren.txt           Basis-Operatoren und Patterns

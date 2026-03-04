@@ -2,8 +2,8 @@
 
 > Design-Manifest und Architektur-Dokumentation
 
-**Version:** 3.2.0-butternut
-**Stand:** 2026-02-28
+**Version:** 3.6.0-spaghetti
+**Stand:** 2026-03-04
 **Zielgruppe:** Entwickler, Kontributoren, fortgeschrittene Nutzer
 
 Copyright (c) 2026 Lukas Geiger. Alle Rechte vorbehalten.

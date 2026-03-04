@@ -2,7 +2,7 @@ OCR-TOOLS - Texterkennung mit Tesseract
 =======================================
 
 Stand: 2026-01-23
-Pfad: docs/docs/docs/help/tools/ocr.txt
+Pfad: docs/help/tools/ocr.txt
 
 BESCHREIBUNG
 ------------
@@ -122,7 +122,7 @@ Schlechte Erkennung:
 
 SIEHE AUCH
 ----------
-  docs/docs/docs/help/steuer.txt         Steuer-Agent mit OCR
+  docs/help/steuer.txt         Steuer-Agent mit OCR
   tools/steuer/           Steuer-Tools
   
   docs/MAIL_PROFILE_SYSTEM.md  E-Mail-basierte Belegerfassung

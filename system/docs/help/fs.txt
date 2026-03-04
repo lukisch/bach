@@ -1,0 +1,97 @@
+# Portabilitaet: UNIVERSAL
+# Version: 1.0.0
+# Zuletzt validiert: 2026-03-04
+
+HANDLER-NAME
+============
+fs - Filesystem Protection CLI
+
+Handler zur Integritaetspruefung und Wiederherstellung von Core-Dateien des BACH-Systems.
+Schuetzt kritische Dateien vor akzidenteller Loeschung oder Beschaedigung.
+
+
+BESCHREIBUNG
+============
+Der fs-Handler verwaltet ein Snapshot- und Manifest-System fuer das BACH-Dateisystem.
+Er klassifiziert Dateien nach Schutzlevel (dist_type):
+  - dist_type=2: CORE (essenzielle Systemdateien, hoheste Prioritaet)
+  - dist_type=1: TEMPLATE (Vorlagen, mittlere Prioritaet)
+  - dist_type=0: USER (Benutzerdaten, keine Automatisierung)
+
+Abhaengigkeiten:
+  - tools/fs_protection.py (FSProtection-Klasse)
+  - tools/fs_protection.py (PathClassifier-Klasse)
+  - data/bach.db (Manifest-Datenbank)
+  - dist/snapshots/*.orig (Snapshot-Archiv)
+
+
+OPERATIONEN
+===========
+check [Standard]
+    Prueift Integritaet aller ueberwachten Dateien.
+    Vergleicht aktuelle Dateien mit Snapshots aus dist/snapshots/.
+    Gibt Status und Liste fehlender/beschaedigter Dateien aus.
+    Aufruf: bach fs check
+
+heal [file] oder --all [--force]
+    Stellt fehlende oder beschaedigte Dateien wieder her.
+    - bach fs heal <file>: Spezifische Datei aus Snapshot wiederherstellen
+    - bach fs heal --all: Alle fehlenden Dateien wiederherstellen
+    - --force Flag: Ueberschreibt ohne Warnung
+    Rueckkehr: (success, message)
+
+classify <path>
+    Zeigt Klassifikation und Schutzlevel eines Pfads.
+    Gibt dist_type (0/1/2) und Schutzlevel (USER/TEMPLATE/CORE) aus.
+    Aufruf: bach fs classify /pfad/zur/datei
+
+scan [keine Argumente]
+    Scannt system/-Verzeichnis und gruppiert nach dist_type.
+    Gibt Anzahl Dateien pro Kategorie aus.
+    Aufruf: bach fs scan
+
+status [keine Argumente]
+    Zeigt aktuellen Schutz-Status mit Metadaten:
+    - Anzahl Snapshots in dist/snapshots/
+    - Manifest-Eintraege in bach.db
+    - Zeitstempel letzte Integritaetspruefung (fs_manifest.json)
+    - Zeitstempel letztes Backup
+    Aufruf: bach fs status
+
+
+BEISPIELE
+=========
+1. System-Integritaet pruefen:
+   $ bach fs check
+
+2. Alle fehlenden Core-Dateien wiederherstellen:
+   $ bach fs heal --all
+
+3. Spezifische beschaedigte Datei reparieren:
+   $ bach fs heal hub/base.py
+
+4. Klassifikation einer Datei ueberpruefen:
+   $ bach fs classify data/bach.db
+
+5. Dateisystem-Statistik anzeigen:
+   $ bach fs scan
+
+6. Aktuellen Schutz-Status einsehen:
+   $ bach fs status
+
+
+DATEIEN
+=======
+hub/fs.py                          Handler-Implementierung (160 Zeilen)
+tools/fs_protection.py             FSProtection + PathClassifier Klassen
+data/bach.db                        SQLite Manifest-Datenbank
+data/fs_manifest.json               Metadaten (last_check, last_backup)
+dist/snapshots/                    Snapshot-Archiv (*.orig Dateien)
+
+
+SIEHE AUCH
+==========
+dist                               Snapshot-Verwaltung (bach dist snapshot)
+base.py                            BaseHandler abstrakte Klasse
+tools/fs_protection.py             Technische Dokumentation
+BACH_SYSTEM.md                     Systemarchitektur und -design

@@ -52,4 +52,4 @@ SIEHE AUCH
 ----------
   wiki/antigravity.txt   Vollstaendige Dokumentation
   wiki/gemini.txt        Gemini KI-Modelle
-  docs/docs/docs/help/partners.txt           KI-Partner System
+  docs/help/partners.txt           KI-Partner System

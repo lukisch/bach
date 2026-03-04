@@ -254,7 +254,7 @@ BACH-SPEZIFISCHE KOMMUNIKATIONSFORMEN (16-21)
     Beispiel:   Claude erstellt Research-Task, Gemini arbeitet ab, Ergebnis zurueck
     Staerke:    Nutzt Geminis Staerken (grosse Dokumente, Bilder)
     Schwaeche:  Manueller Transfer noetig (oder Google Drive Sync)
-    BACH:       skills/_protocols/gemini-delegation.md
+    BACH:       skills/workflows/gemini-delegation.md
 
 VERGLEICHSMATRIX
 =================

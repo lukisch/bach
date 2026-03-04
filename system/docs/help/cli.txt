@@ -1,6 +1,6 @@
 # Portabilitaet: UNIVERSAL
-# Zuletzt validiert: 2026-02-08 (Claude Sonnet 4.5)
-# Naechste Pruefung: 2026-08-08
+# Zuletzt validiert: 2026-03-04 (Root-Docs-Review)
+# Naechste Pruefung: 2026-09-04
 
 CLI-KONVENTIONEN (v2.0 Registry-Based)
 =======================================
@@ -138,9 +138,9 @@ Wenn kein Handler gefunden wird, versucht BACH ein Tool aus tools/:
   bach skill_export  → tools/skill_export.py
   bach backup_manager → tools/backup_manager.py
 
-REGISTRIERTE HANDLER (Stand 2026-02-13):
+REGISTRIERTE HANDLER (Stand 2026-03-04):
 ----------------------------------------
-75+ Handler via Auto-Discovery (hub/*.py):
+109+ Handler via Auto-Discovery (hub/*.py):
 abo, agents, ati, backup, beat, bericht, between, calendar, chain, clock,
 connections, connector, consolidation, contact, context, countdown, cv,
 daemon (=scheduler), data, db, dist, doc, docs, email, extensions, fs, gesundheit, gui,

@@ -1,5 +1,8 @@
 # BACH Changelog
 
+> **Hinweis:** Das kanonische Changelog befindet sich unter [`../CHANGELOG.md`](../CHANGELOG.md) (BACH Root-Verzeichnis).
+> Diese Datei enthaelt die Historie bis v3.2.0-butternut. Neuere Versionen (v3.3.0+) siehe Root-CHANGELOG.
+
 Alle wichtigen Aenderungen an BACH werden hier dokumentiert.
 
 Copyright (c) 2026 Lukas Geiger. Alle Rechte vorbehalten.

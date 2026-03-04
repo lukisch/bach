@@ -311,11 +311,11 @@ PUT  /api/skills-board/hierarchy  Hierarchie speichern
 
 Help-System:
 GET  /api/help               Help-Dateien auflisten
-GET  /api/docs/docs/docs/help/{name}        Help-Datei lesen
-PUT  /api/docs/docs/docs/help/{name}        Help-Datei aktualisieren
+GET  /api/docs/help/{name}        Help-Datei lesen
+PUT  /api/docs/help/{name}        Help-Datei aktualisieren
 POST /api/help               Help-Datei erstellen
-DELETE /api/docs/docs/docs/help/{name}      Help-Datei loeschen
-GET  /api/docs/docs/docs/help/search/{term} Help durchsuchen
+DELETE /api/docs/help/{name}      Help-Datei loeschen
+GET  /api/docs/help/search/{term} Help durchsuchen
 
 Anonymization (Foerderplaner):
 GET  /api/anonymization/clients  Klienten

@@ -58,6 +58,6 @@ BEISPIELE
 
 SIEHE AUCH
 ----------
-  docs/docs/docs/help/memory.txt      Gedächtnis-Konsolidierung
-  docs/docs/docs/help/maintain.txt    Integritäts-Prüfung
+  docs/help/memory.txt      Gedächtnis-Konsolidierung
+  docs/help/maintain.txt    Integritäts-Prüfung
   bach --help startup  Session-Start

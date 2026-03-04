@@ -2,7 +2,7 @@ CODE QUALITY TOOLS - Code-Qualitaet und Fixes
 =============================================
 
 Stand: 2026-01-23
-Pfad: docs/docs/docs/help/tools/code_quality.txt
+Pfad: docs/help/tools/code_quality.txt
 
 BESCHREIBUNG
 ------------

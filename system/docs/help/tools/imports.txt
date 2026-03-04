@@ -2,7 +2,7 @@ IMPORT TOOLS - Python Import-Handling
 ======================================
 
 Stand: 2026-01-23
-Pfad: docs/docs/docs/help/tools/imports.txt
+Pfad: docs/help/tools/imports.txt
 
 BESCHREIBUNG
 ------------

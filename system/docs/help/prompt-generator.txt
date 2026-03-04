@@ -12,7 +12,7 @@ Senden von Prompts an Claude-Sessions - manuell oder automatisiert.
 STATUS:   FUNKTIONAL (Service implementiert, Handler fehlt)
 HANDLER:  NICHT REGISTRIERT (kein bach.py Integration)
 SERVICE:  hub/_services/prompt_generator/
-GUI:      gui/prompt_manager.py (PyQt6, eigenstaendig)
+GUI:      gui/prompt_manager.py (PySide6, eigenstaendig)
 
 
 KONZEPT
@@ -88,7 +88,7 @@ Erweiterte Optionen fuer automatisierte Sessions:
 GUI-LAYOUT (gui/prompt_manager.py - IMPLEMENTIERT)
 ---------------------------------------------------
 
-  PyQt6-basierter Dark-Theme Manager mit:
+  PySide6-basierter Dark-Theme Manager mit:
   - Tab 1: Prompt Editor + Vorlagen (System/Agents/Custom)
   - Tab 2: Daemon-Steuerung (Intervalle, Ruhezeiten, Profilen)
   - Tab 3: Template-Verwaltung
@@ -132,13 +132,13 @@ ABGRENZUNG: DREI HANDLER-SYSTEME
   │  Systemweit fuer alle Agenten                                   │
   │  Handler:  FEHLT (nicht in Registry)                            │
   │  Service:  hub/_services/prompt_generator/prompt_generator.py   │
-  │  GUI:      gui/prompt_manager.py (PyQt6, eigenstaendig)         │
+  │  GUI:      gui/prompt_manager.py (PySide6, eigenstaendig)       │
   │  Daemon:   JA (session_daemon.py)                               │
   │  API:      FEHLT (nicht in bach_api.py)                         │
   └─────────────────────────────────────────────────────────────────┘
 
   ┌─────────────────────────────────────────────────────────────────┐
-  │  WARTUNG (docs/docs/docs/help/wartung.txt)                                     │
+  │  WARTUNG (docs/help/wartung.txt)                                     │
   ├─────────────────────────────────────────────────────────────────┤
   │  Shell/Python-Befehle ausfuehren (Backup, Cleanup)              │
   │  Keine Prompts, nur Befehle                                     │
@@ -149,7 +149,7 @@ ABGRENZUNG: DREI HANDLER-SYSTEME
   └─────────────────────────────────────────────────────────────────┘
 
   ┌─────────────────────────────────────────────────────────────────┐
-  │  RECURRING (docs/docs/docs/help/recurring.txt)                                 │
+  │  RECURRING (docs/help/recurring.txt)                                 │
   ├─────────────────────────────────────────────────────────────────┤
   │  Erstellt Tasks als Erinnerungen                                │
   │  Kein Prompt-Sending                                            │
@@ -180,7 +180,7 @@ TECHNISCHE BASIS
         ├── ati.json
         └── wartung.json
 
-  GUI: gui/prompt_manager.py (PyQt6, eigenstaendig)
+  GUI: gui/prompt_manager.py (PySide6, eigenstaendig)
 
   FEHLENDE INTEGRATION:
     - Kein Handler in hub/ (nicht in Registry)

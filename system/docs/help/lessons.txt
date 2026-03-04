@@ -97,6 +97,6 @@ Lessons fließen automatisch in das **Dynamic Learning System** ein:
 
 SIEHE AUCH
 ----------
-  docs/docs/docs/help/memory.txt            Cognitive Memory Model
-  docs/docs/docs/help/consolidation.txt     Vom Ereignis zur Lektion
+  docs/help/memory.txt            Cognitive Memory Model
+  docs/help/consolidation.txt     Vom Ereignis zur Lektion
   ROADMAP.md                 Phasen der Entwicklung

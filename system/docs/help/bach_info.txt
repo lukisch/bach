@@ -36,5 +36,5 @@ CLI/GUI/MCP --> Hub Handler --> Skills/Tools --> Datenbanken/Dateisystem/Partner
 SIEHE AUCH
 wiki/was_ist_bach.txt      Ausfuehrliche Definition & Vergleich
 system/ARCHITECTURE.md          Architektur-Dokumentation (Schichten-Modell)
-docs/docs/docs/help/architecture.txt           Technische Details
-docs/docs/docs/help/features.txt               Feature-Liste
+docs/help/architecture.txt           Technische Details
+docs/help/features.txt               Feature-Liste

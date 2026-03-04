@@ -69,7 +69,7 @@ Delegation ist DB-basiert (seit JSON_001 Migration):
 
 SIEHE AUCH
 ----------
-docs/docs/docs/help/partner.txt                 Partner-Konzept (Zonen, Routing)
+docs/help/partner.txt                 Partner-Konzept (Zonen, Routing)
 wiki/gemini.txt             Gemini-Details
 wiki/antigravity.txt        Antigravity-Editor
 hub/partner.py                   Partner Handler Implementation

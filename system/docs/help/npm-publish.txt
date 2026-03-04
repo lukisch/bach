@@ -80,4 +80,4 @@ SIEHE AUCH
 ----------
   docs/help/tools.txt         Tool-Uebersicht
   docs/help/coding.txt        Coding-Standards
-  skills/_protocols/npm-mcp-publish.md  Ausfuehrliches Protokoll
+  skills/workflows/npm-mcp-publish.md  Ausfuehrliches Protokoll

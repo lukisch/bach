@@ -9,7 +9,7 @@ STAND: 2026-02-08
 
 GRUNDREGEL: DATENBANK VOR JSON
 ------------------------------
-BACH nutzt SQLite (`bach.db`) als primäre Datenhaltung (aktuell 116 Tabellen).
+BACH nutzt SQLite (`bach.db`) als primäre Datenhaltung (aktuell 210+ Tabellen).
 JSON-Dateien sind NUR in begründeten Ausnahmefällen erlaubt.
 
 WANN DATENBANK (STANDARD)?
@@ -44,5 +44,5 @@ KONVERTIERUNG
 
 SIEHE AUCH
 ----------
-  docs/docs/docs/help/maintain.txt    Integritäts-Check und Seal-Mechanismus
-  bach --db status     Aktueller Stand der 116 Tabellen
+  docs/help/maintain.txt    Integritäts-Check und Seal-Mechanismus
+  bach --db status     Aktueller Stand der 210+ Tabellen

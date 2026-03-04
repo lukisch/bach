@@ -55,5 +55,5 @@ SIEHE AUCH
 ----------
   bach --sync help         Skills- und Tools-Synchronisation
   bach fs help             Filesystem-Operationen (heal, verify)
-  docs/docs/docs/help/guidelines.txt      Dokumentations-Standards
-  system/db/schema.sql     Vollständiges DB-Schema (114 Tabellen)
+  docs/help/guidelines.txt      Dokumentations-Standards
+  system/db/schema.sql     Vollständiges DB-Schema (210+ Tabellen)

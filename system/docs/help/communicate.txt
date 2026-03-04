@@ -136,4 +136,4 @@ SIEHE AUCH
 ----------
   bach partner --help    Partner-Verwaltung und Delegation
   bach msg --help        Nachrichtensystem-Befehle
-  docs/docs/docs/help/maintain.txt      Partner-Health Checks
+  docs/help/maintain.txt      Partner-Health Checks

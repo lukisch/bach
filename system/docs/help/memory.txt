@@ -25,7 +25,7 @@ DIE 5 KOGNITIVEN TYPEN:
    - Speichert abgeschlossene Sessions (360+).
    - Befehl: `bach --memory session "..."`
 
-3. SEMANTISCHES GEDÄCHTNIS (memory_facts, docs/docs/docs/help/, wiki/)
+3. SEMANTISCHES GEDÄCHTNIS (memory_facts, docs/help/, wiki/)
    - "Das Weltwissen"
    - Fakten, Definitionen, Architektur (230+ Fakten).
    - Befehl: `bach --memory fact "..."`
@@ -136,7 +136,7 @@ SIEHE AUCH:
   --help injectors      Das Injektor-System
   --help consolidation  Konsolidierungs-Engine
   --help connector      Connector-Integration (context_triggers)
-  docs/docs/docs/help/lessons.txt      Umgang mit Lektionen
+  docs/help/lessons.txt      Umgang mit Lektionen
   bach_api.py           Library API (memory Modul)
   SKILL.md              System-Initialisierung
 
@@ -230,7 +230,7 @@ DER LERNPROZESS ALS KREISLAUF:
 │  │ Lessons      - Was hat funktioniert? Was nicht?               │  │
 │  │ Workflows    - WIE geht es? (Prozedurales Gedaechtnis)        │  │
 │  │ Sessions     - Was war mein Ziel? (Ausrichtung auf Zukunft)   │  │
-│  │ Fakten       - docs/docs/docs/help/ + wiki/ + facts (Weltwissen)             │  │
+│  │ Fakten       - docs/help/ + wiki/ + facts (Weltwissen)             │  │
 │  │ Best Pract.  - Zu Regeln gemachte Erfahrungen                 │  │
 │  └───────────────────────────────────────────────────────────────┘  │
 │        │                                                            │
@@ -274,7 +274,7 @@ ZUORDNUNG: MENSCHLICHES GEDAECHTNIS <-> BACH
 | Arbeitsgedaechtnis       | memory_working                 | Aktuelle Session            |
 | Prozedurales Gedaechtnis | Workflows, tools/, skills/     | WIE man etwas tut           |
 | Episodisches Gedaechtnis | memory_lessons, memory_sessions| WAS passiert ist            |
-| Semantisches Gedaechtnis | docs/docs/docs/help/, wiki/, memory_facts     | Weltwissen (fast leer*)     |
+| Semantisches Gedaechtnis | docs/help/, wiki/, memory_facts     | Weltwissen (fast leer*)     |
 | Regelwissen              | Best Practices, SKILL.md       | Bewaehrte Erfahrungen       |
 
 *) Semantisches Gedaechtnis ist bei BACH fast leer, weil das Weltwissen

@@ -94,6 +94,6 @@ SIEHE AUCH
 ----------
   system/bach_api.py   Library-API Modul (bevorzugter Zugriff)
   system/hub/task.py   TaskHandler Implementation
-  docs/docs/docs/help/delegate.txt    Delegation an Partner
-  docs/docs/docs/help/maintain.txt    Integritaets-Pruefung und Cleanup
+  docs/help/delegate.txt    Delegation an Partner
+  docs/help/maintain.txt    Integritaets-Pruefung und Cleanup
   bach --help ati      Der Automated Tool Incorporator

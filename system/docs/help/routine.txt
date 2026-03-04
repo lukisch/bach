@@ -80,4 +80,4 @@ SIEHE AUCH
 ----------
   bach calendar         Kombinierte Termin- und Routine-Ansicht
   bach --help gesundheit  Zusätzliche Haushalts-Tools (Inventar)
-  docs/docs/docs/help/maintain.txt     DB-Verschiebungs-Historie (User->Bach)
+  docs/help/maintain.txt     DB-Verschiebungs-Historie (User->Bach)

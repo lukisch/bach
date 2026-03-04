@@ -54,7 +54,7 @@ usecases:
   id                   Primaerschluessel
   title                Testfall-Titel
   description          Beschreibung des Testfalls
-  workflow_path        Pfad zum Workflow (skills/_protocols/...)
+  workflow_path        Pfad zum Workflow (skills/workflows/...)
   workflow_name        Name des Workflows
   test_input           JSON: Eingabedaten fuer Test
   expected_output      JSON: Erwartetes Ergebnis

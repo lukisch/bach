@@ -218,7 +218,7 @@ Mehrere Operatoren zu einem Workflow verbinden.
   - n8n-Pipelines
   - Airflow DAGs
   - Kubernetes CronJobs + Worker
-BACH: Toolchain-Engine (hub/chain.py), Workflows (skills/_protocols/), Dev-Zyklus
+BACH: Toolchain-Engine (hub/chain.py), Workflows (skills/workflows/), Dev-Zyklus
 
 7.2 Optimieren
 --------------

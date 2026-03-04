@@ -1,0 +1,60 @@
+# Portabilitaet: UNIVERSAL
+# Version: 1.0.0
+# Zuletzt validiert: 2026-03-04
+
+HANDLER-NAME
+============
+path - Zeigt und verwaltet BACH-Systempfade
+
+
+BESCHREIBUNG
+============
+Der path-Handler ermittelt und zeigt alle wichtigen BACH-Verzeichnisse an. Er
+nutzt bach_paths.py als zentrale Quelle (Single Source of Truth). Pfade koennen
+lokal ueberschrieben und validiert werden.
+
+Versionsstand: v2.0
+
+
+OPERATIONEN
+===========
+show, all           Alle wichtigen Pfade anzeigen (Standard)
+list                Alle verfuegbaren Pfadnamen auflisten (gruppiert)
+<name>              Spezifischen Pfad anzeigen (mit Zusatzinfo)
+set <name> <pfad>   Pfad-Override in Datenbank setzen
+overrides           DB-Overrides anzeigen
+validate            Alle kritischen Pfade validieren
+
+
+BEISPIELE
+=========
+bach path
+  -> Alle Pfade (Standard)
+
+bach path root
+  -> Hauptverzeichnis
+
+bach path list
+  -> Alle verfuegbaren Pfadnamen (gruppiert)
+
+bach path templates
+  -> Pfad zum Templates-Verzeichnis mit Details
+
+bach path set wissensdatenbank /mnt/my/path
+  -> Override in DB speichern
+
+bach path validate
+  -> Validierung durchfuehren
+
+
+DATEIEN
+=======
+hub/path.py                      Handler-Implementierung (PathHandler)
+hub/bach_paths.py               Zentrale Pfad-Registry und Funktionen
+data/bach.db                    Speichert Pfad-Overrides
+
+
+SIEHE AUCH
+==========
+hub/base.py                     BaseHandler-Dokumentation
+docs/help/                      Weitere Handler-Dokumentation

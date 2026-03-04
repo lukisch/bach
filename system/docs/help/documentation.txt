@@ -19,9 +19,8 @@ system/:
   ARCHITECTURE.md       Technische Architektur, Komponenten
   ROADMAP.md            Entwicklungsplan, Meilensteine
   CHANGELOG.md          Versionshistorie, Aenderungen
-  BUGLOG.md             Bekannte Bugs, Fixes
 
-HELP-SYSTEM (system/docs/docs/docs/docs/help/)
+HELP-SYSTEM (system/docs/help/)
 --------------------------
 
 Aufruf: python bach.py --help <topic>
@@ -65,7 +64,7 @@ SKILLS-HIERARCHIE (system/skills/)
 -----------------------------------
 
   agents/        Agent-Profile (Rollen)
-  skills/_protocols/     Workflow-Definitionen (22 Workflows)
+  skills/workflows/     Workflow-Definitionen (22 Workflows)
   agents/_experts/       Experten-Konfigurationen
   skills/_services/      Service-Beschreibungen
   skills/_templates/     Vorlagen
@@ -95,7 +94,7 @@ CODE-DOKUMENTATION
 DATENBANK-SCHEMA
 ----------------
 
-  system/db/schema.sql   Vollstaendiges DB-Schema (114 Tabellen)
+  system/db/schema.sql   Vollstaendiges DB-Schema (210+ Tabellen)
   system/data/bach.db    SQLite-Datenbank
 
 CLI-Zugriff:
@@ -120,7 +119,7 @@ SKILL.md                 <- Master-Kontext (liest LLM immer)
     │
     ├── ARCHITECTURE.md  <- Technische Details
     │
-    ├── docs/docs/docs/help/            <- Operative Anleitungen
+    ├── docs/help/            <- Operative Anleitungen
     │   ├── core.txt     <- Kern-Konzept
     │   ├── memory.txt   <- Memory-System
     │   └── ...
@@ -139,9 +138,9 @@ HANDLER-ARCHITEKTUR
 -------------------
 
 Help Handler:      system/hub/help.py
-  - Zeigt .txt Dateien aus system/docs/docs/docs/docs/help/
+  - Zeigt .txt Dateien aus system/docs/help/
   - Unterstuetzt Unterordner (tools/, wiki/)
-  - Alias-System fuer agents, _protocols, _experts
+  - Alias-System fuer agents, workflows, _experts
   - Tool-Direktzugriff aus DB (v1.1.38+)
 
 Docs Handler:      system/hub/docs.py

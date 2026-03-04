@@ -1,0 +1,94 @@
+# Portabilitaet: UNIVERSAL
+# Version: 1.0.0
+# Zuletzt validiert: 2026-03-04
+
+HANDLER-NAME
+============
+db_sync - OneDrive-basiertes Backup-Sync-System
+
+
+BESCHREIBUNG
+============
+Synchronisiert bach.db ueber OneDrive-Backups mit .bachdb-Endung. Die Live-DB
+bleibt lokal ohne Konflikte. Backups werden zwischen Systemen (LAPTOP/
+WORKSTATION) ueber die Backup-Ordner synchronisiert.
+
+Intelligentes Merge: Tabellen mit Timestamp-Spalten verwenden Last-Write-Wins
+mit Konflikt-Check durch Heartbeat (5-Minuten-Fenster). Secrets werden aus
+Backups entfernt (ENT-44). Automatische Cleanup-Strategie: Behalte neueste
+Backups pro Host plus alles unter X Tagen (Default: 7 Tage, 10 pro Host).
+
+
+OPERATIONEN
+===========
+bach db backup
+  Erstellt manuelles Backup von bach.db.
+  Format: bach_HOSTNAME_TIMESTAMP.bachdb (Beispiel: bach_LAPTOP_2026-03-04T14-30-00.bachdb)
+  Traeger: Lokal, keine Remote-Anfrage.
+
+bach db sync
+  Fuehrt vollstaendigen Sync durch: Pull (neuere Backups) + Merge + Push (eigenes Backup).
+  Konflikt-Check: Wenn andere PCs aktiv sind (Heartbeat < 5min), wird nach Bestätigung gefragt.
+  Flags: --auto oder -y fuer non-interactive Mode.
+  Merge-Strategie: Neuere Zeilen (Timestamp) gewinnen (INSERT OR REPLACE).
+
+bach db status
+  Zeigt Status anzeigen: Lokale DB, Backup-Ordner, letzte 10 Backups (Host, Zeit, Groesse),
+  aktive PCs und deren Heartbeat.
+
+bach db cleanup
+  Loescht alte Backups basierend auf Retention-Policy.
+  Regel: Behalte neueste 10 pro Host ODER alles jünger als 7 Tage (konfigurierbar).
+  Gibt Anzahl geloeschter Backups aus.
+
+bach db enable
+  Aktiviert Auto-Sync bei Startup/Exit (setzt Konfigurationsflag).
+
+bach db disable
+  Deaktiviert Auto-Sync.
+
+
+BEISPIELE
+=========
+# Manuelles Backup vor risikanter Operation
+bach db backup
+
+# Sync mit Konflikt-Check (interaktiv)
+bach db sync
+
+# Unbeaufsichtigter Sync (Cronjob/Automation)
+bach db sync --auto
+
+# Status vor Sync pruefen (zeigt aktive PCs und Backups)
+bach db status
+
+# Cleanup veralteter Backups manuell ausloesen
+bach db cleanup
+
+
+DATEIEN
+=======
+Relativ zu system/:
+
+hub/db_sync.py
+  Kernimplementierung (DBSyncManager, DBSyncHandler).
+  Tabellen mit Timestamp-Merge: ati_tasks, connector_messages, memory_facts,
+  memory_context, tasks, steuer_dokumente, agent_synergies, bach_agents,
+  assistant_calendar.
+
+data/bach.db
+  Lokale Produktions-Datenbank (bleibt unberuehrt bei Fehlern).
+
+../backups/
+  Backup-Ordner (OneDrive-synced). Enthaelt .bachdb-Dateien und heartbeat.json.
+  Heartbeat: Verfolgt aktive PCs (Hostname, PID, Zeitstempel) fuer Konflikt-Detection.
+
+config/db_sync_enabled
+  Flag fuer Auto-Sync-Aktivierung (erstellt durch "enable", entfernt durch "disable").
+
+
+SIEHE AUCH
+==========
+- CLAUDE.md: BACH-System-Doku, Retention-Policy (backup_retention_days in system_config)
+- basehandler / Handler-Framework: Siehe base.py fuer Schnittstelle
+- heartbeat.json: Dynamisch, enthaelt {hostname: {last_seen, pid, active}}

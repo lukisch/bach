@@ -38,7 +38,7 @@ SCHICHTEN-MODELL
    Standardisiertes Interface (c_ prefix) für AI-Kompatibilität.
 
 5. DATA & PERSISTENCE (bach.db, data/logs/)
-   SQLite-Grundlage mit 116+ Tabellen (Zentralisierte Datenhaltung).
+   SQLite-Grundlage mit 210+ Tabellen (Zentralisierte Datenhaltung).
    Tracking von Tokens, Sessions, Erfolg und Directory Truth.
    Logs konsolidiert in data/logs/ (system/logs/ DEPRECATED)
 
@@ -57,7 +57,7 @@ system/
 │   ├── adapter.py ............. Legacy Bridge
 │   └── aliases.py ............. Command Aliases (mem -> memory)
 ├── data/
-│   ├── bach.db ................ SQLite (116+ Tabellen) - "Das Gedächtnis"
+│   ├── bach.db ................ SQLite (210+ Tabellen) - "Das Gedächtnis"
 │   └── logs/ .................. Konsolidierte Logs (NUR HIER)
 ├── db/
 │   └── schema.sql ............. Single Source of Truth (DDL)
@@ -67,7 +67,7 @@ system/
 │       ├── connector/ ......... Queue-Processor (async)
 │       └── document/ .......... Report-Workflows
 ├── tools/ ..................... Python-Scripts (290+ Werkzeuge)
-├── docs/docs/docs/help/ ...................... Hilfe-System (.txt)
+├── docs/help/ ...................... Hilfe-System (.txt)
 ├── agents/ ............ Agenten-Profile (Rollen)
 ├── partners/ .......... LLM-Konfigurationen (KONSOLIDIERT)
 ├── docs/ ...................... Dokumentation & Konzepte
@@ -119,7 +119,7 @@ ARCHITEKTUR-DIAGRAMM (Registry v2.0)
 │ PERSISTENCE LAYER                                               │
 ├───────────────────┬─────────────────────┬───────────────────────┤
 │ bach.db           │ data/logs/          │ user/                 │
-│ 116+ Tabellen     │ Konsolidierte Logs  │ Exports & Berichte    │
+│ 210+ Tabellen     │ Konsolidierte Logs  │ Exports & Berichte    │
 └───────────────────┴─────────────────────┴───────────────────────┘
 
 CORE KONZEPTE
@@ -146,7 +146,7 @@ CORE KONZEPTE
 
 SIEHE AUCH
 ----------
-docs/docs/docs/help/bach_info.txt       Was ist BACH?
-docs/docs/docs/help/memory.txt          Das Gedaechtnis-System
-docs/docs/docs/help/partner.txt         Zusammenarbeit der KIs
+docs/help/bach_info.txt       Was ist BACH?
+docs/help/memory.txt          Das Gedaechtnis-System
+docs/help/partner.txt         Zusammenarbeit der KIs
 wiki/was_ist_bach.txt  Ausfuehrliche Synopse

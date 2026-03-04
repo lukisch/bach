@@ -42,7 +42,7 @@ WAS WIRD GESICHERT?
 
   NICHT gesichert (dist_type >= 1):
     ├── bach.py, schema.sql, hub/
-    ├── tools/, skills/, docs/docs/docs/help/
+    ├── tools/, skills/, docs/help/
     └── (sind Teil der Distribution)
 
 BACKUP-ROTATION

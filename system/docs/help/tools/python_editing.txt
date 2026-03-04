@@ -2,7 +2,7 @@ PYTHON EDITING TOOLS - Python-Dateien bearbeiten
 =================================================
 
 Stand: 2026-01-23
-Pfad: docs/docs/docs/help/tools/python_editing.txt
+Pfad: docs/help/tools/python_editing.txt
 
 BESCHREIBUNG
 ------------

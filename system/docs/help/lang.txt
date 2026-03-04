@@ -1,0 +1,78 @@
+# Portabilitaet: UNIVERSAL
+# Version: 1.0.0
+# Zuletzt validiert: 2026-03-04
+
+HANDLER-NAME
+============
+lang - Mehrsprachigkeit und Uebersetzungs-Verwaltung
+
+BESCHREIBUNG
+============
+Der LANG-Handler verwaltet mehrsprachige Inhalte in BACH. Er scannt Code nach
+deutschen Strings, fuehrt Uebersetzungen durch, validiert fehlende
+Uebersetzungen und verwaltet ein Basis-Woerterbuch mit 119 deutschen Begriffen.
+Nutzt SQLite-Datenbank (bach.db) mit Tabellen: languages_config,
+languages_translations, languages_dictionary.
+
+OPERATIONEN
+===========
+  status              Sprachkonfiguration und Statistiken anzeigen
+  scan                Code-Verzeichnisse nach deutschen Strings durchsuchen
+  scan --namespace    Nur bestimmten Bereich scannen (cli, gui, help, skills)
+  list                Alle Uebersetzungen anzeigen
+  list --lang <code>  Nur bestimmte Sprache (de/en)
+  missing             Fehlende Uebersetzungen (Eintraege ohne en-Version)
+  translate           Auto-Uebersetzung starten (basierend auf Woerterbuch)
+  add <key>           Manuell Uebersetzung hinzufuegen (--de, --en Flags)
+  add-language <code> Neue Sprache registrieren (z.B. fr, es, pt)
+  export              Fuer LLM-Review exportieren (JSON-Format)
+  import <datei>      LLM-Review-Datei importieren und integrieren
+  set <lang>          Standard-Sprache setzen (de/en)
+  dict status         Woerterbuch-Status anzeigen
+  dict init           Basis-Woerterbuch (119 Begriffe) laden
+  dict add <de> <en>  Begriff manuell zum Woerterbuch hinzufuegen
+  dict search <term>  Begriff im Woerterbuch suchen
+
+BEISPIELE
+=========
+# Sprachstatus anzeigen
+  bach lang status
+
+# Code nach deutschen Texten durchsuchen
+  bach lang scan
+  bach lang scan --namespace cli
+
+# Fehlende Uebersetzungen identifizieren
+  bach lang missing
+
+# Manuell uebersetzen
+  bach lang add "speichern" --de "Speichern" --en "Save"
+
+# LLM-Review vorbereiten
+  bach lang export
+  [... LLM bearbeitet Datei ...]
+  bach lang import export.json
+
+# Neue Sprache hinzufuegen (Französisch)
+  bach lang add-language fr
+
+# Standard-Sprache auf English setzen
+  bach lang set en
+
+# Woerterbuch-Basis laden (119 Eintraege)
+  bach lang dict init
+
+DATEIEN
+=======
+Implementierung: hub/lang.py (LangHandler-Klasse)
+Datenbank:      data/bach.db (SQLite)
+  - Tabelle languages_config: Standard-Sprache, Fallback, Auto-Translate-Flag
+  - Tabelle languages_translations: Alle Uebersetzungen mit Metadaten
+  - Tabelle languages_dictionary: Basis-Woerterbuch (119 Begriffe)
+Export-Format:  JSON (Uebersetzungen + Metadaten, kompatibel mit LLM-Tools)
+
+SIEHE AUCH
+==========
+  bach cli        - Befehlszeilen-Schnittstelle
+  bach backup     - Datenbank-Backups (Uebersetzungen schreiben zu bach.db)
+  bach help       - Help-System fuer alle Handler

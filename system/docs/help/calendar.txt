@@ -50,4 +50,4 @@ SIEHE AUCH
 ----------
   bach routine         Verwaltung der Haushaltsroutinen
   bach --help clock    Zeit- und Zeitstempel-Tools
-  docs/docs/docs/help/memory.txt      Zeitliche Einordnung von Sessions
+  docs/help/memory.txt      Zeitliche Einordnung von Sessions

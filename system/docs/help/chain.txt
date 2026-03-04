@@ -2,7 +2,7 @@
 # Version: 1.0.0
 # Zuletzt validiert: 2026-02-28
 # Naechste Pruefung: 2026-08-28
-# Ressourcen: [hub/chain.py, toolchains, daemon_jobs]
+# Ressourcen: [hub/chain.py, toolchains, scheduler_jobs]
 
 CHAIN - Verkettete Tool-Befehle und LLM-Ketten
 ================================================
@@ -113,7 +113,7 @@ DATENBANK
   toolchains:
     id, name, description, steps_json, created_at, updated_at
 
-  chain_runs:
+  toolchain_runs:
     id, chain_id, status, started_at, ended_at, log
 
 DATEIEN

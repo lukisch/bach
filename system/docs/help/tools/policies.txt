@@ -2,7 +2,7 @@ POLICIES - Wiederverwendbare Code-Standards
 ==========================================
 
 Stand: 2026-01-23
-Pfad: docs/docs/docs/help/tools/policies.txt
+Pfad: docs/help/tools/policies.txt
 
 BESCHREIBUNG
 ------------

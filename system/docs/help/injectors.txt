@@ -93,7 +93,7 @@ KOGNITIVE ORCHESTRIERUNG (Diagramm)
   |  STATISCH (Wissensbasis)                                    |
   |  +-- Meta-Skills, Meta-Workflows                            |
   |  +-- Wiki (wiki/)                                      |
-  |  +-- Help (docs/docs/docs/help/*.txt)                                      |
+  |  +-- Help (docs/help/*.txt)                                      |
   |  +-- Kontext (memory_context)                               |
   |                                                             |
   |  PROZESSBEGLEITEND (via Injektoren)                         |

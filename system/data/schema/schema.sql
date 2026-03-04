@@ -2234,3 +2234,295 @@ CREATE INDEX IF NOT EXISTS idx_blob_history_path ON bach_blob_history(blob_path)
 --         content='document_index',
 --         content_rowid='id'
 --     );
+
+
+-- =============================================================
+-- Fehlende Tabellen (aus DB extrahiert, 2026-03-04)
+-- Ergaenzt durch Help-Expert-Review
+-- =============================================================
+
+CREATE TABLE claude_bridge_config (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_at TEXT
+);
+
+CREATE TABLE claude_bridge_workers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    task_description TEXT NOT NULL,
+    status TEXT DEFAULT 'running',
+    permission_mode TEXT,
+    pid INTEGER,
+    result_summary TEXT,
+    error_message TEXT,
+    started_at TEXT NOT NULL,
+    ended_at TEXT,
+    cost_estimate_usd REAL DEFAULT 0.0
+);
+
+CREATE TABLE cookbook_recipes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT UNIQUE NOT NULL,
+    title TEXT,
+    description TEXT,
+    recipe_json TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    dist_type INTEGER DEFAULT 0
+);
+
+CREATE TABLE daemon_jobs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE,
+    profile_name TEXT,               -- Aus DaemonManager/profiles.json
+    description TEXT,
+    job_type TEXT NOT NULL CHECK(job_type IN ('cron', 'interval', 'event', 'manual')),
+    schedule TEXT,                   -- Cron-Expression oder Interval
+    command TEXT NOT NULL,           -- CLI-Befehl
+    script_path TEXT,                -- Pfad zum Script (aus DaemonManager)
+    arguments TEXT,                  -- Argumente (aus DaemonManager)
+    parameters TEXT,                 -- JSON mit Parametern
+    is_active INTEGER DEFAULT 0,
+    last_run TIMESTAMP,
+    next_run TIMESTAMP,
+    run_count INTEGER DEFAULT 0,
+    success_count INTEGER DEFAULT 0,
+    fail_count INTEGER DEFAULT 0,
+    last_result TEXT,                -- 'success', 'failed', 'timeout'
+    last_output TEXT,
+    timeout_seconds INTEGER DEFAULT 300,
+    retry_on_fail INTEGER DEFAULT 0,
+    max_retries INTEGER DEFAULT 3,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+, dist_type INTEGER DEFAULT 1);
+
+CREATE TABLE daemon_runs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    job_id INTEGER NOT NULL REFERENCES daemon_jobs(id),
+    started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    finished_at TIMESTAMP,
+    duration_seconds REAL,
+    result TEXT CHECK(result IN ('success', 'failed', 'timeout', 'cancelled')),
+    output TEXT,
+    error TEXT,
+    triggered_by TEXT DEFAULT 'schedule'  -- 'schedule', 'manual', 'event'
+, dist_type INTEGER DEFAULT 0);
+
+CREATE TABLE dist_file_versions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    file_path TEXT NOT NULL,
+    version TEXT NOT NULL,
+    file_hash TEXT NOT NULL,
+    dist_type INTEGER NOT NULL,
+    created_at TEXT NOT NULL,
+    UNIQUE(file_path, version)
+);
+
+CREATE TABLE dist_type_defaults (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    path TEXT NOT NULL UNIQUE,
+    dist_type INTEGER NOT NULL DEFAULT 1,
+    is_file INTEGER NOT NULL DEFAULT 0,
+    note TEXT DEFAULT '',
+    updated_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE TABLE document_chunks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    search_index_id INTEGER NOT NULL,  -- FK zu search_index
+    chunk_number INTEGER NOT NULL,     -- 0-basiert
+    chunk_text TEXT NOT NULL,          -- Chunk-Inhalt (400 Tokens)
+    chunk_tokens INTEGER DEFAULT 0,    -- Token-Anzahl (Approximation)
+    summary TEXT,                      -- LLM-Zusammenfassung (Stufe 3, NULL bis generiert)
+    embedding BLOB,                    -- Optionales Embedding (sqlite-vec, SQ064)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    summarized_at TIMESTAMP,           -- Wann wurde Summary generiert?
+    FOREIGN KEY (search_index_id) REFERENCES search_index(id) ON DELETE CASCADE
+);
+
+CREATE TABLE email_drafts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                recipient TEXT NOT NULL,
+                cc TEXT,
+                bcc TEXT,
+                subject TEXT NOT NULL,
+                body TEXT NOT NULL,
+                body_html TEXT,
+                account_id INTEGER DEFAULT 3,
+                sender_email TEXT DEFAULT 'lukasgeiger@googlemail.com',
+                status TEXT DEFAULT 'draft'
+                    CHECK(status IN ('draft', 'sent', 'cancelled', 'failed')),
+                error_message TEXT,
+                gmail_message_id TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                sent_at TIMESTAMP,
+                confirmed_by TEXT,
+                cancelled_at TIMESTAMP
+            );
+
+CREATE TABLE epstein_runs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    finished_at TIMESTAMP,
+    chunk_size INTEGER DEFAULT 400,    -- Token pro Chunk
+    overlap INTEGER DEFAULT 80,        -- Overlap-Tokens
+    llm_model TEXT,                    -- z.B. "haiku-3.5", "sonnet-3.5"
+    llm_cost_usd REAL DEFAULT 0.0,     -- Geschätzte LLM-Kosten
+    documents_indexed INTEGER DEFAULT 0,
+    chunks_created INTEGER DEFAULT 0,
+    chunks_summarized INTEGER DEFAULT 0,
+    errors_count INTEGER DEFAULT 0,
+    log TEXT,                          -- Fehler-Log, Warnings
+    status TEXT DEFAULT 'running'      -- running, completed, failed
+);
+
+CREATE TABLE health_symptoms (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    symptom TEXT NOT NULL,
+    body_part TEXT,
+    severity INTEGER CHECK(severity BETWEEN 1 AND 10),
+    onset TEXT NOT NULL,
+    resolution TEXT,
+    status TEXT DEFAULT 'active',
+    linked_diagnosis_id INTEGER,
+    notes TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (linked_diagnosis_id) REFERENCES health_diagnoses(id)
+);
+
+CREATE TABLE partner_memory_config (
+    partner_id TEXT PRIMARY KEY,
+    fact_decay_rate REAL DEFAULT 0.01,          -- Pro Tag ohne Zugriff
+    lesson_decay_rate REAL DEFAULT 0.005,       -- Lessons decayen langsamer
+    min_confidence REAL DEFAULT 0.2,            -- Unter diesem Wert löschen?
+    max_facts INTEGER DEFAULT 1000,
+    max_lessons INTEGER DEFAULT 200,
+    max_sessions INTEGER DEFAULT 500,
+    memory_md_top_facts INTEGER DEFAULT 10,
+    memory_md_top_lessons INTEGER DEFAULT 10,
+    auto_cleanup_enabled INTEGER DEFAULT 1,
+    cleanup_interval_days INTEGER DEFAULT 7,
+    last_cleanup_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE partner_memory_decay (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    item_type TEXT NOT NULL CHECK(item_type IN ('fact', 'lesson')),
+    item_id INTEGER NOT NULL,
+    partner_id TEXT NOT NULL,
+    original_confidence REAL NOT NULL,
+    current_confidence REAL NOT NULL,
+    decay_applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    event_type TEXT CHECK(event_type IN ('decay', 'boost', 'reset')),
+    event_reason TEXT,                   -- Warum wurde geboostet/decayed?
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(item_type, item_id, decay_applied_at)
+);
+
+CREATE TABLE partner_memory_facts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    partner_id TEXT NOT NULL,           -- 'claude', 'gemini', 'ollama', 'gpt4'
+    category TEXT NOT NULL CHECK(category IN ('user', 'project', 'system', 'domain')),
+    key TEXT NOT NULL,
+    value TEXT NOT NULL,
+    value_type TEXT DEFAULT 'text' CHECK(value_type IN ('text', 'json', 'number', 'date')),
+    confidence REAL DEFAULT 1.0 CHECK(confidence >= 0 AND confidence <= 1),
+    last_accessed TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    access_count INTEGER DEFAULT 0,
+    decay_rate REAL DEFAULT 0.01,       -- Pro Tag ohne Zugriff
+    source TEXT,                         -- Welcher Agent/Kontext hat es erstellt
+    related_trigger TEXT,                -- Optional: Trigger der es ausgelöst hat
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(partner_id, category, key)
+);
+
+CREATE TABLE partner_memory_lessons (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    partner_id TEXT NOT NULL,           -- 'claude', 'gemini', 'ollama', 'gpt4'
+    category TEXT NOT NULL,              -- 'code', 'system', 'workflow', 'communication'
+    severity TEXT DEFAULT 'medium' CHECK(severity IN ('low', 'medium', 'high', 'critical')),
+    title TEXT NOT NULL,
+    problem TEXT NOT NULL,               -- Was war das Problem?
+    solution TEXT NOT NULL,              -- Wie wurde es gelöst?
+    context TEXT,                        -- Zusätzlicher Kontext
+    related_tools TEXT,                  -- Komma-separiert: 'git, npm, python'
+    related_files TEXT,                  -- Komma-separiert: 'hub/*.py, tests/*'
+    trigger_words TEXT,                  -- Trigger-Keywords für Auto-Injection
+    trigger_events TEXT,                 -- Events die Lesson aktivieren
+    is_active INTEGER DEFAULT 1,
+    times_shown INTEGER DEFAULT 0,
+    last_shown TIMESTAMP,
+    effectiveness REAL DEFAULT 0.5,      -- 0.0-1.0, wie hilfreich war die Lesson?
+    last_accessed TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    access_count INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE partner_memory_sessions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    partner_id TEXT NOT NULL,
+    session_id TEXT NOT NULL UNIQUE,    -- UUID oder Hash
+    started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ended_at TIMESTAMP,
+    duration_seconds INTEGER,
+    project TEXT,                        -- Projekt-Name oder Pfad
+    summary TEXT,                        -- Session-Zusammenfassung
+    key_topics TEXT,                     -- Hauptthemen (komma-separiert)
+    continuation_context TEXT,           -- Was wurde für nächste Session notiert?
+    next_steps TEXT,                     -- Geplante nächste Schritte
+    facts_added INTEGER DEFAULT 0,
+    lessons_added INTEGER DEFAULT 0,
+    tools_used TEXT,                     -- Genutzte Tools (komma-separiert)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE search_index (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    source TEXT NOT NULL,          -- 'document', 'wiki', 'memory_working', 'memory_fact', 'memory_lesson', 'file'
+    source_id TEXT NOT NULL,       -- ID/key in source table
+    source_path TEXT,              -- file path or DB reference
+    title TEXT NOT NULL,           -- display title
+    content TEXT,                  -- full text content (truncated to 100k)
+    category TEXT,                 -- file category or content type
+    content_hash TEXT,             -- SHA256 for dedup
+    word_count INTEGER DEFAULT 0,
+    file_size INTEGER DEFAULT 0,
+    indexed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(source, source_id)
+);
+
+CREATE TABLE search_tags (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    search_id INTEGER NOT NULL REFERENCES search_index(id) ON DELETE CASCADE,
+    tag TEXT NOT NULL,
+    UNIQUE(search_id, tag)
+);
+
+CREATE TABLE system_activity (
+    id INTEGER PRIMARY KEY CHECK (id = 1),  -- Singleton-Tabelle (nur 1 Zeile)
+    last_activity TEXT NOT NULL,             -- ISO Timestamp der letzten Aktivität
+    session_id TEXT,                         -- Aktuelle Session (aus memory_sessions)
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+, eod_finalized_today INTEGER DEFAULT 0, last_eod_finalize TEXT);
+
+CREATE TABLE watcher_event_log (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        source TEXT NOT NULL,
+        event_type TEXT NOT NULL,
+        sender TEXT DEFAULT '',
+        content_preview TEXT DEFAULT '',
+        action TEXT NOT NULL,
+        confidence REAL DEFAULT 0.0,
+        reasoning TEXT DEFAULT '',
+        response_sent TEXT DEFAULT '',
+        escalation_profile TEXT DEFAULT '',
+        processing_time_ms INTEGER DEFAULT 0,
+        created_at TEXT NOT NULL
+    );
+

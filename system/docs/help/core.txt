@@ -57,7 +57,7 @@ Beispiele:
   - Review-Workflow: Lesen -> Bewerten -> Kommentieren -> Entscheiden
   - Startup-Workflow: Pruefen -> Laden -> Initialisieren -> Bereit
 
-Speicherort: skills/_protocols/*.md
+Speicherort: skills/workflows/*.md
 
 Workflows sind ZENTRAL weil:
   1. Sie die eigentliche Steuerung uebernehmen
@@ -111,7 +111,7 @@ BEWUSSTSEIN DES LLM
 
 Das operierende LLM muss wissen:
 1. WELCHE Agents existieren (agents/)
-2. WELCHE Workflows verfuegbar sind (skills/_protocols/)
+2. WELCHE Workflows verfuegbar sind (skills/workflows/)
 3. WELCHE Skills/Tools/Services es gibt (skills/, tools/)
 
 Dies wird erreicht durch:
@@ -150,11 +150,11 @@ Siehe: WF-TUEV Tasks (in Entwicklung)
 VERWANDTE KONZEPTE
 ------------------
 
-- docs/docs/docs/help/memory.txt        - Memory als kognitives Modell
-- docs/docs/docs/help/agents.txt        - Agent-System Details
-- docs/docs/docs/help/workflow.txt      - Workflow-System Details
-- docs/docs/docs/help/skills.txt        - Skills-Hierarchie
-- docs/docs/docs/help/tools.txt         - Tool-System Details
+- docs/help/memory.txt        - Memory als kognitives Modell
+- docs/help/agents.txt        - Agent-System Details
+- docs/help/workflow.txt      - Workflow-System Details
+- docs/help/skills.txt        - Skills-Hierarchie
+- docs/help/tools.txt         - Tool-System Details
 - system/ARCHITECTURE.md - Gesamtarchitektur
 
 ---

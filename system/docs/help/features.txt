@@ -1,7 +1,7 @@
 # Portabilitaet: UNIVERSAL
-# Version: 3.1.6
-# Zuletzt validiert: 2026-02-23 (3D-Installer-Modell, BACHInstallerWizard)
-# Naechste Pruefung: 2026-08-23
+# Version: 3.6.0
+# Zuletzt validiert: 2026-03-04 (Root-Docs-Review)
+# Naechste Pruefung: 2026-09-04
 
 BACH v3 - FEATURES
 ====================
@@ -11,7 +11,7 @@ Uebersicht aller implementierten Features und deren Status.
 ARCHITEKTUR v2.0 (NEU)
 ----------------------
 Registry-Based Handler-System mit Auto-Discovery:
-- 64+ Handler in hub/ automatisch erkannt
+- 109+ Handler in hub/ automatisch erkannt
 - Library-API (bach_api.py) fuer programmatischen Zugriff
 - Dual-Init Handler (Path + App Support)
 - Multi-Handler-Dateien (time.py, tuev.py)
@@ -136,14 +136,14 @@ FEATURE-MATRIX
 |-------------------|------|------|--------|
 | CLI-Befehle       | 20   | 60+  | OK     |
 | Help-Themen       | 21   | 60+  | OK     |
-| Handler (Registry)| 12   | 64+  | OK     |
+| Handler (Registry)| 12   | 109+ | OK     |
 | Skills (Datei)    | 30   | 50+  | OK     |
 | Skills (JSON)     | 50   | 0    | JSON*  |
 | Tools (Datei)     | 30   | 90+  | OK     |
 | Tools (Registry)  | 60   | 85   | OK     |
 | GUI Endpunkte     | 30   | 80+  | OK     |
 | REST-API Endpoints| 10   | 12   | OK     |
-| DB Tabellen       | 25   | 114  | OK     |
+| DB Tabellen       | 25   | 138  | OK     |
 | Connectors        | 3    | 3+   | OK     |
 
 *) Skills & Experten werden primär über skills_hierarchy.json verwaltet.
@@ -189,7 +189,7 @@ CHANGELOG v2.0 (2026-02-06 bis 2026-02-08)
 + REST-API Headless Server (Port 8001, 12 Endpoints)
 + Daemon-Integration (poll_and_route + dispatch Jobs)
 + Schema-Migration mit Retry-Tracking und Circuit Breaker
-+ DB-Schema: 114 Tabellen (Single Source of Truth)
++ DB-Schema: 210+ Tabellen (Single Source of Truth)
 + 50 Tests (test_core + test_smoke) - alle gruen
 + Log-Pfade konsolidiert (nur noch system/data/logs/)
 + _partners Ordner konsolidiert (nur noch system/partners/)

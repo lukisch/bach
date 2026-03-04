@@ -45,7 +45,7 @@ EBENEN DER PLANUNG (Phase 3)
 
   Ebene      Frage                        Ort
   ---------  ---------------------------  -------------------------
-  Workflow   WANN/WIE koordinieren?       skills/_protocols/*.md
+  Workflow   WANN/WIE koordinieren?       skills/workflows/*.md
   Agent      WER fuehrt aus?              agents/*.txt
   Experte    WER hat Fachwissen?          agents/_experts/*/
   Skill      WAS wird getan?              skills/_services/*.md
@@ -66,7 +66,7 @@ CHECKLISTE NEUER SERVICE (Phase 6)
 
 WORKFLOW-DATEI
 --------------
-  Detaillierter Ablauf: skills/_protocols/dev-zyklus.md
+  Detaillierter Ablauf: skills/workflows/dev-zyklus.md
 
 SIEHE AUCH
 ----------

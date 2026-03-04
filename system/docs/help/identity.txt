@@ -63,6 +63,6 @@ Sie stellt sicher dass das "Gedaechtnis" (DB) zur "Hardware" (Dateisystem) passt
 
 SIEHE AUCH
 ----------
-  docs/docs/docs/help/maintain.txt        Wartungs-Tools (keine Identity-Funktion)
-  docs/docs/docs/help/distribution.txt    Distribution & Releases
-  docs/docs/docs/help/bach_info.txt       System-Uebersicht
+  docs/help/maintain.txt        Wartungs-Tools (keine Identity-Funktion)
+  docs/help/distribution.txt    Distribution & Releases
+  docs/help/bach_info.txt       System-Uebersicht
