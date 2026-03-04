@@ -1,7 +1,7 @@
 # BACH Partners
 
 Automatisch generiert aus der Datenbank (delegation_rules, partner_recognition, interaction_protocols).
-Letzte Aktualisierung: 2026-03-02 23:07
+Letzte Aktualisierung: 2026-03-03 11:57
 
 ## Delegation Rules
 

@@ -1,7 +1,7 @@
 {
   "_comment": "BACH Directory Truth - Referenz für korrekte Pfade (SQ022 Pfadfreiheit)",
   "_version": "1.0.0",
-  "_updated_at": "2026-03-02T23:04:06.902472",
+  "_updated_at": "2026-03-03T11:56:12.845151",
   "_auto_generated": true,
   "paths": {
     "bach_root": ".",
@@ -43,5 +43,5 @@
     "user": "C:/Users/User/OneDrive/KI&AI/BACH/user",
     "workspace": "C:/Users/User/OneDrive/KI&AI/BACH/workspace"
   },
-  "last_finalize": "2026-03-02T23:04:06.902472"
+  "last_finalize": "2026-03-03T11:56:12.845151"
 }

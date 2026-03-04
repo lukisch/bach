@@ -212,7 +212,7 @@ class EmailSender:
                 cc=row['cc'],
                 bcc=row['bcc'],
                 sender=row['sender_email'],
-                attachment_path=row.get('attachment_path')
+                attachment_path=row['attachment_path'] if 'attachment_path' in row.keys() else None
             )
 
             # Senden via Gmail API

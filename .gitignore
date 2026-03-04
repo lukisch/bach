@@ -109,7 +109,7 @@ PLAN.txt
 
 # === USER-SPEZIFISCHE SKILLS (dist_type 0) ===
 /system/skills/_os/
-/system/skills/therapie/
+# /system/skills/therapie/  # SQ046: Therapie-Skills sind ab v3.5.0 Teil des Repos
 /system/skills/_services/notizblock.md
 /system/skills/_services/user-decide.md
 /system/skills/workflows/_archive/

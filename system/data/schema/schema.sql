@@ -4,7 +4,7 @@
 -- Generated from existing bach.db
 -- All tables use CREATE TABLE IF NOT EXISTS for safety
 --
--- Tables: 127 (SQ002a: +9 Dist-Tabellen, SQ002b: +release_manifest +known_instances, 2 VIEWs, 2026-02-17)
+-- Tables: 130 (SQ002a: +9 Dist-Tabellen, SQ002b: +release_manifest +known_instances, 2 VIEWs, SQ044: +bach_blobs +bach_blobs_fts +bach_blob_history, 2026-03-04)
 -- ============================================================================
 
 PRAGMA journal_mode=WAL;
@@ -2184,6 +2184,45 @@ CREATE TABLE IF NOT EXISTS session_context (
     updated_at TEXT NOT NULL DEFAULT (datetime('now')),
     UNIQUE(date)
 );
+
+-- ── BLOBS (SQ044: Wiki-in-Database) ──────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS bach_blobs (
+    path TEXT PRIMARY KEY,
+    category TEXT NOT NULL DEFAULT 'wiki',
+    content TEXT,
+    mime_type TEXT DEFAULT 'text/plain',
+    size_bytes INTEGER,
+    checksum TEXT,
+    lang TEXT DEFAULT 'de',
+    metadata TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_bach_blobs_category ON bach_blobs(category);
+CREATE INDEX IF NOT EXISTS idx_bach_blobs_lang ON bach_blobs(lang);
+
+CREATE VIRTUAL TABLE IF NOT EXISTS bach_blobs_fts USING fts5(
+    path,
+    content,
+    category,
+    content=bach_blobs,
+    content_rowid=rowid,
+    tokenize='unicode61'
+);
+
+CREATE TABLE IF NOT EXISTS bach_blob_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    blob_path TEXT NOT NULL,
+    action TEXT NOT NULL,
+    old_checksum TEXT,
+    new_checksum TEXT,
+    changed_at TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (blob_path) REFERENCES bach_blobs(path)
+);
+
+CREATE INDEX IF NOT EXISTS idx_blob_history_path ON bach_blob_history(blob_path);
 
 -- ── FULL TEXT SEARCH ──────────────────────────────────────────────────
 

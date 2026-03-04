@@ -6,6 +6,35 @@ Copyright (c) 2026 Lukas Geiger. Alle Rechte vorbehalten.
 
 ---
 
+## [3.5.0-milk] - 2026-03-04
+
+### Neu
+
+- **Wiki-in-Database mit FTS5 (SQ044):** 263 Wiki-Artikel als BLOBs in bach.db mit FTS5-Volltext-Suche
+  - `bach_blobs` Tabelle mit Checksummen, Kategorien, Metadaten
+  - `bach_blobs_fts` Virtual Table fuer schnelle Volltextsuche mit Snippets
+  - `bach_blob_history` fuer Aenderungsverfolgung
+  - Wiki-Handler nutzt FTS5 fuer Suche, DB-Lookup fuer Artikel-Anzeige, Dateisystem als Fallback
+- **Therapie-Skills (B30/SQ046):** 3 neue Skills + 8 Wiki-Artikel + Ethik-Policy
+  - Skills: PMR/Autogenes Training, Psychoedukation, Positive Psychologie
+  - Wiki: Verhaltenstherapie, Tiefenpsychologie, Analytische Psychotherapie, Systemische Therapie, EMDR, Schematherapie, DBT, ACT
+  - ETHICS.md: Grenzen digitaler Therapie-Unterstuetzung, Verbotsliste, Notfall-Verweis
+- **Schwarm-LLM Parallele Worker (SQ016):** Echte parallele Ausfuehrung in llmauto
+  - `ClaudeRunner.run_parallel()`: ThreadPoolExecutor-basierte Multi-Prompt-Ausfuehrung
+  - `run_parallel_workers()`: Parallele Worker in Chain-Ketten (aktiviert via `parallel_workers: true`)
+  - Benchmark-Script: 20 Tasks in 4 Kategorien, Vergleich sequentiell vs. parallel
+
+### Schema
+
+- Migration 032: `bach_blobs` + `bach_blobs_fts` + `bach_blob_history` Tabellen
+- Gesamt: 138 Tabellen
+
+### Fixes
+
+- email_sender.py: Robusterer Zugriff auf attachment_path in Row-Objekten
+
+---
+
 ## [3.4.0-pizza] - 2026-03-02
 
 ### Neu

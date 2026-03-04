@@ -1,6 +1,6 @@
 # BACH Agents & Experts
 
-**Generiert:** 2026-03-02 23:07
+**Generiert:** 2026-03-03 11:57
 **Quelle:** bach.db (bach_agents, bach_experts)
 **Generator:** `bach export mirrors` oder `python tools/agents_export.py`
 
