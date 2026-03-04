@@ -109,7 +109,7 @@ BACH ist in drei Ausbaustufen verfuegbar -- vom minimalistischen Kern bis zum vo
 
 | Stufe | Projekt | Beschreibung | Repository |
 |-------|---------|-------------|------------|
-| 1 | **USMC** | Ultra Simple Memory Core -- minimalistisches geteiltes Memory-System | [github.com/lukisch/usmc](https://github.com/lukisch/usmc) |
+| 1 | **USMC** | Unified Shared Memory Client -- minimalistisches geteiltes Memory-System | [github.com/lukisch/usmc](https://github.com/lukisch/usmc) |
 | 2 | **Rinnsal** | BACH Mini -- USMC + llmauto (LLM-Orchestrierung), extrem eingedampft | [github.com/lukisch/rinnsal](https://github.com/lukisch/rinnsal) |
 | 3 | **BACH** | Vollstaendiges System -- 109+ Handler, 932+ Skills, Agenten, GUI, Bridge | [github.com/lukisch/bach](https://github.com/lukisch/bach) |
 
