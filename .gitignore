@@ -82,6 +82,14 @@ Thumbs.db
 **/dist/
 **/build/
 
+# === BENUTZERSPEZIFISCHE DOKUMENTATION (niemals committen!) ===
+# Werden beim ersten Start aus Templates generiert / von BACH ueberschrieben
+MEMORY.md
+USER.md
+
+# === SESSION-LOGS (Enthalten private Daten) ===
+logs/daily/
+
 # === PLAN-DATEIEN (Interne Planung, nicht veröffentlichen) ===
 PLAN.txt
 **/PLAN.txt
