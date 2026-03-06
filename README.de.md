@@ -1,5 +1,6 @@
 <p align="right">
-  <img src="ellmos-logo.jpg" alt="ellmos logo" width="300">
+  <img src="ellmos-logo.jpg" alt="ellmos logo" width="200">
+  <img src="logo_bach_text.jpg" alt="BACH logo" width="200">
 </p>
 
 # ellmos BACH - Textbasiertes Betriebssystem fuer LLMs
