@@ -220,10 +220,9 @@ class MemoryGenerator:
         return status
 
     def get_top_lessons(self, limit: int = 10) -> list[dict]:
-        """Top-Lessons nach Severity sortiert."""
+        """Top-Lessons nach Severity sortiert (shared_memory_lessons bevorzugt)."""
         conn = sqlite3.connect(self.db_path)
 
-        # Severity-Mapping: critical > high > medium > low
         severity_order = """
             CASE severity
                 WHEN 'critical' THEN 1
@@ -234,17 +233,34 @@ class MemoryGenerator:
             END
         """
 
-        cursor = conn.execute(f"""
-            SELECT title, problem, solution, severity
-            FROM memory_lessons
-            WHERE is_active = 1
-            ORDER BY {severity_order}, created_at DESC
-            LIMIT ?
-        """, (limit,))
+        # Bevorzuge shared_memory_lessons (Multi-Agent)
+        try:
+            cursor = conn.execute(f"""
+                SELECT title, problem, solution, severity
+                FROM shared_memory_lessons
+                WHERE is_active = 1
+                  AND visibility IN ('shared', 'public')
+                ORDER BY {severity_order}, created_at DESC
+                LIMIT ?
+            """, (limit,))
+            lessons = cursor.fetchall()
+        except sqlite3.OperationalError:
+            lessons = []
 
-        lessons = []
-        for row in cursor.fetchall():
-            lessons.append({
+        # Fallback auf legacy memory_lessons
+        if not lessons:
+            cursor = conn.execute(f"""
+                SELECT title, problem, solution, severity
+                FROM memory_lessons
+                WHERE is_active = 1
+                ORDER BY {severity_order}, created_at DESC
+                LIMIT ?
+            """, (limit,))
+            lessons = cursor.fetchall()
+
+        result = []
+        for row in lessons:
+            result.append({
                 'title': row[0],
                 'problem': row[1],
                 'solution': row[2],
@@ -252,7 +268,7 @@ class MemoryGenerator:
             })
 
         conn.close()
-        return lessons
+        return result
 
     def get_active_projects(self, limit: int = 5) -> list[dict]:
         """Top-Projekte aus Tasks, nach Priorität."""
@@ -369,7 +385,10 @@ class MemoryGenerator:
         return silos
 
     def extract_manual_section(self, memory_md: Path) -> str:
-        """Extrahiert manuellen Bereich aus bestehendem MEMORY.md."""
+        """Extrahiert manuellen Bereich aus bestehendem MEMORY.md.
+
+        Bereinigt duplizierte Header (Idempotenz-Fix).
+        """
         if not memory_md.exists():
             return ""
 
@@ -379,7 +398,23 @@ class MemoryGenerator:
         match = re.search(r'<!-- MANUELL START -->(.*?)<!-- MANUELL END -->', content, re.DOTALL)
 
         if match:
-            return match.group(1).strip()
+            raw = match.group(1).strip()
+            # Bereinige duplizierte Header-Zeilen
+            lines = raw.split('\n')
+            seen_header = False
+            cleaned = []
+            for line in lines:
+                if line.strip().startswith('## ') and 'Manuelle Notizen' in line:
+                    if seen_header:
+                        continue  # Duplizierter Header -> überspringen
+                    seen_header = True
+                    continue  # Header wird von build() gesetzt
+                cleaned.append(line)
+            result = '\n'.join(cleaned).strip()
+            # Falls nur Platzhalter übrig -> leer zurückgeben
+            if result == '*Keine manuellen Notizen*':
+                return ""
+            return result
         return ""
 
     def build(self, current_task, system_status, top_lessons, active_projects, important_settings, silo_index, manual_content) -> str:
@@ -559,20 +594,35 @@ class DailyLogGenerator:
         return tasks
 
     def _get_new_lessons_today(self) -> list[dict]:
-        """Hole heute erstellte Lessons."""
+        """Hole heute erstellte Lessons (shared_memory bevorzugt)."""
         conn = sqlite3.connect(self.db_path)
         today = datetime.now().strftime("%Y-%m-%d")
 
-        cursor = conn.execute("""
-            SELECT title, solution
-            FROM memory_lessons
-            WHERE DATE(created_at) = ?
-            ORDER BY created_at DESC
-        """, (today,))
+        # Bevorzuge shared_memory_lessons
+        try:
+            cursor = conn.execute("""
+                SELECT title, solution
+                FROM shared_memory_lessons
+                WHERE DATE(created_at) = ?
+                ORDER BY created_at DESC
+            """, (today,))
+            lessons = cursor.fetchall()
+        except sqlite3.OperationalError:
+            lessons = []
 
-        lessons = [{'title': row[0], 'solution': row[1]} for row in cursor.fetchall()]
+        # Fallback auf legacy
+        if not lessons:
+            cursor = conn.execute("""
+                SELECT title, solution
+                FROM memory_lessons
+                WHERE DATE(created_at) = ?
+                ORDER BY created_at DESC
+            """, (today,))
+            lessons = cursor.fetchall()
+
+        result = [{'title': row[0], 'solution': row[1]} for row in lessons]
         conn.close()
-        return lessons
+        return result
 
     def _build_log(self, date: str, completed_tasks: list, new_lessons: list) -> str:
         """Baut Log-Content."""
