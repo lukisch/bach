@@ -11,7 +11,7 @@
 
 ## Ueberblick
 
-**BACH** ist ein textbasiertes Betriebssystem, das Large Language Models (LLMs) befaehigt, eigenstaendig zu arbeiten, zu lernen und sich zu organisieren. Als Teil der **ellmos**-Familie (Extensive Large Language Model Operating Systems) bietet BACH eine umfassende Infrastruktur fuer Task-Management, Wissensmanagement, Automatisierung und LLM-Orchestrierung.
+**BACH** ist ein textbasiertes Betriebssystem, das Large Language Models (LLMs) befaehigt, eigenstaendig zu arbeiten, zu lernen und sich zu organisieren. Als Teil der **ellmos**-Familie (Extra Large Language Model Operating Systems) bietet BACH eine umfassende Infrastruktur fuer Task-Management, Wissensmanagement, Automatisierung und LLM-Orchestrierung.
 
 ### Kernfunktionen
 
