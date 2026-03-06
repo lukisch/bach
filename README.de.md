@@ -1,4 +1,6 @@
-# BACH - Textbasiertes Betriebssystem für LLMs
+# ellmos BACH - Textbasiertes Betriebssystem fuer LLMs
+
+*Der schmale Fluss, der alles vereint.*
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python)
 ![License](https://img.shields.io/badge/License-MIT-green)
@@ -7,9 +9,9 @@
 
 **Version:** v3.7.0-waterfall
 
-## Überblick
+## Ueberblick
 
-BACH ist ein textbasiertes Betriebssystem, das Large Language Models (LLMs) befähigt, eigenständig zu arbeiten, zu lernen und sich zu organisieren. Es bietet eine umfassende Infrastruktur für Task-Management, Wissensmanagement, Automatisierung und LLM-Orchestrierung.
+**BACH** ist ein textbasiertes Betriebssystem, das Large Language Models (LLMs) befaehigt, eigenstaendig zu arbeiten, zu lernen und sich zu organisieren. Als Teil der **ellmos**-Familie (Extensive Large Language Model Operating Systems) bietet BACH eine umfassende Infrastruktur fuer Task-Management, Wissensmanagement, Automatisierung und LLM-Orchestrierung.
 
 ### Kernfunktionen
 
@@ -103,15 +105,15 @@ Multi-Agent-Koordination mit Kontext-Generierung, Konflikt-Erkennung, Decay und 
 ### 8. llmauto-Integration
 Chain-Steps als LLM-Prompts mit `bach://`-URL-Resolution für dynamische Kontext-Einbindung.
 
-## Ausbaustufen
+## Die ellmos-Familie
 
-BACH ist in drei Ausbaustufen verfuegbar -- vom minimalistischen Kern bis zum vollstaendigen System:
+Alle ellmos-Projekte folgen einer Gewaesser-Metapher -- von der Quelle zum Fluss:
 
 | Stufe | Projekt | Beschreibung | Repository |
 |-------|---------|-------------|------------|
-| 1 | **USMC** | United Shared Memory Client -- minimalistisches geteiltes Memory-System | [github.com/lukisch/usmc](https://github.com/lukisch/usmc) |
-| 2 | **Rinnsal** | BACH Mini -- USMC + llmauto (LLM-Orchestrierung), extrem eingedampft | [github.com/lukisch/rinnsal](https://github.com/lukisch/rinnsal) |
-| 3 | **BACH** | Vollstaendiges System -- 109+ Handler, 932+ Skills, Agenten, GUI, Bridge | [github.com/lukisch/bach](https://github.com/lukisch/bach) |
+| 1 | **USMC** | United Shared Memory Client -- die Quelle (nur geteiltes Memory) | [github.com/lukisch/usmc](https://github.com/lukisch/usmc) |
+| 2 | **Rinnsal** | Das Rinnsal -- USMC + llmauto (LLM-Orchestrierung), extrem kompakt | [github.com/lukisch/rinnsal](https://github.com/lukisch/rinnsal) |
+| 3 | **BACH** | Der schmale Fluss, der alles vereint -- 109+ Handler, 932+ Skills, Agenten, GUI, Bridge | [github.com/lukisch/bach](https://github.com/lukisch/bach) |
 
 ## Dokumentation
 
@@ -139,4 +141,4 @@ For the English documentation, see **[README.md](README.md)**
 
 ---
 
-*BACH v3.7.0-waterfall - Textbasiertes Betriebssystem fuer LLMs*
+*ellmos BACH v3.7.0-waterfall - Textbasiertes Betriebssystem fuer LLMs*

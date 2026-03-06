@@ -1,4 +1,6 @@
-# BACH - Text-Based Operating System for LLMs
+# ellmos BACH - Text-Based Operating System for LLMs
+
+*The stream that unites everything.*
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python)
 ![License](https://img.shields.io/badge/License-MIT-green)
@@ -9,7 +11,7 @@
 
 ## Overview
 
-BACH is a text-based operating system that empowers Large Language Models (LLMs) to work autonomously, learn, and self-organize. It provides comprehensive infrastructure for task management, knowledge management, automation, and LLM orchestration.
+**BACH** is a text-based operating system that empowers Large Language Models (LLMs) to work autonomously, learn, and self-organize. Part of the **ellmos** family (Extensive Large Language Model Operating Systems), BACH provides comprehensive infrastructure for task management, knowledge management, automation, and LLM orchestration.
 
 ### Key Features
 
@@ -103,15 +105,15 @@ Multi-agent coordination with context generation, conflict detection, decay, and
 ### 8. llmauto Integration
 Chain steps as LLM prompts with `bach://` URL resolution for dynamic context embedding.
 
-## Tiers
+## The ellmos Family
 
-BACH is available in three tiers -- from a minimalist core to the full system:
+All ellmos projects follow a water metaphor -- from a spring to a full stream:
 
 | Tier | Project | Description | Repository |
 |------|---------|-------------|------------|
-| 1 | **USMC** | United Shared Memory Client -- minimalist shared memory system | [github.com/lukisch/usmc](https://github.com/lukisch/usmc) |
-| 2 | **Rinnsal** | BACH Mini -- USMC + llmauto (LLM orchestration), extremely compact | [github.com/lukisch/rinnsal](https://github.com/lukisch/rinnsal) |
-| 3 | **BACH** | Full system -- 109+ handlers, 932+ skills, agents, GUI, bridge | [github.com/lukisch/bach](https://github.com/lukisch/bach) |
+| 1 | **USMC** | United Shared Memory Client -- the spring (shared memory only) | [github.com/lukisch/usmc](https://github.com/lukisch/usmc) |
+| 2 | **Rinnsal** | The trickle -- USMC + llmauto (LLM orchestration), extremely compact | [github.com/lukisch/rinnsal](https://github.com/lukisch/rinnsal) |
+| 3 | **BACH** | The stream that unites everything -- 109+ handlers, 932+ skills, agents, GUI, bridge | [github.com/lukisch/bach](https://github.com/lukisch/bach) |
 
 ## Documentation
 
@@ -141,4 +143,4 @@ Die vollstaendige deutsche Dokumentation findest du hier: **[README.de.md](READM
 
 ---
 
-*BACH v3.7.0-waterfall - Text-Based Operating System for LLMs*
+*ellmos BACH v3.7.0-waterfall - Text-Based Operating System for LLMs*
