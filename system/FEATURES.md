@@ -1,8 +1,8 @@
-# Feature-Analyse: BACH v3.6.0-spaghetti
+# Feature-Analyse: BACH v3.7.0-waterfall
 
 ## Projektuebersicht
 
-**Projektname:** BACH (Best of Agentic Cognitive Helpers)
+**Projektname:** BACH
 **Version:** 3.6.0-spaghetti
 **Status:** Production-Ready
 **Typ:** Textbasiertes Betriebssystem fuer LLMs
@@ -368,7 +368,7 @@ Events: `before_startup`, `after_startup`, `before_shutdown`, `after_shutdown`, 
 
 ## Zusammenfassung
 
-BACH v3.6.0-spaghetti ist ein vollstaendiges textbasiertes Betriebssystem fuer KI-Agenten mit folgenden Kennzahlen:
+BACH v3.7.0-waterfall ist ein vollstaendiges textbasiertes Betriebssystem fuer KI-Agenten mit folgenden Kennzahlen:
 
 | Metrik | Wert |
 |--------|------|
@@ -392,4 +392,4 @@ BACH v3.6.0-spaghetti ist ein vollstaendiges textbasiertes Betriebssystem fuer K
 
 *Erstellt: 2026-02-05*
 *Aktualisiert: 2026-03-04*
-*System: BACH Feature-Analyse v3.6.0-spaghetti*
+*System: BACH Feature-Analyse v3.7.0-waterfall*

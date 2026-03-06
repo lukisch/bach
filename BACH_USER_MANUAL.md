@@ -1,12 +1,12 @@
 # BACH User Manual
 
-**Version:** v3.6.0-spaghetti
+**Version:** v3.7.0-waterfall
 **Generiert:** 2026-03-04
 **Lizenz:** MIT
 
 ---
 
-BACH (Best of Agentic Cognitive Helpers) ist ein textbasiertes Betriebssystem
+BACH ist ein textbasiertes Betriebssystem
 fuer KI-Assistenten. Es verbindet Mensch und KI durch eine persistente
 Middleware mit Gedaechtnis, Werkzeugen, Workflows und Multi-LLM-Support.
 
@@ -23,7 +23,7 @@ Dieses Handbuch beschreibt Installation, Nutzung und Erweiterung von BACH.
 
 # BACH - Textbasiertes Betriebssystem für LLMs
 
-**Version:** v3.6.0-spaghetti
+**Version:** v3.7.0-waterfall
 **Status:** Production-Ready
 **Lizenz:** MIT
 

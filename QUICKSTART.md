@@ -1,6 +1,6 @@
 # BACH Quickstart Guide
 
-**Version:** v3.6.0-spaghetti
+**Version:** v3.7.0-waterfall
 
 ## In 5 Minuten zum ersten BACH-Workflow
 
@@ -188,4 +188,4 @@ python bach.py docs search "keyword"
 
 ---
 
-*BACH v3.6.0-spaghetti - Best of Agentic Cognitive Helpers*
+*BACH v3.7.0-waterfall - Textbasiertes Betriebssystem fuer LLMs*
