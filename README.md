@@ -94,6 +94,16 @@ Structured memory system with Facts, Lessons, and automatic consolidation (5 mem
 ### 3. Agent Framework
 Boss agents orchestrate experts for complex tasks. The Agent CLI allows direct starting, stopping, and listing of agents via `bach agent`.
 
+<p align="center">
+  <img src="sketch_bach_boss_agents.jpg" alt="BACH Boss Agents" width="600"><br>
+  <i>The 5 Boss Agents: ati, officeassistant, finance-assistant, health-assistant, personal-assistant</i>
+</p>
+
+<p align="center">
+  <img src="sketch_fachexperten_en_new.jpg" alt="BACH Experts" width="600"><br>
+  <i>14 specialized Experts working under their Boss Agents</i>
+</p>
+
 ### 4. Prompt System
 Central management of prompt templates with board collections and full versioning (`bach prompt`).
 
