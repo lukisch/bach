@@ -470,6 +470,12 @@ class SetupHandler(BaseHandler):
         except Exception as e:
             results.append(f"  [WARN] Timestamp-Update fehlgeschlagen: {e}")
 
+        # Templates zu echten Dateien kopieren (falls .md fehlt)
+        init_results = self._init_from_templates()
+        if init_results:
+            results.append("")
+            results.extend(init_results)
+
         # Template-Dateien aufraeumen (nach Personalisierung)
         cleanup_results = self._cleanup_templates()
         if cleanup_results:
@@ -477,6 +483,27 @@ class SetupHandler(BaseHandler):
             results.extend(cleanup_results)
 
         return True, "\n".join(results)
+
+    def _init_from_templates(self) -> list:
+        """Erstellt fehlende .md Dateien aus .template.md Vorlagen.
+
+        Wird vor _cleanup_templates() aufgerufen. Kopiert nur wenn die
+        echte .md noch nicht existiert (erster Start nach git clone).
+        """
+        root = self.base_path.parent  # BACH/
+        created = []
+
+        for template in root.glob("*.template.md"):
+            real_file = root / template.name.replace(".template.md", ".md")
+            if not real_file.exists():
+                try:
+                    import shutil
+                    shutil.copy2(template, real_file)
+                    created.append(f"  [INIT] {real_file.name} aus Template erstellt")
+                except OSError:
+                    created.append(f"  [WARN] Konnte {real_file.name} nicht erstellen")
+
+        return created
 
     def _cleanup_templates(self) -> list:
         """Loescht .template.md Dateien wenn die entsprechende .md existiert.
