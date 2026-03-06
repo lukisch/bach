@@ -1,4 +1,4 @@
-<p align="center">
+<p align="right">
   <img src="ellmos-logo.jpg" alt="ellmos logo" width="300">
 </p>
 
@@ -12,6 +12,10 @@
 ![Status](https://img.shields.io/badge/Status-Production--Ready-brightgreen)
 
 **Version:** v3.7.0-waterfall
+
+<p align="center">
+  <img src="overview.jpg" alt="BACH Ueberblick" width="700">
+</p>
 
 ## Ueberblick
 
@@ -97,11 +101,6 @@ Boss-Agenten orchestrieren Experten für komplexe Aufgaben. Agent-CLI ermöglich
 <p align="center">
   <img src="sketch_bach_boss_agents.jpg" alt="BACH Boss-Agenten" width="600"><br>
   <i>Die 5 Boss-Agenten: ati, officeassistant, finance-assistant, health-assistant, personal-assistant</i>
-</p>
-
-<p align="center">
-  <img src="sketch_fachexperten_en_new.jpg" alt="BACH Experten" width="600"><br>
-  <i>14 spezialisierte Experten unter ihren Boss-Agenten</i>
 </p>
 
 ### 4. Prompt-System
