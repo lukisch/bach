@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="ellmos-logo.jpg" alt="ellmos logo" width="300">
+</p>
+
 # ellmos BACH - Textbasiertes Betriebssystem fuer LLMs
 
 *Der schmale Fluss, der alles vereint.*
