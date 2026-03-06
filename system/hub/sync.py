@@ -4,13 +4,18 @@ Sync Handler - Dateisystem zu DB Synchronisation
 =================================================
 
 --sync skills           Skills-Inhalte von Dateien in DB laden
---sync tools            Tools-Inhalte von Dateien in DB laden  
+--sync tools            Tools-Inhalte von Dateien in DB laden
 --sync all              Beides synchronisieren
 --sync status           Sync-Status anzeigen (Hash-Vergleich)
 
 Optionen:
   --dry-run             Aenderungen nur anzeigen, nicht ausfuehren
   --force               Hash ignorieren, alles neu laden
+
+Konflikt-Regel (SQ044):
+  Dateisystem ist autoritativ fuer Editing, DB ist autoritativ fuer Suche/Distribution.
+  Bei Konflikt gewinnt das Dateisystem (neuerer Timestamp).
+  Lazy Auto-Sync bei Startup prueft Ordner-mtime und synchronisiert nur Aenderungen.
 """
 import hashlib
 import sqlite3

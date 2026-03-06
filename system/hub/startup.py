@@ -18,6 +18,7 @@ Partner-Sessions (v1.1.38):
 """
 import sqlite3
 import json
+import hashlib
 from datetime import datetime
 from pathlib import Path
 from .base import BaseHandler
@@ -245,6 +246,92 @@ class StartupHandler(BaseHandler):
         
         return [{'partner': r[0], 'clocked_in': r[1], 'heartbeat': r[2], 'task': r[3]} for r in rows]
     
+    def _lazy_auto_sync(self) -> list:
+        """Lazy Auto-Sync: Nur geaenderte Ordner synchronisieren (SQ044).
+
+        Prueft mtime der Ordner skills/ und tools/. Nur wenn sich ein Ordner
+        seit dem letzten Sync geaendert hat, wird er synchronisiert.
+        Zustand wird in data/sync_state.json gespeichert.
+        """
+        sync_state_path = self.base_path / "data" / "sync_state.json"
+        sync_dirs = {
+            "skills": self.base_path / "skills",
+            "tools": self.base_path / "tools",
+        }
+        results = []
+
+        # Gespeicherten State laden
+        state = {}
+        if sync_state_path.exists():
+            try:
+                state = json.loads(sync_state_path.read_text(encoding='utf-8'))
+            except (json.JSONDecodeError, OSError):
+                state = {}
+
+        changed_dirs = []
+        for name, dir_path in sync_dirs.items():
+            if not dir_path.exists():
+                continue
+            # Ordner-mtime pruefen (rekursiv: neueste Datei zaehlt)
+            current_mtime = self._get_dir_mtime(dir_path)
+            stored_mtime = state.get(f"{name}_mtime", 0)
+            if current_mtime > stored_mtime:
+                changed_dirs.append(name)
+
+        if not changed_dirs:
+            return []
+
+        # Nur geaenderte Ordner synchronisieren
+        try:
+            from .sync import SyncHandler
+            sync_handler = SyncHandler(self.base_path)
+
+            synced_count = 0
+            for dir_name in changed_dirs:
+                if dir_name == "skills":
+                    success, msg = sync_handler._sync_skills()
+                elif dir_name == "tools":
+                    success, msg = sync_handler._sync_tools()
+                else:
+                    continue
+
+                if success:
+                    # mtime aktualisieren
+                    dir_path = sync_dirs[dir_name]
+                    state[f"{dir_name}_mtime"] = self._get_dir_mtime(dir_path)
+                    synced_count += 1
+
+            if synced_count > 0:
+                results.append(f"[AUTO-SYNC] {', '.join(changed_dirs)} synchronisiert")
+                # State speichern
+                try:
+                    sync_state_path.write_text(
+                        json.dumps(state, indent=2),
+                        encoding='utf-8'
+                    )
+                except OSError:
+                    pass
+        except Exception as e:
+            results.append(f"[AUTO-SYNC] Fehler: {e}")
+
+        return results
+
+    def _get_dir_mtime(self, dir_path: Path) -> float:
+        """Ermittelt die neueste mtime aller Dateien in einem Ordner (rekursiv)."""
+        max_mtime = 0.0
+        try:
+            for f in dir_path.rglob("*"):
+                if f.is_file() and not f.name.startswith((".", "_")):
+                    try:
+                        mt = f.stat().st_mtime
+                        if mt > max_mtime:
+                            max_mtime = mt
+                    except OSError:
+                        pass
+        except OSError:
+            pass
+        return max_mtime
+
     def _run_startup(self, quick: bool, dry_run: bool, startup_mode: str = "gui", partner_id: str = "user") -> tuple:
         results = []
         now = datetime.now()
@@ -379,6 +466,18 @@ class StartupHandler(BaseHandler):
                 # Nur Fehler würden via Exception gemeldet
             except Exception as e:
                 pass  # Silent fail - nicht kritisch (z.B. Datei fehlt)
+
+        # ══════════════════════════════════════════════════════════════
+        # 0.08 LAZY AUTO-SYNC - Skills/Tools bei Aenderung synchen (SQ044)
+        # ══════════════════════════════════════════════════════════════
+        if not dry_run and not quick:
+            try:
+                sync_results = self._lazy_auto_sync()
+                if sync_results:
+                    results.append("")
+                    results.extend(sync_results)
+            except Exception:
+                pass  # Silent fail - nicht kritisch
 
         # ══════════════════════════════════════════════════════════════
         # 0.1 NUL CLEANER - Windows NUL-Dateien entfernen
