@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # SPDX-License-Identifier: MIT
 """
-Copyright (c) 2026 Lukas Geiger
+Copyright (c) 2026 BACH Contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -72,7 +72,7 @@ from typing import Dict, List, Optional, Tuple, Union
 _current = Path(__file__).resolve()
 _hub_dir = _current.parent.parent.parent  # system/hub/
 _services_dir = _hub_dir / "_services"
-_bach_root = _hub_dir.parent.parent  # BACH_v2_vanilla/
+_bach_root = _hub_dir.parent.parent  # BACH/
 
 # Förderplaner-Verzeichnisse
 _foerderplaner = _bach_root / "user" / "documents" / "foerderplaner" / "Berichte"

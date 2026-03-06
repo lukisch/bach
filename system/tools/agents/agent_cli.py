@@ -190,7 +190,7 @@ def init_bach_agents_table():
         ('steuer-agent', 'Steuer-Agent', 'bueroassistent',
          'Steuerbelege, Werbungskosten', 'agents/_experts/steuer/', 'finanzen'),
 
-        # foerderplaner: USER-Experte, nicht in Strawberry enthalten (dist_type=0)
+        # foerderplaner: USER-Experte, nicht in BACH Release v3.1.6 enthalten (dist_type=0)
     ]
 
     for name, display, agent_name, desc, path, domain in experts_data:

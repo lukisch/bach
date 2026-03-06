@@ -30,7 +30,7 @@ if sys.platform == 'win32':
 # BACH-PFADE
 # ============================================================================
 SCRIPT_DIR = Path(__file__).parent
-BACH_ROOT = SCRIPT_DIR.parent.parent  # tools/partner_communication -> BACH_v2_vanilla
+BACH_ROOT = SCRIPT_DIR.parent.parent  # tools/partner_communication -> BACH
 DATA_DIR = BACH_ROOT / "data"
 REGISTRY_PATH = DATA_DIR / "software_registry.json"
 

@@ -73,7 +73,7 @@ BEISPIELE
    bach press send 5 --to redaktion@company.com
 
 5. Konfiguration aendern:
-   bach press config --author "Lukas Geiger" --email info@company.com
+   bach press config --author "Max Mustermann" --email info@company.com
 
 
 DATEIEN

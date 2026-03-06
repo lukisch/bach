@@ -5,7 +5,7 @@
 
 Alle wichtigen Aenderungen an BACH werden hier dokumentiert.
 
-Copyright (c) 2026 Lukas Geiger. Alle Rechte vorbehalten.
+Copyright (c) 2026 BACH Contributors. Alle Rechte vorbehalten.
 
 ---
 

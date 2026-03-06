@@ -199,7 +199,7 @@ Claude:
 ## Speicherorte
 
 ```
-Generierte Tools:  C:\Users\User\OneDrive\KI&AI\BACH_v2_vanilla\User\Tools\coding-tools\python\
-Registry:          C:\Users\User\OneDrive\KI&AI\BACH_v2_vanilla\User\Tools\coding-tools\_registry\
-Log:               C:\Users\User\OneDrive\KI&AI\BACH_v2_vanilla\User\Tools\coding-tools\_registry\integration_log.txt
+Generierte Tools:  C:\Users\User\OneDrive\KI&AI\BACH\User\Tools\coding-tools\python\
+Registry:          C:\Users\User\OneDrive\KI&AI\BACH\User\Tools\coding-tools\_registry\
+Log:               C:\Users\User\OneDrive\KI&AI\BACH\User\Tools\coding-tools\_registry\integration_log.txt
 ```

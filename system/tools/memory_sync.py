@@ -36,7 +36,7 @@ class MemorySync:
 
         # Auto-Detect: Root vs. system/ Installation
         if (self.bach_root / "system").exists():
-            # Root-Installation (Strawberry)
+            # Root-Installation (BACH Release v3.1.6)
             self.system_root = self.bach_root / "system"
         else:
             # Legacy (Vanilla, bach_root = system/)
@@ -616,7 +616,7 @@ def main():
 
     # BACH_ROOT ermitteln
     script_dir = Path(__file__).parent.parent  # system/
-    bach_root = script_dir.parent  # BACH_v2_vanilla/
+    bach_root = script_dir.parent  # BACH/
 
     sync = MemorySync(bach_root)
     command = sys.argv[1]

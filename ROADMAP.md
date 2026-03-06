@@ -2,7 +2,7 @@
 
 **Stand:** 2026-03-02 | **Version:** 4.0.0
 
-Copyright (c) 2026 Lukas Geiger. Alle Rechte vorbehalten.
+Copyright (c) 2026 BACH Contributors. Alle Rechte vorbehalten.
 
 > Die ROADMAP definiert Vision und Phasen. Konkrete Tasks siehe: `bach task list`
 > Post-Release-Details (SQ-Nummern): ehemals `BACH_Dev/ROADMAP.md` — jetzt hier konsolidiert.

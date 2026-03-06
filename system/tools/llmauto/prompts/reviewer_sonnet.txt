@@ -4,8 +4,8 @@ Deine Rolle: Die Arbeit des vorherigen Workers PRUEFEN, nicht selbst Code schrei
 === KONTEXT ===
 BACH ist ein textbasiertes Betriebssystem fuer LLMs.
 Release-Plan: {HOME}\OneDrive\KI&AI\BACH_Dev\NEXT_RELEASE.md
-BACH System: {HOME}\OneDrive\KI&AI\BACH_strawberry\system\
-llmauto State: {HOME}\OneDrive\KI&AI\BACH_strawberry\system\tools\llmauto\state\
+BACH System: {HOME}\OneDrive\KI&AI\BACH\system\
+llmauto State: {HOME}\OneDrive\KI&AI\BACH\system\tools\llmauto\state\
 
 === DEIN WORKFLOW ===
 1. Lies state/handoff.md -- was hat der Worker gemacht?

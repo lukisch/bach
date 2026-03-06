@@ -33,9 +33,9 @@ if sys.stderr:
 
 SCRIPT_DIR = Path(__file__).parent
 
-# Auto-Detect: Root-Installation (Strawberry) oder Legacy (Vanilla, bach.py in system/)
+# Auto-Detect: Root-Installation (BACH Release v3.1.6) oder Legacy (Vanilla, bach.py in system/)
 if (SCRIPT_DIR / "system").exists():
-    # Root-Installation (Strawberry): bach.py liegt im BACH-Root
+    # Root-Installation (BACH Release v3.1.6): bach.py liegt im BACH-Root
     BACH_ROOT = SCRIPT_DIR
     SYSTEM_ROOT = SCRIPT_DIR / "system"
 else:

@@ -2,7 +2,32 @@
 
 Alle wichtigen Aenderungen an BACH werden hier dokumentiert.
 
-Copyright (c) 2026 Lukas Geiger. Alle Rechte vorbehalten.
+Copyright (c) 2026 BACH Contributors. Alle Rechte vorbehalten.
+
+---
+
+## [Unreleased]
+
+### Neu
+
+- **ClaudePermissionsHandler** (`hub/claude_permissions.py`): Permission-Profile fuer Claude Code
+  - Befehl: `bach permissions`
+  - Zwei Default-Profile: `normal` (Standard) und `remote_control` (alle Tools freigeschaltet)
+  - Profile in BACH-DB gespeichert (system_config, Kategorie: claude_permissions)
+  - Automatischer Backup/Restore von ~/.claude/settings.json bei Profil-Wechsel
+  - 10 Operationen: list, show, set, remove, activate, deactivate, sync, reset, status, init
+- **Remote Control Starter** (`start/_internal/claude_remote_control.py`)
+  - Aktiviert Remote-Control-Profil, startet Claude Code, stellt Normal-Profil wieder her
+  - atexit-Handler als Fallback bei Ctrl+C
+  - Desktop-Shortcut: `Claude_RemoteControl.bat`
+  - BACH Boot Menu: Taste [P] unter CLAUDE SPEZIAL
+
+### Dokumentation
+
+- **permissions.txt:** Neue Help-Datei fuer Permission-Profile und Remote Control Workflow
+- **claude-code.txt:** BACH Permission-Profile Verweis ergaenzt
+- **claude-code-automatisierung.txt:** Abschnitt 11 "Remote Control" hinzugefuegt
+- **settings.txt:** Verweis auf claude_permissions Kategorie und permissions.txt
 
 ---
 

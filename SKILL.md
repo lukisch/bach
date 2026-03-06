@@ -1,5 +1,5 @@
 ---
-name: bach-strawberry
+name: bach
 version: 3.6.0
 type: skill
 author: BACH Team
@@ -20,7 +20,7 @@ description: >
 
 # Verwende IMMER die Version mit der höchsten Versionsnummer
 
-# Versions-Check: bach skills version bach-vanilla
+# Versions-Check: bach skills version bach
 
 # Willkommen in Bach
 
@@ -34,7 +34,7 @@ description: >
 
 **(1) VERSIONS-CHECK:** Wenn verschiedene Versionen dieses SKILL.md zur Verfuegung stehen (lokal, zentral), Versionsnummern vergleichen und bei Bedarf zur neuesten Version wechseln und dort weiterlesen.
 ```bash
-bach skills version bach-vanilla   # Prueft ob aktuellere Version existiert
+bach skills version bach   # Prueft ob aktuellere Version existiert
 ```
 
 **(2) BETRIEBSSYSTEM-CHECK:** Erkenne ob du auf Windows, Mac oder Linux arbeitest.
@@ -370,7 +370,18 @@ Oder per API: `help.run("cli")`, `help.run("features")`, etc.
 - `system/CHANGELOG.md` - Versionshistorie
 - `system/BUGLOG.md` - Bekannte Bugs
 - `system/ROADMAP.md` - Geplante Features & Architektur-Uebersicht
-- `../BACH_Dev/MASTERPLAN.txt` - Release-Pipeline (Vanilla -> Strawberry -> GitHub)
+
+#### Root-Dokumente (generiert aus DB, bei `bach --shutdown` aktualisiert)
+
+- `AGENTS.md` - Alle Boss-Agenten und Experten mit Status und Pfaden
+- `PARTNERS.md` - LLM-Partner und Delegation
+- `SKILLS.md` - Skill-Index
+- `WORKFLOWS.md` - Protokoll-Index
+- `CHAINS.md` - Toolchains
+- `USECASES.md` - Anwendungsfaelle
+- `USER.md` - User-Profil
+- `MEMORY.md` - Memory-Snapshot
+- `BACH_HELP_REFERENCE.md` - Gesamte Help-Referenz
 
 #### Kernprinzipien
 
@@ -889,7 +900,7 @@ injector.set_mode("api")              # CLI-Hinweise aus Kontext filtern
 
 ### v2.0.2 (2026-01-01)
 
-- Initiale vanilla Version
+- Initiale Version
 
 ---
 

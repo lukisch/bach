@@ -1,6 +1,6 @@
 {
-  "system": "BACH_v2_vanilla",
-  "system_path": "C://Users//User//OneDrive//KI&AI//BACH_v2_vanilla",
+  "system": "BACH",
+  "system_path": "C://Users//User//OneDrive//KI&AI//BACH",
   "test_date": "2026-02-02T03:30:01.455913",
   "tests": {
     "O001": {
@@ -9,7 +9,7 @@
       "score": 3.75,
       "summary": "3/4 Checks bestanden",
       "data": {
-        "system_path": "C://Users//User//OneDrive//KI&AI//BACH_v2_vanilla",
+        "system_path": "C://Users//User//OneDrive//KI&AI//BACH",
         "test_date": "2026-02-02T03:30:01.638957",
         "test_id": "O001",
         "test_name": "Task-Roundtrip",
@@ -46,7 +46,7 @@
       "score": 4.0,
       "summary": "4/5 Checks bestanden",
       "data": {
-        "system_path": "C://Users//User//OneDrive//KI&AI//BACH_v2_vanilla",
+        "system_path": "C://Users//User//OneDrive//KI&AI//BACH",
         "test_date": "2026-02-02T03:30:35.164571",
         "test_id": "O002",
         "test_name": "Memory-Persistenz",
@@ -88,7 +88,7 @@
       "score": 3.75,
       "summary": "3/4 Checks bestanden",
       "data": {
-        "system_path": "C://Users//User//OneDrive//KI&AI//BACH_v2_vanilla",
+        "system_path": "C://Users//User//OneDrive//KI&AI//BACH",
         "test_date": "2026-02-02T03:31:49.025484",
         "test_id": "O003",
         "test_name": "Tool-Registry",
@@ -227,7 +227,7 @@
       "score": 5.0,
       "summary": "4/4 Checks bestanden",
       "data": {
-        "system_path": "C://Users//User//OneDrive//KI&AI//BACH_v2_vanilla",
+        "system_path": "C://Users//User//OneDrive//KI&AI//BACH",
         "test_date": "2026-02-02T03:32:21.306060",
         "test_id": "O004",
         "test_name": "Backup-Restore",
@@ -274,7 +274,7 @@
       "score": 4.95,
       "summary": "728/735 Config-Dateien valide",
       "data": {
-        "system_path": "C://Users//User//OneDrive//KI&AI//BACH_v2_vanilla",
+        "system_path": "C://Users//User//OneDrive//KI&AI//BACH",
         "test_date": "2026-02-02T03:33:29.711419",
         "test_id": "O005",
         "test_name": "Config-Validierung",
@@ -292,7 +292,7 @@
           {
             "name": "invalid_configs",
             "passed": false,
-            "details": "Ungueltig: ['tool_scan_cache.json', 'financial_data_20260121_020652.json', 'financial_data_20260121_021414.json', 'O_TEST_BACH_v2_vanilla_2026-01-14.json', 'TEST_BACH_v2_vanilla_QUICK_2026-01-19.json']"
+            "details": "Ungueltig: ['tool_scan_cache.json', 'financial_data_20260121_020652.json', 'financial_data_20260121_021414.json', 'O_TEST_BACH_2026-01-14.json', 'TEST_BACH_QUICK_2026-01-19.json']"
           }
         ],
         "config_files": [
@@ -390,7 +390,7 @@
       "score": 4.0,
       "summary": "4/5 Checks bestanden",
       "data": {
-        "system_path": "C://Users//User//OneDrive//KI&AI//BACH_v2_vanilla",
+        "system_path": "C://Users//User//OneDrive//KI&AI//BACH",
         "test_date": "2026-02-02T03:34:22.749216",
         "test_id": "O006",
         "test_name": "Export-Import",

@@ -340,7 +340,7 @@ def main():
     # Pfade ermitteln
     script_path = Path(__file__).resolve()
     system_root = script_path.parent.parent  # tools/ -> system/
-    bach_root = system_root.parent           # system/ -> BACH_v2_vanilla/
+    bach_root = system_root.parent           # system/ -> BACH/
     db_path = system_root / "data" / "bach.db"
 
     if not db_path.exists():

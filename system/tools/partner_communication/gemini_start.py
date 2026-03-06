@@ -30,7 +30,7 @@ import sys
 from pathlib import Path
 
 # Pfade - resolve() fuer absolute Pfade auch bei Aufruf aus anderen Verzeichnissen
-# Skript liegt in tools/partner_communication/ -> 2x parent = BACH_v2_vanilla
+# Skript liegt in tools/partner_communication/ -> 2x parent = BACH
 BACH_DIR = Path(__file__).resolve().parent.parent.parent
 GEMINI_DIR = BACH_DIR / "_partners" / "gemini"
 PROMPTS_DIR = GEMINI_DIR / "prompts"
@@ -126,7 +126,7 @@ def get_prompt(mode, task_count=2, custom_prompt=None):
     elif mode == "default":
         prompt = load_prompt_file("default")
         if not prompt:
-            prompt = "Warte auf Anweisungen. Arbeitsverzeichnis ist BACH_v2_vanilla."
+            prompt = "Warte auf Anweisungen. Arbeitsverzeichnis ist BACH."
         return prompt, "INTERAKTIV"
     else:
         # Mode ist Dateiname in prompts/

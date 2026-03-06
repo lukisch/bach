@@ -291,7 +291,7 @@
           {
             "name": "invalid_configs",
             "passed": false,
-            "details": "Ungueltig: ['tool_scan_cache.json', 'financial_data_20260121_020652.json', 'financial_data_20260121_021414.json', 'O_TEST_BACH_v2_vanilla_2026-01-14.json', 'TEST_BACH_v2_vanilla_QUICK_2026-01-19.json']"
+            "details": "Ungueltig: ['tool_scan_cache.json', 'financial_data_20260121_020652.json', 'financial_data_20260121_021414.json', 'O_TEST_BACH_2026-01-14.json', 'TEST_BACH_QUICK_2026-01-19.json']"
           }
         ],
         "config_files": [

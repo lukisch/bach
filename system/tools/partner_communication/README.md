@@ -75,7 +75,7 @@ RECLUDOS_ROOT = SCRIPT_DIR.parents[4]
 CONNECTIONS_DIR = RECLUDOS_ROOT / "main" / "connections"
 
 # NEU (BACH)
-BACH_ROOT = Path(__file__).parents[2]  # skills/tools/partner_communication -> BACH_v2_vanilla
+BACH_ROOT = Path(__file__).parents[2]  # skills/tools/partner_communication -> BACH
 PARTNERS_DIR = BACH_ROOT / "_partners"
 DATA_DIR = BACH_ROOT / "data"
 ```

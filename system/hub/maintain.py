@@ -391,7 +391,7 @@ Optionen:
   --report        Detaillierten Report generieren
 
 Korrigiert:
-  - Alte recludOS-Pfade -> BACH_v2_vanilla
+  - Alte recludOS-Pfade -> BACH
   - Alte Skill-Pfade
   - Hub/Handler-Pfade
   - Tools-Verweise

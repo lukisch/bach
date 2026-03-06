@@ -256,7 +256,7 @@ def main():
 
     # BACH_ROOT ermitteln
     script_dir = Path(__file__).parent.parent  # system/
-    bach_root = script_dir.parent  # BACH_v2_vanilla/
+    bach_root = script_dir.parent  # BACH/
 
     exporter = AgentsExporter(bach_root)
     success, message = exporter.generate()

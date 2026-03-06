@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # SPDX-License-Identifier: MIT
 """
-Copyright (c) 2026 Lukas Geiger
+Copyright (c) 2026 BACH Contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -36,7 +36,7 @@ Wird vom System-Prompt-Builder aufgerufen.
 from pathlib import Path
 from typing import List
 
-BACH_DIR = Path(__file__).parent.parent.parent.parent.parent  # claude_bridge → _services → hub → system → BACH_v2_vanilla
+BACH_DIR = Path(__file__).parent.parent.parent.parent.parent  # claude_bridge → _services → hub → system → BACH
 
 def log(msg: str, level: str = "INFO"):
     """Einfacher Logger."""

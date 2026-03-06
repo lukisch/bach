@@ -79,7 +79,7 @@ BEISPIEL: Template-Pfad
     from bach_paths import get_path
 
     template_path = get_path("bericht_template")
-    # -> C:/Users/.../BACH_v2_vanilla/system/skills/_templates/bericht_template_geiger_universal.docx
+    # -> C:/Users/.../BACH/system/skills/_templates/bericht_template_geiger_universal.docx
 
 WEITERE FUNKTIONEN
 ------------------

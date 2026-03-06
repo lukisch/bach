@@ -470,7 +470,33 @@ class SetupHandler(BaseHandler):
         except Exception as e:
             results.append(f"  [WARN] Timestamp-Update fehlgeschlagen: {e}")
 
+        # Template-Dateien aufraeumen (nach Personalisierung)
+        cleanup_results = self._cleanup_templates()
+        if cleanup_results:
+            results.append("")
+            results.extend(cleanup_results)
+
         return True, "\n".join(results)
+
+    def _cleanup_templates(self) -> list:
+        """Loescht .template.md Dateien wenn die entsprechende .md existiert.
+
+        Templates bleiben in Git getrackt (fuer neue Installationen), werden
+        aber lokal geloescht sobald die personalisierten Dateien existieren.
+        """
+        root = self.base_path.parent  # BACH/
+        cleaned = []
+
+        for template in root.glob("*.template.md"):
+            real_file = root / template.name.replace(".template.md", ".md")
+            if real_file.exists():
+                try:
+                    template.unlink()
+                    cleaned.append(f"  [OK] Template entfernt: {template.name}")
+                except OSError:
+                    cleaned.append(f"  [WARN] Konnte {template.name} nicht entfernen")
+
+        return cleaned
 
     def _load_user_profile_from_db(self, db_path: Path) -> dict:
         """Laedt Profildaten aus assistant_user_profile fuer USER.md-Personalisierung.

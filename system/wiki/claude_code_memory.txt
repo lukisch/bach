@@ -28,7 +28,7 @@ VERZEICHNISSTRUKTUR
   │   │       ├── mcmc-server.md             # Detail-Datei (bei Bedarf)
   │   │       └── debugging.md              # Themen-Datei (bei Bedarf)
   │   │
-  │   ├── C--Users-User-OneDrive-KI-AI-BACH-v2-vanilla/
+  │   ├── C--Users-User-OneDrive-KI-AI-BACH/
   │   │   └── memory/
   │   │       ├── MEMORY.md                  # BACH-spezifisch (190 Zeilen)
   │   │       └── sqlite_gotchas.md          # Ausgelagertes Detail

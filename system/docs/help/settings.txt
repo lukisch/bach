@@ -106,8 +106,14 @@ DATEIEN
 hub/settings.py          Handler-Implementierung (relativ: hub/settings.py)
 bach.db (system_config)  Datenbank Tabelle (Pfad: BACH_DB)
 
+VERWANDTE KATEGORIEN
+====================
+claude_permissions       Permission-Profile fuer Claude Code (siehe permissions.txt)
+
 SIEHE AUCH
 ==========
 hub/base.py              BaseHandler (relativ: hub/base.py)
 hub/bach_paths.py        BACH_DB Konstante (relativ: hub/bach_paths.py)
+hub/claude_permissions.py  Permissions Handler (relativ: hub/claude_permissions.py)
 docs/BACH-SCHEMA.md      Database Schema (relativ: docs/BACH-SCHEMA.md)
+permissions.txt          Claude Code Permission-Profile

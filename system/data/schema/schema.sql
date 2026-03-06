@@ -1916,7 +1916,7 @@ CREATE TABLE IF NOT EXISTS tiers (
     developer_can_modify INTEGER DEFAULT 1,
     user_can_modify INTEGER DEFAULT 0,
     learn_can_modify INTEGER DEFAULT 0,
-    include_in_vanilla INTEGER DEFAULT 1,
+    include_in_standard INTEGER DEFAULT 1,
     include_in_minimal INTEGER DEFAULT 0,
     include_in_snapshot INTEGER DEFAULT 1
 );

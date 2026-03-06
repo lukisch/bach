@@ -76,9 +76,9 @@ Automatische Rotation verhindert Speicherueberlauf:
 
 SPEICHERORTE
 ============
-  Lokal:    BACH_v2_vanilla/system/data/_backups/
+  Lokal:    BACH/system/data/_backups/
   NAS:      \\NAS-HOST\fritz.nas\Extreme_SSD\BACKUP\BACH_Backups
-  Dist:     BACH_v2_vanilla/distributions/
+  Dist:     BACH/distributions/
 
 HINWEIS:
   NAS nur im Heimnetzwerk erreichbar!
@@ -108,7 +108,7 @@ DISTRIBUTION-BEFEHLE
 ====================
 Pakete fuer Verteilung erstellen:
 
-  bach dist create vanilla       Basis-Paket erstellen
+  bach dist create base       Basis-Paket erstellen
   bach dist list                 Pakete anzeigen
   bach dist status               Verteilungsstatus
   bach dist verify               Integritaet pruefen
@@ -134,7 +134,7 @@ TYPISCHE ANWENDUNGSFAELLE
 
 5. PAKET FUER ANDEREN RECHNER
    Distribution erstellen:
-   bach dist create vanilla
+   bach dist create base
 
 6. SESSION FORTSETZEN
    Nach Neustart/Chat-Wechsel:

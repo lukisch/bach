@@ -7,11 +7,16 @@ Core logic for extracting text from images and PDFs using Tesseract and PyMuPDF.
 Based on tools/c_ocr_engine.py but refactored into a reusable package.
 """
 
+from __future__ import annotations
+
 import sys
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import List, Optional, Union, TYPE_CHECKING
 from dataclasses import dataclass
 import logging
+
+if TYPE_CHECKING:
+    from PIL import Image as _ImageModule
 
 try:
     import pytesseract

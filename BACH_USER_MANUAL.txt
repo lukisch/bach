@@ -310,45 +310,45 @@ BACH verfuegt ueber 97 Handler:
 
 - bach abo -- Abo Handler - Abonnement-Verwaltung (Expert Agent)
 - bach agents -- Agents Handler - Agenten-Verwaltung
-- bach apibook -- Copyright (c) 2026 Lukas Geiger
+- bach apibook -- Copyright (c) 2026 BACH Contributors
 - bach ati -- ATI Handler - Advanced Tool Integration Agent
-- bach bach_paths -- Copyright (c) 2026 Lukas Geiger
+- bach bach_paths -- Copyright (c) 2026 BACH Contributors
 - bach backup -- Backup Handler - Backup-Verwaltung
 - bach bericht -- bericht.py - Foerderbericht-Handler
-- bach calendar_handler -- Copyright (c) 2026 Lukas Geiger
+- bach calendar_handler -- Copyright (c) 2026 BACH Contributors
 - bach chain -- Chain Handler - Ausfuehrung von verketteten Tool-Befehlen
-- bach claude_bridge -- Copyright (c) 2026 Lukas Geiger
+- bach claude_bridge -- Copyright (c) 2026 BACH Contributors
 - bach connections -- Connections Handler - Verbindungen und Actors-Model
-- bach connector -- Copyright (c) 2026 Lukas Geiger
+- bach connector -- Copyright (c) 2026 BACH Contributors
 - bach consolidation -- Consolidation Handler - Memory-Konsolidierung
 - bach contact -- ContactHandler - Kontaktverwaltung CLI
 - bach context -- Context Handler - Kontext-Suche und Longterm-Memory
-- bach cookbook -- Copyright (c) 2026 Lukas Geiger
-- bach cv -- Copyright (c) 2026 Lukas Geiger
+- bach cookbook -- Copyright (c) 2026 BACH Contributors
+- bach cv -- Copyright (c) 2026 BACH Contributors
 - bach daemon -- Daemon Handler - Daemon-Service Verwaltung
-- bach daily_agent -- Copyright (c) 2026 Lukas Geiger
+- bach daily_agent -- Copyright (c) 2026 BACH Contributors
 - bach data_analysis -- BACH Data Analysis Handler
 - bach db -- DB Handler - Datenbank-Operationen (ersetzt Supabase MCP)
-- bach db_sync -- Copyright (c) 2026 Lukas Geiger
+- bach db_sync -- Copyright (c) 2026 BACH Contributors
 - bach denkarium -- Denkarium Handler - Logbuch + Gedanken-Sammler
 - bach dist -- BACH Distribution Handler
-- bach doc -- Copyright (c) 2026 Lukas Geiger
+- bach doc -- Copyright (c) 2026 BACH Contributors
 - bach docs -- Docs Handler - Hauptdokumentation (Markdown + Legacy)
-- bach docs_search -- Copyright (c) 2026 Lukas Geiger
-- bach email -- Copyright (c) 2026 Lukas Geiger
-- bach extensions -- Copyright (c) 2026 Lukas Geiger
+- bach docs_search -- Copyright (c) 2026 BACH Contributors
+- bach email -- Copyright (c) 2026 BACH Contributors
+- bach extensions -- Copyright (c) 2026 BACH Contributors
 - bach folders -- BACH Folders CLI Handler
-- bach fs -- Copyright (c) 2026 Lukas Geiger
+- bach fs -- Copyright (c) 2026 BACH Contributors
 - bach gesundheit -- GesundheitHandler - Gesundheitsassistent CLI
 - bach gui -- GUI Handler - Web-Server Verwaltung
 - bach haushalt -- HaushaltHandler - Haushaltsmanagement CLI
-- bach health -- Copyright (c) 2026 Lukas Geiger
+- bach health -- Copyright (c) 2026 BACH Contributors
 - bach help -- Help Handler - Zeigt Hilfe-Texte aus .txt Dateien
-- bach hooks -- Copyright (c) 2026 Lukas Geiger
+- bach hooks -- Copyright (c) 2026 BACH Contributors
 - bach inbox -- BACH Inbox Handler v1.0
 - bach inject -- Inject Handler - Injektor-Steuerung und Aufgaben-Zuweisung
 - bach integration -- Integration Handler - LLM-Partner-Brücke
-- bach lang -- Copyright (c) 2026 Lukas Geiger
+- bach lang -- Copyright (c) 2026 BACH Contributors
 - bach lesson -- Lesson Handler - Lessons Learned Management
 - bach logs -- Logs Handler - Log-Verwaltung
 - bach maintain -- BACH Maintain Handler
@@ -357,24 +357,24 @@ BACH verfuegt ueber 97 Handler:
 - bach messages -- Messages Handler - Nachrichtensystem CLI
 - bach mount -- BACH Mount Handler
 - bach multi_llm_protocol -- Multi-LLM Protocol Handler - Koordination paralleler Agenten
-- bach news -- Copyright (c) 2026 Lukas Geiger
-- bach newspaper -- Copyright (c) 2026 Lukas Geiger
-- bach notify -- Copyright (c) 2026 Lukas Geiger
-- bach obsidian -- Copyright (c) 2026 Lukas Geiger
+- bach news -- Copyright (c) 2026 BACH Contributors
+- bach newspaper -- Copyright (c) 2026 BACH Contributors
+- bach notify -- Copyright (c) 2026 BACH Contributors
+- bach obsidian -- Copyright (c) 2026 BACH Contributors
 - bach ollama -- Ollama Handler - Lokale AI-Interaktion
 - bach partner -- Partner Handler - Partner-Verwaltung
 - bach partner_config_manager -- PartnerConfigManager - LLM-Partner-Konfiguration
-- bach path -- Copyright (c) 2026 Lukas Geiger
+- bach path -- Copyright (c) 2026 BACH Contributors
 - bach pipeline -- Pipeline-Handler für BACH
-- bach plugins -- Copyright (c) 2026 Lukas Geiger
-- bach press -- Copyright (c) 2026 Lukas Geiger
-- bach profile -- Copyright (c) 2026 Lukas Geiger
-- bach profiler -- Copyright (c) 2026 Lukas Geiger
+- bach plugins -- Copyright (c) 2026 BACH Contributors
+- bach press -- Copyright (c) 2026 BACH Contributors
+- bach profile -- Copyright (c) 2026 BACH Contributors
+- bach profiler -- Copyright (c) 2026 BACH Contributors
 - bach recurring -- BACH Recurring Tasks Handler v1.0.0
-- bach reflection -- Copyright (c) 2026 Lukas Geiger
+- bach reflection -- Copyright (c) 2026 BACH Contributors
 - bach restore -- File Restore Handler (SQ020/HQ6)
 - bach routine -- RoutineHandler - Household Routine Management CLI
-- bach sandbox -- Copyright (c) 2026 Lukas Geiger
+- bach sandbox -- Copyright (c) 2026 BACH Contributors
 - bach scan -- Scan Handler - Scanner-Verwaltung
 - bach seal -- Kernel Seal Handler (SQ021)
 - bach search -- SearchHandler - Unified Search CLI for BACH
@@ -384,7 +384,7 @@ BACH verfuegt ueber 97 Handler:
 - bach shared_memory -- Shared Memory Handler - Multi-Agent Memory-Verwaltung (SQ043
 - bach shutdown -- Shutdown Handler - Session beenden (DB-basiert)
 - bach skills -- Skills Handler - Skill-Verwaltung (v2.0 Architektur)
-- bach smarthome -- Copyright (c) 2026 Lukas Geiger
+- bach smarthome -- Copyright (c) 2026 BACH Contributors
 - bach snapshot -- Snapshot Handler - Session-Snapshot-Verwaltung
 - bach sources -- Sources Handler - Kontextquellen-System
 - bach startup -- Startup Handler - Session starten (DB-basiert)
@@ -398,12 +398,12 @@ BACH verfuegt ueber 97 Handler:
 - bach tools -- Tools Handler - Tool-Verwaltung
 - bach trash -- BACH Trash Handler
 - bach tuev -- TUeV Handler - Workflow-Qualitaetssicherung
-- bach update -- Copyright (c) 2026 Lukas Geiger
-- bach upgrade -- Copyright (c) 2026 Lukas Geiger
-- bach versicherung -- Copyright (c) 2026 Lukas Geiger
-- bach watcher -- Copyright (c) 2026 Lukas Geiger
-- bach web_parse -- Copyright (c) 2026 Lukas Geiger
-- bach web_scrape -- Copyright (c) 2026 Lukas Geiger
+- bach update -- Copyright (c) 2026 BACH Contributors
+- bach upgrade -- Copyright (c) 2026 BACH Contributors
+- bach versicherung -- Copyright (c) 2026 BACH Contributors
+- bach watcher -- Copyright (c) 2026 BACH Contributors
+- bach web_parse -- Copyright (c) 2026 BACH Contributors
+- bach web_scrape -- Copyright (c) 2026 BACH Contributors
 - bach wiki -- Wiki Handler - Wiki-Artikel aus wiki/ anzeigen
 
 

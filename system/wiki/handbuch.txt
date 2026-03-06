@@ -105,7 +105,7 @@ python bach.py --shutdown "Was gemacht wurde"
 ## Ordnerstruktur (fuer Menschen)
 
 ```
-BACH_v2_vanilla/
+BACH/
 │
 ├── 📄 bach.py              # Hauptprogramm
 ├── 📄 SKILL.md             # KI-Referenz (technisch)

@@ -10,7 +10,7 @@ Aufgerufen von:
 - bach --shutdown (Block 5.7: DB -> USER.md)
 
 Hinweis: USER.md liegt im BACH-Root-Verzeichnis (eine Ebene ueber system/).
-         Pfad: BACH_v2_vanilla/USER.md
+         Pfad: BACH/USER.md
 """
 from __future__ import annotations
 
@@ -30,7 +30,7 @@ class UserSync:
     Richtung 2 (DB -> USER.md):  sync_to_file() -- beim Shutdown (regenerieren)
 
     USER.md liegt im BACH-Root, eine Ebene ueber dem system/-Verzeichnis:
-        system/../USER.md  =>  BACH_v2_vanilla/USER.md
+        system/../USER.md  =>  BACH/USER.md
     """
 
     def __init__(self, bach_root: str, db_path: str):
@@ -46,8 +46,8 @@ class UserSync:
         Liest USER.md und parst die wichtigsten Felder.
 
         Erkennt Zeilen der Form:
-            **Name:** Lukas Geiger
-            **Standort:** Bernau
+            **Name:** Max Mustermann
+            **Standort:** Berlin
             **Sprache:** Deutsch
 
         Returns:

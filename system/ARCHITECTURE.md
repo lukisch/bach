@@ -6,7 +6,7 @@
 **Stand:** 2026-03-04
 **Zielgruppe:** Entwickler, Kontributoren, fortgeschrittene Nutzer
 
-Copyright (c) 2026 Lukas Geiger. Alle Rechte vorbehalten.
+Copyright (c) 2026 BACH Contributors. Alle Rechte vorbehalten.
 
 ---
 

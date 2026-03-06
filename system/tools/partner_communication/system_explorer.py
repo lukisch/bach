@@ -37,7 +37,7 @@ if sys.platform == 'win32':
 # BACH-PFADE (angepasst von RecludOS)
 # ============================================================================
 SCRIPT_DIR = Path(__file__).parent
-BACH_ROOT = SCRIPT_DIR.parent.parent  # tools/partner_communication -> BACH_v2_vanilla
+BACH_ROOT = SCRIPT_DIR.parent.parent  # tools/partner_communication -> BACH
 DATA_DIR = BACH_ROOT / "data"
 DB_PATH = DATA_DIR / "bach.db"
 PARTNERS_DIR = DATA_DIR / "partners"

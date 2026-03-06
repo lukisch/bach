@@ -93,6 +93,12 @@ PERMISSIONS
   --dangerously-skip-permissions  ALLE Prompts umgehen (Vorsicht!)
   --allow-dangerously-skip-permissions  Bypass erlauben (nicht aktivieren)
 
+  BACH Permission-Profile (empfohlen fuer Remote Control):
+    bach permissions list              Profile anzeigen
+    bach permissions activate <profil> Profil in settings.json schreiben
+    bach permissions deactivate        Normal-Profil wiederherstellen
+    -> Siehe: permissions.txt fuer Details
+
 AUSGABEFORMATE (mit -p)
 -----------------------
   --output-format text           Text (Standard)
@@ -136,7 +142,7 @@ UMGEBUNGSVARIABLEN (Auswahl)
 BEISPIELE
 ---------
   # Interaktiv im BACH-Verzeichnis
-  cd "C:\Users\User\OneDrive\KI&AI\BACH_v2_vanilla"
+  cd "C:\Users\User\OneDrive\KI&AI\BACH"
   claude
 
   # Mit Opus 4.6 und Extended Context
@@ -192,6 +198,8 @@ SIEHE AUCH
 ----------
   https://code.claude.com/docs/en/cli-reference  Vollstaendige CLI-Referenz
   https://code.claude.com/docs/en/setup          Setup & Installation
+  permissions.txt                           BACH Permission-Profile
+  claude-code-automatisierung.txt           Automatisierung
   wiki/claude-code.txt                      BACH Wiki (falls vorhanden)
   wiki/gemini.txt                           Gemini CLI/Antigravity
   wiki/ollama.txt                           Lokale LLMs

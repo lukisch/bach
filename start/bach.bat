@@ -49,6 +49,7 @@ echo   [0]  Zugewiesene Tasks - Unbegrenzt
 echo.
 echo   --- CLAUDE SPEZIAL ----------------------------
 echo   [F]  Full Access (skip-permissions)
+echo   [P]  Remote Control (Mobile App, Bypass)
 echo   [M]  Maintenance (Recurring/Backup/Docs)
 echo.
 echo   --- CLAUDE LOOP (Endlos) ----------------------
@@ -86,6 +87,7 @@ if "!choice!"=="8" goto claude_all_1h
 if "!choice!"=="9" goto claude_assigned_15
 if "!choice!"=="0" goto claude_assigned_nolimit
 if /i "!choice!"=="F" goto claude_full
+if /i "!choice!"=="P" goto claude_rc
 if /i "!choice!"=="M" goto claude_maintenance
 if /i "!choice!"=="L" goto loop_15
 if /i "!choice!"=="N" goto loop_30
@@ -386,6 +388,11 @@ popd
 echo.
 echo [FERTIG] Session beendet.
 pause
+goto menu
+
+:claude_rc
+title BACH Claude: Remote Control
+call "%~dp0_internal\claude_remote_control.bat"
 goto menu
 
 :claude_maintenance

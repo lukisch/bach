@@ -16,7 +16,7 @@ cursor = conn.cursor()
 systems = [
     ("_CHIAH", "system", "3.1", "SKILL.md", r"C:\Users\User\OneDrive\Software Entwicklung\_CHIAH"),
     ("_BATCH", "system", "2.5", "SKILL.md", r"C:\Users\User\OneDrive\Software Entwicklung\_BATCH"),
-    ("recludOS", "system", "3.3.0", "boot/SKILL.md", r"C:\Users\User\OneDrive\KI&AI\BACH_v2_vanilla\main\system"),
+    ("recludOS", "system", "3.3.0", "boot/SKILL.md", r"C:\Users\User\OneDrive\KI&AI\BACH\main\system"),
     ("BACH_STREAM", "meta", "1.1", "SKILL.txt", r"C:\Users\User\OneDrive\KI&AI\BACH_STREAM"),
     ("AI-Portable", "utility", "1.0", None, r"C:\Users\User\OneDrive\KI&AI\AI-Portable"),
     ("Templates", "utility", "1.0", None, r"C:\Users\User\OneDrive\KI&AI\Templates"),

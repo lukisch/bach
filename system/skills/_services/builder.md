@@ -178,7 +178,7 @@ python skills/tools/exporter.py skill recherche --output recherche.zip
 python skills/tools/exporter.py agent entwickler --output entwickler.zip
 
 # BACH-Installer erstellen (ohne Userdaten)
-python skills/tools/exporter.py os-fresh --output BACH_v2_vanilla_fresh.zip
+python skills/tools/exporter.py os-fresh --output BACH_fresh.zip
 ```
 
 ---
@@ -191,14 +191,14 @@ Distribution erstellt cleane Pakete OHNE Userdaten:
 
 ```bash
 # Distribution erstellen
-bach dist create vanilla              # → distributions/vanilla.zip
-bach dist create vanilla --version 1.1.0
+bach dist create base              # → distributions/base.zip
+bach dist create base --version 1.1.0
 
 # Verfügbare Distributionen anzeigen
 bach dist list
 
 # Distribution installieren (in neuem Ordner)
-bach dist install vanilla "C:\Projekte\MeinBach"
+bach dist install base "C:\Projekte\MeinBach"
 ```
 
 ### Was wird eingepackt?
@@ -214,7 +214,7 @@ SELECT * FROM tools WHERE dist_type >= 1;
 
 ```
 distributions/
-├── vanilla_v1.1.0_2026-01-14.zip
+├── base_v1.1.0_2026-01-14.zip
 │   ├── SKILL.md            (dist_type=2)
 │   ├── bach.py             (dist_type=2)
 │   ├── schema.sql          (dist_type=2)
@@ -315,7 +315,7 @@ bach restore template SKILL.md        # Einzelne Datei
 bach restore template --all           # Alle Templates
 
 # Aus Distribution wiederherstellen (dist_type = 2)
-bach restore dist vanilla             # System-Reset auf vanilla
+bach restore dist base             # System-Reset auf Basis-Distribution
 ```
 
 ### Restore-Modi
@@ -375,7 +375,7 @@ Was will ich?
 │   └─► exporter.py skill/agent
 │
 ├─► BACH weitergeben (frisch)?
-│   └─► bach dist create vanilla
+│   └─► bach dist create base
 │
 ├─► Meine Daten sichern?
 │   └─► bach backup create [--to-nas]
@@ -387,7 +387,7 @@ Was will ich?
 │   └─► bach restore template <file>
 │
 └─► Komplett-Reset auf Distribution?
-    └─► bach restore dist vanilla
+    └─► bach restore dist base
 ```
 
 ---
@@ -425,7 +425,7 @@ python skills/tools/structure_generator.py <n> --embedded skill
 python skills/tools/exporter.py skill <n> --output <n>.zip
 
 # Distribution
-python skills/tools/distribution_system.py create vanilla
+python skills/tools/distribution_system.py create base
 
 # Backup
 python skills/tools/backup_manager.py create [--to-nas]
@@ -566,7 +566,7 @@ python skills/tools/testing/run_external.py "C:\Projekte\BACH_v2"
 ```python
 KNOWN_SYSTEMS = {
     "recludOS": "C:\...\KI&AI\recludOS",
-    "BACH": "C:\...\KI&AI\BACH_v2_vanilla",
+    "BACH": "C:\...\KI&AI\BACH",
     "_BATCH": "C:\...\Software Entwicklung\_BATCH",
     "_CHIAH": "C:\...\Software Entwicklung\_CHIAH",
     "universal-llm-os-v2": "C:\...\Templates\OS\universal-llm-os-v2",
@@ -688,7 +688,7 @@ Was will ich?
 │   └─► exporter.py skill/agent
 │
 ├─► BACH weitergeben (frisch)?
-│   └─► bach dist create vanilla
+│   └─► bach dist create base
 │
 ├─► Meine Daten sichern?
 │   └─► bach backup create

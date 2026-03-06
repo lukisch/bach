@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # SPDX-License-Identifier: MIT
 """
-Copyright (c) 2026 Lukas Geiger
+Copyright (c) 2026 BACH Contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -1133,10 +1133,18 @@ JSON:
     ) -> Path:
         """Generiert Bericht aus JSON-Daten mit dem Generator."""
         try:
-            # Generator importieren
+            # Generator importieren - Direkter Pfad, da 'agents' mit hub/agents.py kollidiert
             import sys
-            sys.path.insert(0, str(BACH_BASE / "system"))
-            from skills._experts.report_generator.generator import fill_template
+            import importlib.util
+            generator_path = BACH_BASE / "system" / "agents" / "_experts" / "report_generator" / "generator.py"
+            spec = importlib.util.spec_from_file_location("report_generator", str(generator_path))
+            generator_mod = importlib.util.module_from_spec(spec)
+            # Generator braucht Zugriff auf seine Nachbar-Module
+            gen_dir = str(generator_path.parent)
+            if gen_dir not in sys.path:
+                sys.path.insert(0, gen_dir)
+            spec.loader.exec_module(generator_mod)
+            fill_template = generator_mod.fill_template
 
             # De-Anonymisierung der JSON-Daten
             if auto_deanonymize and session.profile:
@@ -1168,14 +1176,19 @@ JSON:
                 return None
 
         except Exception as e:
+            import traceback
+            tb = traceback.format_exc()
             session.error_message = f"JSON-Generierung fehlgeschlagen: {e}"
             session.status = "error"
-            # Fallback zu Markdown
+            print(f"[FEHLER] fill_template Exception: {e}")
+            print(f"[FEHLER] Traceback:\n{tb}")
+            # Fallback zu Markdown - json_data mitgeben fuer ICF-Tabelle!
+            print("[INFO] Fallback zu Markdown-Generator...")
             return self._generate_from_markdown(
                 session,
                 json.dumps(json_data, ensure_ascii=False, indent=2),
                 auto_deanonymize,
-                None
+                json_data
             )
 
     def _deanonymize_json(self, data: Dict, profile: TempAnonymProfile) -> Dict:

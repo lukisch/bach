@@ -221,6 +221,32 @@ Parameter                       Beschreibung
 --no-session-persistence        Session nicht speichern (nur mit --print)
 
 
+11. REMOTE CONTROL (MOBILE APP)
+-------------------------------
+Claude Code kann ueber die Claude Mobile App ferngesteuert werden.
+Bekannter Bug: --dangerously-skip-permissions greift nicht bei Remote Control.
+
+Loesung: BACH Permission-Profile verwenden:
+
+    # Automatisch (empfohlen):
+    # Desktop: Claude_RemoteControl.bat
+    # BACH Menue: Taste [P]
+
+    # Manuell:
+    bach permissions activate remote_control
+    claude --dangerously-skip-permissions
+    # -> /rc eingeben, QR-Code scannen
+    # Nach Beendigung:
+    bach permissions deactivate
+
+    # Profile anpassen:
+    bach permissions set remote_control allow=mcp__neuer_server__*
+    bach permissions show remote_control
+    bach permissions status
+
+Siehe: permissions.txt fuer vollstaendige Dokumentation.
+
+
 SICHERHEITSHINWEISE
 -------------------
 1. --dangerously-skip-permissions nur in isolierten Umgebungen
@@ -240,3 +266,4 @@ SIEHE AUCH
 - claude install [target]     Native Build installieren (stable/latest/version)
 - claude update               Auf Updates prüfen
 - claude-code.txt             Allgemeine Claude Code Informationen
+- permissions.txt             BACH Permission-Profile (Remote Control)

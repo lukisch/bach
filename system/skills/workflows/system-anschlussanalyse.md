@@ -92,7 +92,7 @@ Alle Handler sollten BEIDE Wege unterstützen (mit und ohne --).
 
 | Problem | Beispiel | Lösung |
 |---------|----------|--------|
-| Alter Pfad | `recludOS/` statt `BACH_v2_vanilla/` | `--maintain heal` |
+| Alter Pfad | `recludOS/` statt `BACH/` | `--maintain heal` |
 | Fehlende Referenz | skills/docs/docs/docs/help/x.txt erwähnt nicht existierende Datei | Korrigieren |
 | Doppelte Doku | Info in skills/docs/docs/docs/help/*.txt UND in DB | Konsolidieren |
 

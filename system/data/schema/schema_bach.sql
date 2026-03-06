@@ -1002,7 +1002,7 @@ CREATE TABLE IF NOT EXISTS tiers (
     learn_can_modify BOOLEAN DEFAULT 0,
     
     -- Release-Einstellungen
-    include_in_vanilla BOOLEAN DEFAULT 1,    -- Standard-Installation
+    include_in_standard BOOLEAN DEFAULT 1,    -- Standard-Installation
     include_in_minimal BOOLEAN DEFAULT 0,    -- Minimal-Installation
     include_in_snapshot BOOLEAN DEFAULT 1    -- Bei Snapshots
 );
@@ -1010,7 +1010,7 @@ CREATE TABLE IF NOT EXISTS tiers (
 -- 4-Tier System einfügen
 INSERT OR IGNORE INTO tiers (id, name, description, protection_level, 
                              developer_can_modify, user_can_modify, learn_can_modify,
-                             include_in_vanilla, include_in_minimal, include_in_snapshot) VALUES
+                             include_in_standard, include_in_minimal, include_in_snapshot) VALUES
 (0, 'kernel', 'Minimaler Kern - ohne das läuft nichts', 'critical', 1, 0, 0, 1, 1, 1),
 (1, 'core', 'Standard-Komponenten für volle Funktionalität', 'high', 1, 0, 1, 1, 0, 1),
 (2, 'extension', 'Optionale Zusatzfunktionen', 'medium', 1, 1, 1, 0, 0, 1),
@@ -1028,7 +1028,7 @@ CREATE TABLE IF NOT EXISTS releases (
     version_patch INTEGER,
     
     -- Typ
-    type TEXT NOT NULL,                  -- 'vanilla', 'minimal', 'full', 'snapshot', 'fork'
+    type TEXT NOT NULL,                  -- 'standard', 'minimal', 'full', 'snapshot', 'fork'
     name TEXT,                           -- Optionaler Name ('BACH-Bioinformatik')
     
     -- Quelle (für Versionssuffix)

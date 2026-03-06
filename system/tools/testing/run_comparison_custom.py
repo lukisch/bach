@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Copyright (c) 2026 Lukas Geiger
+Copyright (c) 2026 BACH Contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -35,7 +35,7 @@ import compare_systems
 # Inject BachForelle path
 compare_systems.KNOWN_SYSTEMS["BachForelle"] = r"C:\Users\User\OneDrive\KI&AI\BachForelle"
 # Ensure BACH path is correct (Vanilla v2)
-compare_systems.KNOWN_SYSTEMS["BACH_v2"] = r"C:\Users\User\OneDrive\KI&AI\BACH_v2_vanilla"
+compare_systems.KNOWN_SYSTEMS["BACH_v2"] = r"C:\Users\User\OneDrive\KI&AI\BACH"
 
 # Run comparison
 print("Running comparison for: BACH_v2 vs BachForelle...")

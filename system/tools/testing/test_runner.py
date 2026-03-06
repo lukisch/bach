@@ -22,7 +22,7 @@ from pathlib import Path
 from datetime import datetime
 
 # Standard BACH-Pfad
-BACH_ROOT = Path(__file__).parent.parent.parent  # tools/testing -> BACH_v2_vanilla
+BACH_ROOT = Path(__file__).parent.parent.parent  # tools/testing -> BACH
 TESTING_DIR = Path(__file__).parent
 RESULTS_DIR = TESTING_DIR / "results"
 

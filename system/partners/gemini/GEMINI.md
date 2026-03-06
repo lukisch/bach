@@ -31,7 +31,7 @@ bach msg send claude "Task #123 uebernommen" --from gemini
 ### Partner-Workspace
 
 ```
-BACH_v2_vanilla\partners\gemini\
+BACH\partners\gemini\
 ├── inbox\                  # Auftraege AN dich
 ├── outbox\                 # Deine Berichte (OUTPUT)
 │   └── _archive\           # Archivierte Reports

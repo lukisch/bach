@@ -147,11 +147,11 @@ SCHRITT 1: Zielsystem identifizieren
   - Systemklasse? (SKILL/AGENT/OS)
 
 SCHRITT 2: Tests fuer beide ausfuehren
-  python tools/testing/test_runner.py "BACH_v2_vanilla" -p STANDARD
+  python tools/testing/test_runner.py "BACH" -p STANDARD
   python tools/testing/test_runner.py "<anderes>" -p STANDARD
   
   ODER direkt vergleichen:
-  python tools/testing/test_runner.py "BACH_v2_vanilla" --compare "<anderes>"
+  python tools/testing/test_runner.py "BACH" --compare "<anderes>"
 
 SCHRITT 3: Feature-Matrix erstellen
   ┌──────────────┬──────┬──────────┐
@@ -235,7 +235,7 @@ python tools/testing/test_runner.py -p FULL
 python tools/testing/test_runner.py "C:\...\anderes_system"
 
 # Zwei Systeme vergleichen
-python tools/testing/test_runner.py "BACH_v2_vanilla" --compare "C:\...\anderes"
+python tools/testing/test_runner.py "BACH" --compare "C:\...\anderes"
 
 # Profile anzeigen
 python tools/testing/test_runner.py --list-profiles
@@ -245,12 +245,12 @@ python tools/testing/test_runner.py --list-profiles
 
 ```bash
 # B-Tests
-python tools/testing/b_tests/B001_file_inventory.py "BACH_v2_vanilla"
-python tools/testing/b_tests/run_b_tests.py "BACH_v2_vanilla" "results"
+python tools/testing/b_tests/B001_file_inventory.py "BACH"
+python tools/testing/b_tests/run_b_tests.py "BACH" "results"
 
 # O-Tests
-python tools/testing/o_tests/O001_task_roundtrip.py "BACH_v2_vanilla"
-python tools/testing/o_tests/run_o_tests.py "BACH_v2_vanilla" "results"
+python tools/testing/o_tests/O001_task_roundtrip.py "BACH"
+python tools/testing/o_tests/run_o_tests.py "BACH" "results"
 ```
 
 ---
@@ -288,7 +288,7 @@ tools/testing/
 │   └── FULL.json
 │
 └── results/             # Testergebnisse
-    └── BACH_v2_vanilla/
+    └── BACH/
 ```
 
 ---
@@ -354,7 +354,7 @@ Differenz:    T_TOTAL = T_END - T_START
 
 ```json
 {
-  "system": "BACH_v2_vanilla",
+  "system": "BACH",
   "profile": "STANDARD",
   "test_date": "2026-01-17T14:00:00",
   "b_tests": {

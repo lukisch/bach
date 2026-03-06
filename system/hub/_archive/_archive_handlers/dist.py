@@ -269,7 +269,7 @@ class DistHandler(BaseHandler):
             return False, err
         
         try:
-            release_id = dist.create_release(name, "vanilla", description)
+            release_id = dist.create_release(name, "base", description)
             if release_id:
                 return True, f"[OK] Release erstellt: {name} (ID: {release_id})"
             else:
