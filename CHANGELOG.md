@@ -228,7 +228,7 @@ Copyright (c) 2026 BACH Contributors. Alle Rechte vorbehalten.
 
 ### USMC Bridge
 
-- **NEU:** `hub/_services/usmc_bridge.py` - Unified Shared Memory Communication Bridge
+- **NEU:** `hub/_services/usmc_bridge.py` - USMC Bridge (United Shared Memory Client)
   - Verbindet SharedMemory-Handler mit externen Agenten und Services
   - Protokoll: JSON-basiert, unidirektional oder bidirektional
   - Unterstuetzt: local, tcp, file-based Transport

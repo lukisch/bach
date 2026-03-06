@@ -829,7 +829,7 @@ injector.set_mode("api")              # CLI-Hinweise aus Kontext filtern
 - **Agent-CLI**: `AgentLauncherHandler` -- `bach agent start/stop/list` fuer direkte Agent-Steuerung
 - **Prompt-System**: `PromptHandler` -- `bach prompt list/add/edit/show/board-create` fuer zentrale Prompt-Verwaltung
 - **SharedMemory-Erweiterungen**: `current-task`, `generate-context`, `conflict-resolution`, `decay`, `changes-since`
-- **USMC Bridge**: Unified Shared Memory Communication (`hub/_services/usmc_bridge.py`)
+- **USMC Bridge**: United Shared Memory Client (`hub/_services/usmc_bridge.py`)
 - **llmauto-Ketten**: Claude-Prompts als Chain-Steps + `bach://`-URL-Resolution
 - **Scheduler**: `job_type='chain'` + Umbenennung `daemon_jobs` → `scheduler_jobs`
 - **Neue API-Module**: `agent`, `prompt` in `bach_api`

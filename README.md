@@ -21,7 +21,7 @@ BACH ist ein textbasiertes Betriebssystem, das Large Language Models (LLMs) bef�
 - **Agent-CLI** - `bach agent start/stop/list` für direkte Agent-Steuerung
 - **Prompt-System** - Zentrale Prompt-Verwaltung mit Board-System und Versionierung
 - **SharedMemory-Bus** - Multi-Agent-Koordination mit Konflikt-Erkennung und Decay
-- **USMC Bridge** - Unified Shared Memory Communication für Cross-Agent-Kommunikation
+- **USMC Bridge** - United Shared Memory Communication für Cross-Agent-Kommunikation
 - **llmauto-Ketten** - Claude-Prompts als Chain-Steps mit `bach://` URL-Resolution
 
 ## Installation
@@ -109,7 +109,7 @@ BACH ist in drei Ausbaustufen verfuegbar -- vom minimalistischen Kern bis zum vo
 
 | Stufe | Projekt | Beschreibung | Repository |
 |-------|---------|-------------|------------|
-| 1 | **USMC** | Unified Shared Memory Client -- minimalistisches geteiltes Memory-System | [github.com/lukisch/usmc](https://github.com/lukisch/usmc) |
+| 1 | **USMC** | United Shared Memory Client -- minimalistisches geteiltes Memory-System | [github.com/lukisch/usmc](https://github.com/lukisch/usmc) |
 | 2 | **Rinnsal** | BACH Mini -- USMC + llmauto (LLM-Orchestrierung), extrem eingedampft | [github.com/lukisch/rinnsal](https://github.com/lukisch/rinnsal) |
 | 3 | **BACH** | Vollstaendiges System -- 109+ Handler, 932+ Skills, Agenten, GUI, Bridge | [github.com/lukisch/bach](https://github.com/lukisch/bach) |
 
