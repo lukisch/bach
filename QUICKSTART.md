@@ -1,97 +1,65 @@
 # BACH Quickstart Guide
 
-**Version:** v3.7.0-waterfall
+**Version:** v3.1.6
 
-## In 5 Minuten zum ersten BACH-Workflow
+## Your First BACH Workflow in 5 Minutes
 
-### 1. Installation (2 Minuten)
+### 1. Installation (2 Minutes)
 
 ```bash
-# Repository klonen
+# Clone repository
 git clone https://github.com/lukisch/bach.git
 cd bach
 
-# Abhängigkeiten installieren
+# Install dependencies
 pip install -r requirements.txt
 
-# BACH initialisieren
+# Initialize BACH
 python system/setup.py
 ```
 
-### 2. Erste Schritte (3 Minuten)
+### 2. First Steps (3 Minutes)
 
-#### BACH starten
+#### Start BACH
 
 ```bash
 python bach.py --startup
 ```
 
-#### Task erstellen und verwalten
+#### Create and Manage Tasks
 
 ```bash
-# Neue Aufgabe anlegen
-python bach.py task add "Erstes BACH-Experiment"
+# Create a new task
+python bach.py task add "First BACH experiment"
 
-# Aufgaben anzeigen
+# List tasks
 python bach.py task list
 
-# Aufgabe erledigen
+# Complete a task
 python bach.py task done 1
 ```
 
-#### Wissen speichern und abrufen
+#### Store and Retrieve Knowledge
 
 ```bash
-# Notiz ins Wiki schreiben
-python bach.py wiki write "bash-tricks" "Nützliche Bash-Befehle sammeln"
+# Write a wiki note
+python bach.py wiki write "bash-tricks" "Collecting useful bash commands"
 
-# Wissen suchen
+# Search knowledge
 python bach.py wiki search "bash"
 ```
 
-#### Memory-System nutzen
+#### Use the Memory System
 
 ```bash
-# Wichtigen Fakt speichern
-python bach.py mem fact "Projekt-Deadline: 2025-12-31"
+# Store an important fact
+python bach.py mem write fact "Project deadline: 2024-12-31"
 
-# Facts abrufen
+# Retrieve facts
 python bach.py mem read facts
 ```
 
-#### Agenten verwalten
-
-```bash
-# Alle verfügbaren Agenten anzeigen
-python bach.py agent list
-
-# Agenten starten
-python bach.py agent start bueroassistent
-
-# Agenten stoppen
-python bach.py agent stop bueroassistent
-```
-
-#### Prompts verwalten
-
-```bash
-# Prompt-Liste anzeigen
-python bach.py prompt list
-
-# Neuen Prompt anlegen
-python bach.py prompt add "Analyse-Prompt" --content "Analysiere folgendes..."
-
-# Prompt-Board erstellen
-python bach.py prompt board-create "Meine Prompts"
-```
-
-#### Scheduler-Status prüfen
-
-```bash
-python bach.py scheduler status
-```
-
-#### BACH beenden
+#### Stop BACH
 
 ```bash
 python bach.py --shutdown
@@ -99,93 +67,76 @@ python bach.py --shutdown
 
 ---
 
-## Wichtigste Kommandos
-
-| Bereich | Befehl | Beschreibung |
-|---------|--------|--------------|
-| Task | `bach task add "..."` | Neue Aufgabe anlegen |
-| Task | `bach task list` | Aufgaben anzeigen |
-| Memory | `bach mem write "..."` | Notiz schreiben |
-| Memory | `bach mem fact "..."` | Fakt speichern |
-| Wiki | `bach wiki search "..."` | Wissen suchen |
-| Agent | `bach agent list` | Agenten anzeigen |
-| Agent | `bach agent start <name>` | Agenten starten |
-| Agent | `bach agent stop <name>` | Agenten stoppen |
-| Prompt | `bach prompt list` | Prompts anzeigen |
-| Prompt | `bach prompt add <name>` | Prompt anlegen |
-| Scheduler | `bach scheduler status` | Scheduler-Status |
-| Chain | `bach chain list` | Ketten anzeigen |
-| Chain | `bach chain create <name>` | Neue Kette erstellen |
+## Essential Commands
 
 ---
 
-## Nächste Schritte
+## Next Steps
 
-1. **Dokumentation erkunden**
+1. **Explore documentation**
    ```bash
    python bach.py docs list
    ```
 
-2. **Agenten kennenlernen**
+2. **Discover agents**
    ```bash
    python bach.py agent list
-   python bach.py expert list
    ```
 
-3. **Skills durchsuchen**
+3. **Browse skills**
    ```bash
    cat SKILLS.md
    ```
 
-4. **Eigenen Workflow erstellen**
-   - Siehe: [WORKFLOWS.md](WORKFLOWS.md)
-   - Beispiele für wiederkehrende Aufgaben
+4. **Create your own workflow**
+   - See: [Skills/_workflows/](skills/_workflows/)
+   - Examples for recurring tasks
 
 ---
 
-## Konfiguration
+## Configuration
 
-BACH passt sich automatisch an, aber Sie können anpassen:
+BACH adapts automatically, but you can customize:
 
-- **Partner konfigurieren:** `python bach.py partner register claude`
-- **Settings ändern:** `python bach.py config list`
-- **Connector einrichten:** `python bach.py connector list`
-
----
-
-## Weiterführende Dokumentation
-
-- **[README.md](README.md)** - Vollständige Übersicht
-- **[BACH_USER_MANUAL.md](BACH_USER_MANUAL.md)** - Vollständiges Handbuch
-- **[SKILL.md](SKILL.md)** - LLM-Betriebsanleitung
-- **[Skills Katalog](SKILLS.md)** - Alle verfügbaren Skills
-- **[Agents Katalog](AGENTS.md)** - Alle verfügbaren Agenten
+- **Configure partner:** `python bach.py partner register claude`
+- **Change settings:** `python bach.py config list`
+- **Set up connector:** `python bach.py connector list`
 
 ---
 
-## Tipps
+## Further Documentation
 
-1. **Kontextuelles Arbeiten:** BACH merkt sich, woran Sie arbeiten
-2. **Automatisierung:** Nutzen Sie Workflows und Scheduler für wiederkehrende Aufgaben
-3. **Integration:** Verbinden Sie BACH mit Claude, Gemini oder Ollama
-4. **Backup:** Regelmäßig `python bach.py backup create`
-5. **Prompt-System:** Verwalten Sie LLM-Prompts zentral mit `bach prompt`
+- **[README.md](README.md)** - Complete overview
+- **[API Reference](docs/reference/api.md)** - Programming interface
+- **[Skills Catalog](SKILLS.md)** - All available skills
+- **[Agents Catalog](AGENTS.md)** - All available agents
 
 ---
 
-## Hilfe bekommen
+## Tips
+
+1. **Contextual work:** BACH remembers what you're working on
+2. **Automation:** Use workflows for recurring tasks
+3. **Integration:** Connect BACH with Claude, Gemini, or Ollama
+4. **Backup:** Regularly `python bach.py backup create`
+
+---
+
+## Getting Help
 
 ```bash
-# Allgemeine Hilfe
+# General help
 python bach.py --help
 
-# Handler-spezifische Hilfe
+# Handler-specific help
 python bach.py <handler> --help
 
-# Dokumentation durchsuchen
+# Search documentation
 python bach.py docs search "keyword"
 ```
 
 ---
 
-*BACH v3.7.0-waterfall - Textbasiertes Betriebssystem fuer LLMs*
+Deutsche Version: [QUICKSTART.de.md](QUICKSTART.de.md)
+
+*Generated with `bach docs generate quickstart --lang en`*

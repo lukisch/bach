@@ -21,6 +21,7 @@ from pathlib import Path
 import subprocess
 import sys
 from .base import BaseHandler
+from .lang import get_lang, t
 
 
 class ToolsHandler(BaseHandler):
@@ -42,14 +43,14 @@ class ToolsHandler(BaseHandler):
     
     def get_operations(self) -> dict:
         return {
-            "list": "Python-Tools auflisten (Dateisystem)",
-            "db": "Tools aus Datenbank (CLI + externe KI)",
-            "show": "Tool-Details anzeigen",
-            "run": "Tool ausfuehren",
-            "search": "Tools durchsuchen",
-            "suggest": "Tool-Empfehlung basierend auf Problem",
-            "migrate": "Migration der Connections starten",
-            "docs": "Tool-Dokumentation (--generate fuer Auto-Generator)"
+            "list": t("tools_list_desc", default="Python-Tools auflisten (Dateisystem)"),
+            "db": t("tools_db_desc", default="Tools aus Datenbank (CLI + externe KI)"),
+            "show": t("tools_show_desc", default="Tool-Details anzeigen"),
+            "run": t("tools_run_desc", default="Tool ausfuehren"),
+            "search": t("tools_search_desc", default="Tools durchsuchen"),
+            "suggest": t("tools_suggest_desc", default="Tool-Empfehlung basierend auf Problem"),
+            "migrate": t("tools_migrate_desc", default="Migration der Connections starten"),
+            "docs": t("tools_docs_desc", default="Tool-Dokumentation (--generate fuer Auto-Generator)")
         }
     
     def _get_db_conn(self):
@@ -78,31 +79,39 @@ class ToolsHandler(BaseHandler):
     
     def _list_db(self, args: list) -> tuple:
         """Tools aus Datenbank auflisten."""
-        results = ["REGISTRIERTE TOOLS (bach.db)", "=" * 60]
-        
+        results = [t("tools_registered", default="REGISTRIERTE TOOLS (bach.db)"), "=" * 60]
+
         if not self.db_path.exists():
-            return False, "Datenbank nicht gefunden"
-        
+            return False, t("db_not_found", default="Datenbank nicht gefunden")
+
         conn = self._get_db_conn()
-        
+
         # Filter nach Typ
         type_filter = None
         if '--type' in args:
             idx = args.index('--type')
             if idx + 1 < len(args):
                 type_filter = args[idx + 1]
-        
+
+        # TOWER_OF_BABEL: Sprach-Filter mit DE-Fallback
+        lang = get_lang()
+        lang_clause = "AND language = ?"
+
         # Query
         if type_filter:
-            query = "SELECT * FROM tools WHERE type = ? ORDER BY category, name"
-            rows = conn.execute(query, (type_filter,)).fetchall()
+            query = f"SELECT * FROM tools WHERE type = ? {lang_clause} ORDER BY category, name"
+            rows = conn.execute(query, (type_filter, lang)).fetchall()
+            if not rows and lang != 'de':
+                rows = conn.execute(query, (type_filter, 'de')).fetchall()
         else:
-            query = "SELECT * FROM tools ORDER BY type, category, name"
-            rows = conn.execute(query).fetchall()
+            query = f"SELECT * FROM tools WHERE language = ? ORDER BY type, category, name"
+            rows = conn.execute(query, (lang,)).fetchall()
+            if not rows and lang != 'de':
+                rows = conn.execute("SELECT * FROM tools WHERE language = 'de' ORDER BY type, category, name").fetchall()
         
         if not rows:
             conn.close()
-            return True, "Keine Tools in Datenbank gefunden.\nFuehre 'bach tools migrate' aus."
+            return True, t("tools_none_found", default="Keine Tools in Datenbank gefunden.") + "\n" + t("tools_run_migrate", default="Fuehre 'bach tools migrate' aus.")
         
         # Nach Typ gruppieren
         current_type = None
@@ -110,9 +119,9 @@ class ToolsHandler(BaseHandler):
             if row['type'] != current_type:
                 current_type = row['type']
                 type_label = {
-                    'cli': 'CLI-TOOLS (Kommandozeile)',
-                    'external': 'EXTERNE KI-TOOLS',
-                    'internal': 'INTERNE TOOLS'
+                    'cli': t("tools_type_cli", default="CLI-TOOLS (Kommandozeile)"),
+                    'external': t("tools_type_external", default="EXTERNE KI-TOOLS"),
+                    'internal': t("tools_type_internal", default="INTERNE TOOLS")
                 }.get(current_type, current_type.upper())
                 results.append(f"\n[{type_label}]")
             
@@ -132,12 +141,12 @@ class ToolsHandler(BaseHandler):
         ).fetchall()
         
         results.append(f"\n{'=' * 60}")
-        results.append("Statistik:")
+        results.append(f"{t('tools_statistics', default='Statistik')}:")
         total = 0
         for stat in stats:
             results.append(f"  {stat['type']}: {stat['cnt']}")
             total += stat['cnt']
-        results.append(f"  Gesamt: {total}")
+        results.append(f"  {t('count', default='Gesamt')}: {total}")
         
         conn.close()
         return True, "\n".join(results)

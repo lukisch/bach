@@ -59,6 +59,7 @@ class SetupHandler(BaseHandler):
             "user": "USER.md pruefen, personalisieren und mit DB synchronisieren",
             "preflight": "Pre-Flight-Checks vor Installation (Python, npm, Speicher)",
             "full-install": "Vollstaendige BACH-Installation in einem Durchlauf",
+            "lang": "Root-Dokumente auf Sprache umschalten (de/en) [TOWER_OF_BABEL]",
         }
 
     def handle(self, operation: str, args: list, dry_run: bool = False) -> tuple:
@@ -76,6 +77,9 @@ class SetupHandler(BaseHandler):
             return self._preflight(args)
         elif operation == "full-install":
             return self._full_install(args)
+        elif operation == "lang":
+            lang = args[0] if args else None
+            return self._swap_doc_language(lang)
         elif operation is None or operation == "":
             return self._check()
         else:
@@ -821,6 +825,84 @@ class SetupHandler(BaseHandler):
                 updated_at = excluded.updated_at
         """, (category, key, value, now, now))
         return True
+
+    # =========================================================================
+    # Language Swap (TOWER_OF_BABEL v3.7.1)
+    # =========================================================================
+
+    # Dokumente die sprachspezifische Varianten haben
+    _LANG_DOCS = ["README", "QUICKSTART", "SKILLS"]
+
+    def _swap_doc_language(self, lang: str = None) -> tuple:
+        """Schaltet Root-Dokumente auf die gewaehlte Sprache um.
+
+        Bei lang=de: README.md wird deutsch, README.en.md als EN-Backup
+        Bei lang=en: README.md wird englisch (Default), README.de.md als DE-Backup
+
+        Args:
+            lang: Zielsprache ('de' oder 'en')
+        """
+        if lang not in ('de', 'en'):
+            return False, "Usage: bach setup lang <de|en>"
+
+        root = self.base_path.parent  # BACH/
+        results = [f"=== Dokument-Sprache: {lang.upper()} ===\n"]
+
+        for doc_name in self._LANG_DOCS:
+            main_file = root / f"{doc_name}.md"
+            de_file = root / f"{doc_name}.de.md"
+            en_file = root / f"{doc_name}.en.md"
+
+            if lang == "de":
+                # README.md soll deutsch werden
+                if de_file.exists():
+                    # Aktuelle README.md (englisch) sichern als README.en.md
+                    if main_file.exists() and not en_file.exists():
+                        main_file.rename(en_file)
+                        results.append(f"  [OK] {doc_name}.md -> {doc_name}.en.md (EN-Backup)")
+                    elif main_file.exists():
+                        main_file.unlink()
+                    # Deutsche Version wird Hauptdatei
+                    shutil.copy2(str(de_file), str(main_file))
+                    results.append(f"  [OK] {doc_name}.de.md -> {doc_name}.md (DE aktiv)")
+                else:
+                    results.append(f"  [--] {doc_name}.de.md nicht vorhanden, uebersprungen")
+
+            else:  # lang == "en"
+                # README.md soll englisch sein (Default)
+                if en_file.exists():
+                    # EN-Backup zurueck als Hauptdatei
+                    if main_file.exists():
+                        # Aktuelle (deutsche) Version als .de.md sichern
+                        if not de_file.exists():
+                            shutil.copy2(str(main_file), str(de_file))
+                        main_file.unlink()
+                    en_file.rename(main_file)
+                    results.append(f"  [OK] {doc_name}.en.md -> {doc_name}.md (EN aktiv)")
+                elif main_file.exists():
+                    results.append(f"  [OK] {doc_name}.md bereits vorhanden (EN assumed)")
+                else:
+                    results.append(f"  [--] Keine {doc_name}-Datei vorhanden")
+
+        # Systemsprache setzen
+        try:
+            from .lang import set_lang
+            set_lang(lang)
+
+            db_path = self.base_path / "data" / "bach.db"
+            if db_path.exists():
+                conn = sqlite3.connect(str(db_path))
+                conn.execute(
+                    "UPDATE languages_config SET default_language = ?, updated_at = ?",
+                    (lang, datetime.now().isoformat())
+                )
+                conn.commit()
+                conn.close()
+                results.append(f"\n  Systemsprache auf '{lang}' gesetzt.")
+        except Exception as e:
+            results.append(f"\n  [WARN] Systemsprache konnte nicht gesetzt werden: {e}")
+
+        return True, "\n".join(results)
 
     # =========================================================================
     # Secrets Setup

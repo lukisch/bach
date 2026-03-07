@@ -32,6 +32,7 @@ except ImportError:
 from pathlib import Path
 from datetime import datetime
 from .base import BaseHandler
+from .lang import t
 
 
 class SkillsHandler(BaseHandler):
@@ -52,15 +53,15 @@ class SkillsHandler(BaseHandler):
     
     def get_operations(self) -> dict:
         return {
-            "list": "Alle Skills auflisten",
-            "show": "Skill-Details anzeigen",
-            "search": "Skills durchsuchen",
-            "create": "Neuen Skill erstellen (v2.1 - Self-Extension)",
-            "reload": "Handler-Registry + Tools neu laden (Hot-Reload, v2.1)",
-            "export": "Skill exportieren - autarkes Paket (v2.0)",
-            "install": "Skill aus ZIP/Verzeichnis importieren",
-            "hierarchy": "Hierarchie aus DB anzeigen (v1.1.73)",
-            "version": "Versions-Check: lokal vs zentral (v2.0)"
+            "list": t("skills_list_desc", default="Alle Skills auflisten"),
+            "show": t("skills_show_desc", default="Skill-Details anzeigen"),
+            "search": t("skills_search_desc", default="Skills durchsuchen"),
+            "create": t("skills_create_desc", default="Neuen Skill erstellen (v2.1 - Self-Extension)"),
+            "reload": t("skills_reload_desc", default="Handler-Registry + Tools neu laden (Hot-Reload, v2.1)"),
+            "export": t("skills_export_desc", default="Skill exportieren - autarkes Paket (v2.0)"),
+            "install": t("skills_install_desc", default="Skill aus ZIP/Verzeichnis importieren"),
+            "hierarchy": t("skills_hierarchy_desc", default="Hierarchie aus DB anzeigen (v1.1.73)"),
+            "version": t("skills_version_desc", default="Versions-Check: lokal vs zentral (v2.0)")
         }
     
     def handle(self, operation: str, args: list, dry_run: bool = False) -> tuple:
@@ -104,7 +105,7 @@ class SkillsHandler(BaseHandler):
         results = ["SKILLS", "=" * 50]
         
         if not self.skills_dir.exists():
-            return False, "Skills-Verzeichnis nicht gefunden"
+            return False, t("skills_dir_not_found", default="Skills-Verzeichnis nicht gefunden")
         
         # Skills nach Kategorie gruppieren
         categories = {}
@@ -134,7 +135,7 @@ class SkillsHandler(BaseHandler):
                 total += 1
         
         results.append(f"\n{'=' * 50}")
-        results.append(f"Gesamt: {total} Skills in {len(categories)} Kategorien")
+        results.append(f"{t('count', default='Gesamt')}: {total} Skills {t('skills_in_categories', default='in')} {len(categories)} {t('category', default='Kategorien')}")
         
         return True, "\n".join(results)
     
@@ -143,7 +144,7 @@ class SkillsHandler(BaseHandler):
         found = self._find_skill(name)
         
         if not found:
-            return False, f"Skill nicht gefunden: {name}\nNutze: --skills list"
+            return False, f"{t('skill_not_found', default='Skill nicht gefunden')}: {name}\n{t('skills_use_list', default='Nutze')}: --skills list"
         
         results = [f"SKILL: {found.stem}", "=" * 50]
         results.append(f"Pfad: {found.relative_to(self.skills_dir)}")
@@ -185,7 +186,7 @@ class SkillsHandler(BaseHandler):
     
     def _search(self, term: str) -> tuple:
         """Skills nach Begriff durchsuchen."""
-        results = [f"SKILL-SUCHE: '{term}'", "=" * 50]
+        results = [f"{t('skills_search_title', default='SKILL-SUCHE')}: '{term}'", "=" * 50]
         
         found = []
         term_lower = term.lower()
@@ -206,9 +207,9 @@ class SkillsHandler(BaseHandler):
                     pass
         
         if not found:
-            results.append(f"Keine Skills gefunden fuer: {term}")
+            results.append(f"{t('no_results', default='Keine Treffer')}: {term}")
         else:
-            results.append(f"Gefunden: {len(found)}\n")
+            results.append(f"{t('search_results', default='Gefunden')}: {len(found)}\n")
             for skill, match_type in found[:20]:
                 rel_path = skill.relative_to(self.skills_dir)
                 results.append(f"  [{match_type}] {rel_path}")
@@ -235,7 +236,7 @@ class SkillsHandler(BaseHandler):
         # 1. Skill finden
         skill_path = self._find_skill(name)
         if not skill_path:
-            return False, f"Skill nicht gefunden: {name}\nNutze: --skills list"
+            return False, f"{t('skill_not_found', default='Skill nicht gefunden')}: {name}\n{t('skills_use_list', default='Nutze')}: --skills list"
         
         # Bestimme ob Verzeichnis oder Datei
         is_directory = skill_path.is_dir()
@@ -1370,7 +1371,7 @@ anthropic_compatible: true
         # 1. Skill finden
         skill_path = self._find_skill(name)
         if not skill_path:
-            return False, f"Skill nicht gefunden: {name}\nNutze: --skills list"
+            return False, f"{t('skill_not_found', default='Skill nicht gefunden')}: {name}\n{t('skills_use_list', default='Nutze')}: --skills list"
 
         results.append(f"Pfad: {skill_path}")
         results.append("")

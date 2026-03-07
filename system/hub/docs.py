@@ -24,6 +24,7 @@ import sqlite3
 import re
 import sys
 from .base import BaseHandler
+from .lang import get_lang, t
 
 
 class DocsHandler(BaseHandler):
@@ -43,14 +44,14 @@ class DocsHandler(BaseHandler):
 
     def get_operations(self) -> dict:
         return {
-            "list": "Alle Dokumentationen auflisten",
-            "<name>": "Dokument anzeigen (z.B. getting-started)",
-            "guides/<name>": "Guide anzeigen (z.B. guides/db-sync)",
-            "reference/<name>": "Reference anzeigen",
-            "search": "Dokumentation durchsuchen",
-            "sync": "MD -> TXT Sync (Legacy-Support)",
-            "migrate": "TXT -> MD Migration",
-            "generate": "Generiere Dokumentation (SQ063) - bach docs generate <target>"
+            "list": t("docs_list_desc", default="Alle Dokumentationen auflisten"),
+            "<name>": t("docs_show_desc", default="Dokument anzeigen (z.B. getting-started)"),
+            "guides/<name>": t("docs_guides_desc", default="Guide anzeigen (z.B. guides/db-sync)"),
+            "reference/<name>": t("docs_ref_desc", default="Reference anzeigen"),
+            "search": t("docs_search_desc", default="Dokumentation durchsuchen"),
+            "sync": t("docs_sync_desc", default="MD -> TXT Sync (Legacy-Support)"),
+            "migrate": t("docs_migrate_desc", default="TXT -> MD Migration"),
+            "generate": t("docs_generate_desc", default="Generiere Dokumentation (SQ063) - bach docs generate <target>")
         }
 
     def _get_handlers_from_registry(self) -> list:
@@ -123,8 +124,19 @@ class DocsHandler(BaseHandler):
             return self._search(" ".join(args))
         elif operation == "generate":
             # SQ063: Dokumentations-Generator (Runde 6)
-            target = args[0] if args else "all"
-            return self._generate(target)
+            # --lang Parameter extrahieren (TOWER_OF_BABEL v3.7.1)
+            lang = None
+            filtered_args = []
+            i = 0
+            while i < len(args):
+                if args[i] == "--lang" and i + 1 < len(args):
+                    lang = args[i + 1].lower()
+                    i += 2
+                else:
+                    filtered_args.append(args[i])
+                    i += 1
+            target = filtered_args[0] if filtered_args else "all"
+            return self._generate(target, lang=lang)
         elif operation == "show" and args:
             # API-Zugriff: docs.show("name")
             return self._show(args[0])
@@ -440,25 +452,30 @@ class DocsHandler(BaseHandler):
 
         return text
 
-    def _generate(self, target: str) -> tuple:
+    def _generate(self, target: str, lang: str = None) -> tuple:
         """
-        Generiere Dokumentation (SQ063).
+        Generiere Dokumentation (SQ063 + TOWER_OF_BABEL v3.7.1).
 
         Args:
             target: readme|api|skills|agents|changelog|quickstart|full|all
+            lang: Zielsprache ('de'/'en'), None = aktuelle System-Sprache
 
         Returns:
             tuple (success, message)
         """
+        # Sprache bestimmen (TOWER_OF_BABEL)
+        doc_lang = lang or get_lang()
+
+        # Generatoren mit lang-Parameter (wo unterstuetzt)
         generators = {
-            "readme": self._generate_readme,
+            "readme": lambda: self._generate_readme(lang=doc_lang),
             "api": self._generate_api,
-            "skills": self._generate_skills,
+            "skills": lambda: self._generate_skills(lang=doc_lang),
             "agents": self._generate_agents,
             "changelog": self._generate_changelog,
-            "quickstart": self._generate_quickstart,
+            "quickstart": lambda: self._generate_quickstart(lang=doc_lang),
             "quickstart-pdf": self._generate_quickstart_pdf,
-            "full": self._generate_full
+            "full": lambda: self._generate_full(lang=doc_lang)
         }
 
         if target == "all":
@@ -475,9 +492,11 @@ class DocsHandler(BaseHandler):
         else:
             return False, f"Unbekanntes Ziel: {target}\n\nVerfügbar: {', '.join(generators.keys())}, all"
 
-    def _generate_readme(self) -> tuple:
-        """Generiere README.md aus DB + System-Info."""
+    def _generate_readme(self, lang: str = None) -> tuple:
+        """Generiere README.md aus DB + System-Info (TOWER_OF_BABEL: zweisprachig)."""
         try:
+            doc_lang = lang or get_lang()
+
             # DB-Statistiken sammeln
             db_path = self.base_path / "data" / "bach.db"
             conn = sqlite3.connect(str(db_path))
@@ -491,7 +510,7 @@ class DocsHandler(BaseHandler):
             stats['lessons'] = cur.execute("SELECT COUNT(*) FROM memory_lessons").fetchone()[0]
             stats['facts'] = cur.execute("SELECT COUNT(*) FROM memory_facts").fetchone()[0]
 
-            # Workflows zählen
+            # Workflows zaehlen
             workflows_dir = self.base_path / "skills" / "_workflows"
             stats['workflows'] = len(list(workflows_dir.rglob("*.md"))) if workflows_dir.exists() else 0
 
@@ -504,103 +523,225 @@ class DocsHandler(BaseHandler):
             conn.close()
 
             # README generieren
-            readme_content = self._build_readme_content(stats, version)
+            readme_content = self._build_readme_content(stats, version, lang=doc_lang)
 
-            # Schreibe README.md
-            readme_path = self.base_path.parent / "README.md"
+            # Dateiname: README.md (EN default) / README.de.md (DE)
+            if doc_lang == "de":
+                readme_path = self.base_path.parent / "README.de.md"
+            else:
+                readme_path = self.base_path.parent / "README.md"
             readme_path.write_text(readme_content, encoding="utf-8")
 
-            return True, f"README.md generiert: {readme_path}\n  {stats['skills']} Skills | {stats['agents']} Agents | {stats['tools']} Tools"
+            return True, f"README{'.' + doc_lang if doc_lang != 'en' else ''}.md generiert: {readme_path}\n  {stats['skills']} Skills | {stats['agents']} Agents | {stats['tools']} Tools"
 
         except Exception as e:
             return False, f"Fehler bei README-Generierung: {e}"
 
-    def _build_readme_content(self, stats: dict, version: str) -> str:
-        """Erstelle README-Inhalt."""
-        content = f"""# BACH - Textbasiertes Betriebssystem für LLMs
+    # TOWER_OF_BABEL: Zweisprachige Templates fuer Dokumentation
+    _README_STRINGS = {
+        'en': {
+            'title': 'BACH - Text-Based Operating System for LLMs',
+            'status': 'Production-Ready',
+            'license': 'MIT',
+            'overview_title': 'Overview',
+            'overview_text': (
+                'BACH is a text-based operating system that empowers Large Language Models (LLMs) '
+                'to work, learn, and organize autonomously. It provides comprehensive infrastructure '
+                'for task management, knowledge management, automation, and LLM orchestration.'
+            ),
+            'core_features': 'Core Features',
+            'agents_label': 'AI Agents',
+            'agents_desc': 'Specialized agents for various domains',
+            'tools_label': 'Tools',
+            'tools_desc': 'Extensive tool library for file processing, analysis, automation',
+            'skills_label': 'Skills',
+            'skills_desc': 'Reusable workflows and templates',
+            'workflows_label': 'Workflows',
+            'workflows_desc': 'Pre-built process protocols',
+            'knowledge_label': 'Knowledge Store',
+            'installation': 'Installation',
+            'clone_repo': 'Clone repository',
+            'install_deps': 'Install dependencies',
+            'init_bach': 'Initialize BACH',
+            'quick_start': 'Quick Start',
+            'start_bach': 'Start BACH',
+            'create_task': 'Create a task',
+            'search_knowledge': 'Search knowledge',
+            'stop_bach': 'Stop BACH',
+            'components_title': 'Main Components',
+            'comp_task_title': 'Task Management',
+            'comp_task_desc': 'Complete GTD system with prioritization, deadlines, tags, and context tracking.',
+            'comp_knowledge_title': 'Knowledge System',
+            'comp_knowledge_desc': 'Structured memory system with facts, lessons, and automatic consolidation.',
+            'comp_agents_title': 'Agent Framework',
+            'comp_agents_desc': 'Boss agents orchestrate experts for complex tasks (office, health, production, etc.).',
+            'comp_bridge_title': 'Bridge System',
+            'comp_bridge_desc': 'Connector framework for external services (Telegram, Email, WhatsApp, etc.).',
+            'comp_auto_title': 'Automation',
+            'comp_auto_desc': 'Scheduler for recurring tasks and event-based workflows.',
+            'docs_title': 'Documentation',
+            'docs_getting_started': 'Getting Started',
+            'docs_getting_started_desc': 'First steps with BACH',
+            'docs_api': 'API Reference',
+            'docs_api_desc': 'Complete API documentation',
+            'docs_skills': 'Skills Catalog',
+            'docs_skills_desc': 'All available skills',
+            'docs_agents': 'Agents Catalog',
+            'docs_agents_desc': 'All available agents',
+            'license_title': 'License',
+            'license_text': 'MIT License - see [LICENSE](LICENSE) for details.',
+            'support_title': 'Support',
+            'generated_with': 'Generated with',
+            'lang_link': 'Deutsche Version: [README.de.md](README.de.md)',
+        },
+        'de': {
+            'title': 'BACH - Textbasiertes Betriebssystem fuer LLMs',
+            'status': 'Production-Ready',
+            'license': 'MIT',
+            'overview_title': 'Ueberblick',
+            'overview_text': (
+                'BACH ist ein textbasiertes Betriebssystem, das Large Language Models (LLMs) '
+                'befaehigt, eigenstaendig zu arbeiten, zu lernen und sich zu organisieren. '
+                'Es bietet eine umfassende Infrastruktur fuer Task-Management, Wissensmanagement, '
+                'Automatisierung und LLM-Orchestrierung.'
+            ),
+            'core_features': 'Kernfunktionen',
+            'agents_label': 'KI-Agenten',
+            'agents_desc': 'Spezialisierte Agenten fuer verschiedene Aufgabenbereiche',
+            'tools_label': 'Tools',
+            'tools_desc': 'Umfangreiche Tool-Bibliothek fuer Dateiverarbeitung, Analyse, Automation',
+            'skills_label': 'Skills',
+            'skills_desc': 'Wiederverwendbare Workflows und Templates',
+            'workflows_label': 'Workflows',
+            'workflows_desc': 'Vorgefertigte Prozess-Protokolle',
+            'knowledge_label': 'Wissensspeicher',
+            'installation': 'Installation',
+            'clone_repo': 'Repository klonen',
+            'install_deps': 'Abhaengigkeiten installieren',
+            'init_bach': 'BACH initialisieren',
+            'quick_start': 'Quick Start',
+            'start_bach': 'BACH starten',
+            'create_task': 'Task erstellen',
+            'search_knowledge': 'Wissen abrufen',
+            'stop_bach': 'BACH beenden',
+            'components_title': 'Hauptkomponenten',
+            'comp_task_title': 'Task-Management',
+            'comp_task_desc': 'Vollstaendiges GTD-System mit Priorisierung, Deadlines, Tags und Context-Tracking.',
+            'comp_knowledge_title': 'Wissenssystem',
+            'comp_knowledge_desc': 'Strukturiertes Memory-System mit Facts, Lessons und automatischer Konsolidierung.',
+            'comp_agents_title': 'Agenten-Framework',
+            'comp_agents_desc': 'Boss-Agenten orchestrieren Experten fuer komplexe Aufgaben (Buero, Gesundheit, Produktion, etc.).',
+            'comp_bridge_title': 'Bridge-System',
+            'comp_bridge_desc': 'Connector-Framework fuer externe Services (Telegram, Email, WhatsApp, etc.).',
+            'comp_auto_title': 'Automatisierung',
+            'comp_auto_desc': 'Scheduler fuer wiederkehrende Tasks und Event-basierte Workflows.',
+            'docs_title': 'Dokumentation',
+            'docs_getting_started': 'Erste Schritte',
+            'docs_getting_started_desc': 'Erste Schritte mit BACH',
+            'docs_api': 'API-Referenz',
+            'docs_api_desc': 'Vollstaendige API-Dokumentation',
+            'docs_skills': 'Skills-Katalog',
+            'docs_skills_desc': 'Alle verfuegbaren Skills',
+            'docs_agents': 'Agenten-Katalog',
+            'docs_agents_desc': 'Alle verfuegbaren Agenten',
+            'license_title': 'Lizenz',
+            'license_text': 'MIT License - siehe [LICENSE](LICENSE) fuer Details.',
+            'support_title': 'Support',
+            'generated_with': 'Generiert mit',
+            'lang_link': 'English version: [README.md](README.md)',
+        }
+    }
+
+    def _build_readme_content(self, stats: dict, version: str, lang: str = 'en') -> str:
+        """Erstelle README-Inhalt (TOWER_OF_BABEL: zweisprachig)."""
+        s = self._README_STRINGS.get(lang, self._README_STRINGS['en'])
+
+        content = f"""# {s['title']}
 
 **Version:** {version}
-**Status:** Production-Ready
-**Lizenz:** MIT
+**Status:** {s['status']}
+**{s['license_title']}:** {s['license']}
 
-## Überblick
+## {s['overview_title']}
 
-BACH ist ein textbasiertes Betriebssystem, das Large Language Models (LLMs) befähigt, eigenständig zu arbeiten, zu lernen und sich zu organisieren. Es bietet eine umfassende Infrastruktur für Task-Management, Wissensmanagement, Automatisierung und LLM-Orchestrierung.
+{s['overview_text']}
 
-### Kernfunktionen
+### {s['core_features']}
 
-- **🤖 {stats['agents']} KI-Agenten** - Spezialisierte Agenten für verschiedene Aufgabenbereiche
-- **🛠️ {stats['tools']} Tools** - Umfangreiche Tool-Bibliothek für Dateiverarbeitung, Analyse, Automation
-- **📚 {stats['skills']} Skills** - Wiederverwendbare Workflows und Templates
-- **🔄 {stats['workflows']} Workflows** - Vorgefertigte Prozess-Protokolle
-- **💾 Wissensspeicher** - {stats['lessons']} Lessons + {stats['facts']} Facts
+- **{stats['agents']} {s['agents_label']}** - {s['agents_desc']}
+- **{stats['tools']} {s['tools_label']}** - {s['tools_desc']}
+- **{stats['skills']} {s['skills_label']}** - {s['skills_desc']}
+- **{stats['workflows']} {s['workflows_label']}** - {s['workflows_desc']}
+- **{s['knowledge_label']}** - {stats['lessons']} Lessons + {stats['facts']} Facts
 
-## Installation
+## {s['installation']}
 
 ```bash
-# Repository klonen
+# {s['clone_repo']}
 git clone https://github.com/lukisch/bach.git
 cd bach
 
-# Abhängigkeiten installieren
+# {s['install_deps']}
 pip install -r requirements.txt
 
-# BACH initialisieren
+# {s['init_bach']}
 python system/setup.py
 ```
 
-## Quick Start
+## {s['quick_start']}
 
 ```bash
-# BACH starten
+# {s['start_bach']}
 python bach.py --startup
 
-# Task erstellen
+# {s['create_task']}
 python bach.py task add "Analysiere Projektstruktur"
 
-# Wissen abrufen
+# {s['search_knowledge']}
 python bach.py wiki search "Task Management"
 
-# BACH beenden
+# {s['stop_bach']}
 python bach.py --shutdown
 ```
 
-## Hauptkomponenten
+## {s['components_title']}
 
-### 1. Task-Management
-Vollständiges GTD-System mit Priorisierung, Deadlines, Tags und Context-Tracking.
+### 1. {s['comp_task_title']}
+{s['comp_task_desc']}
 
-### 2. Wissenssystem
-Strukturiertes Memory-System mit Facts, Lessons und automatischer Konsolidierung.
+### 2. {s['comp_knowledge_title']}
+{s['comp_knowledge_desc']}
 
-### 3. Agenten-Framework
-Boss-Agenten orchestrieren Experten für komplexe Aufgaben (Büro, Gesundheit, Produktion, etc.).
+### 3. {s['comp_agents_title']}
+{s['comp_agents_desc']}
 
-### 4. Bridge-System
-Connector-Framework für externe Services (Telegram, Email, WhatsApp, etc.).
+### 4. {s['comp_bridge_title']}
+{s['comp_bridge_desc']}
 
-### 5. Automatisierung
-Scheduler für wiederkehrende Tasks und Event-basierte Workflows.
+### 5. {s['comp_auto_title']}
+{s['comp_auto_desc']}
 
-## Dokumentation
+## {s['docs_title']}
 
-- **[Getting Started](docs/getting-started.md)** - Erste Schritte mit BACH
-- **[API Reference](docs/reference/)** - Vollständige API-Dokumentation
-- **[Skills Katalog](SKILLS.md)** - Alle verfügbaren Skills
-- **[Agents Katalog](AGENTS.md)** - Alle verfügbaren Agenten
+- **[{s['docs_getting_started']}](docs/getting-started.md)** - {s['docs_getting_started_desc']}
+- **[{s['docs_api']}](docs/reference/)** - {s['docs_api_desc']}
+- **[{s['docs_skills']}](SKILLS.md)** - {s['docs_skills_desc']}
+- **[{s['docs_agents']}](AGENTS.md)** - {s['docs_agents_desc']}
 
-## Lizenz
+## {s['license_title']}
 
-MIT License - siehe [LICENSE](LICENSE) für Details.
+{s['license_text']}
 
-## Support
+## {s['support_title']}
 
 - **Issues:** [GitHub Issues](https://github.com/lukisch/bach/issues)
 - **Discussions:** [GitHub Discussions](https://github.com/lukisch/bach/discussions)
 
 ---
 
-*Generiert mit `bach docs generate readme`*
+{s['lang_link']}
+
+*{s['generated_with']} `bach docs generate readme --lang {lang}`*
 """
         return content
 
@@ -747,9 +888,11 @@ bach_api.task.add(
 """
         return content
 
-    def _generate_skills(self) -> tuple:
-        """Generiere Skills-Katalog aus skills-Tabelle."""
+    def _generate_skills(self, lang: str = None) -> tuple:
+        """Generiere Skills-Katalog aus skills-Tabelle (TOWER_OF_BABEL: zweisprachig)."""
         try:
+            doc_lang = lang or get_lang()
+
             db_path = self.base_path / "data" / "bach.db"
             conn = sqlite3.connect(str(db_path))
             cur = conn.cursor()
@@ -773,33 +916,57 @@ bach_api.task.add(
             conn.close()
 
             # SKILLS.md generieren
-            content = self._build_skills_content(skills_by_type)
-            skills_path = self.base_path.parent / "SKILLS.md"
+            content = self._build_skills_content(skills_by_type, lang=doc_lang)
+            if doc_lang == "de":
+                skills_path = self.base_path.parent / "SKILLS.de.md"
+            else:
+                skills_path = self.base_path.parent / "SKILLS.md"
             skills_path.write_text(content, encoding="utf-8")
 
             total = sum(len(skills) for skills in skills_by_type.values())
-            return True, f"SKILLS.md generiert: {skills_path}\n  {total} Skills in {len(skills_by_type)} Kategorien"
+            return True, f"SKILLS{'.' + doc_lang if doc_lang != 'en' else ''}.md generiert: {skills_path}\n  {total} Skills in {len(skills_by_type)} Kategorien"
 
         except Exception as e:
             return False, f"Fehler bei Skills-Generierung: {e}"
 
-    def _build_skills_content(self, skills_by_type: dict) -> str:
-        """Erstelle SKILLS.md Inhalt."""
+    def _build_skills_content(self, skills_by_type: dict, lang: str = 'en') -> str:
+        """Erstelle SKILLS.md Inhalt (TOWER_OF_BABEL: zweisprachig)."""
         total = sum(len(skills) for skills in skills_by_type.values())
 
-        content = f"""# BACH Skills-Katalog
+        if lang == 'de':
+            title = "BACH Skills-Katalog"
+            count_label = "Anzahl"
+            generated = "Generiert"
+            generated_from = "Automatisch aus der Skills-Datenbank"
+            overview = "Ueberblick"
+            overview_text = "Dieser Katalog listet alle verfuegbaren Skills auf, gruppiert nach Typ."
+            by_type = "Skills nach Typ"
+            cat_label = "Kategorie"
+            generated_with = "Generiert mit"
+        else:
+            title = "BACH Skills Catalog"
+            count_label = "Count"
+            generated = "Generated"
+            generated_from = "Automatically from the skills database"
+            overview = "Overview"
+            overview_text = "This catalog lists all available skills, grouped by type."
+            by_type = "Skills by Type"
+            cat_label = "Category"
+            generated_with = "Generated with"
 
-**Anzahl:** {total} Skills
-**Generiert:** Automatisch aus der Skills-Datenbank
+        content = f"""# {title}
 
-## Übersicht
+**{count_label}:** {total} Skills
+**{generated}:** {generated_from}
 
-Dieser Katalog listet alle verfügbaren Skills auf, gruppiert nach Typ.
+## {overview}
+
+{overview_text}
 
 """
 
-        # Typ-Übersicht
-        content += "### Skills nach Typ\n\n"
+        # Typ-Uebersicht
+        content += f"### {by_type}\n\n"
         for skill_type in sorted(skills_by_type.keys()):
             count = len(skills_by_type[skill_type])
             content += f"- **{skill_type}**: {count} Skills\n"
@@ -813,14 +980,14 @@ Dieser Katalog listet alle verfügbaren Skills auf, gruppiert nach Typ.
             for name, category, desc in sorted(skills):
                 content += f"### `{name}`\n"
                 if category:
-                    content += f"**Kategorie:** {category}  \n"
+                    content += f"**{cat_label}:** {category}  \n"
                 if desc and desc.strip():
                     content += f"{desc}\n"
                 content += "\n"
 
             content += "---\n\n"
 
-        content += "\n*Generiert mit `bach docs generate skills`*\n"
+        content += f"\n*{generated_with} `bach docs generate skills --lang {lang}`*\n"
         return content
 
     def _generate_agents(self) -> tuple:
@@ -963,9 +1130,11 @@ python bach.py db info dist_file_versions
 """
         return content
 
-    def _generate_quickstart(self) -> tuple:
-        """Generiere QUICKSTART.md aus DB-Daten."""
+    def _generate_quickstart(self, lang: str = None) -> tuple:
+        """Generiere QUICKSTART.md aus DB-Daten (TOWER_OF_BABEL: zweisprachig)."""
         try:
+            doc_lang = lang or get_lang()
+
             db_path = self.base_path / "data" / "bach.db"
             conn = sqlite3.connect(str(db_path))
             cur = conn.cursor()
@@ -988,11 +1157,14 @@ python bach.py db info dist_file_versions
             ]
 
             # QUICKSTART.md generieren
-            content = self._build_quickstart_content(version, handlers)
-            quickstart_path = self.base_path.parent / "QUICKSTART.md"
+            content = self._build_quickstart_content(version, handlers, lang=doc_lang)
+            if doc_lang == "de":
+                quickstart_path = self.base_path.parent / "QUICKSTART.de.md"
+            else:
+                quickstart_path = self.base_path.parent / "QUICKSTART.md"
             quickstart_path.write_text(content, encoding="utf-8")
 
-            return True, f"QUICKSTART.md generiert: {quickstart_path}"
+            return True, f"QUICKSTART{'.' + doc_lang if doc_lang != 'en' else ''}.md generiert: {quickstart_path}"
 
         except Exception as e:
             return False, f"Fehler bei Quickstart-Generierung: {e}"
@@ -1034,13 +1206,14 @@ python bach.py db info dist_file_versions
         except Exception as e:
             return False, f"Fehler bei Quickstart-PDF-Generierung: {e}"
 
-    def _build_quickstart_content(self, version: str, handlers: list) -> str:
-        """Erstelle QUICKSTART-Inhalt."""
-        content = f"""# BACH Quickstart Guide
+    def _build_quickstart_content(self, version: str, handlers: list, lang: str = 'en') -> str:
+        """Erstelle QUICKSTART-Inhalt (TOWER_OF_BABEL: zweisprachig)."""
+        if lang == 'de':
+            content = f"""# BACH Quickstart Guide
 
 **Version:** {version}
 
-## 🚀 In 5 Minuten zu Ihrem ersten BACH-Workflow
+## In 5 Minuten zu Ihrem ersten BACH-Workflow
 
 ### 1. Installation (2 Minuten)
 
@@ -1049,7 +1222,7 @@ python bach.py db info dist_file_versions
 git clone https://github.com/lukisch/bach.git
 cd bach
 
-# Abhängigkeiten installieren
+# Abhaengigkeiten installieren
 pip install -r requirements.txt
 
 # BACH initialisieren
@@ -1081,7 +1254,7 @@ python bach.py task done 1
 
 ```bash
 # Notiz ins Wiki schreiben
-python bach.py wiki write "bash-tricks" "Nützliche Bash-Befehle sammeln"
+python bach.py wiki write "bash-tricks" "Nuetzliche Bash-Befehle sammeln"
 
 # Wissen suchen
 python bach.py wiki search "bash"
@@ -1105,7 +1278,80 @@ python bach.py --shutdown
 
 ---
 
-## 📚 Wichtigste Kommandos
+## Wichtigste Kommandos
+
+"""
+        else:
+            content = f"""# BACH Quickstart Guide
+
+**Version:** {version}
+
+## Your First BACH Workflow in 5 Minutes
+
+### 1. Installation (2 Minutes)
+
+```bash
+# Clone repository
+git clone https://github.com/lukisch/bach.git
+cd bach
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Initialize BACH
+python system/setup.py
+```
+
+### 2. First Steps (3 Minutes)
+
+#### Start BACH
+
+```bash
+python bach.py --startup
+```
+
+#### Create and Manage Tasks
+
+```bash
+# Create a new task
+python bach.py task add "First BACH experiment"
+
+# List tasks
+python bach.py task list
+
+# Complete a task
+python bach.py task done 1
+```
+
+#### Store and Retrieve Knowledge
+
+```bash
+# Write a wiki note
+python bach.py wiki write "bash-tricks" "Collecting useful bash commands"
+
+# Search knowledge
+python bach.py wiki search "bash"
+```
+
+#### Use the Memory System
+
+```bash
+# Store an important fact
+python bach.py mem write fact "Project deadline: 2024-12-31"
+
+# Retrieve facts
+python bach.py mem read facts
+```
+
+#### Stop BACH
+
+```bash
+python bach.py --shutdown
+```
+
+---
+
+## Essential Commands
 
 """
 
@@ -1114,9 +1360,10 @@ python bach.py --shutdown
             if desc and desc.strip():
                 content += f"### `bach {name}`\n{desc}\n\n"
 
-        content += """---
+        if lang == 'de':
+            content += """---
 
-## 🎯 Nächste Schritte
+## Naechste Schritte
 
 1. **Dokumentation erkunden**
    ```bash
@@ -1135,39 +1382,39 @@ python bach.py --shutdown
 
 4. **Eigenen Workflow erstellen**
    - Siehe: [Skills/_workflows/](skills/_workflows/)
-   - Beispiele für wiederkehrende Aufgaben
+   - Beispiele fuer wiederkehrende Aufgaben
 
 ---
 
-## 🔧 Konfiguration
+## Konfiguration
 
-BACH passt sich automatisch an, aber Sie können anpassen:
+BACH passt sich automatisch an, aber Sie koennen anpassen:
 
 - **Partner konfigurieren:** `python bach.py partner register claude`
-- **Settings ändern:** `python bach.py config list`
+- **Settings aendern:** `python bach.py config list`
 - **Connector einrichten:** `python bach.py connector list`
 
 ---
 
-## 📖 Weiterführende Dokumentation
+## Weiterfuehrende Dokumentation
 
-- **[README.md](README.md)** - Vollständige Übersicht
-- **[API Reference](docs/reference/api.md)** - Programmier-Interface
-- **[Skills Katalog](SKILLS.md)** - Alle verfügbaren Skills
-- **[Agents Katalog](AGENTS.md)** - Alle verfügbaren Agenten
+- **[README.md](README.md)** - Vollstaendige Uebersicht
+- **[API-Referenz](docs/reference/api.md)** - Programmier-Interface
+- **[Skills-Katalog](SKILLS.md)** - Alle verfuegbaren Skills
+- **[Agenten-Katalog](AGENTS.md)** - Alle verfuegbaren Agenten
 
 ---
 
-## 💡 Tipps
+## Tipps
 
 1. **Kontextuelles Arbeiten:** BACH merkt sich, woran Sie arbeiten
-2. **Automatisierung:** Nutzen Sie Workflows für wiederkehrende Aufgaben
+2. **Automatisierung:** Nutzen Sie Workflows fuer wiederkehrende Aufgaben
 3. **Integration:** Verbinden Sie BACH mit Claude, Gemini oder Ollama
-4. **Backup:** Regelmäßig `python bach.py backup create`
+4. **Backup:** Regelmaessig `python bach.py backup create`
 
 ---
 
-## ❓ Hilfe bekommen
+## Hilfe bekommen
 
 ```bash
 # Allgemeine Hilfe
@@ -1182,24 +1429,98 @@ python bach.py docs search "keyword"
 
 ---
 
-*Generiert mit `bach docs generate quickstart`*
+English version: [QUICKSTART.md](QUICKSTART.md)
 
-**Viel Erfolg mit BACH! 🎵**
+*Generiert mit `bach docs generate quickstart --lang de`*
+"""
+        else:
+            content += """---
+
+## Next Steps
+
+1. **Explore documentation**
+   ```bash
+   python bach.py docs list
+   ```
+
+2. **Discover agents**
+   ```bash
+   python bach.py agent list
+   ```
+
+3. **Browse skills**
+   ```bash
+   cat SKILLS.md
+   ```
+
+4. **Create your own workflow**
+   - See: [Skills/_workflows/](skills/_workflows/)
+   - Examples for recurring tasks
+
+---
+
+## Configuration
+
+BACH adapts automatically, but you can customize:
+
+- **Configure partner:** `python bach.py partner register claude`
+- **Change settings:** `python bach.py config list`
+- **Set up connector:** `python bach.py connector list`
+
+---
+
+## Further Documentation
+
+- **[README.md](README.md)** - Complete overview
+- **[API Reference](docs/reference/api.md)** - Programming interface
+- **[Skills Catalog](SKILLS.md)** - All available skills
+- **[Agents Catalog](AGENTS.md)** - All available agents
+
+---
+
+## Tips
+
+1. **Contextual work:** BACH remembers what you're working on
+2. **Automation:** Use workflows for recurring tasks
+3. **Integration:** Connect BACH with Claude, Gemini, or Ollama
+4. **Backup:** Regularly `python bach.py backup create`
+
+---
+
+## Getting Help
+
+```bash
+# General help
+python bach.py --help
+
+# Handler-specific help
+python bach.py <handler> --help
+
+# Search documentation
+python bach.py docs search "keyword"
+```
+
+---
+
+Deutsche Version: [QUICKSTART.de.md](QUICKSTART.de.md)
+
+*Generated with `bach docs generate quickstart --lang en`*
 """
         return content
 
-    def _generate_full(self) -> tuple:
-        """Generiere vollständige Dokumentation (alle Generatoren)."""
+    def _generate_full(self, lang: str = None) -> tuple:
+        """Generiere vollstaendige Dokumentation (alle Generatoren, TOWER_OF_BABEL: zweisprachig)."""
         try:
+            doc_lang = lang or get_lang()
             results = []
             success_count = 0
             fail_count = 0
 
             # Reihenfolge: README -> QUICKSTART -> SKILLS -> AGENTS -> API -> CHANGELOG
             generators = [
-                ("README", self._generate_readme),
-                ("QUICKSTART", self._generate_quickstart),
-                ("SKILLS", self._generate_skills),
+                ("README", lambda: self._generate_readme(lang=doc_lang)),
+                ("QUICKSTART", lambda: self._generate_quickstart(lang=doc_lang)),
+                ("SKILLS", lambda: self._generate_skills(lang=doc_lang)),
                 ("AGENTS", self._generate_agents),
                 ("API", self._generate_api),
                 ("CHANGELOG", self._generate_changelog)

@@ -16,6 +16,7 @@ Unterordner-Unterstuetzung (v2.6 Refactoring):
 from pathlib import Path
 import sqlite3
 from .base import BaseHandler
+from .lang import t
 
 
 class WikiHandler(BaseHandler):
@@ -36,12 +37,12 @@ class WikiHandler(BaseHandler):
 
     def get_operations(self) -> dict:
         return {
-            "list": "Alle Wiki-Artikel auflisten",
-            "folders": "Alle Themenordner auflisten",
-            "<thema>": "Artikel zu einem Thema anzeigen",
-            "<ordner>/<thema>": "Artikel aus Unterordner (z.B. foerderung/icf)",
-            "search": "Artikel durchsuchen",
-            "sync": "Help- und Wiki-Dateien in DB spiegeln (Index aktualisieren)"
+            "list": t("wiki_list_desc", default="Alle Wiki-Artikel auflisten"),
+            "folders": t("wiki_folders_desc", default="Alle Themenordner auflisten"),
+            "<thema>": t("wiki_show_desc", default="Artikel zu einem Thema anzeigen"),
+            "<ordner>/<thema>": t("wiki_subshow_desc", default="Artikel aus Unterordner (z.B. foerderung/icf)"),
+            "search": t("wiki_search_desc", default="Artikel durchsuchen"),
+            "sync": t("wiki_sync_desc", default="Help- und Wiki-Dateien in DB spiegeln (Index aktualisieren)")
         }
 
     def handle(self, operation: str, args: list, dry_run: bool = False) -> tuple:
@@ -72,10 +73,12 @@ class WikiHandler(BaseHandler):
             # Unterordner ergaenzen falls vorhanden
             folders = self._get_folders()
             if folders:
-                folder_info = "\n\nTHEMENORDNER\n------------\n"
+                articles_label = t("wiki_articles_label", default="THEMENORDNER")
+                article_word = t("wiki_article_word", default="Artikel")
+                folder_info = f"\n\n{articles_label}\n------------\n"
                 for folder, count in folders:
-                    folder_info += f"  {folder}/              ({count} Artikel)\n"
-                folder_info += "\n  Abruf: bach wiki <ordner>/<thema>\n"
+                    folder_info += f"  {folder}/              ({count} {article_word})\n"
+                folder_info += f"\n  {t('wiki_access', default='Abruf')}: bach wiki <ordner>/<thema>\n"
                 folder_info += "  z.B.:  bach wiki foerderung/icf"
                 return True, f"WIKI-ARTIKEL\n{'='*50}\n\n{index_content}{folder_info}"
 
@@ -342,16 +345,16 @@ class WikiHandler(BaseHandler):
                         matches.append((f"{folder.name}/{article.stem}", match))
 
         if not matches:
-            return True, f"Keine Treffer fuer: {keyword}"
+            return True, f"{t('no_results', default='Keine Treffer')} {t('wiki_for', default='fuer')}: {keyword}"
 
-        results = [f"WIKI-SUCHE: {keyword}", "=" * 50, ""]
+        results = [f"{t('wiki_search_label', default='WIKI-SUCHE')}: {keyword}", "=" * 50, ""]
         for name, context in matches:
             results.append(f"  {name}")
             if context:
                 results.append(f"    ...{context}...")
             results.append("")
 
-        results.append(f"{len(matches)} Treffer")
+        results.append(f"{len(matches)} {t('search_results', default='Treffer')}")
         return True, "\n".join(results)
 
     def _search_file(self, path: Path, keyword_lower: str) -> str:
@@ -374,7 +377,7 @@ class WikiHandler(BaseHandler):
         cursor = conn.cursor()
 
         try:
-            # Tabelle erstellen
+            # Tabelle erstellen (TOWER_OF_BABEL: mit language-Spalte)
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS wiki_articles (
                     path TEXT PRIMARY KEY,
@@ -382,7 +385,8 @@ class WikiHandler(BaseHandler):
                     content TEXT,
                     category TEXT,
                     last_modified TIMESTAMP,
-                    tags TEXT
+                    tags TEXT,
+                    language TEXT DEFAULT 'de'
                 )
             """)
             
@@ -406,8 +410,8 @@ class WikiHandler(BaseHandler):
                                 title = potential_title
                             
                         cursor.execute("""
-                            INSERT OR REPLACE INTO wiki_articles (path, title, content, category, last_modified)
-                            VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+                            INSERT OR REPLACE INTO wiki_articles (path, title, content, category, last_modified, language)
+                            VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, 'de')
                         """, (rel_path, title, content, "wiki"))
                         count += 1
                     except Exception as e:
@@ -431,8 +435,8 @@ class WikiHandler(BaseHandler):
                                 title = potential_title
 
                         cursor.execute("""
-                            INSERT OR REPLACE INTO wiki_articles (path, title, content, category, last_modified)
-                            VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+                            INSERT OR REPLACE INTO wiki_articles (path, title, content, category, last_modified, language)
+                            VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, 'de')
                         """, (rel_path, title, content, "help"))
                         count += 1
                     except Exception as e:

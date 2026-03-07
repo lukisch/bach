@@ -10,6 +10,7 @@ Agents Handler - Agenten-Verwaltung
 import sqlite3
 from pathlib import Path
 from .base import BaseHandler
+from .lang import get_lang, t
 
 # Pfade aus zentraler Konfiguration (Single Source of Truth)
 # Fallback falls bach_paths nicht importierbar
@@ -42,15 +43,15 @@ class AgentsHandler(BaseHandler):
 
     def get_operations(self) -> dict:
         return {
-            "list": "Alle Agenten und Experten auflisten",
-            "info": "Agenten-Details anzeigen",
-            "active": "Nur aktive Agenten",
-            "sync": "Neue Filesystem-Experten automatisch in DB eintragen",
+            "list": t("agents_list_desc", default="Alle Agenten und Experten auflisten"),
+            "info": t("agents_info_desc", default="Agenten-Details anzeigen"),
+            "active": t("agents_active_desc", default="Nur aktive Agenten"),
+            "sync": t("agents_sync_desc", default="Neue Filesystem-Experten automatisch in DB eintragen"),
         }
 
     def handle(self, operation: str, args: list, dry_run: bool = False) -> tuple:
         if not self.db_path.exists():
-            return False, "Datenbank nicht gefunden"
+            return False, t("db_not_found", default="Datenbank nicht gefunden")
 
         if operation == "info" and args:
             return self._info(args[0])
@@ -133,13 +134,21 @@ class AgentsHandler(BaseHandler):
             conn = self._get_conn()
             cursor = conn.cursor()
 
-            # --- bach_agents Tabelle (Boss-Agenten, die richtige Tabelle) ---
+            # --- bach_agents Tabelle (Boss-Agenten) ---
+            # TOWER_OF_BABEL: Sprach-Filter mit Fallback auf DE
+            lang = get_lang()
             try:
-                ba_query = "SELECT name, is_active FROM bach_agents"
+                ba_query = "SELECT name, is_active FROM bach_agents WHERE language = ?"
+                ba_params = [lang]
                 if active_only:
-                    ba_query += " WHERE is_active = 1"
-                cursor.execute(ba_query)
-                for row in cursor.fetchall():
+                    ba_query += " AND is_active = 1"
+                cursor.execute(ba_query, ba_params)
+                ba_rows = cursor.fetchall()
+                # Fallback: wenn keine Ergebnisse fuer aktuelle Sprache, DE laden
+                if not ba_rows and lang != 'de':
+                    cursor.execute(ba_query.replace("language = ?", "language = 'de'"), ['de'])
+                    ba_rows = cursor.fetchall()
+                for row in ba_rows:
                     key = row['name'].lower()
                     if key in boss_agents:
                         boss_agents[key]['in_db'] = True
@@ -174,13 +183,18 @@ class AgentsHandler(BaseHandler):
                         'type': row['type'],
                     }
 
-            # --- bach_experts Tabelle (Experten) ---
+            # --- bach_experts Tabelle (Experten, TOWER_OF_BABEL: sprachsensitiv) ---
             try:
-                exp_query = "SELECT name, is_active FROM bach_experts"
+                exp_query = "SELECT name, is_active FROM bach_experts WHERE language = ?"
+                exp_params = [lang]
                 if active_only:
-                    exp_query += " WHERE is_active = 1"
-                cursor.execute(exp_query)
-                for row in cursor.fetchall():
+                    exp_query += " AND is_active = 1"
+                cursor.execute(exp_query, exp_params)
+                exp_rows = cursor.fetchall()
+                if not exp_rows and lang != 'de':
+                    cursor.execute(exp_query.replace("language = ?", "language = 'de'"), ['de'])
+                    exp_rows = cursor.fetchall()
+                for row in exp_rows:
                     key = row['name'].lower()
                     is_active = bool(row['is_active'])
                     if key in experts:
@@ -213,36 +227,36 @@ class AgentsHandler(BaseHandler):
 
     def _list(self, active_only: bool) -> tuple:
         """Agenten und Experten auflisten - aus bach_paths + DB."""
-        results = ["AGENTEN", "=" * 40]
+        results = [t("boss_agents", default="AGENTEN"), "=" * 40]
 
         boss_agents, experts = self._scan_filesystem()
         self._load_db_status(boss_agents, experts, active_only)
 
         # --- Boss-Agenten ausgeben ---
-        results.append("\n[BOSS-AGENTEN]")
+        results.append(f"\n[{t('boss_agents', default='BOSS-AGENTEN')}]")
         if boss_agents:
             for key, agent in sorted(boss_agents.items()):
                 type_str = f" ({agent.get('type', 'boss')})"
                 results.append(f"  {self._status_icon(agent)} {agent['name']}{type_str}")
         else:
-            results.append("  (keine gefunden)")
+            results.append(f"  ({t('not_found', default='keine gefunden')})")
 
         # --- Experten ausgeben ---
-        results.append("\n[EXPERTEN]")
+        results.append(f"\n[{t('experts', default='EXPERTEN')}]")
         if experts:
             for key, expert in sorted(experts.items()):
                 # Datei-Status ergaenzen wenn nur Filesystem
                 file_status = ""
                 if not expert.get('in_db') and not expert.get('aktiv_in_file', True):
-                    file_status = " (inaktiv)"
+                    file_status = f" ({t('inactive', default='inaktiv')})"
                 results.append(f"  {self._status_icon(expert)} {expert['name']}{file_status}")
         else:
-            results.append("  (keine gefunden)")
+            results.append(f"  ({t('not_found', default='keine gefunden')})")
 
         results.append("\n" + "=" * 40)
-        results.append("Legende: [X]=DB+aktiv [-]=DB+inaktiv [ ]=nur Datei")
+        results.append(f"{t('legend', default='Legende')}: [X]=DB+{t('active', default='aktiv')} [-]=DB+{t('inactive', default='inaktiv')} [ ]={t('agents_file_only', default='nur Datei')}")
         results.append(f"Pfade: {self.agents_dir} {'(bach_paths)' if _PATHS_FROM_BACH else '(fallback)'}")
-        results.append("\nDetails: --agents info <n>")
+        results.append(f"\n{t('details', default='Details')}: --agents info <n>")
 
         return True, "\n".join(results)
 
@@ -296,10 +310,10 @@ class AgentsHandler(BaseHandler):
                    if not e.get('in_db') and e.get('file')]
 
         if not to_sync:
-            return True, "[OK] Alle Experten bereits in DB eingetragen. Nichts zu tun."
+            return True, t("agents_sync_ok", default="[OK] Alle Experten bereits in DB eingetragen. Nichts zu tun.")
 
         if dry_run:
-            lines = [f"[DRY-RUN] {len(to_sync)} Experte(n) wuerden eingetragen:"]
+            lines = [f"[DRY-RUN] {len(to_sync)} {t('experts', default='Experte(n)')} {t('agents_would_sync', default='wuerden eingetragen')}:"]
             for key, e in to_sync:
                 lines.append(f"  + {e['name']}")
             return True, "\n".join(lines)
@@ -354,10 +368,10 @@ class AgentsHandler(BaseHandler):
 
         lines = []
         if synced:
-            lines.append(f"[OK] {len(synced)} Experte(n) eingetragen:")
+            lines.append(f"[OK] {len(synced)} {t('experts', default='Experte(n)')} {t('agents_synced', default='eingetragen')}:")
             lines.extend(synced)
         if errors:
-            lines.append(f"\n[FEHLER] {len(errors)} fehlgeschlagen:")
+            lines.append(f"\n[{t('error_generic', default='FEHLER')}] {len(errors)} {t('agents_sync_failed', default='fehlgeschlagen')}:")
             lines.extend(errors)
 
         return True, "\n".join(lines)
@@ -374,12 +388,14 @@ class AgentsHandler(BaseHandler):
 
         agent = cursor.fetchone()
 
+        _yes = t("yes_label", default="Ja")
+        _no = t("no_label", default="Nein")
         if agent:
             results = [f"AGENT: {agent['name']}", "=" * 40]
             results.append(f"ID:          {agent['id']}")
             results.append(f"Type:        {agent['type']}")
-            results.append(f"Aktiv:       {'Ja' if agent['is_active'] else 'Nein'}")
-            results.append(f"Beschreibung: {agent['description'] or '-'}")
+            results.append(f"{t('active', default='Aktiv')}:       {_yes if agent['is_active'] else _no}")
+            results.append(f"{t('description_label', default='Beschreibung')}: {agent['description'] or '-'}")
 
             # Synergien
             cursor.execute("""
@@ -390,7 +406,7 @@ class AgentsHandler(BaseHandler):
             """, (agent['id'],))
             synergies = cursor.fetchall()
             if synergies:
-                results.append("\nSynergien:")
+                results.append(f"\n{t('synergies_label', default='Synergien')}:")
                 for s in synergies:
                     results.append(f"  -> {s['name']} ({s['synergy_type']})")
         else:
@@ -405,15 +421,15 @@ class AgentsHandler(BaseHandler):
                 expert = None
 
             if expert:
-                results = [f"EXPERTE: {expert['name']}", "=" * 40]
+                results = [f"{t('experts', default='EXPERTE')}: {expert['name']}", "=" * 40]
                 results.append(f"ID:           {expert['id']}")
-                results.append(f"Aktiv:        {'Ja' if expert['is_active'] else 'Nein'}")
-                results.append(f"Beschreibung: {expert.get('description') or '-'}")
+                results.append(f"{t('active', default='Aktiv')}:        {_yes if expert['is_active'] else _no}")
+                results.append(f"{t('description_label', default='Beschreibung')}: {expert.get('description') or '-'}")
                 results.append(f"Domain:       {expert.get('domain') or '-'}")
                 results.append(f"Skill-Pfad:   {expert.get('skill_path') or '-'}")
             else:
                 conn.close()
-                return False, f"Agent/Experte nicht gefunden: {name}"
+                return False, f"{t('not_found', default='nicht gefunden')}: {name}"
 
         conn.close()
         return True, "\n".join(results)
