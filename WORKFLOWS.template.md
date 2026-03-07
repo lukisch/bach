@@ -1,28 +1,31 @@
 # BACH Workflows
 
-Automatisch generiert aus dem Dateisystem (skills/workflows/).
+Automatically generated from the filesystem (skills/workflows/).
 
-**Total:** (wird automatisch befuellt)
+**Total:** (automatically populated)
 
-## Kategorien
+## Categories
 
-- **Analysis**: Dokumenten-Analyse, Help-Reviews, Skill-Abdeckung
-- **Dev**: Entwicklungs-Workflows (Bugfix, CLI-Checkliste, Dev-Zyklus)
-- **Integration**: System-Anschluss, MCP-Publishing, Migrations-Workflows
-- **System**: System-Mapping, Aufraeumen, Testverfahren
+- **Analysis**: Document analysis, help reviews, skill coverage
+- **Dev**: Development workflows (bugfix, CLI checklist, dev cycle)
+- **Integration**: System integration, MCP publishing, migration workflows
+- **System**: System mapping, cleanup, testing procedures
 
-## Beispiel
+## Example
 
-### Workflow: Bugfix-Protokoll
+### Workflow: Bugfix Protocol
 
 **Version:** 1.0.0
-**Datei:** `skills/workflows/dev/bugfix-protokoll.md`
+**File:** `skills/workflows/dev/bugfix-protokoll.md`
 
-Strukturierter Ablauf fuer Bug-Analyse und -Behebung.
+Structured process for bug analysis and resolution.
 
 ---
 
 <!--
-  HINWEIS: Diese Datei ist ein Template.
-  BACH generiert die vollstaendige Liste automatisch aus dem Dateisystem.
+  NOTE: This file is a template.
+  BACH generates the complete list automatically from the filesystem.
 -->
+
+---
+🇩🇪 [Deutsche Version](WORKFLOWS.template.de.md)

@@ -1,39 +1,42 @@
-# BACH Skills-Katalog
+# BACH Skills Catalog
 
-**Anzahl:** (wird automatisch generiert)
-**Generiert:** Automatisch aus der Skills-Datenbank
+**Count:** (automatically generated)
+**Generated:** Automatically from the skills database
 
-## Uebersicht
+## Overview
 
-Dieser Katalog listet alle verfuegbaren Skills auf, gruppiert nach Typ.
+This catalog lists all available skills, grouped by type.
 
-### Skills nach Typ
+### Skills by Type
 
-- **agent**: Boss-Agenten und Orchestrierer
-- **expert**: Spezialisierte Fach-Experten
-- **extension**: System-Erweiterungen
-- **file**: Dateibasierte Skills (Markdown)
-- **service**: Hintergrund-Services
-- **workflow**: Mehrstufige Arbeitsablaeufe
-- **protocol**: Kommunikations-Protokolle
-- **profile**: LLM-Profile (Claude, Ollama, Gemini)
+- **agent**: Boss agents and orchestrators
+- **expert**: Specialized domain experts
+- **extension**: System extensions
+- **file**: File-based skills (Markdown)
+- **service**: Background services
+- **workflow**: Multi-step workflows
+- **protocol**: Communication protocols
+- **profile**: LLM profiles (Claude, Ollama, Gemini)
 
-## Beispiel-Eintrag
+## Example Entry
 
 ### `example-skill`
 
 **Version:** 1.0.0
-**Typ:** workflow
-**Portabilitaet:** UNIVERSAL
+**Type:** workflow
+**Portability:** UNIVERSAL
 
-Beschreibung des Skills...
+Description of the skill...
 
 ---
 
 <!--
-  HINWEIS: Diese Datei ist ein Template.
-  BACH generiert den vollstaendigen Katalog automatisch aus bach.db:
+  NOTE: This file is a template.
+  BACH generates the complete catalog automatically from bach.db:
     bach export mirrors
-  oder:
+  or:
     python system/tools/skills_export.py
 -->
+
+---
+🇩🇪 [Deutsche Version](SKILLS.template.de.md)

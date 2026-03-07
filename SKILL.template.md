@@ -8,173 +8,173 @@ updated: 2026-03-06
 anthropic_compatible: true
 
 description: >
-  Zentrales Verwaltungssystem für BACH. Dies ist der EINZIGE Skill
-  der bei Claude hochgeladen werden muss. Er kennt alle lokalen Skills,
-  führt Versions-Checks durch und lädt bei Bedarf aktuellere lokale
-  Versionen. Aktiviert sich automatisch bei jeder Skill-Nutzung.
+  Central management system for BACH. This is the ONLY skill
+  that needs to be uploaded to Claude. It knows all local skills,
+  performs version checks, and loads newer local versions as needed.
+  Activates automatically whenever a skill is used.
 ---
 
-# VERSIONS-HINWEIS
+# VERSION NOTICE
 
-# Prüfe ob eine neuere Version dieses Skills existiert (lokal oder zentral)
+# Check whether a newer version of this skill exists (local or central)
 
-# Verwende IMMER die Version mit der höchsten Versionsnummer
+# ALWAYS use the version with the highest version number
 
-# Versions-Check: bach skills version bach
+# Version check: bach skills version bach
 
-# Willkommen in Bach
-
----
-
-## REGELN - GUIDELINES - STANDARDS
+# Welcome to Bach
 
 ---
 
-### IMMER (vor allem anderen)
+## RULES - GUIDELINES - STANDARDS
 
-**(1) VERSIONS-CHECK:** Wenn verschiedene Versionen dieses SKILL.md zur Verfuegung stehen (lokal, zentral), Versionsnummern vergleichen und bei Bedarf zur neuesten Version wechseln und dort weiterlesen.
+---
+
+### ALWAYS (before anything else)
+
+**(1) VERSION CHECK:** If multiple versions of this SKILL.md are available (local, central), compare version numbers and switch to the newest version if necessary, then continue reading there.
 ```bash
-bach skills version bach   # Prueft ob aktuellere Version existiert
+bach skills version bach   # Check if a newer version exists
 ```
 
-**(2) BETRIEBSSYSTEM-CHECK:** Erkenne ob du auf Windows, Mac oder Linux arbeitest.
-- Windows: Keine `/dev/null` UND kein `NUL:`. Stattdessen Ausgabe weglassen oder `2>&1` nutzen. Vermeide `&&`, Befehle einzeln ausfuehren
-- Bei nul-Dateien: `python tools/c_nul_cleaner.py --dir <pfad> --delete`
+**(2) OPERATING SYSTEM CHECK:** Detect whether you are running on Windows, Mac, or Linux.
+- Windows: No `/dev/null` AND no `NUL:`. Instead, omit output or use `2>&1`. Avoid `&&`, execute commands individually
+- For nul files: `python tools/c_nul_cleaner.py --dir <path> --delete`
 
 ---
 
-### DANACH: Zugriffsart / Session-Modus klaeren
+### NEXT: Determine access type / session mode
 
-Waehle den Modus der zu deiner Situation passt:
+Choose the mode that fits your situation:
 
-| Modus | Wann | Startup | Zugang |
-|-------|------|---------|--------|
-| **A) Bibliothek** | Gast, lesend, einzelne Abfragen, BACH als Werkzeug | Kein Startup | `from bach_api import task; task.list()` |
-| **B) Gemischt** | Vom User zu BACH-Start aufgefordert, aktive Mitarbeit | API Startup | `session.startup()` + API + `session.shutdown()` |
-| **C) Session** | Klassisch, automatischer Start, ausfuehrliches Protokoll | CLI Startup | `python bach.py --startup --partner=claude` |
+| Mode | When | Startup | Access |
+|------|------|---------|--------|
+| **A) Library** | Guest, read-only, individual queries, BACH as a tool | No startup | `from bach_api import task; task.list()` |
+| **B) Mixed** | Prompted by user to start BACH, active collaboration | API Startup | `session.startup()` + API + `session.shutdown()` |
+| **C) Session** | Classic, automatic start, detailed protocol | CLI Startup | `python bach.py --startup --partner=claude` |
 
-- Modus C kann jederzeit zu B wechseln (API statt CLI nutzen)
-- Modus B und C koennen jederzeit zu A wechseln (einzelne Abfrage ohne Session)
-- Im Zweifel: **Modus B** (empfohlen fuer LLM-Sessions)
-
----
-
-### IM MODUS B und C: Regeln fuer aktive Nutzung
-
-**(1) Lesen und Schreiben -- BACH-Nutzung ist Mitentwicklung:**
-
-Wer BACH nutzt, entwickelt BACH mit. Jeder Zugriff ist eine Gelegenheit das System zu verbessern.
-
-- **(a) Handler First:** Jede Funktion gehoert als Handler in `hub/`. Ein Handler ist automatisch ueber CLI **und** API erreichbar. Kein separater Code fuer verschiedene Zugangswege.
-- **(b) Luecken fuellen:** Fehlen Handler, API-Module, Skills, Tools, Workflows oder andere Komponenten -- erstelle sie. Fehlende Handler haben hoechste Prioritaet, sie sind die Grundlage fuer alle Zugangswege.
-- **(c) Eigenes erwuenscht:** Das Erstellen eigener Skills, Workflows, Tools, MCPs ist ausdruecklich erwuenscht. Bei der Bearbeitung bestehender Absprache mit dem User.
-- **(d) Fix-or-Task:** Probleme fuehren entweder zur sofortigen Korrektur (klein) oder zu einem Task in der Queue (gross). Entscheidend: Aufwand vs. Nutzen. Danach zurueck zur eigentlichen Aufgabe.
-- **(e) Self-Healing:** Findest du Fehler in BACH (Pfade, Befehle, veraltete Referenzen, kaputte Imports), korrigiere sie sofort und informiere den User. BACH repariert sich selbst durch seine Nutzer.
-- **(f) Self-Extension:** Fehlt dir eine Faehigkeit, gib sie dir selbst! Nutze `bach skills create` um neue Tools, Handler, Agents, Experts oder Services zu scaffolden. Nach `bach skills reload` sind sie sofort verfuegbar. Siehe: `bach help self-extension`
-
-**(2) Fuehre die Startprozedur durch** (siehe unten). Lies Pflichtpakete und bei Bedarf (`-->`) freiwillige Verweise. Pakete sind mit Modus-Kennzeichnung versehen:
-- `[C]` → Nur im Session-Modus lesen
-- `[B]` → Nur im Gemischten Modus lesen, im Session-Modus ueberspringen
-- `[B/C]` → In beiden Modi lesen
-- Ohne Kennzeichnung → Immer bei Bedarf lesen
-
-**(3) Lese Zusatzpakete bei Bedarf** (Themenpakete weiter unten).
+- Mode C can switch to B at any time (use API instead of CLI)
+- Modes B and C can switch to A at any time (single query without session)
+- When in doubt: **Mode B** (recommended for LLM sessions)
 
 ---
 
-### IM MODUS A: Regeln fuer Gast-/Werkzeug-Nutzung
+### IN MODE B and C: Rules for active use
 
-Lese Zusatzpakete bei Bedarf. Kein Startup noetig, kein Shutdown erwartet.
+**(1) Reading and Writing -- Using BACH means co-developing BACH:**
+
+Anyone who uses BACH co-develops BACH. Every access is an opportunity to improve the system.
+
+- **(a) Handler First:** Every function belongs as a Handler in `hub/`. A Handler is automatically accessible via CLI **and** API. No separate code for different access paths.
+- **(b) Fill gaps:** If Handlers, API modules, Skills, Tools, Workflows, or other components are missing -- create them. Missing Handlers have the highest priority as they are the foundation for all access paths.
+- **(c) Custom contributions welcome:** Creating your own Skills, Workflows, Tools, MCPs is explicitly encouraged. When editing existing ones, coordinate with the user.
+- **(d) Fix-or-Task:** Problems either lead to an immediate fix (small) or a task in the queue (large). The deciding factor: effort vs. benefit. Then return to the actual task.
+- **(e) Self-Healing:** If you find errors in BACH (paths, commands, outdated references, broken imports), fix them immediately and inform the user. BACH repairs itself through its users.
+- **(f) Self-Extension:** If you lack a capability, give it to yourself! Use `bach skills create` to scaffold new Tools, Handlers, Agents, Experts, or Services. After `bach skills reload` they are immediately available. See: `bach help self-extension`
+
+**(2) Execute the startup procedure** (see below). Read mandatory packages and optionally (`-->`) voluntary references. Packages are labeled by mode:
+- `[C]` → Read only in Session mode
+- `[B]` → Read only in Mixed mode, skip in Session mode
+- `[B/C]` → Read in both modes
+- No label → Always read when needed
+
+**(3) Read additional packages as needed** (topic packages below).
+
+---
+
+### IN MODE A: Rules for guest/tool usage
+
+Read additional packages as needed. No startup required, no shutdown expected.
 
 ```python
 from bach_api import task, memory, tools, steuer
-task.list()         # Sofort nutzbar
-tools.search("ocr") # Werkzeug finden
+task.list()         # Immediately usable
+tools.search("ocr") # Find a tool
 ```
 
 ---
 
-### Dokument-Struktur (Navigations-Karte)
+### Document Structure (Navigation Map)
 
 ```
-IMMER (vor allem anderen)
-├── (1) VERSIONS-CHECK
-└── (2) BETRIEBSSYSTEM-CHECK
+ALWAYS (before anything else)
+├── (1) VERSION CHECK
+└── (2) OPERATING SYSTEM CHECK
 
-ZUGRIFFSART klaeren
-├── A) Bibliothek    → Gast, lesend, Werkzeug
-├── B) Gemischt      → User-gefuehrt, API + Startup (empfohlen)
-└── C) Session       → Klassisch, CLI + volles Protokoll
+DETERMINE ACCESS TYPE
+├── A) Library       → Guest, read-only, tool
+├── B) Mixed         → User-guided, API + Startup (recommended)
+└── C) Session       → Classic, CLI + full protocol
 
-IM MODUS B und C
-├── (1) Lesen = Mitentwicklung
+IN MODE B and C
+├── (1) Reading = Co-development
 │   ├── (a) Handler First
-│   ├── (b) Luecken fuellen
-│   ├── (c) Eigenes erwuenscht
+│   ├── (b) Fill gaps
+│   ├── (c) Custom contributions welcome
 │   ├── (d) Fix-or-Task
 │   └── (e) Self-Healing
-├── (2) Startprozedur durchfuehren
+├── (2) Execute startup procedure
 │   ├── (1) Start              [B/C]
-│   ├── (2) Systemwissen       [B/C]
+│   ├── (2) System knowledge   [B/C]
 │   ├── (3) Memory             [B/C]
-│   ├── (4) Faehigkeiten       [B/C]
-│   ├── (5) Aufgabenplanung    [B/C]
-│   └── (6) Protokolle          [C]
-└── (3) Zusatzpakete bei Bedarf
+│   ├── (4) Capabilities       [B/C]
+│   ├── (5) Task planning      [B/C]
+│   └── (6) Protocols           [C]
+└── (3) Additional packages as needed
 
-IM MODUS A
-└── Zusatzpakete bei Bedarf
+IN MODE A
+└── Additional packages as needed
 
-THEMEN-PAKETE (alle Modi, bei Bedarf)
-├── Teamarbeit
-├── Problemloesung
+TOPIC PACKAGES (all modes, as needed)
+├── Teamwork
+├── Problem solving
 ├── Coding
-├── Wartung
-├── Dateiverwaltung
+├── Maintenance
+├── File management
 ├── Self-Extension              [B/C]
 └── Shutdown                    [B/C]
 
-REFERENZ
-├── Skill-Architektur
-├── Drei Zugriffsmodi (API-Module, Wann-was-nutzen)
-├── Gesamtarchitektur-Diagramm
-├── Hooks & Injektoren
+REFERENCE
+├── Skill architecture
+├── Three access modes (API modules, when to use what)
+├── Overall architecture diagram
+├── Hooks & Injectors
 └── Changelog
 ```
 
 ---
 
-### Skill-Architektur v2.0 (NEU)
+### Skill Architecture v2.0 (NEW)
 
-#### Versions-Check-Prinzip
+#### Version Check Principle
 
-**IMMER die neueste Version verwenden** - egal ob lokal oder zentral gespeichert:
+**ALWAYS use the newest version** - regardless of whether stored locally or centrally:
 
 ```bash
-bach skills version <name>    # Prüfe Versionen
-bach tools version <name>     # Prüfe Tool-Versionen
+bach skills version <name>    # Check versions
+bach tools version <name>     # Check tool versions
 ```
 
-#### Skill-Struktur: Ein Skill = Ein Ordner
+#### Skill Structure: One Skill = One Folder
 
-Jeder Skill, Agent, Expert ist **vollständig autark** in einem eigenen Ordner:
+Each Skill, Agent, Expert is **fully self-contained** in its own folder:
 
 ```
 agents/entwickler/
-├── SKILL.md              # Definition mit Standard-Header
-├── tool_xyz.py           # Spezifische Tools (flat)
-├── protocol_abc.md       # Spezifische Protokolle (flat)
+├── SKILL.md              # Definition with standard header
+├── tool_xyz.py           # Specific tools (flat)
+├── protocol_abc.md       # Specific protocols (flat)
 └── config.json           # Optional
 ```
 
-**Regeln:**
+**Rules:**
 
-- < 5 Dateien: Flat (alles im Root)
-- >= 5 Dateien: Unterordner `tools/`, `protocols/` erlaubt
-- **Im Zweifel Tools doppelt halten** (allgemein + skill-spezifisch)
-- nach Export muss es ohne BACH funktionieren
+- < 5 files: Flat (everything in root)
+- >= 5 files: Subfolders `tools/`, `protocols/` allowed
+- **When in doubt, keep tools in both locations** (general + skill-specific)
+- After export it must work without BACH
 
-#### Standard-Header (Pflicht für alle Komponenten)
+#### Standard Header (mandatory for all components)
 
 ```yaml
 ---
@@ -190,78 +190,78 @@ dependencies:
   services: []
   protocols: []
 description: >
-  [Beschreibung]
+  [Description]
 ---
 ```
 
 **Templates:** `system/skills/_templates/TEMPLATE_*.md`
 
-#### Ausbaustufen
+#### Expansion Stages
 
-BACH existiert in drei Stufen: **USMC** (Memory-Kern), **Rinnsal** (+ LLM-Orchestrierung), **BACH** (vollstaendiges System). Details: [README.md](README.md#ausbaustufen)
+BACH exists in three stages: **USMC** (Memory core), **Rinnsal** (+ LLM orchestration), **BACH** (complete system). Details: [README.md](README.md#ausbaustufen)
 
-#### Drei Zugriffsmodi
+#### Three Access Modes
 
-BACH bietet **zwei parallele Zugangswege** (CLI + Library-API), die in **drei Modi** kombiniert werden koennen. Beide Wege nutzen dieselben Handler und dieselbe DB.
+BACH offers **two parallel access paths** (CLI + Library API) that can be combined into **three modes**. Both paths use the same Handlers and the same DB.
 
-##### Modus 1: Session-Modus (CLI -- klassisch)
+##### Mode 1: Session Mode (CLI -- classic)
 
-Volles Startup/Shutdown-Protokoll ueber die Kommandozeile. Fuer interaktive Terminal-Sessions.
+Full startup/shutdown protocol via command line. For interactive terminal sessions.
 
 ```bash
 cd system
 python bach.py --startup --partner=claude --mode=silent --watch
-# ... arbeiten ...
-python bach.py --shutdown "Zusammenfassung"
+# ... work ...
+python bach.py --shutdown "Summary"
 ```
 
-##### Modus 2: Bibliothek-Modus (API -- leichtgewichtig)
+##### Mode 2: Library Mode (API -- lightweight)
 
-Direkter Zugriff auf Handler ohne Session-Overhead. Fuer Scripts, schnelle Abfragen, oder LLMs die nur einzelne Operationen brauchen.
+Direct access to Handlers without session overhead. For scripts, quick queries, or LLMs that only need individual operations.
 
 ```python
 from bach_api import task, memory, steuer, partner, tools, injector
 
-task.list()                              # Tasks abfragen
-memory.write("Wichtige Notiz")           # Memory schreiben
-steuer.status()                          # Steuer-Status
-partner.list()                           # Partner auflisten
-injector.process("ich bin blockiert")    # Kognitive Hilfe
+task.list()                              # Query tasks
+memory.write("Important note")           # Write to memory
+steuer.status()                          # Tax status
+partner.list()                           # List partners
+injector.process("I am stuck")           # Cognitive assistance
 ```
 
-##### Modus 3: Gemischter Modus (API mit Session-Lifecycle)
+##### Mode 3: Mixed Mode (API with session lifecycle)
 
-Volles Startup/Shutdown ueber die API. **Empfohlen fuer LLM-Sessions** -- kombiniert Session-Management mit ergonomischem API-Zugriff.
+Full startup/shutdown via API. **Recommended for LLM sessions** -- combines session management with ergonomic API access.
 
 ```python
 from bach_api import session, task, memory, injector
 
-# Session starten (= python bach.py --startup --partner=claude --mode=silent)
+# Start session (= python bach.py --startup --partner=claude --mode=silent)
 session.startup(partner="claude", mode="silent")
 
-# Arbeiten mit API
+# Work with API
 task.list()
-memory.write("Notiz")
-injector.process("komplexe aufgabe")
+memory.write("Note")
+injector.process("complex task")
 
-# Session beenden (= python bach.py --shutdown "Zusammenfassung")
-session.shutdown("Was gemacht wurde. Naechste: Was kommt.")
+# End session (= python bach.py --shutdown "Summary")
+session.shutdown("What was done. Next: What comes next.")
 ```
 
-##### Verfuegbare API-Module
+##### Available API Modules
 
 ```python
 from bach_api import (
-    # Session-Lifecycle
+    # Session Lifecycle
     session,     # startup(), shutdown(), shutdown_quick(), shutdown_emergency()
 
-    # Kern-Handler
+    # Core Handlers
     task,        # add(), list(), done(), assign(), ...
     memory,      # write(), read(), status(), fact(), search(), ...
     backup,      # create(), list(), info()
     status,      # run()
 
-    # Domain-Handler
+    # Domain Handlers
     steuer,      # status(), beleg(), posten(), export()
     lesson,      # add(), last(), list(), search()
     partner,     # list(), status(), delegate(), info()
@@ -269,89 +269,89 @@ from bach_api import (
     msg,         # send(), unread(), read()
     email,       # send(), draft(), drafts(), confirm(), setup()
 
-    # Kognitive Injektoren
+    # Cognitive Injectors
     injector,    # process(), check_between(), tool_reminder(), status(), toggle()
 
-    # Hook-Framework
+    # Hook Framework
     hooks,       # on(), off(), emit(), status(), list_events()
 
-    # Plugin-API (Dynamische Erweiterung)
+    # Plugin API (Dynamic Extension)
     plugins,     # register_tool(), register_hook(), register_handler(), load_plugin()
 
-    # Raw-Zugriff (beliebiger Handler)
+    # Raw Access (any Handler)
     app,         # app().execute("handler", "operation", ["args"])
 )
 ```
 
-##### Wann was nutzen
+##### When to use what
 
-| Situation | Empfehlung |
-|-----------|------------|
-| LLM-Session (empfohlen) | Gemischter Modus: `session.startup()` + API |
-| Schnelle Einzelabfrage | Bibliothek-Modus: direkt `task.list()` |
-| Mensch am Terminal | Session-Modus: `python bach.py --startup` |
-| Dateien lesen, Code suchen | Direkt (Glob/Grep/Read) |
-| Handler nicht in bach_api | `app().execute("handler", "op", ["args"])` |
+| Situation | Recommendation |
+|-----------|----------------|
+| LLM session (recommended) | Mixed Mode: `session.startup()` + API |
+| Quick single query | Library Mode: directly `task.list()` |
+| Human at terminal | Session Mode: `python bach.py --startup` |
+| Reading files, searching code | Direct (Glob/Grep/Read) |
+| Handler not in bach_api | `app().execute("handler", "op", ["args"])` |
 
-**Architektur:** `core/registry.py` erkennt 109+ Handler automatisch (Auto-Discovery). Neue Handler brauchen nur eine `.py`-Datei in `hub/` -- kein manuelles Mapping. Hot-Reload: `app().reload_registry()`
+**Architecture:** `core/registry.py` discovers 109+ Handlers automatically (Auto-Discovery). New Handlers only need a `.py` file in `hub/` -- no manual mapping. Hot-Reload: `app().reload_registry()`
 
-#### Komponenten-Typen
+#### Component Types
 
-| Typ | Ordner | Charakteristik |
-|-----|--------|----------------|
-| **Agent** | `agents/<name>/` | Orchestriert Experten, eigener Ordner |
-| **Expert** | `agents/_experts/<name>/` | Tiefes Domänenwissen, eigener Ordner |
-| **Service** | `hub/_services/<name>/` | Allgemein, Handler-nah, eigener Ordner |
-| **Protocol** | `skills/workflows/` | 1 Datei = 1 Protokoll (ehem. Workflow), Kategorie-Unterordner erlaubt |
-| **Connector** | `connectors/` | Externe Anbindungen (MCP, APIs) |
-| **Tool (allg.)** | `tools/` | Wiederverwendbar |
-| **Tool (spez.)** | Im Skill-Ordner | Nur für diesen Skill |
+| Type | Folder | Characteristics |
+|------|--------|-----------------|
+| **Agent** | `agents/<name>/` | Orchestrates Experts, own folder |
+| **Expert** | `agents/_experts/<name>/` | Deep domain knowledge, own folder |
+| **Service** | `hub/_services/<name>/` | General purpose, close to Handlers, own folder |
+| **Protocol** | `skills/workflows/` | 1 file = 1 protocol (formerly Workflow), category subfolders allowed |
+| **Connector** | `connectors/` | External integrations (MCP, APIs) |
+| **Tool (general)** | `tools/` | Reusable |
+| **Tool (specific)** | In Skill folder | Only for this Skill |
 
-#### Skill-Quellen & Sicherheit
+#### Skill Sources & Security
 
-| Klasse | Quellen | Vorgehen |
-|--------|---------|----------|
-| **Goldstandard** | Selbst geschrieben | Beste Integration |
-| **Seriös** | anthropics/skills, anthropics/claude-cookbooks | Nach Prüfung 1:1 übernehmbar |
-| **Unsicher** | Andere GitHub-Repos | NUR neu schreiben |
-| **Blacklist** | `data/skill_blacklist.json` | VERBOTEN |
-
----
-
-## STARTPROZEDUR [B/C]: (1) → (2) → (3) → (4) → (5) → (6)
-
-*Nur in Modus B (Gemischt) und C (Session). Modus A ueberspringt diese Sektion.*
+| Class | Sources | Approach |
+|-------|---------|----------|
+| **Gold standard** | Self-written | Best integration |
+| **Reputable** | anthropics/skills, anthropics/claude-cookbooks | Adoptable 1:1 after review |
+| **Untrusted** | Other GitHub repos | ONLY rewrite from scratch |
+| **Blacklist** | `data/skill_blacklist.json` | FORBIDDEN |
 
 ---
 
-### (1) STARTe jetzt Bach [B/C]
+## STARTUP PROCEDURE [B/C]: (1) → (2) → (3) → (4) → (5) → (6)
 
-**Modus C (Session/CLI):**
+*Only in Mode B (Mixed) and C (Session). Mode A skips this section.*
+
+---
+
+### (1) START Bach now [B/C]
+
+**Mode C (Session/CLI):**
 
 ```bash
 cd system
 python bach.py --startup --partner=claude --mode=silent --watch
 ```
 
-**Modus B (Gemischt/API -- empfohlen):**
+**Mode B (Mixed/API -- recommended):**
 
 ```python
 from bach_api import session
 session.startup(partner="claude", mode="silent")
 ```
 
-**Fuer Gemini:**
+**For Gemini:**
 
 ```python
-# Modus B (API)
+# Mode B (API)
 session.startup(partner="gemini", mode="silent")
-# Modus C (CLI)
+# Mode C (CLI)
 # python bach.py --startup --partner=gemini --mode=silent --watch
 ```
 
 ---
 
-### (2) SYSTEM: Lade dein Systemwissen [B/C]
+### (2) SYSTEM: Load your system knowledge [B/C]
 
 ```bash
 bach help cli
@@ -363,64 +363,64 @@ bach help architecture
 # --> bach help injectors
 ```
 
-Oder per API: `help.run("cli")`, `help.run("features")`, etc.
+Or via API: `help.run("cli")`, `help.run("features")`, etc.
 
-#### Dateien zur Einsicht
+#### Files for review
 
-- `system/CHANGELOG.md` - Versionshistorie
-- `system/ROADMAP.md` - Geplante Features & Architektur-Uebersicht
+- `system/CHANGELOG.md` - Version history
+- `system/ROADMAP.md` - Planned features & architecture overview
 
-#### Root-Dokumente (generiert aus DB, bei `bach --shutdown` aktualisiert)
+#### Root documents (generated from DB, updated on `bach --shutdown`)
 
-- `AGENTS.md` - Alle Boss-Agenten und Experten mit Status und Pfaden
-- `PARTNERS.md` - LLM-Partner und Delegation
-- `SKILLS.md` - Skill-Index
-- `WORKFLOWS.md` - Protokoll-Index
+- `AGENTS.md` - All boss agents and experts with status and paths
+- `PARTNERS.md` - LLM partners and delegation
+- `SKILLS.md` - Skill index
+- `WORKFLOWS.md` - Protocol index
 - `CHAINS.md` - Toolchains
-- `USECASES.md` - Anwendungsfaelle
-- `USER.md` - User-Profil
-- `MEMORY.md` - Memory-Snapshot
-- `BACH_HELP_REFERENCE.md` - Gesamte Help-Referenz
+- `USECASES.md` - Use cases
+- `USER.md` - User profile
+- `MEMORY.md` - Memory snapshot
+- `BACH_HELP_REFERENCE.md` - Complete help reference
 
-#### Kernprinzipien
+#### Core Principles
 
-- **BACH als Organismus**: Connectors/Bridge sind die **Sinne & Stimme** (Wahrnehmung + Kommunikation mit der Aussenwelt). LLMs sind der **Verstand** (Denken, Verstehen, Entscheiden). Die Datenbank und Textdateien sind das **Gedaechtnis**. Die GUI ist das **Gesicht**. API, CLI, Tools, Agenten, Skills und Workflows sind die **Haende** (Handlungspotential).
-- **Handler First**: Jede Funktion als Handler in `hub/` -- automatisch ueber CLI **und** API erreichbar
-- **API bevorzugt**: LLMs nutzen `bach_api` statt CLI. Menschen nutzen CLI oder GUI.
-- **Systemisch**: Wiederverwendbar fuer jeden User
-- **dist_type**: 0=USER (persoenlich), 1=TEMPLATE (anpassbar), 2=CORE (System)
-- **Idempotent**: Importe wiederholbar ohne Duplikate
-- **Versions-Check**: Immer neueste Version verwenden
+- **BACH as an organism**: Connectors/Bridge are the **senses & voice** (perception + communication with the outside world). LLMs are the **mind** (thinking, understanding, deciding). The database and text files are the **memory**. The GUI is the **face**. API, CLI, Tools, Agents, Skills, and Workflows are the **hands** (action potential).
+- **Handler First**: Every function as a Handler in `hub/` -- automatically accessible via CLI **and** API
+- **API preferred**: LLMs use `bach_api` instead of CLI. Humans use CLI or GUI.
+- **Systemic**: Reusable for any user
+- **dist_type**: 0=USER (personal), 1=TEMPLATE (customizable), 2=CORE (system)
+- **Idempotent**: Imports repeatable without duplicates
+- **Version check**: Always use the newest version
 
-> **KERNPRINZIP:** BACH wird NICHT primaer fuer einen einzelnen User entwickelt, sondern als wiederverwendbares System.
+> **CORE PRINCIPLE:** BACH is NOT primarily developed for a single user, but as a reusable system.
 
-#### Arbeitsprinzipien
+#### Working Principles
 
-Sechs Grundregeln fuer alle BACH-Partner (LLMs, Agenten, Experten):
+Six fundamental rules for all BACH partners (LLMs, Agents, Experts):
 
-1. **Eigene Ressourcen zuerst** — Pruefe Memory, Wiki, Tools und DB bevor du den User fragst
-2. **Ergebnisse vor Prozess** — Was zaehlt ist das Resultat, nicht die Methode
-3. **Handeln statt ankuendigen** — Erklaere nicht was du tun wirst, tu es einfach
-4. **Meinung haben** — Du darfst widersprechen und eigene Vorschlaege machen
-5. **Kompakt bleiben** — System-Prompts unter 1000 Token, Injektionen schlank halten
-6. **Wissen sichern** — Erkenntnisse ins Gedaechtnis schreiben bevor der Kontext verloren geht
+1. **Own resources first** — Check Memory, Wiki, Tools, and DB before asking the user
+2. **Results over process** — What matters is the outcome, not the method
+3. **Act instead of announce** — Don't explain what you will do, just do it
+4. **Have an opinion** — You may disagree and make your own suggestions
+5. **Stay compact** — System prompts under 1000 tokens, keep injections lean
+6. **Secure knowledge** — Write insights to memory before context is lost
 
-**Partner-spezifische Anweisungen:**
-- **Claude**: Lies `CLAUDE.md` im Root-Verzeichnis (Knowledge Capture Regel, Integration)
-- **Gemini**: Lies `GEMINI.md` im Root-Verzeichnis (Knowledge Capture Regel, Integration)
-- **Ollama**: Lies `OLLAMA.md` im Root-Verzeichnis (Knowledge Capture Regel, Integration)
+**Partner-specific instructions:**
+- **Claude**: Read `CLAUDE.md` in the root directory (Knowledge Capture rules, integration)
+- **Gemini**: Read `GEMINI.md` in the root directory (Knowledge Capture rules, integration)
+- **Ollama**: Read `OLLAMA.md` in the root directory (Knowledge Capture rules, integration)
 
-Diese Dateien enthalten detaillierte Knowledge-Capture-Regeln und Partner-spezifische Einstellungen.
+These files contain detailed Knowledge Capture rules and partner-specific settings.
 
-#### Datenbank-Schema (138 Tabellen in bach.db)
+#### Database Schema (138 tables in bach.db)
 
-| # | Bereich | Wichtigste Tabellen |
-|---|---------|---------------------|
+| # | Area | Key Tables |
+|---|------|------------|
 | 1 | System | `system_identity`, `system_config`, `instance_identity` |
 | 2 | Tasks | `tasks` |
 | 3 | Memory | `memory_working`, `memory_facts`, `memory_lessons`, `memory_sessions` |
-| 4 | Tools | `tools` (373 Eintraege) |
-| 5 | Skills | `skills` (932 Eintraege) |
+| 4 | Tools | `tools` (373 entries) |
+| 5 | Skills | `skills` (932 entries) |
 | 6 | Agents | `bach_agents`, `bach_experts`, `agent_synergies` |
 | 7 | Files | `files_truth`, `files_trash`, `dist_files` |
 | 8 | Automation | `automation_triggers`, `automation_routines`, `automation_injectors` |
@@ -428,14 +428,14 @@ Diese Dateien enthalten detaillierte Knowledge-Capture-Regeln und Partner-spezif
 | 10 | Connections | `connections`, `connector_messages`, `partner_presence` |
 | 11 | Languages | `languages_config`, `languages_translations` |
 | 12 | Distribution | `distribution_manifest`, `dist_type_defaults`, `releases`, `snapshots` |
-| 13 | Wiki | `wiki` (87 Artikel) |
+| 13 | Wiki | `wiki` (87 articles) |
 | 14 | Usecases | `usecases`, `toolchains` |
 
-Vollstaendiges Schema: `system/data/schema/schema.sql` (138 Tabellen + Views + FTS)
+Complete schema: `system/data/schema/schema.sql` (138 tables + Views + FTS)
 
 ---
 
-### BACH v2.6 GESAMTARCHITEKTUR
+### BACH v2.6 OVERALL ARCHITECTURE
 
 ```text
   +=====================================================================+
@@ -448,7 +448,7 @@ Vollstaendiges Schema: `system/data/schema/schema.sql` (138 Tabellen + Views + F
            |              |              |                  |
   +========v==============v==============v==================v===========+
   |                    CORE LAYER (core/*.py)                           |
-  |  app.py → registry.py → Auto-Discovery von 75+ Handlern            |
+  |  app.py → registry.py → Auto-Discovery of 75+ Handlers             |
   |  base.py (BaseHandler) | db.py (Schema-First) | hooks.py (Events)  |
   +=========|==============|=======================================+====+
             |              |                                       |
@@ -464,32 +464,32 @@ Vollstaendiges Schema: `system/data/schema/schema.sql` (138 Tabellen + Views + F
   +----v------------------+   |   +------------------v-----------------+
   |   AGENTS LAYER        |   |   |   CONNECTORS & PARTNERS           |
   |                       |   |   |                                    |
-  | agents/ (Ordner)      |   |   | connectors/ (MCP, APIs)           |
-  | agents/_experts/      |   |   | partners/ (Multi-LLM-Konfig)      |
+  | agents/ (folders)     |   |   | connectors/ (MCP, APIs)           |
+  | agents/_experts/      |   |   | partners/ (Multi-LLM config)      |
   +-----------------------+   |   +------------------------------------+
                               |
   +---------------------------v----------------------------------------+
   |   SKILLS & TOOLS LAYER                     |    DATA LAYER         |
   |                                            |                       |
-  | skills/workflows/ (ehem. _workflows)      | bach.db (Unified)     |
-  | skills/_templates/ (Standard-Templates)    | Dateisystem            |
-  | hub/_services/ (Ordner)                    | inbox/outbox/          |
+  | skills/workflows/ (formerly _workflows)   | bach.db (Unified)     |
+  | skills/_templates/ (standard templates)    | File system            |
+  | hub/_services/ (folders)                   | inbox/outbox/          |
   | tools/*.py | c_*.py | injectors.py         |                       |
   +--------------------------------------------+-----------------------+
               |
   +-----------v-----------+
   | SELF-EXTENSION LAYER  |
   |                       |
-  | skills create (6 Typ) |
+  | skills create (6 typ) |
   | skills reload (Hot)   |
   | hooks.on/emit (14 Ev) |
-  | Plugin-API (geplant)  |
+  | Plugin API (planned)  |
   +-----------------------+
 ```
 
 ---
 
-### (3) MEMORY: Lade deinen Episodischen Kontext [B/C]
+### (3) MEMORY: Load your episodic context [B/C]
 
 ```bash
 bach help memory
@@ -497,55 +497,55 @@ bach help lessons
 bach help consolidation
 ```
 
-#### Das kognitive Memory-Modell (5 Typen)
+#### The Cognitive Memory Model (5 Types)
 
-| Typ | Entsprechung | Funktion | Befehl |
-|-----|--------------|----------|--------|
-| **Working** | Kurzzeit | Aktuelle Session | `bach mem write` |
-| **Episodic** | Tagebuch | Abgeschlossene Sessions | `bach --memory session` |
-| **Semantic** | Weltwissen | Fakten, Wiki, Help | `bach --memory fact` |
-| **Procedural** | Können | Tools, Skills, Workflows | `bach help tools` |
-| **Associative** | Verknüpfung | Konsolidierung, Trigger | `bach consolidate` |
+| Type | Equivalent | Function | Command |
+|------|------------|----------|---------|
+| **Working** | Short-term | Current session | `bach mem write` |
+| **Episodic** | Diary | Completed sessions | `bach --memory session` |
+| **Semantic** | World knowledge | Facts, Wiki, Help | `bach --memory fact` |
+| **Procedural** | Know-how | Tools, Skills, Workflows | `bach help tools` |
+| **Associative** | Linking | Consolidation, Trigger | `bach consolidate` |
 
 ---
 
-### (4) FÄHIGKEITEN: Lade Wissen über deine Fähigkeiten [B/C]
+### (4) CAPABILITIES: Load knowledge about your capabilities [B/C]
 
 ```bash
 bach help skills
 bach help tools
 ```
 
-**Hierarchie:**
+**Hierarchy:**
 
-- **Agenten**: Orchestrieren mehrere Bereiche, eigener Ordner
-- **Experten**: Tiefes Domänenwissen, eigener Ordner
-- **Services**: Allgemeine Dienste, Handler-nah
+- **Agents**: Orchestrate multiple domains, own folder
+- **Experts**: Deep domain knowledge, own folder
+- **Services**: General-purpose services, close to Handlers
 
-**Wichtige Verzeichnisse:**
+**Important directories:**
 
-- `system/agents/` - Agenten (je eigener Ordner)
-- `system/agents/_experts/` - Experten (je eigener Ordner)
-- `system/hub/_services/` - Services (je eigener Ordner)
-- `system/skills/workflows/` - Protokolle (Einzeldateien, ehem. _workflows)
-- `system/skills/_templates/` - Standard-Templates
-- `system/connectors/` - Externe Anbindungen (MCP, APIs)
-- `system/partners/` - Multi-LLM-Konfigurationen
+- `system/agents/` - Agents (each in own folder)
+- `system/agents/_experts/` - Experts (each in own folder)
+- `system/hub/_services/` - Services (each in own folder)
+- `system/skills/workflows/` - Protocols (single files, formerly _workflows)
+- `system/skills/_templates/` - Standard templates
+- `system/connectors/` - External integrations (MCP, APIs)
+- `system/partners/` - Multi-LLM configurations
 
 ---
 
-### (5) AUFGABENPLANUNG [B/C]
+### (5) TASK PLANNING [B/C]
 
-#### (5.1) User-Wuensche erkennen
+#### (5.1) Identify user requests
 
-- Erkenne konkrete im Prompt genannte Userwuensche als Aufgaben
-- Lege Aufgaben fest und plane dein Vorgehen
-- Wenn keine konkreten Wuensche vorliegen, gehe weiter zu 5.2
+- Recognize concrete user requests mentioned in the prompt as tasks
+- Define tasks and plan your approach
+- If no concrete requests are present, proceed to 5.2
 
-#### (5.2) Aufgabenkontext laden
+#### (5.2) Load task context
 
 ```python
-# API (bevorzugt)
+# API (preferred)
 from bach_api import task
 task.list()
 ```
@@ -556,13 +556,13 @@ bach help tasks
 bach task list
 ```
 
-- Suche dir selbststaendig Aufgaben aus und weise sie dir zu
+- Independently select tasks and assign them to yourself
 
 ---
 
-### (6) PROZEDURALES WISSEN & PROTOKOLLE [C]
+### (6) PROCEDURAL KNOWLEDGE & PROTOCOLS [C]
 
-*Im Modus B optional -- Protokolle sind Dokumentation, kein Code.*
+*Optional in Mode B -- Protocols are documentation, not code.*
 
 ```bash
 bach help protocol
@@ -570,15 +570,15 @@ bach help between-tasks
 bach help practices
 ```
 
-**Pfad:** `system/skills/workflows/`
+**Path:** `system/skills/workflows/`
 
 ---
 
-## THEMEN-PAKETE (bei Bedarf lesen -- alle Modi)
+## TOPIC PACKAGES (read as needed -- all modes)
 
-### THEMA: Zusammenarbeit (PAKET: TEAMARBEIT)
+### TOPIC: Collaboration (PACKAGE: TEAMWORK)
 
-*Wann lesen:* Du arbeitest mit Partnern im System.
+*When to read:* You are working with partners in the system.
 
 ```bash
 bach help partners
@@ -586,14 +586,14 @@ bach help multi_llm
 bach help delegate
 ```
 
-**Chat-System:**
+**Chat system:**
 
 ```python
 # API
 from bach_api import msg, partner
-msg.send("gemini", "Bitte recherchiere...")
+msg.send("gemini", "Please research...")
 msg.unread()
-partner.delegate("Recherche", "--to=gemini")
+partner.delegate("Research", "--to=gemini")
 ```
 
 ```bash
@@ -602,19 +602,19 @@ bach msg send claude "Text"
 bach msg unread
 ```
 
-**Lock-System:**
+**Lock system:**
 
 ```bash
-bach llm lock <datei>           # Lock VOR Schreiben
-bach llm unlock [datei]         # Lock freigeben
-bach llm status                 # Wer hat welche Locks?
+bach llm lock <file>            # Lock BEFORE writing
+bach llm unlock [file]          # Release lock
+bach llm status                 # Who holds which locks?
 ```
 
 ---
 
-### THEMA: Problemlösung (PAKET: PROBLEMLÖSUNG)
+### TOPIC: Problem Solving (PACKAGE: PROBLEM SOLVING)
 
-*Wann lesen:* Du triffst auf Probleme oder Blockaden.
+*When to read:* You encounter problems or blockers.
 
 ```bash
 bach help operatoren
@@ -625,9 +625,9 @@ bach help strategien
 
 ---
 
-### THEMA: Coding-Aufgaben (PAKET: CODING)
+### TOPIC: Coding Tasks (PACKAGE: CODING)
 
-*Wann lesen:* Du bearbeitest Code oder fixt Bugs.
+*When to read:* You are working on code or fixing bugs.
 
 ```bash
 bach help ati
@@ -637,9 +637,9 @@ bach help bugfix
 
 ---
 
-### THEMA: Wartung (PAKET: WARTUNG)
+### TOPIC: Maintenance (PACKAGE: MAINTENANCE)
 
-*Wann lesen:* Du bearbeitest Wartungs-Aufgaben.
+*When to read:* You are working on maintenance tasks.
 
 ```bash
 bach help maintain
@@ -650,9 +650,9 @@ bach daemon status
 
 ---
 
-### THEMA: Dateiverwaltung (PAKET: DATEIVERWALTUNG)
+### TOPIC: File Management (PACKAGE: FILE MANAGEMENT)
 
-*Wann lesen:* Du führst Dateioperationen durch.
+*When to read:* You are performing file operations.
 
 ```bash
 bach help trash
@@ -662,9 +662,9 @@ bach help distribution
 
 ---
 
-### THEMA: Selbsterweiterung (PAKET: SELF-EXTENSION) [B/C]
+### TOPIC: Self-Extension (PACKAGE: SELF-EXTENSION) [B/C]
 
-*Wann lesen:* Dir fehlt eine Faehigkeit oder du willst BACH erweitern.
+*When to read:* You lack a capability or want to extend BACH.
 
 ```bash
 bach help self-extension
@@ -672,151 +672,151 @@ bach help hooks
 bach help skills
 ```
 
-**Neue Faehigkeiten erstellen (5 Typen):**
+**Create new capabilities (5 types):**
 
 ```bash
-bach skills create voice-processor --type tool       # Neues Tool scaffolden
-bach skills create email-agent --type agent           # Neuen Agent scaffolden
-bach skills create tax-expert --type expert            # Neuen Experten scaffolden
-bach skills create api-gateway --type handler          # Neuen CLI-Befehl scaffolden
-bach skills create data-sync --type service            # Neuen Service scaffolden
+bach skills create voice-processor --type tool       # Scaffold new tool
+bach skills create email-agent --type agent           # Scaffold new agent
+bach skills create tax-expert --type expert            # Scaffold new expert
+bach skills create api-gateway --type handler          # Scaffold new CLI command
+bach skills create data-sync --type service            # Scaffold new service
 ```
 
-**Nach Erstellung: Hot-Reload (kein Neustart!)**
+**After creation: Hot-Reload (no restart needed!)**
 
 ```bash
 bach skills reload
 ```
 
-**Hook-Framework (14 Events):**
+**Hook Framework (14 Events):**
 
 ```python
 from core.hooks import hooks
 
-# Eigene Logik an System-Events haengen
-hooks.on('after_task_create', meine_funktion, name='mein_plugin')
-hooks.on('after_startup', startup_check, name='mein_plugin')
+# Attach custom logic to system events
+hooks.on('after_task_create', my_function, name='my_plugin')
+hooks.on('after_startup', startup_check, name='my_plugin')
 
-# Events anzeigen
+# Display events
 # bach hooks events
 ```
 
-**Plugin-API (Dynamische Erweiterung zur Laufzeit):**
+**Plugin API (Dynamic extension at runtime):**
 
 ```python
 from bach_api import plugins
 
-# Tool registrieren (sofort nutzbar)
-plugins.register_tool("mein_tool", meine_funktion, "Beschreibung")
+# Register tool (immediately usable)
+plugins.register_tool("my_tool", my_function, "Description")
 
-# Hook registrieren (Event abonnieren)
-plugins.register_hook("after_task_done", callback, plugin="mein-plugin")
+# Register hook (subscribe to event)
+plugins.register_hook("after_task_done", callback, plugin="my-plugin")
 
-# Handler registrieren (neuer CLI-Befehl!)
-plugins.register_handler("mein_cmd", MeinHandler)
+# Register handler (new CLI command!)
+plugins.register_handler("my_cmd", MyHandler)
 
-# Plugin aus Manifest laden
-plugins.load_plugin("plugins/mein-plugin/plugin.json")
+# Load plugin from manifest
+plugins.load_plugin("plugins/my-plugin/plugin.json")
 ```
 
 ```bash
-# CLI: Plugin-Verwaltung
-bach plugins list          # Geladene Plugins
-bach plugins create name   # Plugin scaffolden
-bach plugins load pfad     # Plugin laden
-bach plugins unload name   # Plugin entladen
+# CLI: Plugin management
+bach plugins list          # Loaded plugins
+bach plugins create name   # Scaffold plugin
+bach plugins load path     # Load plugin
+bach plugins unload name   # Unload plugin
 ```
 
 **Self-Extension Loop:**
-1. ERKENNEN → Fehlende Faehigkeit identifizieren
-2. ERSTELLEN → `bach skills create <name> --type <typ>` oder `plugins.register_tool()`
-3. IMPLEMENTIEREN → Code schreiben
-4. REGISTRIEREN → `bach skills reload` oder `plugins.load_plugin()`
-5. NUTZEN → Sofort verfuegbar
-6. REFLEKTIEREN → `bach lesson add "Was gelernt"`
+1. IDENTIFY → Recognize missing capability
+2. CREATE → `bach skills create <name> --type <type>` or `plugins.register_tool()`
+3. IMPLEMENT → Write code
+4. REGISTER → `bach skills reload` or `plugins.load_plugin()`
+5. USE → Immediately available
+6. REFLECT → `bach lesson add "What was learned"`
 
 ---
 
-### THEMA: Shutdown (PAKET: SHUTDOWN) [B/C]
+### TOPIC: Shutdown (PACKAGE: SHUTDOWN) [B/C]
 
-*Wann lesen:* Die Sitzung wird beendet. Nur in Modus B und C relevant.
+*When to read:* The session is ending. Only relevant in Mode B and C.
 
-**Modus B (API -- empfohlen):**
+**Mode B (API -- recommended):**
 ```python
 from bach_api import session, memory
-memory.session("THEMA: Was gemacht. NAECHSTE: Was kommt.")
-session.shutdown("Zusammenfassung", partner="claude")
-# Oder schnell:
-session.shutdown_quick("Kurze Notiz")
+memory.session("TOPIC: What was done. NEXT: What comes next.")
+session.shutdown("Summary", partner="claude")
+# Or quick:
+session.shutdown_quick("Brief note")
 ```
 
-**Modus C (CLI):**
+**Mode C (CLI):**
 ```bash
 bach help shutdown
-bach --memory session "THEMA: Was gemacht. NAECHSTE: Was kommt."
+bach --memory session "TOPIC: What was done. NEXT: What comes next."
 bach --shutdown
 ```
 
 ---
 
-## HOOKS & INJEKTOREN
+## HOOKS & INJECTORS
 
-### Hook-Framework (Technisches Event-System)
+### Hook Framework (Technical Event System)
 
-Hooks erlauben es, eigene Logik an 14 Lifecycle-Events zu haengen -- ohne bestehenden Code zu aendern.
+Hooks allow you to attach custom logic to 14 lifecycle events -- without modifying existing code.
 
 ```python
 from core.hooks import hooks
 
-# Listener registrieren
+# Register listener
 hooks.on('after_task_done', auto_backup, name='backup_plugin')
 hooks.on('after_startup', health_check, priority=10, name='health')
 
 # CLI
-# bach hooks status    → Zeigt alle Hooks
-# bach hooks events    → Listet alle 14 Events
-# bach hooks log       → Letzte Ausfuehrungen
+# bach hooks status    → Shows all hooks
+# bach hooks events    → Lists all 14 events
+# bach hooks log       → Recent executions
 ```
 
 **Events:** `before_startup`, `after_startup`, `before_shutdown`, `after_shutdown`, `before_command`, `after_command`, `after_task_create`, `after_task_done`, `after_task_delete`, `after_memory_write`, `after_lesson_add`, `after_skill_create`, `after_skill_reload`, `after_email_send`
 
-> Hooks sind das **technische Framework**. Injektoren sind das **kognitive Subsystem**. Sie arbeiten unabhaengig voneinander.
+> Hooks are the **technical framework**. Injectors are the **cognitive subsystem**. They operate independently of each other.
 
 ---
 
-### Injektoren (Kognitive Orchestrierung)
+### Injectors (Cognitive Orchestration)
 
-Die 6 Injektoren simulieren **Denken und Assoziationen** als **Zentrale Exekutive**. Verfuegbar ueber CLI und API.
+The 6 Injectors simulate **thinking and associations** as a **Central Executive**. Available via CLI and API.
 
-| Injektor | Teilfunktionen | API-tauglich |
-|----------|----------------|:---:|
-| **strategy_injector** | Metakognition, Entscheidungshilfe, Fehleranalyse | Ja |
-| **context_injector** | Tool-Empfehlung, Memory-Abruf, Anforderungsanalyse | Teilweise* |
-| **between_injector** | Qualitaetskontrolle, Task-Uebergang, Ergebnis-Validierung | Ja |
-| **time_injector** | Zeitgefuehl (Timebeat), Nachrichten-Check | Ja |
-| **tool_injector** | Tool-Erinnerung, Duplikat-Warnung | Ja |
-| **task_assigner** | Auto-Zuweisung, Task-Zerlegung | Ja |
+| Injector | Sub-functions | API-capable |
+|----------|---------------|:---:|
+| **strategy_injector** | Metacognition, decision support, error analysis | Yes |
+| **context_injector** | Tool recommendation, memory retrieval, requirements analysis | Partial* |
+| **between_injector** | Quality control, task transition, result validation | Yes |
+| **time_injector** | Time awareness (Timebeat), message check | Yes |
+| **tool_injector** | Tool reminder, duplicate warning | Yes |
+| **task_assigner** | Auto-assignment, task decomposition | Yes |
 
-*\*context_injector enthaelt CLI-Befehle als Hinweise. Im API-Modus filterbar.*
+*\*context_injector contains CLI commands as hints. Filterable in API mode.*
 
 **CLI:**
 ```bash
-bach --inject status            # Status aller Injektoren
-bach --inject toggle <name>     # An/Aus schalten
+bach --inject status            # Status of all injectors
+bach --inject toggle <name>     # Toggle on/off
 ```
 
 **API:**
 ```python
 from bach_api import injector
 
-injector.process("text")              # Alle Injektoren auf Text anwenden
-injector.check_between("task done")   # Quality-Check nach Task-Abschluss
-injector.tool_reminder()              # Verfuegbare Tools (einmalig)
-injector.assign_task()                # Naechste Aufgabe automatisch zuweisen
-injector.time_check()                 # Uhrzeit + Nachrichten
-injector.status()                     # Status aller Injektoren
-injector.toggle("strategy_injector")  # Einzeln an/aus
-injector.set_mode("api")              # CLI-Hinweise aus Kontext filtern
+injector.process("text")              # Apply all injectors to text
+injector.check_between("task done")   # Quality check after task completion
+injector.tool_reminder()              # Available tools (once)
+injector.assign_task()                # Automatically assign next task
+injector.time_check()                 # Time + messages
+injector.status()                     # Status of all injectors
+injector.toggle("strategy_injector")  # Toggle individually
+injector.set_mode("api")              # Filter CLI hints from context
 ```
 
 ---
@@ -825,82 +825,85 @@ injector.set_mode("api")              # CLI-Hinweise aus Kontext filtern
 
 ### v3.2.0-butternut (2026-02-28)
 
-- **Agent-CLI**: `AgentLauncherHandler` -- `bach agent start/stop/list` fuer direkte Agent-Steuerung
-- **Prompt-System**: `PromptHandler` -- `bach prompt list/add/edit/show/board-create` fuer zentrale Prompt-Verwaltung
-- **SharedMemory-Erweiterungen**: `current-task`, `generate-context`, `conflict-resolution`, `decay`, `changes-since`
+- **Agent CLI**: `AgentLauncherHandler` -- `bach agent start/stop/list` for direct agent control
+- **Prompt System**: `PromptHandler` -- `bach prompt list/add/edit/show/board-create` for centralized prompt management
+- **SharedMemory Extensions**: `current-task`, `generate-context`, `conflict-resolution`, `decay`, `changes-since`
 - **USMC Bridge**: United Shared Memory Client (`hub/_services/usmc_bridge.py`)
-- **llmauto-Ketten**: Claude-Prompts als Chain-Steps + `bach://`-URL-Resolution
-- **Scheduler**: `job_type='chain'` + Umbenennung `daemon_jobs` → `scheduler_jobs`
-- **Neue API-Module**: `agent`, `prompt` in `bach_api`
-- **Portierungen**: SharedMemoryHandler, ApiProberHandler, N8nManagerHandler, UserSyncHandler, Stigmergy-Service
-- **Tabellen**: 4 neue DB-Tabellen: `prompt_templates`, `prompt_versions`, `prompt_boards`, `prompt_board_items`
-- **109+ Handler** (bisher: 75+)
+- **llmauto Chains**: Claude prompts as chain steps + `bach://` URL resolution
+- **Scheduler**: `job_type='chain'` + rename `daemon_jobs` → `scheduler_jobs`
+- **New API Modules**: `agent`, `prompt` in `bach_api`
+- **Ports**: SharedMemoryHandler, ApiProberHandler, N8nManagerHandler, UserSyncHandler, Stigmergy-Service
+- **Tables**: 4 new DB tables: `prompt_templates`, `prompt_versions`, `prompt_boards`, `prompt_board_items`
+- **109+ Handlers** (previously: 75+)
 
 ### v2.6.0 (2026-02-13)
 
-- **Verzeichnis-Restrukturierung**: Klare Trennung von Agents, Skills, Connectors und Partners
-  - `skills/_agents/` → `agents/` (Top-Level unter system/)
-  - `skills/_experts/` → `agents/_experts/` (Experten gehoeren zu Agents)
-  - `skills/_workflows/` → `skills/workflows/` (Workflows heissen jetzt Protocols)
-  - `skills/_connectors/` → `connectors/` (Top-Level unter system/)
-  - `skills/_partners/` → `partners/` (Top-Level unter system/)
-- **PathHealer**: Automatische Pfad-Korrektur in allen betroffenen Dateien
-- **Komponenten-Typ `protocol`**: Ersetzt `workflow` in der Typ-Hierarchie
-- **Komponenten-Typ `connector`**: Neu fuer externe Anbindungen (MCP, APIs)
-- **Architektur-Diagramm**: AGENTS LAYER und CONNECTORS & PARTNERS als eigene Sektionen
-- **SKILL.md v2.6**: Alle Referenzen, Tabellen und Diagramme an neue Struktur angepasst
+- **Directory Restructuring**: Clear separation of Agents, Skills, Connectors, and Partners
+  - `skills/_agents/` → `agents/` (top-level under system/)
+  - `skills/_experts/` → `agents/_experts/` (Experts belong to Agents)
+  - `skills/_workflows/` → `skills/workflows/` (Workflows now called Protocols)
+  - `skills/_connectors/` → `connectors/` (top-level under system/)
+  - `skills/_partners/` → `partners/` (top-level under system/)
+- **PathHealer**: Automatic path correction in all affected files
+- **Component type `protocol`**: Replaces `workflow` in the type hierarchy
+- **Component type `connector`**: New for external integrations (MCP, APIs)
+- **Architecture Diagram**: AGENTS LAYER and CONNECTORS & PARTNERS as separate sections
+- **SKILL.md v2.6**: All references, tables, and diagrams adapted to new structure
 
 ### v2.5.0 (2026-02-13)
 
-- **Self-Extension System**: AI-Partner koennen sich neue Faehigkeiten geben
-  - `bach skills create <name> --type <typ>` (5 Typen: tool, agent, expert, handler, service)
-  - `bach skills reload` (Hot-Reload: Registry + Tools + Skills-DB)
-  - Self-Extension Loop: ERKENNEN → ERSTELLEN → REGISTRIEREN → NUTZEN → REFLEKTIEREN
-- **Hook-Framework**: Erweiterbares Event-System mit 14 Lifecycle-Events
-  - `core/hooks.py` - HookRegistry-Singleton, Prioritaeten, Event-Log
+- **Self-Extension System**: AI partners can give themselves new capabilities
+  - `bach skills create <name> --type <type>` (5 types: tool, agent, expert, handler, service)
+  - `bach skills reload` (Hot-Reload: Registry + Tools + Skills DB)
+  - Self-Extension Loop: IDENTIFY → CREATE → REGISTER → USE → REFLECT
+- **Hook Framework**: Extensible event system with 14 lifecycle events
+  - `core/hooks.py` - HookRegistry singleton, priorities, event log
   - `hub/hooks.py` - CLI: `bach hooks status/events/log/test`
   - Integration in: Startup, Shutdown, Task, Memory, Lesson, Skills, App
-  - Hooks != Injektoren: Technisches Framework vs. kognitives Subsystem
-- **Email-Handler**: Gmail API mit Draft-Safety (send, draft, confirm, cancel)
-- **Registry Hot-Reload**: `app().reload_registry()` ohne Neustart
-- **Regel (f) Self-Extension**: "Fehlt dir eine Faehigkeit, gib sie dir selbst!"
-- **Dokumentation**: hooks.txt, self-extension.txt, cli.txt, skills.txt, ROADMAP.md
+  - Hooks != Injectors: Technical framework vs. cognitive subsystem
+- **Email Handler**: Gmail API with draft safety (send, draft, confirm, cancel)
+- **Registry Hot-Reload**: `app().reload_registry()` without restart
+- **Rule (f) Self-Extension**: "If you lack a capability, give it to yourself!"
+- **Documentation**: hooks.txt, self-extension.txt, cli.txt, skills.txt, ROADMAP.md
 
 ### v2.4.0 (2026-02-08)
 
-- **MCP Server v2.2**: 23 Tools, 8 Resources, 3 Prompts - alle drei MCP-Primitives
-- **Email-Adapter**: SMTP_SSL in notify.py (portiert aus BachForelle)
-- **BachFliege + BachForelle**: Analysiert und archiviert (`docs/_archive/con5_BACHFLIEGE_BACHFORELLE_ARCHIV.md`)
+- **MCP Server v2.2**: 23 Tools, 8 Resources, 3 Prompts - all three MCP primitives
+- **Email Adapter**: SMTP_SSL in notify.py (ported from BachForelle)
+- **BachFliege + BachForelle**: Analyzed and archived (`docs/_archive/con5_BACHFLIEGE_BACHFORELLE_ARCHIV.md`)
 
 ### v2.3.0 (2026-02-06)
 
-- **Regelwerk komplett ueberarbeitet**: IMMER → Zugriffsart → Modus-spezifisch
-- **Drei Modi**: A (Bibliothek), B (Gemischt), C (Session) mit [B], [C], [B/C] Tags
-- **Mitentwicklungs-Prinzip**: "BACH-Nutzung ist Mitentwicklung" als Kernregel
-- **bach_api.py erweitert**: session, partner, logs, msg, tools, help, injector
-- **14 API-Module**: Kompletter programmatischer Zugriff auf alle Handler
-- **Injektoren ueber API**: Alle 6 Injektoren per Library nutzbar + CLI-Filter
-- **Session-Lifecycle per API**: `session.startup()` / `session.shutdown()`
-- Architektur-Diagramm aktualisiert (Core Layer + bach_api)
-- Alle Sektionen mit Modus-Kennzeichnung versehen
+- **Ruleset completely reworked**: ALWAYS → Access type → Mode-specific
+- **Three Modes**: A (Library), B (Mixed), C (Session) with [B], [C], [B/C] tags
+- **Co-development Principle**: "Using BACH means co-developing BACH" as core rule
+- **bach_api.py extended**: session, partner, logs, msg, tools, help, injector
+- **14 API Modules**: Complete programmatic access to all Handlers
+- **Injectors via API**: All 6 Injectors usable via library + CLI filter
+- **Session Lifecycle via API**: `session.startup()` / `session.shutdown()`
+- Architecture diagram updated (Core Layer + bach_api)
+- All sections labeled with mode tags
 
 ### v2.2.0 (2026-02-06)
 
-- Zwei Zugriffswege (CLI + Library-API) dokumentiert
-- bach_api.py Basismodule: task, memory, backup, steuer, lesson, status
+- Two access paths (CLI + Library API) documented
+- bach_api.py base modules: task, memory, backup, steuer, lesson, status
 
 ### v2.1.0 (2026-02-04)
 
-- Skill-Architektur v2.0 integriert
-- Versions-Check-Prinzip eingefuehrt
-- Standard-Header dokumentiert
-- Skill-Quellen-Klassifizierung hinzugefuegt
-- Injektor-Teilfunktionen dokumentiert
+- Skill Architecture v2.0 integrated
+- Version check principle introduced
+- Standard header documented
+- Skill source classification added
+- Injector sub-functions documented
 
 ### v2.0.2 (2026-01-01)
 
-- Initiale Version
+- Initial version
 
 ---
 
-**BACH Skill-Architektur v2.0**
+**BACH Skill Architecture v2.0**
+
+---
+🇩🇪 [Deutsche Version](SKILL.template.de.md)

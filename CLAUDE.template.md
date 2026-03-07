@@ -1,10 +1,10 @@
-# BACH Projekt-Anweisungen
+# BACH Project Instructions
 
-<!-- BACH:START - Automatisch generiert, nicht manuell bearbeiten -->
+<!-- BACH:START - Automatically generated, do not edit manually -->
 
-*Generiert: (wird beim ersten Start automatisch befuellt)*
+*Generated: (automatically populated on first start)*
 
-## System-Einstellungen
+## System Settings
 
 **SECURITY**
 - `secrets_file_path`: ~/.bach/bach_secrets.json
@@ -15,36 +15,39 @@
 - `timeout_checkpoint_minutes`: 10
 
 **INTEGRATION**
-- `integration.claude-code.claude_md_path`: (wird automatisch gesetzt)
+- `integration.claude-code.claude_md_path`: (automatically set)
 
-## BACH Lessons (Top-10)
+## BACH Lessons (Top 10)
 
-*Noch keine Lessons gespeichert. BACH lernt aus deinen Sessions.*
+*No lessons stored yet. BACH learns from your sessions.*
 
 <!-- BACH:END -->
 
-## Entwicklungs-Workflow (Single Installation Model, ab v3.3.0)
+## Development Workflow (Single Installation Model, since v3.3.0)
 
-### Code aendern
+### Changing Code
 ```bash
-# Direkt im Git-Repo entwickeln
-cd /pfad/zu/BACH
-# CORE-Aenderungen: git add + commit + push
+# Develop directly in the Git repo
+cd /path/to/BACH
+# CORE changes: git add + commit + push
 git add system/hub/neuer_handler.py
-git commit -m "feat: neuer Handler"
+git commit -m "feat: new handler"
 git push origin main
 ```
 
-### User-Daten sind geschuetzt
+### User Data is Protected
 
-Die `.gitignore` schuetzt:
-- `bach.db` und alle Laufzeitdaten
-- `user/` Verzeichnis (persoenliche Daten)
-- Credentials und API-Keys
-- Generierte Dokumentation (MEMORY.md, USER.md, SKILLS.md, etc.)
+The `.gitignore` protects:
+- `bach.db` and all runtime data
+- `user/` directory (personal data)
+- Credentials and API keys
+- Generated documentation (MEMORY.md, USER.md, SKILLS.md, etc.)
 
 <!--
-  HINWEIS: Diese Datei ist ein Template.
-  BACH ueberschreibt den BACH:START/END-Block automatisch mit echten Daten.
-  Varianten: OLLAMA.md, GEMINI.md (gleiche Struktur, andere LLM-Anweisungen)
+  NOTE: This file is a template.
+  BACH overwrites the BACH:START/END block automatically with real data.
+  Variants: OLLAMA.md, GEMINI.md (same structure, different LLM instructions)
 -->
+
+---
+🇩🇪 [Deutsche Version](CLAUDE.template.de.md)

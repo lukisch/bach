@@ -1,16 +1,16 @@
 # BACH Toolchains
 
-Automatisch generiert aus der Datenbank (toolchains).
+Automatically generated from the database (toolchains).
 
-**Total:** (wird automatisch befuellt)
+**Total:** (automatically populated)
 
-## Trigger-Typen
+## Trigger Types
 
-- **event**: Reagiert auf System-Events (z.B. task_completed)
-- **schedule**: Zeitgesteuerte Ausfuehrung
-- **manual**: Manuell ausgeloest
+- **event**: Reacts to system events (e.g. task_completed)
+- **schedule**: Time-based execution
+- **manual**: Manually triggered
 
-## Beispiel
+## Example
 
 ### after_task_done
 
@@ -26,6 +26,9 @@ Automatisch generiert aus der Datenbank (toolchains).
 ---
 
 <!--
-  HINWEIS: Diese Datei ist ein Template.
-  BACH generiert die vollstaendige Liste automatisch aus bach.db.
+  NOTE: This file is a template.
+  BACH generates the complete list automatically from bach.db.
 -->
+
+---
+🇩🇪 [Deutsche Version](CHAINS.template.de.md)

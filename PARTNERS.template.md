@@ -1,27 +1,30 @@
 # BACH Partners
 
-Automatisch generiert aus der Datenbank (delegation_rules, partner_recognition, interaction_protocols).
+Automatically generated from the database (delegation_rules, partner_recognition, interaction_protocols).
 
 ## Delegation Rules
 
-BACH nutzt ein Zonen-Modell fuer Partner-Auswahl:
+BACH uses a zone model for partner selection:
 
-| Zone | Strategie | Bevorzugter Partner |
-|------|-----------|-------------------|
-| Zone 1 | Voller Zugang | Claude (beste Qualitaet) |
-| Zone 2 | Moderat | Ollama (kostenguenstig) |
-| Zone 3 | Konservativ | Ollama (nur lokal) |
-| Zone 4 | Notfall | Minimaler Verbrauch |
+| Zone | Strategy | Preferred Partner |
+|------|----------|-------------------|
+| Zone 1 | Full access | Claude (best quality) |
+| Zone 2 | Moderate | Ollama (cost-effective) |
+| Zone 3 | Conservative | Ollama (local only) |
+| Zone 4 | Emergency | Minimal consumption |
 
-## Partner-Typen
+## Partner Types
 
-- **Claude**: Anthropic API (hoehere Qualitaet, kostet Tokens)
-- **Ollama**: Lokale LLMs (kostenlos, offline-faehig)
-- **Gemini**: Google API (Alternative)
+- **Claude**: Anthropic API (higher quality, costs tokens)
+- **Ollama**: Local LLMs (free, offline-capable)
+- **Gemini**: Google API (alternative)
 
 ---
 
 <!--
-  HINWEIS: Diese Datei ist ein Template.
-  BACH generiert die vollstaendige Liste automatisch aus bach.db.
+  NOTE: This file is a template.
+  BACH generates the complete list automatically from bach.db.
 -->
+
+---
+🇩🇪 [Deutsche Version](PARTNERS.template.de.md)

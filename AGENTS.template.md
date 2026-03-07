@@ -1,51 +1,54 @@
 # BACH Agents & Experts
 
-**Generiert:** (automatisch aus bach.db)
-**Quelle:** bach.db (bach_agents, bach_experts)
-**Generator:** `bach export mirrors` oder `python tools/agents_export.py`
+**Generated:** (automatically from bach.db)
+**Source:** bach.db (bach_agents, bach_experts)
+**Generator:** `bach export mirrors` or `python tools/agents_export.py`
 
 ---
 
-## Boss-Agenten (Orchestrierer)
+## Boss Agents (Orchestrators)
 
-Boss-Agenten orchestrieren komplexe Workflows und delegieren an Experten.
+Boss agents orchestrate complex workflows and delegate to experts.
 
-### Entwickler Agent (ATI)
-- **Typ:** Expert
+### Developer Agent (ATI)
+- **Type:** Expert
 - **Status:** active
-- **Beschreibung:** Spezialisiert auf Tool-Ueberwachung und Software-Entwicklung.
+- **Description:** Specialized in tool monitoring and software development.
 
-### Bueroassistent
-- **Typ:** boss
-- **Kategorie:** beruflich
-- **Beschreibung:** Steuern, Foerderplanung, Dokumentation
+### Office Assistant
+- **Type:** boss
+- **Category:** professional
+- **Description:** Taxes, funding planning, documentation
 
-### Gesundheitsassistent
-- **Typ:** boss
-- **Kategorie:** privat
-- **Beschreibung:** Arztberichte, Medikamente, Laborwerte, Vorsorge
+### Health Assistant
+- **Type:** boss
+- **Category:** personal
+- **Description:** Medical reports, medications, lab results, preventive care
 
-### Persoenlicher Assistent
-- **Typ:** boss
-- **Kategorie:** privat
-- **Beschreibung:** Briefings, Termine, Kalender, Haushalt
+### Personal Assistant
+- **Type:** boss
+- **Category:** personal
+- **Description:** Briefings, appointments, calendar, household
 
 ### Production
-- **Typ:** boss
-- **Kategorie:** kreativ
-- **Beschreibung:** Content-Erstellung und Medienproduktion
+- **Type:** boss
+- **Category:** creative
+- **Description:** Content creation and media production
 
 ---
 
-## Experten
+## Experts
 
-Experten sind spezialisierte Sub-Agenten unter Boss-Agenten.
+Experts are specialized sub-agents under boss agents.
 
-*(Wird automatisch aus bach.db generiert)*
+*(Automatically generated from bach.db)*
 
 ---
 
 <!--
-  HINWEIS: Diese Datei ist ein Template.
-  BACH generiert die vollstaendige Liste automatisch.
+  NOTE: This file is a template.
+  BACH generates the complete list automatically.
 -->
+
+---
+🇩🇪 [Deutsche Version](AGENTS.template.de.md)

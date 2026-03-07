@@ -1,48 +1,51 @@
 # BACH Help Reference
 
-**Generiert:** (automatisch aus bach.db und Dateisystem)
+**Generated:** (automatically from bach.db and filesystem)
 **Generator:** `bach export help-reference`
 
-Dieses Dokument ist die vollstaendige Referenz aller BACH-Befehle, Handler,
-Agents, Experts, Skills und Konfigurationsoptionen.
+This document is the complete reference for all BACH commands, handlers,
+agents, experts, skills, and configuration options.
 
-## Inhalt
+## Contents
 
-1. Schnellstart
-2. CLI-Befehle (bach ...)
-3. Handler-Referenz
+1. Quick Start
+2. CLI Commands (bach ...)
+3. Handler Reference
 4. Agents & Experts
-5. Skills-Katalog
-6. Konfiguration
+5. Skills Catalog
+6. Configuration
 7. Backup & Recovery
-8. Kontakte & Kommunikation
-9. Steuer-Modul
+8. Contacts & Communication
+9. Tax Module
 10. Workflows
 
-## Schnellstart
+## Quick Start
 
 ```bash
-# BACH starten
+# Start BACH
 python system/bach.py
 
-# Hilfe anzeigen
+# Show help
 bach help
 
-# Status pruefen
+# Check status
 bach status
 
-# Backup erstellen
+# Create backup
 bach backup create
 ```
 
-## CLI-Befehle
+## CLI Commands
 
-*(Wird automatisch aus den registrierten Handlern generiert)*
+*(Automatically generated from registered handlers)*
 
 ---
 
 <!--
-  HINWEIS: Diese Datei ist ein Template.
-  Die vollstaendige Referenz (~18.000 Zeilen) wird automatisch generiert.
-  Sie enthaelt user-spezifische Daten und ist daher nicht im Git-Repo.
+  NOTE: This file is a template.
+  The complete reference (~18,000 lines) is automatically generated.
+  It contains user-specific data and is therefore not in the Git repo.
 -->
+
+---
+🇩🇪 [Deutsche Version](BACH_HELP_REFERENCE.template.de.md)
