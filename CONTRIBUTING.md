@@ -3,14 +3,24 @@
 BACH is a personal project by Lukas Geiger. Contributions are welcome
 but there's no guarantee of response time.
 
-## How to contribute
+## Getting Started
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/my-feature`)
-3. Make your changes
-4. Run tests (`bach test` or `python -m pytest`)
-5. Commit with clear message
-6. Open a Pull Request
+2. Clone: `git clone https://github.com/YOUR_USERNAME/bach.git`
+3. Install: `pip install -r requirements.txt`
+4. Initialize: `python system/setup.py`
+
+## How to contribute
+
+1. Create a feature branch (`git checkout -b feature/my-feature`)
+2. Make your changes
+3. Run tests (`bach test` or `python -m pytest`)
+4. Commit with clear message
+5. Open a Pull Request
+
+### Good First Issues
+
+Look for issues labeled [`good first issue`](https://github.com/ellmos-ai/bach/labels/good%20first%20issue) -- these are great starting points for new contributors.
 
 ## Guidelines
 
