@@ -67,7 +67,7 @@ from collections import defaultdict
 if sys.platform == 'win32':
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
-BACH_DB = Path(r"C:\Users\User\OneDrive\KI&AI\BACH_STREAM\PRODUCTION\CONSTRUCTION_AREA\BACH_v1\Bach\bach.db")
+BACH_DB = Path(r"C:\Users\User\OneDrive\.AI\BACH_STREAM\PRODUCTION\CONSTRUCTION_AREA\BACH_v1\Bach\bach.db")
 
 # Heuristische Mapping: Begriff im Dateinamen → Kategorie/Aktion
 DELETE_PATTERNS = {

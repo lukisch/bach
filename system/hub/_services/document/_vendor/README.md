@@ -7,8 +7,8 @@ Diese Dateien leben in BACH und werden hier gepflegt.
 
 | Datei | Quelle | Zweck |
 |-------|--------|-------|
-| `redaction_detector.py` | DokuZentrum (`Software Entwicklung/SUITEN/DokuZentrum/core/redaction/detector.py`) | Regex+Fuzzy+Blacklist Erkennung sensibler Daten |
-| `pdf_schwaerzer_pro.py` | PDFSchwärzer Pro (`Software Entwicklung/TOOLS/Docs/PDFSchwärzer Pro/PDF schwärzer pro V2.py`) | PDF-Schwärzung + AES-256 Encryption (pikepdf) + Format-Konvertierung |
+| `redaction_detector.py` | DokuZentrum (`.SOFTWARE/SUITEN/DokuZentrum/core/redaction/detector.py`) | Regex+Fuzzy+Blacklist Erkennung sensibler Daten |
+| `pdf_schwaerzer_pro.py` | PDFSchwärzer Pro (`.SOFTWARE/TOOLS/Docs/PDFSchwärzer Pro/PDF schwärzer pro V2.py`) | PDF-Schwärzung + AES-256 Encryption (pikepdf) + Format-Konvertierung |
 | `anthropic_docx/` | github.com/anthropics/skills (skills/docx) | XML Pack/Unpack, Validate, Tracked Changes, Comments |
 | `anthropic_pdf/` | github.com/anthropics/skills (skills/pdf) | PDF-Formular-Extraktion, Ausfuellung, Konvertierung |
 | `anthropic_xlsx/` | github.com/anthropics/skills (skills/xlsx) | Excel Recalc, Office XML Pack/Unpack/Validate |

@@ -108,7 +108,7 @@ def get_route(
     try:
         req = urllib.request.Request(
             url,
-            headers={"User-Agent": "BACH-Routing-Service/1.0 (github.com/lukisch/bach)"},
+            headers={"User-Agent": "BACH-Routing-Service/1.0 (github.com/ellmos-ai/bach)"},
         )
         with urllib.request.urlopen(req, timeout=10) as resp:
             data = json.loads(resp.read().decode("utf-8"))
@@ -194,7 +194,7 @@ def geocode_place(place_name: str) -> Optional[Tuple[float, float]]:
     try:
         req = urllib.request.Request(
             url,
-            headers={"User-Agent": "BACH-Routing-Service/1.0 (github.com/lukisch/bach)"},
+            headers={"User-Agent": "BACH-Routing-Service/1.0 (github.com/ellmos-ai/bach)"},
         )
         with urllib.request.urlopen(req, timeout=8) as resp:
             results = json.loads(resp.read().decode("utf-8"))

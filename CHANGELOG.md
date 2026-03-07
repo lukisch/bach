@@ -133,7 +133,7 @@ Copyright (c) 2026 BACH Contributors. Alle Rechte vorbehalten.
 
 ### Breaking Changes
 
-- **MCP-Server aus Repo entfernt:** `system/tools/mcp/bach-codecommander/`, `bach-filecommander/`, `n8n-manager-mcp/` sind nicht mehr im Repo enthalten. Stattdessen: `bach setup mcp` oder `npm install -g bach-codecommander-mcp bach-filecommander-mcp`
+- **MCP-Server aus Repo entfernt:** `system/tools/mcp/bach-codecommander/`, `bach-filecommander/`, `n8n-manager-mcp/` sind nicht mehr im Repo enthalten. Stattdessen: `bach setup mcp` oder `npm install -g ellmos-codecommander-mcp ellmos-filecommander-mcp`
 - **--max-turns entfernt:** Einzel-Sessions haben kein festes Turns-Limit mehr. Loop-Sessions behalten Sicherheitslimits.
 
 ### Neue Handler

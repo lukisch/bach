@@ -12,13 +12,13 @@ Workflow zum Veroeffentlichen der BACH MCP Server auf NPM und GitHub.
 
 PAKETE
 ------
-  bach-filecommander-mcp    39 Tools, Filesystem/Prozesse/Sessions/i18n
-  bach-codecommander-mcp    15 Tools, Code-Analyse/JSON/Encoding/i18n
+  ellmos-filecommander-mcp    39 Tools, Filesystem/Prozesse/Sessions/i18n
+  ellmos-codecommander-mcp    15 Tools, Code-Analyse/JSON/Encoding/i18n
 
 GITHUB REPOS
 -------------
-  https://github.com/lukisch/bach-filecommander-mcp
-  https://github.com/lukisch/bach-codecommander-mcp
+  https://github.com/lukisch/ellmos-filecommander-mcp
+  https://github.com/lukisch/ellmos-codecommander-mcp
 
 NPM AUTHENTIFIZIERUNG
 ----------------------

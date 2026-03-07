@@ -359,7 +359,7 @@ Events: `before_startup`, `after_startup`, `before_shutdown`, `after_shutdown`, 
 | GUI-Framework | PySide6 (geplant) |
 | Datenvalidierung | Pydantic |
 | LLM-SDK | Anthropic SDK (Claude), Google GenAI (Gemini) |
-| MCP | bach-codecommander-mcp, bach-filecommander-mcp (npm) |
+| MCP | ellmos-codecommander-mcp, ellmos-filecommander-mcp (npm) |
 | Pfad-Verwaltung | Pathlib (Cross-Platform), bach_paths.py (Self-Healing) |
 | Parallelisierung | ThreadPoolExecutor (Schwarm-LLM) |
 | OCR | pytesseract + pdf2image |

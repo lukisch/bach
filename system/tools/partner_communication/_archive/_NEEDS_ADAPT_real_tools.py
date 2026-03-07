@@ -12,7 +12,7 @@ from pathlib import Path
 if sys.platform == 'win32':
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
-path = Path(r"C:\Users\User\OneDrive\KI&AI\BACH\main\system\act\communicate\system-explorer\software_registry.json")
+path = Path(r"C:\Users\User\OneDrive\.AI\BACH\main\system\act\communicate\system-explorer\software_registry.json")
 
 with open(path, 'r', encoding='utf-8') as f:
     data = json.load(f)

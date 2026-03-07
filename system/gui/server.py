@@ -10687,7 +10687,7 @@ async def import_profiles_from_universal_mail():
 
         search_paths = [
 
-            Path.home() / "OneDrive" / "Software Entwicklung" / "TOOLS" / "Mail" / "UniversalInvoiceMail",
+            Path.home() / "OneDrive" / ".SOFTWARE" / "TOOLS" / "Mail" / "UniversalInvoiceMail",
 
             BACH_DIR / "tools" / "mail",
 

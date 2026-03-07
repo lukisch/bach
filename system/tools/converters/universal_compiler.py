@@ -63,7 +63,7 @@ if sys.platform == 'win32':
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 
 SCRIPT_DIR = Path(__file__).parent
-BASE_PATH = Path(r"C:\Users\User\OneDrive\Software Entwicklung")
+BASE_PATH = Path(r"C:\Users\User\OneDrive\.SOFTWARE")
 LOG_FILE = SCRIPT_DIR / "_logs" / "compile_log.txt"
 
 # ==================== HELPER ====================

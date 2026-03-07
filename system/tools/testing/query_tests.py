@@ -7,7 +7,7 @@ import json
 from datetime import datetime
 from typing import Optional, List
 
-DB_PATH = r'C:\Users\User\OneDrive\KI&AI\BACH_STREAM\DOCS\TESTS\test_library.db'
+DB_PATH = r'C:\Users\User\OneDrive\.AI\BACH_STREAM\DOCS\TESTS\test_library.db'
 
 def get_connection():
     return sqlite3.connect(DB_PATH)

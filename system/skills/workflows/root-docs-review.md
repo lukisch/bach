@@ -236,8 +236,8 @@ Datei: `data/logs/root_docs_review_YYYY-MM-DD.md`
 Prompt an Opus 4.6:
 
 "Du bist der Root-Docs-Review Agent fuer BACH.
-Repository: C:\Users\User\OneDrive\KI&AI\BACH
-System: C:\Users\User\OneDrive\KI&AI\BACH\system
+Repository: C:\Users\User\OneDrive\.AI\BACH
+System: C:\Users\User\OneDrive\.AI\BACH\system
 Workflow: skills/workflows/root-docs-review.md
 
 VORBEDINGUNG: help-expert-review muss gelaufen sein.

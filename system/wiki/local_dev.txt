@@ -80,7 +80,7 @@ WICHTIG
 ABGRENZUNG
 ----------
   C:\_Local_DEV\          Lokal, kein Sync, temporaer/sensitiv
-  OneDrive\KI&AI\         Cloud-Sync, Hauptarbeitsbereich
+  OneDrive\.AI\         Cloud-Sync, Hauptarbeitsbereich
   G:\                     Google Drive (Partner-Sync)
   NAS (\\nas\)            Langzeit-Archiv, Backup-Ziel
 

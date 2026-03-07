@@ -25,11 +25,11 @@ from typing import List, Dict, Any
 
 # Bekannte Systeme (gleich wie run_external.py)
 KNOWN_SYSTEMS = {
-    "recludOS": r"C:\Users\User\OneDrive\KI&AI\recludOS",
-    "BACH": r"C:\Users\User\OneDrive\KI&AI\BACH",
-    "_BATCH": r"C:\Users\User\OneDrive\Software Entwicklung\_BATCH",
-    "_CHIAH": r"C:\Users\User\OneDrive\Software Entwicklung\_CHIAH",
-    "universal-llm-os-v2": r"C:\Users\User\OneDrive\KI&AI\Templates\OS\universal-llm-os-v2",
+    "recludOS": r"C:\Users\User\OneDrive\.AI\recludOS",
+    "BACH": r"C:\Users\User\OneDrive\.AI\BACH",
+    "_BATCH": r"C:\Users\User\OneDrive\.SOFTWARE\_BATCH",
+    "_CHIAH": r"C:\Users\User\OneDrive\.SOFTWARE\_CHIAH",
+    "universal-llm-os-v2": r"C:\Users\User\OneDrive\.AI\Templates\OS\universal-llm-os-v2",
 }
 
 

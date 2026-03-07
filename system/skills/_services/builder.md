@@ -565,10 +565,10 @@ python skills/tools/testing/run_external.py "C:\Projekte\BACH_v2"
 
 ```python
 KNOWN_SYSTEMS = {
-    "recludOS": "C:\...\KI&AI\recludOS",
-    "BACH": "C:\...\KI&AI\BACH",
-    "_BATCH": "C:\...\Software Entwicklung\_BATCH",
-    "_CHIAH": "C:\...\Software Entwicklung\_CHIAH",
+    "recludOS": "C:\...\.AI\recludOS",
+    "BACH": "C:\...\.AI\BACH",
+    "_BATCH": "C:\...\.SOFTWARE\_BATCH",
+    "_CHIAH": "C:\...\.SOFTWARE\_CHIAH",
     "universal-llm-os-v2": "C:\...\Templates\OS\universal-llm-os-v2",
 }
 ```

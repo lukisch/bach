@@ -555,9 +555,9 @@ class AccountManager:
         # === 3. Rekursive Suche in wichtigen Verzeichnissen ===
         recursive_search_dirs = [
             # OneDrive-Ordner
-            user_home / "OneDrive" / "Software Entwicklung" / "TOOLS",
-            user_home / "OneDrive" / "Software Entwicklung",
-            user_home / "OneDrive" / "KI&AI",
+            user_home / "OneDrive" / ".SOFTWARE" / "TOOLS",
+            user_home / "OneDrive" / ".SOFTWARE",
+            user_home / "OneDrive" / ".AI",
             user_home / "OneDrive",
 
             # Standard Windows-Ordner

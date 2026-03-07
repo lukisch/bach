@@ -149,10 +149,10 @@ Die BACH-spezifischen nutzen BACHs eigene Infrastruktur.
     Methode:    Gemeinsamer MCP-Server den mehrere LLM-Instanzen nutzen
     Richtung:   Bidirektional (alle Instanzen rufen gleichen Server auf)
     Latenz:     Sofort (Tool-Call)
-    Beispiel:   bach-codecommander-mcp als Shared-Service fuer alle Claude-Instanzen
+    Beispiel:   ellmos-codecommander-mcp als Shared-Service fuer alle Claude-Instanzen
     Staerke:    Standardisiert (MCP-Protokoll), tool-basiert, erweiterbar
     Schwaeche:  Server muss laufen, kein Push-Mechanismus
-    BACH:       bach-codecommander-mcp (14 Tools), bach-filecommander-mcp (38 Tools)
+    BACH:       ellmos-codecommander-mcp (14 Tools), ellmos-filecommander-mcp (38 Tools)
 
 13. PROCESS-CHAINING (.bat als Signal)
 ----------------------------------------

@@ -5,8 +5,8 @@ BACH_STREAM Test Library - Database Population
 import sqlite3
 import json
 
-DB_PATH = r'C:\Users\User\OneDrive\KI&AI\BACH_STREAM\DOCS\TESTS\test_library.db'
-SCHEMA_PATH = r'C:\Users\User\OneDrive\KI&AI\BACH_STREAM\DOCS\TESTS\test_schema.sql'
+DB_PATH = r'C:\Users\User\OneDrive\.AI\BACH_STREAM\DOCS\TESTS\test_library.db'
+SCHEMA_PATH = r'C:\Users\User\OneDrive\.AI\BACH_STREAM\DOCS\TESTS\test_schema.sql'
 
 # Schema laden und ausfuehren
 conn = sqlite3.connect(DB_PATH)

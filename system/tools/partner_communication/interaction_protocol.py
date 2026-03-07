@@ -280,10 +280,10 @@ class InteractionProtocol:
         if sys.platform == 'win32':
             # Standard BACH-Orte auf Windows
             paths = [
-                r"C:\Users\User\OneDrive\KI&AI",
+                r"C:\Users\User\OneDrive\.AI",
                 r"C:\DEV_local",
-                r"D:\KI&AI",
-                r"E:\KI&AI"
+                r"D:\.AI",
+                r"E:\.AI"
             ]
         else:
             paths = ["/home", "/mnt", "/opt/bach", "~"]

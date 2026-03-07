@@ -129,7 +129,7 @@ def get_weather(lat: float, lon: float, lang: str = "de") -> Optional[dict]:
         try:
             req = urllib.request.Request(
                 url,
-                headers={"User-Agent": "BACH-Weather-Service/1.0 (github.com/lukisch/bach)"},
+                headers={"User-Agent": "BACH-Weather-Service/1.0 (github.com/ellmos-ai/bach)"},
             )
             with urllib.request.urlopen(req, timeout=12) as resp:
                 data = json.loads(resp.read().decode("utf-8"))

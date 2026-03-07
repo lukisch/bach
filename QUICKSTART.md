@@ -8,7 +8,7 @@
 
 ```bash
 # Clone repository
-git clone https://github.com/lukisch/bach.git
+git clone https://github.com/ellmos-ai/bach.git
 cd bach
 
 # Install dependencies

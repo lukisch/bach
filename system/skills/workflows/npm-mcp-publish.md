@@ -1,7 +1,7 @@
 # MCP Server Release Protokoll (NPM + GitHub)
 
 > **Ziel:** Strukturierter Ablauf fuer das Veroeffentlichen von BACH MCP Servern auf GitHub und NPM.
-> Gilt fuer: bach-filecommander-mcp, bach-codecommander-mcp
+> Gilt fuer: ellmos-filecommander-mcp, ellmos-codecommander-mcp
 
 ---
 
@@ -67,16 +67,16 @@ Checkliste fuer jedes Release:
 
 ## Phase 3: Build
 
-**WICHTIG - Bekanntes Problem:** Das `&` im Pfad `KI&AI` stoert `npm run build`.
+**WICHTIG - Bekanntes Problem:** Das `&` im Pfad `.AI` stoert `npm run build`.
 
 **Workaround:** TypeScript direkt ueber Node aufrufen:
 
 ```bash
 # FileCommander
-node "C:\Users\User\OneDrive\KI&AI\MCP\recludos-filecommander-mcp\node_modules\typescript\bin\tsc" --project "C:\Users\User\OneDrive\KI&AI\MCP\recludos-filecommander-mcp\tsconfig.json"
+node "C:\Users\User\OneDrive\.AI\MCP\recludos-filecommander-mcp\node_modules\typescript\bin\tsc" --project "C:\Users\User\OneDrive\.AI\MCP\recludos-filecommander-mcp\tsconfig.json"
 
 # CodeCommander
-node "C:\Users\User\OneDrive\KI&AI\MCP\bach-codecommander-mcp\node_modules\typescript\bin\tsc" --project "C:\Users\User\OneDrive\KI&AI\MCP\bach-codecommander-mcp\tsconfig.json"
+node "C:\Users\User\OneDrive\.AI\MCP\ellmos-codecommander-mcp\node_modules\typescript\bin\tsc" --project "C:\Users\User\OneDrive\.AI\MCP\ellmos-codecommander-mcp\tsconfig.json"
 ```
 
 Build ist erfolgreich wenn keine Ausgabe kommt (kein Output = kein Error).
@@ -153,16 +153,16 @@ npm publish --ignore-scripts
 ### Warum --ignore-scripts?
 
 Das `prepublishOnly` Script in package.json ruft `npm run build` auf,
-was wegen des `&` im Pfad `KI&AI` fehlschlaegt. Da der Build bereits
+was wegen des `&` im Pfad `.AI` fehlschlaegt. Da der Build bereits
 manuell in Phase 3 erledigt wurde, wird er hier uebersprungen.
 
 ### Beide Server nacheinander
 
 ```bash
-cd "C:\Users\User\OneDrive\KI&AI\MCP\bach-filecommander-mcp"
+cd "C:\Users\User\OneDrive\.AI\MCP\ellmos-filecommander-mcp"
 npm publish --ignore-scripts
 
-cd "C:\Users\User\OneDrive\KI&AI\MCP\bach-codecommander-mcp"
+cd "C:\Users\User\OneDrive\.AI\MCP\ellmos-codecommander-mcp"
 npm publish --ignore-scripts
 ```
 
@@ -177,14 +177,14 @@ npm publish --ignore-scripts
 npm whoami    # -> "lukisch"
 
 # === FileCommander ===
-node "C:\Users\User\OneDrive\KI&AI\MCP\bach-filecommander-mcp\node_modules\typescript\bin\tsc" --project "C:\Users\User\OneDrive\KI&AI\MCP\bach-filecommander-mcp\tsconfig.json"
-cd "C:\Users\User\OneDrive\KI&AI\MCP\bach-filecommander-mcp"
+node "C:\Users\User\OneDrive\.AI\MCP\ellmos-filecommander-mcp\node_modules\typescript\bin\tsc" --project "C:\Users\User\OneDrive\.AI\MCP\ellmos-filecommander-mcp\tsconfig.json"
+cd "C:\Users\User\OneDrive\.AI\MCP\ellmos-filecommander-mcp"
 git add -A && git commit -m "release: vX.Y.Z" && git tag vX.Y.Z && git push origin master --tags
 npm publish --ignore-scripts
 
 # === CodeCommander ===
-node "C:\Users\User\OneDrive\KI&AI\MCP\bach-codecommander-mcp\node_modules\typescript\bin\tsc" --project "C:\Users\User\OneDrive\KI&AI\MCP\bach-codecommander-mcp\tsconfig.json"
-cd "C:\Users\User\OneDrive\KI&AI\MCP\bach-codecommander-mcp"
+node "C:\Users\User\OneDrive\.AI\MCP\ellmos-codecommander-mcp\node_modules\typescript\bin\tsc" --project "C:\Users\User\OneDrive\.AI\MCP\ellmos-codecommander-mcp\tsconfig.json"
+cd "C:\Users\User\OneDrive\.AI\MCP\ellmos-codecommander-mcp"
 git add -A && git commit -m "release: vX.Y.Z" && git tag vX.Y.Z && git push origin master --tags
 npm publish --ignore-scripts
 ```

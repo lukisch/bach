@@ -678,7 +678,7 @@ class DocsHandler(BaseHandler):
 
 ```bash
 # {s['clone_repo']}
-git clone https://github.com/lukisch/bach.git
+git clone https://github.com/ellmos-ai/bach.git
 cd bach
 
 # {s['install_deps']}
@@ -734,8 +734,8 @@ python bach.py --shutdown
 
 ## {s['support_title']}
 
-- **Issues:** [GitHub Issues](https://github.com/lukisch/bach/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/lukisch/bach/discussions)
+- **Issues:** [GitHub Issues](https://github.com/ellmos-ai/bach/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/ellmos-ai/bach/discussions)
 
 ---
 
@@ -1219,7 +1219,7 @@ python bach.py db info dist_file_versions
 
 ```bash
 # Repository klonen
-git clone https://github.com/lukisch/bach.git
+git clone https://github.com/ellmos-ai/bach.git
 cd bach
 
 # Abhaengigkeiten installieren
@@ -1292,7 +1292,7 @@ python bach.py --shutdown
 
 ```bash
 # Clone repository
-git clone https://github.com/lukisch/bach.git
+git clone https://github.com/ellmos-ai/bach.git
 cd bach
 
 # Install dependencies

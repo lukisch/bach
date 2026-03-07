@@ -101,7 +101,7 @@ mein-mcp/
 
 **Multi-Domain Server**
 - Ein MCP-Server kann mehrere Domains bedienen
-- Beispiel: bach-codecommander-mcp hat Code + JSON + Encoding-Tools
+- Beispiel: ellmos-codecommander-mcp hat Code + JSON + Encoding-Tools
 - Vorteil: Zentrale Abhängigkeitsverwaltung
 
 **Decorator-Pattern für Middleware**

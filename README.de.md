@@ -20,7 +20,7 @@ BACH ist ein textbasiertes Betriebssystem, das Large Language Models (LLMs) befa
 
 ```bash
 # Repository klonen
-git clone https://github.com/lukisch/bach.git
+git clone https://github.com/ellmos-ai/bach.git
 cd bach
 
 # Abhaengigkeiten installieren
@@ -76,8 +76,8 @@ MIT License - siehe [LICENSE](LICENSE) fuer Details.
 
 ## Support
 
-- **Issues:** [GitHub Issues](https://github.com/lukisch/bach/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/lukisch/bach/discussions)
+- **Issues:** [GitHub Issues](https://github.com/ellmos-ai/bach/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/ellmos-ai/bach/discussions)
 
 ---
 

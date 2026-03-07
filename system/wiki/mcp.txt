@@ -24,8 +24,8 @@ MCP basiert auf einer Client-Server-Architektur:
     Beispiele:
     - `sqlite-mcp`: Zugriff auf SQLite-Datenbanken
     - `github-mcp`: Zugriff auf GitHub Repositories
-    - `bach-codecommander-mcp`: 14 Tools fuer Code-Analyse (BACH-eigen)
-    - `bach-filecommander-mcp`: 38 Tools fuer Filesystem-Ops (BACH-eigen)
+    - `ellmos-codecommander-mcp`: 14 Tools fuer Code-Analyse (BACH-eigen)
+    - `ellmos-filecommander-mcp`: 38 Tools fuer Filesystem-Ops (BACH-eigen)
 
 3.  **Ressourcen & Tools**
     Der Server stellt bereit:
@@ -41,16 +41,16 @@ VORTEILE
 
 BACH MCP-SERVER (AKTIV)
 -----------------------
-Eigene MCP-Server unter: C:\Users\User\OneDrive\KI&AI\MCP\
+Eigene MCP-Server unter: C:\Users\User\OneDrive\.AI\MCP\
 
-  bach-codecommander-mcp  v1.0.1  14 Tools: Code-Analyse, JSON-Repair, Encoding-Fix,
+  ellmos-codecommander-mcp  v1.0.1  14 Tools: Code-Analyse, JSON-Repair, Encoding-Fix,
                                   Import-Organizer, Format-Konvertierung
-                                  GitHub: github.com/lukisch/bach-codecommander-mcp
+                                  GitHub: github.com/lukisch/ellmos-codecommander-mcp
 
-  bach-filecommander-mcp  v1.4.1  38 Tools: Filesystem-Ops, Prozess-Management,
+  ellmos-filecommander-mcp  v1.4.1  38 Tools: Filesystem-Ops, Prozess-Management,
                                   interaktive Sessions, Dateisuche, Duplikat-Erkennung,
                                   Markdown-Export
-                                  GitHub: github.com/lukisch/bach-filecommander-mcp
+                                  GitHub: github.com/lukisch/ellmos-filecommander-mcp
 
 Konfiguration Claude Desktop:
   C:\Users\User\AppData\Roaming\Claude\claude_desktop_config.json
@@ -160,7 +160,7 @@ Ein dedizierter `bach-mcp` Server koennte Antigravity (und Claude) direkten Zugr
 - `bach:/config`: Systemkonfiguration
 
 Dies wuerde die Datei-basierte Kommunikation (via `.md` Dateien) durch direkte API-Aufrufe ersetzen.
-Hinweis: bach-codecommander-mcp und bach-filecommander-mcp sind bereits realisiert (s.o.).
+Hinweis: ellmos-codecommander-mcp und ellmos-filecommander-mcp sind bereits realisiert (s.o.).
 
 SIEHE AUCH
 ----------

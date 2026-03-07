@@ -102,8 +102,8 @@ class SetupHandler(BaseHandler):
 
         # 2. MCP-Server installieren
         packages = [
-            "bach-codecommander-mcp",
-            "bach-filecommander-mcp",
+            "ellmos-codecommander-mcp",
+            "ellmos-filecommander-mcp",
         ]
 
         results.append("=== MCP-Server Installation ===\n")
@@ -164,8 +164,8 @@ class SetupHandler(BaseHandler):
                 return (
                     "  Claude Code Config nicht gefunden.\n"
                     "  Manuell konfigurieren mit:\n"
-                    "    claude mcp add --scope user bach-codecommander -- npx bach-codecommander-mcp\n"
-                    "    claude mcp add --scope user bach-filecommander -- npx bach-filecommander-mcp"
+                    "    claude mcp add --scope user bach-codecommander -- npx ellmos-codecommander-mcp\n"
+                    "    claude mcp add --scope user bach-filecommander -- npx ellmos-filecommander-mcp"
                 )
 
         if dry_run:
@@ -184,11 +184,11 @@ class SetupHandler(BaseHandler):
         server_configs = {
             "bach-codecommander": {
                 "command": "npx",
-                "args": ["bach-codecommander-mcp"]
+                "args": ["ellmos-codecommander-mcp"]
             },
             "bach-filecommander": {
                 "command": "npx",
-                "args": ["bach-filecommander-mcp"]
+                "args": ["ellmos-filecommander-mcp"]
             },
         }
 
@@ -222,7 +222,7 @@ class SetupHandler(BaseHandler):
             all_ok = False
 
         # 2. MCP-Server
-        for pkg in ["bach-codecommander-mcp", "bach-filecommander-mcp"]:
+        for pkg in ["ellmos-codecommander-mcp", "ellmos-filecommander-mcp"]:
             try:
                 proc = subprocess.run(
                     ["npm", "list", "-g", pkg, "--depth=0"],
