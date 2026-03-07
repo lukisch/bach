@@ -40,7 +40,7 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/lukisch/bach.git
+git clone https://github.com/ellmos-ai/bach.git
 cd bach
 
 # Install dependencies
@@ -59,11 +59,11 @@ BACH provides two MCP servers for integration with Claude Code, Cursor, and othe
 python system/bach.py setup mcp
 
 # Or manually via npm:
-npm install -g bach-codecommander-mcp bach-filecommander-mcp
+npm install -g ellmos-codecommander-mcp ellmos-filecommander-mcp
 ```
 
-- **[bach-codecommander-mcp](https://www.npmjs.com/package/bach-codecommander-mcp)** - Code analysis and refactoring tools
-- **[bach-filecommander-mcp](https://www.npmjs.com/package/bach-filecommander-mcp)** - File management and batch operations
+- **[ellmos-codecommander-mcp](https://www.npmjs.com/package/ellmos-codecommander-mcp)** - Code analysis and refactoring tools
+- **[ellmos-filecommander-mcp](https://www.npmjs.com/package/ellmos-filecommander-mcp)** - File management and batch operations
 
 ## Quick Start
 
@@ -126,9 +126,9 @@ All ellmos projects follow a water metaphor -- from a spring to a full stream:
 
 | Tier | Project | Description | Repository |
 |------|---------|-------------|------------|
-| 1 | **USMC** | United Shared Memory Client -- the spring (shared memory only) | [github.com/lukisch/usmc](https://github.com/lukisch/usmc) |
-| 2 | **Rinnsal** | The trickle -- USMC + llmauto (LLM orchestration), extremely compact | [github.com/lukisch/rinnsal](https://github.com/lukisch/rinnsal) |
-| 3 | **BACH** | The stream that unites everything -- 109+ handlers, 932+ skills, agents, GUI, bridge | [github.com/lukisch/bach](https://github.com/lukisch/bach) |
+| 1 | **USMC** | United Shared Memory Client -- the spring (shared memory only) | [github.com/ellmos-ai/usmc](https://github.com/ellmos-ai/usmc) |
+| 2 | **Rinnsal** | The trickle -- USMC + llmauto (LLM orchestration), extremely compact | [github.com/ellmos-ai/rinnsal](https://github.com/ellmos-ai/rinnsal) |
+| 3 | **BACH** | The stream that unites everything -- 109+ handlers, 932+ skills, agents, GUI, bridge | [github.com/ellmos-ai/bach](https://github.com/ellmos-ai/bach) |
 
 ## Documentation
 
@@ -139,14 +139,32 @@ All ellmos projects follow a water metaphor -- from a spring to a full stream:
 - **[Workflows](WORKFLOWS.md)** - 54 protocol workflows
 - **[SKILL.md](SKILL.md)** - LLM operating instructions (for Claude, Gemini, Ollama)
 
+## See Also: OpenClaw
+
+How does BACH compare to [OpenClaw](https://github.com/openclaw/openclaw), the popular open-source AI assistant (274K+ stars)?
+
+| | **BACH** | **OpenClaw** |
+|---|---|---|
+| **Focus** | LLM Operating System -- deep autonomy, structured memory, multi-agent orchestration | Personal AI Assistant -- broad messaging gateway, voice, companion apps |
+| **Tools/Skills** | 373+ tools, 932+ skills, 54 workflows (local, curated) | Community-driven skill marketplace (ClawhHub, 2.2K+ skills) |
+| **Memory** | 5 memory types with decay, conflict detection, consolidation (145+ DB tables) | Session-based with `/compact`, workspace files |
+| **Agents** | Boss-Expert orchestration (5 boss agents), SharedMemory Bus | Single-agent with multi-session management |
+| **Messaging** | Telegram, Email, WhatsApp (Bridge System) | 20+ platforms (WhatsApp, Telegram, Slack, Discord, Signal, Teams, Matrix...) |
+| **Interfaces** | CLI, Python API, PySide6 GUI, Web GUI | CLI, WebChat, macOS/iOS/Android apps, Voice |
+| **MCP** | Own MCP servers (FileCommander, CodeCommander) | Native MCP Registry |
+| **Stack** | Python 3.10+, SQLite | TypeScript, Node.js 22+ |
+| **License** | MIT | MIT |
+
+**In short:** BACH goes deep (structured memory, autonomous agents, scheduler, 145+ DB tables). OpenClaw goes wide (20+ messengers, native apps, voice, massive community). Different philosophies, complementary strengths.
+
 ## License
 
 MIT License - see [LICENSE](LICENSE) for details.
 
 ## Support
 
-- **Issues:** [GitHub Issues](https://github.com/lukisch/bach/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/lukisch/bach/discussions)
+- **Issues:** [GitHub Issues](https://github.com/ellmos-ai/bach/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/ellmos-ai/bach/discussions)
 
 ---
 
