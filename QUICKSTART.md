@@ -1,6 +1,6 @@
 # BACH Quickstart Guide
 
-**Version:** v3.1.6
+**Version:** v3.8.0-sugar
 
 ## Your First BACH Workflow in 5 Minutes
 

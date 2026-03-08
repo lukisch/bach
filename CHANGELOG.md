@@ -8,6 +8,10 @@ Copyright (c) 2026 BACH Contributors. Alle Rechte vorbehalten.
 
 ## [Unreleased]
 
+---
+
+## [3.8.0-sugar] - 2026-03-08
+
 ### Neu
 
 - **ClaudePermissionsHandler** (`hub/claude_permissions.py`): Permission-Profile fuer Claude Code
@@ -21,13 +25,36 @@ Copyright (c) 2026 BACH Contributors. Alle Rechte vorbehalten.
   - atexit-Handler als Fallback bei Ctrl+C
   - Desktop-Shortcut: `Claude_RemoteControl.bat`
   - BACH Boot Menu: Taste [P] unter CLAUDE SPEZIAL
+- **Schwarm-Handler** (`hub/schwarm.py`): CLI-Integration fuer Schwarm-Operationen (SQ016)
+  - Befehl: `bach schwarm`
+  - Operationen: list, run, translate, summarize, benchmark, status
+  - 4 Schwarm-Muster: Epstein (Parallel), Hierarchie (Boss+Worker), Stigmergy (Pheromon), Konsensus (Mehrheit)
+  - Automatisches Muster-Routing via Entscheidungsbaum
+- **Konsensus-Schwarm** (`tools/schwarm/consensus.py`): Muster 4 -- Mehrheitsentscheid
+  - Mehrere LLM-Runs beantworten dieselbe Frage, Konsens wird ermittelt
+  - Konfigurierbar: Anzahl Voter, Modell, Similarity-Threshold
+- **Kosten-Tracking**: Token-Zaehler pro Schwarm-Run in DB (`schwarm_runs` Tabelle)
+- **Schwarm-Tools portiert** aus BACH_Dev nach system/tools/schwarm/:
+  - translate_swarm.py, summarize_chunks.py, runner.py, benchmark.py
+- **5 neue Therapie-Skills** (B30/SQ046 Phase 1):
+  - Systemische Fragetechniken (Zirkulaere Fragen, Skalierung, Wunderfrage)
+  - Problemloese-Training (6-Schritte-Modell)
+  - Gewaltfreie Kommunikation (GFK nach Rosenberg, 4 Schritte)
+  - Motivierende Gespraechsfuehrung (OARS-Techniken, Prochaska)
+  - Verhaltensaktivierung (Aktivitaetenplanung, Stimmungs-Tagebuch)
+
+### Schema
+
+- **Migration 033:** `schwarm_runs` Tabelle fuer Schwarm-Kosten-Tracking (pattern, tokens, cost, duration)
 
 ### Dokumentation
 
+- **schwarm.txt:** Neue Help-Datei fuer Schwarm-CLI und Muster-Uebersicht
 - **permissions.txt:** Neue Help-Datei fuer Permission-Profile und Remote Control Workflow
 - **claude-code.txt:** BACH Permission-Profile Verweis ergaenzt
 - **claude-code-automatisierung.txt:** Abschnitt 11 "Remote Control" hinzugefuegt
 - **settings.txt:** Verweis auf claude_permissions Kategorie und permissions.txt
+- **Version Bump:** Alle Root-Dokumente auf v3.8.0-sugar aktualisiert
 
 ---
 

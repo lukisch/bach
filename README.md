@@ -10,10 +10,10 @@
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python)
 ![License](https://img.shields.io/badge/License-MIT-green)
-![Version](https://img.shields.io/badge/Version-v3.7.1--tower--of--babel-orange)
+![Version](https://img.shields.io/badge/Version-v3.8.0--sugar--of--babel-orange)
 ![Status](https://img.shields.io/badge/Status-Production--Ready-brightgreen)
 
-**Version:** v3.7.1-tower-of-babel
+**Version:** v3.8.0-sugar-of-babel
 
 <p align="center">
   <img src="overview.jpg" alt="BACH Overview" width="700">
