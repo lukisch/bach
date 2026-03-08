@@ -8,6 +8,24 @@ Copyright (c) 2026 BACH Contributors. Alle Rechte vorbehalten.
 
 ## [Unreleased]
 
+### Neu
+
+- **Schwarm-Muster komplett** (SQ016): Alle 5 Muster aktiv
+  - Hierarchie-Muster (`tools/schwarm/hierarchy.py`): Boss-Worker-Aggregator
+  - Stigmergy-Muster (`tools/schwarm/stigmergy_pattern.py`): Pheromon-Koordination
+  - Spezialist-Muster (`tools/schwarm/specialist.py`): Auto-Routing an Boss-Agenten
+  - 3 neue CLI-Operationen: `bach schwarm hierarchy/stigmergy/specialist`
+- **5 neue Therapie-Skills** (B30/SQ046 Phase 2):
+  - ACT-Techniken (Hexaflex, Defusion, Akzeptanz)
+  - DBT-Fertigkeiten (TIPP, DEAR MAN, 4 Module)
+  - Stabilisierungstechniken (5-4-3-2-1 Grounding, Box-Breathing)
+  - Trauma-Psychoedukation (Window of Tolerance, nur Aufklaerung)
+  - Expositionsbegleitung (SUDs-Skala, nur Planung)
+
+### Bugfix
+
+- **agent_launcher.py:** Windows cp1252 Encoding-Fix bei tasklist-Subprocess (0x81 Umlaut-Crash)
+
 ---
 
 ## [3.8.0-sugar] - 2026-03-08
