@@ -164,7 +164,7 @@ class AgentsHandler(BaseHandler):
             "info": t("agents_info_desc", default="Agenten-Details anzeigen"),
             "active": t("agents_active_desc", default="Nur aktive Agenten"),
             "sync": t("agents_sync_desc", default="Neue Filesystem-Experten automatisch in DB eintragen"),
-            "rename": "Display-Name aendern (--agents rename <name> <neuer-name>)",
+            "rename": t("agents_rename_desc", default="Display-Name aendern (--agents rename <name> <neuer-name>)"),
         }
 
     def handle(self, operation: str, args: list, dry_run: bool = False) -> tuple:
@@ -175,7 +175,7 @@ class AgentsHandler(BaseHandler):
             return self._info(args[0])
         elif operation == "rename" and args:
             if len(args) < 2:
-                return False, "[ERROR] Syntax: --agents rename <name> <neuer-display-name>"
+                return False, t("agents_rename_syntax_error", default="[ERROR] Syntax: --agents rename <name> <neuer-display-name>")
             return self._rename(args[0], " ".join(args[1:]))
         elif operation == "active":
             return self._list(active_only=True)
@@ -415,14 +415,14 @@ class AgentsHandler(BaseHandler):
         # Validierung
         new_display_name = new_display_name.strip()
         if not new_display_name:
-            return False, "[ERROR] Display-Name darf nicht leer sein."
+            return False, t("display_name_empty", default="[ERROR] Display-Name darf nicht leer sein.")
         if len(new_display_name) > 30:
-            return False, f"[ERROR] Display-Name zu lang ({len(new_display_name)} Zeichen, max 30)."
+            return False, f"{t('display_name_too_long', default='[ERROR] Display-Name zu lang')} ({len(new_display_name)}/30)."
 
         # Agent/Experte finden
         resolved = resolve_agent_name(self.db_path, query)
         if not resolved:
-            return False, f"[ERROR] Agent/Experte '{query}' nicht gefunden."
+            return False, f"[ERROR] {t('not_found', default='nicht gefunden')}: {query}"
 
         table = resolved['source_table']
         name = resolved['name']
@@ -439,13 +439,13 @@ class AgentsHandler(BaseHandler):
             conn.commit()
             conn.close()
         except Exception as e:
-            return False, f"[ERROR] DB-Update fehlgeschlagen: {e}"
+            return False, f"[ERROR] {t('db_update_failed', default='DB-Update fehlgeschlagen')}: {e}"
 
         return True, (
-            f"[OK] Display-Name geaendert\n"
+            f"{t('display_name_changed', default='[OK] Display-Name geaendert')}\n"
             f"  Agent:  {name}\n"
-            f"  Vorher: {old_display}\n"
-            f"  Jetzt:  {new_display_name}"
+            f"  {t('previous_label', default='Vorher')}: {old_display}\n"
+            f"  {t('now_label', default='Jetzt')}:  {new_display_name}"
         )
 
     def _parse_concept(self, concept_file: Path) -> dict:
@@ -594,17 +594,17 @@ class AgentsHandler(BaseHandler):
 
                 results = [header, "=" * 40]
                 results.append(f"ID:            {row['id']}")
-                results.append(f"Display-Name:  {display}")
+                results.append(f"{t('display_name_label', default='Display-Name')}:  {display}")
                 results.append(f"{t('active', default='Aktiv')}:         {_yes if row['is_active'] else _no}")
                 row_keys = row.keys()
                 desc = row['description'] if 'description' in row_keys else '-'
                 results.append(f"{t('description_label', default='Beschreibung')}:  {desc or '-'}")
                 if persona:
-                    results.append(f"Persona:       {persona}")
+                    results.append(f"{t('persona_label', default='Persona')}:       {persona}")
                 if 'domain' in row_keys:
                     results.append(f"Domain:        {row['domain'] or '-'}")
                 if 'skill_path' in row_keys:
-                    results.append(f"Skill-Pfad:    {row['skill_path'] or '-'}")
+                    results.append(f"{t('skill_path_label', default='Skill-Pfad')}:    {row['skill_path'] or '-'}")
 
                 conn.close()
                 return True, "\n".join(results)

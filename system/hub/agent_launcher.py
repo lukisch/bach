@@ -21,6 +21,7 @@ import sqlite3
 from pathlib import Path
 from datetime import datetime
 from .base import BaseHandler
+from .lang import t
 
 
 class AgentLauncherHandler(BaseHandler):
@@ -44,11 +45,11 @@ class AgentLauncherHandler(BaseHandler):
 
     def get_operations(self) -> dict:
         return {
-            "list": "Verfuegbare Agents auflisten",
-            "start": "Agent starten (bach agent start <name>)",
-            "stop": "Agent stoppen (bach agent stop <name>)",
-            "status": "Laufende Agents anzeigen",
-            "rename": "Display-Name aendern (bach agent rename <name> <neuer-name>)"
+            "list": t("agent_list_desc", default="Verfuegbare Agents auflisten"),
+            "start": t("agent_start_desc", default="Agent starten (bach agent start <name>)"),
+            "stop": t("agent_stop_desc", default="Agent stoppen (bach agent stop <name>)"),
+            "status": t("agent_status_desc", default="Laufende Agents anzeigen"),
+            "rename": t("agent_rename_desc", default="Display-Name aendern (bach agent rename <name> <neuer-name>)")
         }
 
     def handle(self, operation: str, args: list, dry_run: bool = False) -> tuple:
@@ -56,18 +57,18 @@ class AgentLauncherHandler(BaseHandler):
             return self._list_agents()
         elif operation == "start":
             if not args:
-                return (False, "[ERROR] Agent-Name erforderlich: bach agent start <name>")
+                return (False, f"[ERROR] {t('agent_name_required', default='Agent-Name erforderlich')}: bach agent start <name>")
             name = args[0]
             return self._start_agent(name, args[1:], dry_run)
         elif operation == "stop":
             if not args:
-                return (False, "[ERROR] Agent-Name erforderlich: bach agent stop <name>")
+                return (False, f"[ERROR] {t('agent_name_required', default='Agent-Name erforderlich')}: bach agent stop <name>")
             return self._stop_agent(args[0], dry_run)
         elif operation == "status":
             return self._show_status()
         elif operation == "rename":
             if len(args) < 2:
-                return (False, "[ERROR] Syntax: bach agent rename <name> <neuer-display-name>")
+                return (False, t("agent_rename_syntax", default="[ERROR] Syntax: bach agent rename <name> <neuer-display-name>"))
             return self._rename_agent(args[0], ' '.join(args[1:]), dry_run)
         else:
             return self._list_agents()
@@ -144,7 +145,7 @@ class AgentLauncherHandler(BaseHandler):
         agents = self._scan_agents()
 
         if not agents:
-            return (True, "Keine Agents mit SKILL.md gefunden.")
+            return (True, t("no_agents_found", default="Keine Agents mit SKILL.md gefunden."))
 
         output = [
             "=== VERFUEGBARE AGENTS ===",
@@ -160,10 +161,11 @@ class AgentLauncherHandler(BaseHandler):
 
         output.extend([
             "",
-            "--- Befehle ---",
-            "bach agent start <name>    Agent starten",
-            "bach agent stop <name>     Agent stoppen",
-            "bach agent status          Laufende Agents"
+            f"--- {t('commands_label', default='Befehle')} ---",
+            "bach agent start <name>    " + t("agent_start_desc", default="Agent starten"),
+            "bach agent stop <name>     " + t("agent_stop_desc", default="Agent stoppen"),
+            "bach agent status          " + t("agent_status_desc", default="Laufende Agents anzeigen"),
+            "bach agent rename <n> <n>  " + t("agent_rename_desc", default="Display-Name aendern")
         ])
 
         return (True, "\n".join(output))
@@ -241,20 +243,20 @@ class AgentLauncherHandler(BaseHandler):
                 break
 
         if not agent:
-            return (False, f"[ERROR] Agent '{name}' nicht gefunden oder hat keine SKILL.md")
+            return (False, f"[ERROR] Agent '{name}' {t('agent_not_found', default='nicht gefunden oder hat keine SKILL.md')}")
 
         # Bereits laufend?
         pid = self._is_agent_running(resolved_name)
         if pid:
-            return (False, f"[WARN] Agent '{resolved_name}' laeuft bereits (PID {pid})")
+            return (False, f"[WARN] Agent '{resolved_name}' {t('agent_already_running', default='laeuft bereits')} (PID {pid})")
 
         mode = self._parse_flag(args, "--mode", "default")
         model = self._parse_flag(args, "--model", "sonnet")
 
         if mode not in ("plan", "default"):
-            return (False, f"[ERROR] Ungueltiger Modus: {mode} (erlaubt: plan, default)")
+            return (False, f"[ERROR] {t('agent_invalid_mode', default='Ungueltiger Modus')}: {mode} (plan, default)")
         if model not in ("sonnet", "opus", "haiku"):
-            return (False, f"[ERROR] Ungueltiges Modell: {model} (erlaubt: sonnet, opus, haiku)")
+            return (False, f"[ERROR] {t('agent_invalid_model', default='Ungueltiges Modell')}: {model} (sonnet, opus, haiku)")
 
         if dry_run:
             return (True, f"[DRY-RUN] Wuerde Agent '{resolved_name}' starten (mode={mode}, model={model})")
@@ -326,7 +328,7 @@ class AgentLauncherHandler(BaseHandler):
                     f"echo.\n"
                     f"{' '.join(cmd)}\n"
                     f"echo.\n"
-                    f"echo Session beendet. Druecke eine Taste...\n"
+                    f"echo {t('session_ended', default='Session beendet. Druecke eine Taste...')}\n"
                     f"pause\n"
                 )
                 start_bat.write_text(bat_content, encoding='utf-8')
@@ -429,7 +431,7 @@ class AgentLauncherHandler(BaseHandler):
         pid_files = list(self.pid_dir.glob("*.pid"))
 
         if not pid_files:
-            return (True, "=== AGENT STATUS ===\n\nKeine Agents registriert.")
+            return (True, f"=== AGENT STATUS ===\n\n{t('no_agents_registered', default='Keine Agents registriert.')}")
 
         output = [
             "=== AGENT STATUS ===",
@@ -494,23 +496,23 @@ class AgentLauncherHandler(BaseHandler):
         """Aendert den Display-Namen eines Agenten/Experten."""
         db_path = self.data_dir / "bach.db"
         if not db_path.exists():
-            return (False, "[ERROR] Datenbank nicht gefunden")
+            return (False, f"[ERROR] {t('db_not_found', default='Datenbank nicht gefunden')}")
 
         try:
             from .agents import resolve_agent_name
             result = resolve_agent_name(db_path, query)
         except Exception as e:
-            return (False, f"[ERROR] Name-Resolution fehlgeschlagen: {e}")
+            return (False, f"[ERROR] {t('name_resolution_failed', default='Name-Resolution fehlgeschlagen')}: {e}")
 
         if not result:
-            return (False, f"[ERROR] Agent/Experte '{query}' nicht gefunden")
+            return (False, f"[ERROR] {t('not_found', default='nicht gefunden')}: {query}")
 
         table = result['source_table']
         tech_name = result['name']
         old_display = result['display_name']
 
         if dry_run:
-            return (True, f"[DRY-RUN] Wuerde '{tech_name}' umbenennen: '{old_display}' -> '{new_display_name}'")
+            return (True, f"[DRY-RUN] {t('agent_rename_would', default='Wuerde umbenennen')}: '{tech_name}' '{old_display}' -> '{new_display_name}'")
 
         try:
             conn = sqlite3.connect(db_path)
@@ -521,10 +523,10 @@ class AgentLauncherHandler(BaseHandler):
             conn.commit()
             conn.close()
             return (True, (
-                f"[OK] Display-Name geaendert\n"
+                f"{t('display_name_changed', default='[OK] Display-Name geaendert')}\n"
                 f"     Agent:  {tech_name}\n"
-                f"     Vorher: {old_display}\n"
-                f"     Neu:    {new_display_name}"
+                f"     {t('previous_label', default='Vorher')}: {old_display}\n"
+                f"     {t('now_label', default='Neu')}:    {new_display_name}"
             ))
         except Exception as e:
-            return (False, f"[ERROR] Umbenennung fehlgeschlagen: {e}")
+            return (False, f"[ERROR] {t('rename_failed', default='Umbenennung fehlgeschlagen')}: {e}")
