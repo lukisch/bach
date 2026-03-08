@@ -334,15 +334,16 @@ class WikiHandler(BaseHandler):
             if match:
                 matches.append((article.stem, match))
 
-        # Unterordner durchsuchen
-        for folder in self.wiki_path.iterdir():
-            if folder.is_dir() and not folder.name.startswith("_"):
-                for article in folder.glob("*.txt"):
-                    if article.name.startswith("_"):
-                        continue
-                    match = self._search_file(article, keyword_lower)
-                    if match:
-                        matches.append((f"{folder.name}/{article.stem}", match))
+        # Unterordner durchsuchen (rekursiv)
+        for article in self.wiki_path.rglob("*.txt"):
+            if article.parent == self.wiki_path:
+                continue  # Root-Dateien bereits oben behandelt
+            if article.name.startswith("_"):
+                continue
+            match = self._search_file(article, keyword_lower)
+            if match:
+                rel = article.relative_to(self.wiki_path).with_suffix("")
+                matches.append((rel.as_posix(), match))
 
         if not matches:
             return True, f"{t('no_results', default='Keine Treffer')} {t('wiki_for', default='fuer')}: {keyword}"
