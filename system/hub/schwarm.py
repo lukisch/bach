@@ -17,6 +17,9 @@ Befehle:
   bach schwarm summarize [--batch-size N]             Chunk-Zusammenfassungen
   bach schwarm benchmark [--compare] [--workers N]    Performance-Benchmark
   bach schwarm consensus <frage> [--voters N]         Konsensus-Abstimmung
+  bach schwarm hierarchy <aufgabe> [--workers N]      Boss-Worker-Aggregator
+  bach schwarm stigmergy <aufgabe> [--agents N]       Pheromon-basierte Koordination
+  bach schwarm specialist <aufgabe> [--auto-execute]  Routing an spezialisierten Agenten
   bach schwarm status                                 Schwarm-Run-Historie
 
 Ref: BACH v3.8.0-SUGAR
@@ -44,12 +47,12 @@ class SchwarmHandler(BaseHandler):
         "hierarchie": {
             "name": "Hierarchie",
             "desc": "Manager-Worker-Struktur mit Task-Delegation",
-            "status": "geplant",
+            "status": "aktiv",
         },
         "stigmergy": {
             "name": "Stigmergy",
             "desc": "Indirekte Koordination ueber geteilten Zustand",
-            "status": "geplant",
+            "status": "aktiv",
         },
         "konsensus": {
             "name": "Konsensus",
@@ -59,7 +62,7 @@ class SchwarmHandler(BaseHandler):
         "spezialist": {
             "name": "Spezialist",
             "desc": "Aufgabe an spezialisierten Agenten routen",
-            "status": "geplant",
+            "status": "aktiv",
         },
     }
 
@@ -84,6 +87,9 @@ class SchwarmHandler(BaseHandler):
             "summarize": t("schwarm_summarize_desc", default="Chunk-Zusammenfassungen generieren"),
             "benchmark": t("schwarm_benchmark_desc", default="Performance-Benchmark (sequentiell vs. parallel)"),
             "consensus": t("schwarm_consensus_desc", default="Konsensus-Abstimmung mit mehreren LLMs"),
+            "hierarchy": t("schwarm_hierarchy_desc", default="Boss-Worker-Aggregator Hierarchie-Muster"),
+            "stigmergy": t("schwarm_stigmergy_desc", default="Pheromon-basierte Schwarm-Koordination"),
+            "specialist": t("schwarm_specialist_desc", default="Aufgabe an spezialisierten Agenten routen"),
             "status": t("schwarm_status_desc", default="Schwarm-Run-Historie und Statistiken"),
         }
 
@@ -100,6 +106,12 @@ class SchwarmHandler(BaseHandler):
             return self._benchmark(args, dry_run)
         elif operation == "consensus":
             return self._consensus(args, dry_run)
+        elif operation == "hierarchy":
+            return self._hierarchy(args, dry_run)
+        elif operation == "stigmergy":
+            return self._stigmergy(args, dry_run)
+        elif operation == "specialist":
+            return self._specialist(args, dry_run)
         elif operation == "status":
             return self._status(args)
         else:
@@ -167,6 +179,12 @@ class SchwarmHandler(BaseHandler):
                 f"  bach schwarm summarize --dry-run\n"
                 f"  bach schwarm benchmark --compare"
             )
+        elif pattern == "hierarchie":
+            return self._hierarchy([task], dry_run)
+        elif pattern == "stigmergy":
+            return self._stigmergy([task], dry_run)
+        elif pattern == "spezialist":
+            return self._specialist([task], dry_run)
         else:
             return False, f"Muster '{pattern}' ist noch nicht implementiert."
 
@@ -376,6 +394,252 @@ class SchwarmHandler(BaseHandler):
             return False, f"Fehler beim Laden des Konsensus-Moduls: {e}"
         except Exception as e:
             return False, f"Fehler bei Konsensus-Ausfuehrung: {e}"
+
+    # =========================================================
+    # hierarchy -- Boss-Worker-Aggregator
+    # =========================================================
+
+    def _hierarchy(self, args: list, dry_run: bool) -> tuple:
+        if not args:
+            return False, (
+                "Usage: bach schwarm hierarchy \"<aufgabe>\" [--workers N] "
+                "[--boss-model sonnet|opus] [--worker-model haiku|sonnet]\n\n"
+                "Beispiel:\n"
+                "  bach schwarm hierarchy \"Erstelle eine REST-API Dokumentation\" --workers 4"
+            )
+
+        # Argumente parsen
+        task = args[0]
+        workers = 3
+        boss_model = "sonnet"
+        worker_model = "haiku"
+
+        i = 1
+        while i < len(args):
+            arg = args[i]
+            if arg in ("--workers", "-w") and i + 1 < len(args):
+                try:
+                    workers = int(args[i + 1])
+                except ValueError:
+                    return False, f"--workers erwartet eine Zahl, nicht '{args[i + 1]}'"
+                i += 2
+            elif arg == "--boss-model" and i + 1 < len(args):
+                boss_model = args[i + 1]
+                i += 2
+            elif arg == "--worker-model" and i + 1 < len(args):
+                worker_model = args[i + 1]
+                i += 2
+            else:
+                task += " " + args[i]
+                i += 1
+
+        if dry_run:
+            return True, (
+                f"[DRY-RUN] Hierarchie-Muster:\n"
+                f"  Aufgabe:       {task}\n"
+                f"  Worker:        {workers}\n"
+                f"  Boss-Modell:   {boss_model}\n"
+                f"  Worker-Modell: {worker_model}\n\n"
+                f"Wuerde 1 Boss + {workers} Worker + 1 Aggregator starten."
+            )
+
+        try:
+            from tools.schwarm.hierarchy import HierarchyPattern
+
+            pattern = HierarchyPattern(
+                task=task,
+                num_workers=workers,
+                boss_model=boss_model,
+                worker_model=worker_model,
+            )
+            result = pattern.run()
+
+            if result.get("success") and result.get("result"):
+                return True, (
+                    f"HIERARCHIE-ERGEBNIS\n"
+                    f"{'=' * 60}\n"
+                    f"{result['result']}\n"
+                    f"{'=' * 60}\n"
+                    f"Sub-Tasks: {len(result.get('subtasks', []))}, "
+                    f"Worker: {workers}, "
+                    f"Kosten: ${result['stats']['cost_usd']:.4f}"
+                )
+            else:
+                error = result.get("error", "Unbekannter Fehler")
+                return False, f"Hierarchie fehlgeschlagen: {error}"
+
+        except ImportError as e:
+            return False, f"Fehler beim Laden des Hierarchie-Moduls: {e}"
+        except Exception as e:
+            return False, f"Fehler bei Hierarchie-Ausfuehrung: {e}"
+
+    # =========================================================
+    # stigmergy -- Pheromon-basierte Koordination
+    # =========================================================
+
+    def _stigmergy(self, args: list, dry_run: bool) -> tuple:
+        if not args:
+            return False, (
+                "Usage: bach schwarm stigmergy \"<aufgabe>\" [--agents N] "
+                "[--rounds N] [--evaporation 0.1] [--model haiku|sonnet]\n\n"
+                "Beispiel:\n"
+                "  bach schwarm stigmergy \"Wie strukturiere ich einen Microservice?\" --agents 4 --rounds 3"
+            )
+
+        # Argumente parsen
+        task = args[0]
+        num_agents = 3
+        rounds = 2
+        evaporation = 0.1
+        model = "haiku"
+
+        i = 1
+        while i < len(args):
+            arg = args[i]
+            if arg in ("--agents", "-a") and i + 1 < len(args):
+                try:
+                    num_agents = int(args[i + 1])
+                except ValueError:
+                    return False, f"--agents erwartet eine Zahl, nicht '{args[i + 1]}'"
+                i += 2
+            elif arg in ("--rounds", "-r") and i + 1 < len(args):
+                try:
+                    rounds = int(args[i + 1])
+                except ValueError:
+                    return False, f"--rounds erwartet eine Zahl, nicht '{args[i + 1]}'"
+                i += 2
+            elif arg in ("--evaporation", "-e") and i + 1 < len(args):
+                try:
+                    evaporation = float(args[i + 1])
+                except ValueError:
+                    return False, f"--evaporation erwartet eine Zahl, nicht '{args[i + 1]}'"
+                i += 2
+            elif arg in ("--model", "-m") and i + 1 < len(args):
+                model = args[i + 1]
+                i += 2
+            else:
+                task += " " + args[i]
+                i += 1
+
+        if dry_run:
+            return True, (
+                f"[DRY-RUN] Stigmergy-Muster:\n"
+                f"  Aufgabe:       {task}\n"
+                f"  Agenten:       {num_agents}\n"
+                f"  Runden:        {rounds}\n"
+                f"  Verdunstung:   {evaporation:.1%}\n"
+                f"  Modell:        {model}\n\n"
+                f"Wuerde {num_agents * rounds} LLM-Aufrufe ueber {rounds} Runden starten."
+            )
+
+        try:
+            from tools.schwarm.stigmergy_pattern import StigmergyPattern
+
+            pattern = StigmergyPattern(
+                task=task,
+                num_agents=num_agents,
+                rounds=rounds,
+                evaporation_rate=evaporation,
+                model=model,
+            )
+            result = pattern.run()
+
+            if result.get("success") and result.get("result"):
+                return True, (
+                    f"STIGMERGY-ERGEBNIS (Bester Pfad: {result.get('best_path', '?')})\n"
+                    f"{'=' * 60}\n"
+                    f"{result['result']}\n"
+                    f"{'=' * 60}\n"
+                    f"Runden: {rounds}, Agenten: {num_agents}, "
+                    f"Pheromone: {len(result.get('pheromones', []))}, "
+                    f"Kosten: ${result['stats']['cost_usd']:.4f}"
+                )
+            else:
+                return False, "Stigmergy: Kein Ergebnis gefunden."
+
+        except ImportError as e:
+            return False, f"Fehler beim Laden des Stigmergy-Moduls: {e}"
+        except Exception as e:
+            return False, f"Fehler bei Stigmergy-Ausfuehrung: {e}"
+
+    # =========================================================
+    # specialist -- Aufgabe an spezialisierten Agenten routen
+    # =========================================================
+
+    def _specialist(self, args: list, dry_run: bool) -> tuple:
+        if not args:
+            return False, (
+                "Usage: bach schwarm specialist \"<aufgabe>\" [--auto-execute] "
+                "[--model haiku|sonnet]\n\n"
+                "Beispiel:\n"
+                "  bach schwarm specialist \"Plane einen Arzttermin\"\n"
+                "  bach schwarm specialist \"Erstelle eine Steuererklaerung\" --auto-execute"
+            )
+
+        # Argumente parsen
+        task = args[0]
+        auto_execute = False
+        model = "haiku"
+
+        i = 1
+        while i < len(args):
+            arg = args[i]
+            if arg == "--auto-execute":
+                auto_execute = True
+                i += 1
+            elif arg in ("--model", "-m") and i + 1 < len(args):
+                model = args[i + 1]
+                i += 2
+            else:
+                task += " " + args[i]
+                i += 1
+
+        if dry_run:
+            return True, (
+                f"[DRY-RUN] Spezialist-Muster:\n"
+                f"  Aufgabe:       {task}\n"
+                f"  Auto-Execute:  {auto_execute}\n"
+                f"  Modell:        {model}\n\n"
+                f"Wuerde Agenten aus bach_agents laden und Routing durchfuehren."
+            )
+
+        try:
+            from tools.schwarm.specialist import SpecialistPattern
+
+            pattern = SpecialistPattern(
+                task=task,
+                auto_execute=auto_execute,
+                model=model,
+            )
+            result = pattern.run()
+
+            if result.get("success"):
+                agent = result.get("agent", {})
+                recommendation = result.get("recommendation", "")
+                output_parts = [
+                    f"SPEZIALIST-ERGEBNIS",
+                    f"{'=' * 60}",
+                    f"Empfehlung: {recommendation}",
+                ]
+
+                exec_result = result.get("execution_result")
+                if exec_result and exec_result.get("success"):
+                    output_parts.append(f"\nAGENT-ANTWORT:\n{exec_result['output']}")
+
+                output_parts.extend([
+                    f"{'=' * 60}",
+                    f"Kosten: ${result['stats']['cost_usd']:.4f}",
+                ])
+
+                return True, "\n".join(output_parts)
+            else:
+                error = result.get("error", "Kein passender Agent gefunden")
+                return False, f"Spezialist: {error}"
+
+        except ImportError as e:
+            return False, f"Fehler beim Laden des Spezialist-Moduls: {e}"
+        except Exception as e:
+            return False, f"Fehler bei Spezialist-Ausfuehrung: {e}"
 
     # =========================================================
     # status -- Run-Historie

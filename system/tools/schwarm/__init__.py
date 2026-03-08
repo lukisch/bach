@@ -9,5 +9,14 @@ Ref: BACH v3.8.0-SUGAR
 
 from .runner import ClaudeRunner
 from .consensus import ConsensusPattern
+from .hierarchy import HierarchyPattern
+from .stigmergy_pattern import StigmergyPattern
+from .specialist import SpecialistPattern
 
-__all__ = ["ClaudeRunner", "ConsensusPattern"]
+__all__ = [
+    "ClaudeRunner",
+    "ConsensusPattern",
+    "HierarchyPattern",
+    "StigmergyPattern",
+    "SpecialistPattern",
+]
