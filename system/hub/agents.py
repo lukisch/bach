@@ -6,6 +6,7 @@ Agents Handler - Agenten-Verwaltung
 --agents list        Alle Agenten auflisten
 --agents info <n>    Agenten-Details
 --agents active      Nur aktive Agenten
+--agents rename <n> <display_name>  Display-Name aendern
 """
 import sqlite3
 from pathlib import Path
@@ -21,6 +22,122 @@ except ImportError:
     _AGENTS_DIR = None
     _EXPERTS_DIR = None
     _PATHS_FROM_BACH = False
+
+
+def resolve_agent_name(db_path, query: str) -> dict:
+    """
+    Loest einen Agenten/Experten ueber mehrere Strategien auf.
+
+    Sucht in dieser Reihenfolge:
+    1. Exakter technischer Name (name)
+    2. Exakter Display-Name (display_name)
+    3. Substring in name, display_name oder description
+    4. Fuzzy-Match (Levenshtein-Distanz <= 2)
+
+    Args:
+        db_path: Pfad zur bach.db
+        query: Suchbegriff (Name, Display-Name, Beschreibung)
+
+    Returns:
+        dict mit keys: name, display_name, persona, description, type, source_table
+        oder None wenn nicht gefunden
+    """
+    if not db_path or not Path(db_path).exists():
+        return None
+
+    query_lower = query.lower().strip()
+    if not query_lower:
+        return None
+
+    def _levenshtein(s1: str, s2: str) -> int:
+        """Einfache Levenshtein-Distanz."""
+        if len(s1) < len(s2):
+            return _levenshtein(s2, s1)
+        if len(s2) == 0:
+            return len(s1)
+        prev_row = range(len(s2) + 1)
+        for i, c1 in enumerate(s1):
+            curr_row = [i + 1]
+            for j, c2 in enumerate(s2):
+                insertions = prev_row[j + 1] + 1
+                deletions = curr_row[j] + 1
+                substitutions = prev_row[j] + (c1 != c2)
+                curr_row.append(min(insertions, deletions, substitutions))
+            prev_row = curr_row
+        return prev_row[-1]
+
+    try:
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        # Strategie 1+2+3: Exakt name, exakt display_name, Substring
+        for table, type_label in [('bach_agents', 'boss'), ('bach_experts', 'expert')]:
+            try:
+                cursor.execute(f"""
+                    SELECT name, display_name, persona, description
+                    FROM {table}
+                    WHERE LOWER(name) = ?
+                       OR LOWER(display_name) = ?
+                       OR LOWER(name) LIKE ?
+                       OR LOWER(display_name) LIKE ?
+                       OR LOWER(COALESCE(description, '')) LIKE ?
+                       OR LOWER(COALESCE(persona, '')) LIKE ?
+                    ORDER BY
+                        CASE WHEN LOWER(name) = ? THEN 0
+                             WHEN LOWER(display_name) = ? THEN 1
+                             WHEN LOWER(name) LIKE ? THEN 2
+                             WHEN LOWER(display_name) LIKE ? THEN 3
+                             ELSE 4 END
+                    LIMIT 1
+                """, (query_lower, query_lower,
+                      f'%{query_lower}%', f'%{query_lower}%',
+                      f'%{query_lower}%', f'%{query_lower}%',
+                      query_lower, query_lower,
+                      f'%{query_lower}%', f'%{query_lower}%'))
+                row = cursor.fetchone()
+                if row:
+                    conn.close()
+                    return {
+                        'name': row['name'],
+                        'display_name': row['display_name'] or row['name'],
+                        'persona': row['persona'] or '',
+                        'description': row['description'] if 'description' in row.keys() else '',
+                        'type': type_label,
+                        'source_table': table,
+                    }
+            except sqlite3.OperationalError:
+                continue
+
+        # Strategie 4: Fuzzy-Match (Levenshtein <= 2)
+        best_match = None
+        best_dist = 3  # Maximal akzeptierte Distanz
+        for table, type_label in [('bach_agents', 'boss'), ('bach_experts', 'expert')]:
+            try:
+                cursor.execute(f"SELECT name, display_name, persona, description FROM {table}")
+                for row in cursor.fetchall():
+                    for field in [row['name'], row['display_name']]:
+                        if not field:
+                            continue
+                        dist = _levenshtein(query_lower, field.lower())
+                        if dist < best_dist:
+                            best_dist = dist
+                            best_match = {
+                                'name': row['name'],
+                                'display_name': row['display_name'] or row['name'],
+                                'persona': row['persona'] or '',
+                                'description': row['description'] if 'description' in row.keys() else '',
+                                'type': type_label,
+                                'source_table': table,
+                            }
+            except sqlite3.OperationalError:
+                continue
+
+        conn.close()
+        return best_match
+    except Exception:
+        pass
+    return None
 
 
 class AgentsHandler(BaseHandler):
@@ -47,6 +164,7 @@ class AgentsHandler(BaseHandler):
             "info": t("agents_info_desc", default="Agenten-Details anzeigen"),
             "active": t("agents_active_desc", default="Nur aktive Agenten"),
             "sync": t("agents_sync_desc", default="Neue Filesystem-Experten automatisch in DB eintragen"),
+            "rename": "Display-Name aendern (--agents rename <name> <neuer-name>)",
         }
 
     def handle(self, operation: str, args: list, dry_run: bool = False) -> tuple:
@@ -55,6 +173,10 @@ class AgentsHandler(BaseHandler):
 
         if operation == "info" and args:
             return self._info(args[0])
+        elif operation == "rename" and args:
+            if len(args) < 2:
+                return False, "[ERROR] Syntax: --agents rename <name> <neuer-display-name>"
+            return self._rename(args[0], " ".join(args[1:]))
         elif operation == "active":
             return self._list(active_only=True)
         elif operation == "sync":
@@ -138,7 +260,7 @@ class AgentsHandler(BaseHandler):
             # TOWER_OF_BABEL: Sprach-Filter mit Fallback auf DE
             lang = get_lang()
             try:
-                ba_query = "SELECT name, is_active FROM bach_agents WHERE language = ?"
+                ba_query = "SELECT name, is_active, display_name, persona FROM bach_agents WHERE language = ?"
                 ba_params = [lang]
                 if active_only:
                     ba_query += " AND is_active = 1"
@@ -153,6 +275,8 @@ class AgentsHandler(BaseHandler):
                     if key in boss_agents:
                         boss_agents[key]['in_db'] = True
                         boss_agents[key]['is_active'] = bool(row['is_active'])
+                        boss_agents[key]['display_name'] = row['display_name'] or ''
+                        boss_agents[key]['persona'] = row['persona'] or ''
             except sqlite3.OperationalError:
                 pass  # bach_agents existiert noch nicht
 
@@ -185,7 +309,7 @@ class AgentsHandler(BaseHandler):
 
             # --- bach_experts Tabelle (Experten, TOWER_OF_BABEL: sprachsensitiv) ---
             try:
-                exp_query = "SELECT name, is_active FROM bach_experts WHERE language = ?"
+                exp_query = "SELECT name, is_active, display_name, persona FROM bach_experts WHERE language = ?"
                 exp_params = [lang]
                 if active_only:
                     exp_query += " AND is_active = 1"
@@ -200,6 +324,8 @@ class AgentsHandler(BaseHandler):
                     if key in experts:
                         experts[key]['in_db'] = True
                         experts[key]['is_active'] = is_active
+                        experts[key]['display_name'] = row['display_name'] or ''
+                        experts[key]['persona'] = row['persona'] or ''
                     elif key not in boss_agents:
                         # Nur in bach_experts, nicht im Filesystem
                         experts[key] = {
@@ -209,6 +335,8 @@ class AgentsHandler(BaseHandler):
                             'is_active': is_active,
                             'aktiv_in_file': False,
                             'type': 'expert',
+                            'display_name': row['display_name'] or '',
+                            'persona': row['persona'] or '',
                         }
             except sqlite3.OperationalError:
                 pass  # bach_experts Tabelle existiert noch nicht
@@ -225,6 +353,18 @@ class AgentsHandler(BaseHandler):
         else:
             return "[ ]"
 
+    def _format_display_name(self, entry: dict) -> str:
+        """Formatiert display_name Suffix fuer Listing.
+
+        Zeigt display_name in Klammern, aber nur wenn er sich vom
+        technischen Namen unterscheidet und gesetzt ist.
+        """
+        dn = entry.get('display_name', '')
+        name = entry.get('name', '')
+        if dn and dn.lower() != name.lower():
+            return f" ({dn})"
+        return ""
+
     def _list(self, active_only: bool) -> tuple:
         """Agenten und Experten auflisten - aus bach_paths + DB."""
         results = [t("boss_agents", default="AGENTEN"), "=" * 40]
@@ -236,8 +376,9 @@ class AgentsHandler(BaseHandler):
         results.append(f"\n[{t('boss_agents', default='BOSS-AGENTEN')}]")
         if boss_agents:
             for key, agent in sorted(boss_agents.items()):
+                dn_str = self._format_display_name(agent)
                 type_str = f" ({agent.get('type', 'boss')})"
-                results.append(f"  {self._status_icon(agent)} {agent['name']}{type_str}")
+                results.append(f"  {self._status_icon(agent)} {agent['name']}{dn_str}{type_str}")
         else:
             results.append(f"  ({t('not_found', default='keine gefunden')})")
 
@@ -245,11 +386,12 @@ class AgentsHandler(BaseHandler):
         results.append(f"\n[{t('experts', default='EXPERTEN')}]")
         if experts:
             for key, expert in sorted(experts.items()):
+                dn_str = self._format_display_name(expert)
                 # Datei-Status ergaenzen wenn nur Filesystem
                 file_status = ""
                 if not expert.get('in_db') and not expert.get('aktiv_in_file', True):
                     file_status = f" ({t('inactive', default='inaktiv')})"
-                results.append(f"  {self._status_icon(expert)} {expert['name']}{file_status}")
+                results.append(f"  {self._status_icon(expert)} {expert['name']}{dn_str}{file_status}")
         else:
             results.append(f"  ({t('not_found', default='keine gefunden')})")
 
@@ -259,6 +401,52 @@ class AgentsHandler(BaseHandler):
         results.append(f"\n{t('details', default='Details')}: --agents info <n>")
 
         return True, "\n".join(results)
+
+    def _rename(self, query: str, new_display_name: str) -> tuple:
+        """Aendert den display_name eines Agenten oder Experten.
+
+        Args:
+            query: Technischer Name oder aktueller Display-Name
+            new_display_name: Neuer Display-Name
+
+        Returns:
+            (success, message) Tuple
+        """
+        # Validierung
+        new_display_name = new_display_name.strip()
+        if not new_display_name:
+            return False, "[ERROR] Display-Name darf nicht leer sein."
+        if len(new_display_name) > 30:
+            return False, f"[ERROR] Display-Name zu lang ({len(new_display_name)} Zeichen, max 30)."
+
+        # Agent/Experte finden
+        resolved = resolve_agent_name(self.db_path, query)
+        if not resolved:
+            return False, f"[ERROR] Agent/Experte '{query}' nicht gefunden."
+
+        table = resolved['source_table']
+        name = resolved['name']
+        old_display = resolved['display_name']
+
+        # Update in DB
+        try:
+            conn = self._get_conn()
+            cursor = conn.cursor()
+            cursor.execute(
+                f"UPDATE {table} SET display_name = ? WHERE name = ?",
+                (new_display_name, name)
+            )
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            return False, f"[ERROR] DB-Update fehlgeschlagen: {e}"
+
+        return True, (
+            f"[OK] Display-Name geaendert\n"
+            f"  Agent:  {name}\n"
+            f"  Vorher: {old_display}\n"
+            f"  Jetzt:  {new_display_name}"
+        )
 
     def _parse_concept(self, concept_file: Path) -> dict:
         """
@@ -377,10 +565,51 @@ class AgentsHandler(BaseHandler):
         return True, "\n".join(lines)
 
     def _info(self, name: str) -> tuple:
-        """Agenten-Details - sucht in agents + bach_experts."""
+        """Agenten-Details - sucht via resolve_agent_name, dann Legacy-Tabelle."""
+        _yes = t("yes_label", default="Ja")
+        _no = t("no_label", default="Nein")
+
+        # Zuerst ueber Name-Resolver versuchen (bach_agents / bach_experts)
+        resolved = resolve_agent_name(self.db_path, name)
+
         conn = self._get_conn()
         cursor = conn.cursor()
 
+        if resolved:
+            table = resolved['source_table']
+            canonical = resolved['name']
+            try:
+                cursor.execute(f"SELECT * FROM {table} WHERE name = ?", (canonical,))
+                row = cursor.fetchone()
+            except sqlite3.OperationalError:
+                row = None
+
+            if row:
+                display = resolved['display_name']
+                persona = resolved.get('persona', '')
+                label = "AGENT" if resolved['type'] == 'boss' else t('experts', default='EXPERTE')
+                header = f"{label}: {canonical}"
+                if display and display.lower() != canonical.lower():
+                    header += f" ({display})"
+
+                results = [header, "=" * 40]
+                results.append(f"ID:            {row['id']}")
+                results.append(f"Display-Name:  {display}")
+                results.append(f"{t('active', default='Aktiv')}:         {_yes if row['is_active'] else _no}")
+                row_keys = row.keys()
+                desc = row['description'] if 'description' in row_keys else '-'
+                results.append(f"{t('description_label', default='Beschreibung')}:  {desc or '-'}")
+                if persona:
+                    results.append(f"Persona:       {persona}")
+                if 'domain' in row_keys:
+                    results.append(f"Domain:        {row['domain'] or '-'}")
+                if 'skill_path' in row_keys:
+                    results.append(f"Skill-Pfad:    {row['skill_path'] or '-'}")
+
+                conn.close()
+                return True, "\n".join(results)
+
+        # Fallback: Legacy agents Tabelle
         cursor.execute("""
             SELECT * FROM agents
             WHERE name LIKE ? OR id = ?
@@ -388,8 +617,6 @@ class AgentsHandler(BaseHandler):
 
         agent = cursor.fetchone()
 
-        _yes = t("yes_label", default="Ja")
-        _no = t("no_label", default="Nein")
         if agent:
             results = [f"AGENT: {agent['name']}", "=" * 40]
             results.append(f"ID:          {agent['id']}")
@@ -409,27 +636,9 @@ class AgentsHandler(BaseHandler):
                 results.append(f"\n{t('synergies_label', default='Synergien')}:")
                 for s in synergies:
                     results.append(f"  -> {s['name']} ({s['synergy_type']})")
-        else:
-            # Fallback: in bach_experts suchen
-            try:
-                cursor.execute("""
-                    SELECT * FROM bach_experts
-                    WHERE name LIKE ? OR id = ?
-                """, (f"%{name}%", name if name.isdigit() else -1))
-                expert = cursor.fetchone()
-            except sqlite3.OperationalError:
-                expert = None
 
-            if expert:
-                results = [f"{t('experts', default='EXPERTE')}: {expert['name']}", "=" * 40]
-                results.append(f"ID:           {expert['id']}")
-                results.append(f"{t('active', default='Aktiv')}:        {_yes if expert['is_active'] else _no}")
-                results.append(f"{t('description_label', default='Beschreibung')}: {expert.get('description') or '-'}")
-                results.append(f"Domain:       {expert.get('domain') or '-'}")
-                results.append(f"Skill-Pfad:   {expert.get('skill_path') or '-'}")
-            else:
-                conn.close()
-                return False, f"{t('not_found', default='nicht gefunden')}: {name}"
+            conn.close()
+            return True, "\n".join(results)
 
         conn.close()
-        return True, "\n".join(results)
+        return False, f"{t('not_found', default='nicht gefunden')}: {name}"

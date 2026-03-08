@@ -22,6 +22,14 @@ Copyright (c) 2026 BACH Contributors. Alle Rechte vorbehalten.
   - Trauma-Psychoedukation (Window of Tolerance, nur Aufklaerung)
   - Expositionsbegleitung (SUDs-Skala, nur Planung)
 
+- **Agent-Personas & Name-Resolution** (Migration 034):
+  - `resolve_agent_name()`: Multi-Strategie Namensaufloesung (Name, Display-Name, Beschreibung, Persona, Fuzzy/Levenshtein)
+  - `bach agent rename <name> <neuer-name>`: Benutzer-definierbare Display-Names
+  - Persona-Injection: Charakter-Beschreibung wird beim Agent-Start in CLAUDE.md injiziert
+  - Agent-Start/Stop akzeptiert Display-Names, Rollen und Beschreibungen
+  - 20 Default-Personas: 5 Boss-Agenten (Atlas, Clara, Felix, Helena, Paul) + 15 Experten
+  - Listing zeigt Display-Names in Klammern an
+
 ### Bugfix
 
 - **agent_launcher.py:** Windows cp1252 Encoding-Fix bei tasklist-Subprocess (0x81 Umlaut-Crash)

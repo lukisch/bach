@@ -17,6 +17,7 @@ import os
 import signal
 import subprocess
 import json
+import sqlite3
 from pathlib import Path
 from datetime import datetime
 from .base import BaseHandler
@@ -46,7 +47,8 @@ class AgentLauncherHandler(BaseHandler):
             "list": "Verfuegbare Agents auflisten",
             "start": "Agent starten (bach agent start <name>)",
             "stop": "Agent stoppen (bach agent stop <name>)",
-            "status": "Laufende Agents anzeigen"
+            "status": "Laufende Agents anzeigen",
+            "rename": "Display-Name aendern (bach agent rename <name> <neuer-name>)"
         }
 
     def handle(self, operation: str, args: list, dry_run: bool = False) -> tuple:
@@ -63,6 +65,10 @@ class AgentLauncherHandler(BaseHandler):
             return self._stop_agent(args[0], dry_run)
         elif operation == "status":
             return self._show_status()
+        elif operation == "rename":
+            if len(args) < 2:
+                return (False, "[ERROR] Syntax: bach agent rename <name> <neuer-display-name>")
+            return self._rename_agent(args[0], ' '.join(args[1:]), dry_run)
         else:
             return self._list_agents()
 
@@ -173,13 +179,64 @@ class AgentLauncherHandler(BaseHandler):
                 return args[i + 1]
         return default
 
+    def _resolve_to_technical_name(self, query: str) -> str:
+        """Loest Display-Name/Rolle/Beschreibung zum technischen Namen auf."""
+        # Erst direkt pruefen (schneller Pfad)
+        agents = self._scan_agents()
+        for ag in agents:
+            if ag["name"].lower() == query.lower():
+                return ag["name"]
+
+        # Dann ueber DB (display_name, description, persona)
+        try:
+            from .agents import resolve_agent_name
+            db_path = self.data_dir / "bach.db"
+            result = resolve_agent_name(db_path, query)
+            if result:
+                return result['name']
+        except Exception:
+            pass
+
+        return query  # Unveraendert zurueckgeben
+
+    def _get_persona_info(self, name: str) -> dict:
+        """Laedt display_name und persona aus der DB."""
+        db_path = self.data_dir / "bach.db"
+        if not db_path.exists():
+            return {}
+        try:
+            conn = sqlite3.connect(db_path)
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            for table in ('bach_agents', 'bach_experts'):
+                try:
+                    cursor.execute(
+                        f"SELECT display_name, persona FROM {table} WHERE name = ?",
+                        (name,))
+                    row = cursor.fetchone()
+                    if row:
+                        conn.close()
+                        return {
+                            'display_name': row['display_name'] or '',
+                            'persona': row['persona'] or '',
+                        }
+                except sqlite3.OperationalError:
+                    continue
+            conn.close()
+        except Exception:
+            pass
+        return {}
+
     def _start_agent(self, name: str, args: list, dry_run: bool) -> tuple:
         """Startet einen Agent."""
+        # Name-Resolution: Display-Name, Rolle oder Beschreibung -> technischer Name
+        resolved_name = self._resolve_to_technical_name(name)
+
         # Agent finden
         agents = self._scan_agents()
         agent = None
         for ag in agents:
-            if ag["name"] == name:
+            if ag["name"] == resolved_name:
                 agent = ag
                 break
 
@@ -187,9 +244,9 @@ class AgentLauncherHandler(BaseHandler):
             return (False, f"[ERROR] Agent '{name}' nicht gefunden oder hat keine SKILL.md")
 
         # Bereits laufend?
-        pid = self._is_agent_running(name)
+        pid = self._is_agent_running(resolved_name)
         if pid:
-            return (False, f"[WARN] Agent '{name}' laeuft bereits (PID {pid})")
+            return (False, f"[WARN] Agent '{resolved_name}' laeuft bereits (PID {pid})")
 
         mode = self._parse_flag(args, "--mode", "default")
         model = self._parse_flag(args, "--model", "sonnet")
@@ -200,14 +257,14 @@ class AgentLauncherHandler(BaseHandler):
             return (False, f"[ERROR] Ungueltiges Modell: {model} (erlaubt: sonnet, opus, haiku)")
 
         if dry_run:
-            return (True, f"[DRY-RUN] Wuerde Agent '{name}' starten (mode={mode}, model={model})")
+            return (True, f"[DRY-RUN] Wuerde Agent '{resolved_name}' starten (mode={mode}, model={model})")
 
         # Verzeichnisse sicherstellen
         self.pid_dir.mkdir(parents=True, exist_ok=True)
         self.temp_dir.mkdir(parents=True, exist_ok=True)
 
         # Temporaere CLAUDE.md erstellen
-        agent_temp_dir = self.temp_dir / f"agent_{name}"
+        agent_temp_dir = self.temp_dir / f"agent_{resolved_name}"
         agent_temp_dir.mkdir(parents=True, exist_ok=True)
         claude_md = agent_temp_dir / "CLAUDE.md"
 
@@ -216,13 +273,28 @@ class AgentLauncherHandler(BaseHandler):
         except Exception as e:
             return (False, f"[ERROR] SKILL.md nicht lesbar: {e}")
 
+        # Persona aus DB laden
+        persona_info = self._get_persona_info(resolved_name)
+        display_name = persona_info.get('display_name', '')
+        persona = persona_info.get('persona', '')
+
+        persona_block = ""
+        if display_name or persona:
+            persona_block = "\n## Persona\n"
+            if display_name:
+                persona_block += f"Dein Name ist \"{display_name}\".\n"
+            if persona:
+                persona_block += f"Dein Charakter: {persona}\n"
+            persona_block += "\n"
+
         claude_md_content = (
-            f"# BACH Agent: {name}\n\n"
-            f"Du bist der BACH Agent \"{name}\". Befolge die folgende SKILL.md\n"
+            f"# BACH Agent: {resolved_name}\n\n"
+            f"Du bist der BACH Agent \"{resolved_name}\". Befolge die folgende SKILL.md\n"
             f"als deine Identitaet und Arbeitsanweisung.\n\n"
             f"BACH System-Pfad: {self.base_path}\n"
             f"Nutze die Tools und Dateien im BACH-System unter diesem Pfad.\n"
-            f"Antworte auf Deutsch.\n\n"
+            f"Antworte auf Deutsch.\n"
+            f"{persona_block}\n"
             f"---\n\n"
             f"{skill_content}"
         )
@@ -241,14 +313,15 @@ class AgentLauncherHandler(BaseHandler):
         try:
             if sys.platform == 'win32':
                 # Windows: neues Fenster via cmd /c start
-                title = f"BACH: {name}"
+                agent_label = display_name or resolved_name
+                title = f"BACH: {agent_label}"
                 # start.bat im Temp-Verzeichnis erstellen
                 start_bat = agent_temp_dir / "start.bat"
                 bat_content = (
                     f"@echo off\n"
                     f"title {title}\n"
                     f"cd /d \"{agent_temp_dir}\"\n"
-                    f"echo === BACH Agent: {name} ===\n"
+                    f"echo === BACH Agent: {agent_label} ({resolved_name}) ===\n"
                     f"echo Modell: {model} ^| Modus: {mode}\n"
                     f"echo.\n"
                     f"{' '.join(cmd)}\n"
@@ -259,7 +332,7 @@ class AgentLauncherHandler(BaseHandler):
                 start_bat.write_text(bat_content, encoding='utf-8')
 
                 proc = subprocess.Popen(
-                    ["cmd", "/c", "start", f"BACH: {name}", "cmd", "/c", str(start_bat)],
+                    ["cmd", "/c", "start", title, "cmd", "/c", str(start_bat)],
                     cwd=str(agent_temp_dir),
                     creationflags=subprocess.CREATE_NO_WINDOW
                 )
@@ -275,18 +348,20 @@ class AgentLauncherHandler(BaseHandler):
             # PID speichern
             pid_data = {
                 "pid": proc.pid,
-                "name": name,
+                "name": resolved_name,
+                "display_name": display_name,
                 "type": agent["type"],
                 "model": model,
                 "mode": mode,
                 "started": datetime.now().isoformat(),
                 "temp_dir": str(agent_temp_dir)
             }
-            pid_file = self.pid_dir / f"{name}.pid"
+            pid_file = self.pid_dir / f"{resolved_name}.pid"
             pid_file.write_text(json.dumps(pid_data, indent=2), encoding='utf-8')
 
+            agent_label = display_name or resolved_name
             return (True, (
-                f"[OK] Agent '{name}' gestartet\n"
+                f"[OK] Agent '{agent_label}' ({resolved_name}) gestartet\n"
                 f"     PID:    {proc.pid}\n"
                 f"     Typ:    {agent['type']}\n"
                 f"     Modell: {model}\n"
@@ -305,7 +380,8 @@ class AgentLauncherHandler(BaseHandler):
 
     def _stop_agent(self, name: str, dry_run: bool) -> tuple:
         """Stoppt einen laufenden Agent."""
-        pid_file = self.pid_dir / f"{name}.pid"
+        resolved_name = self._resolve_to_technical_name(name)
+        pid_file = self.pid_dir / f"{resolved_name}.pid"
 
         if not pid_file.exists():
             return (False, f"[WARN] Agent '{name}' hat kein PID-File (laeuft nicht)")
@@ -409,3 +485,46 @@ class AgentLauncherHandler(BaseHandler):
         ])
 
         return (True, "\n".join(output))
+
+    # ------------------------------------------------------------------
+    # rename
+    # ------------------------------------------------------------------
+
+    def _rename_agent(self, query: str, new_display_name: str, dry_run: bool) -> tuple:
+        """Aendert den Display-Namen eines Agenten/Experten."""
+        db_path = self.data_dir / "bach.db"
+        if not db_path.exists():
+            return (False, "[ERROR] Datenbank nicht gefunden")
+
+        try:
+            from .agents import resolve_agent_name
+            result = resolve_agent_name(db_path, query)
+        except Exception as e:
+            return (False, f"[ERROR] Name-Resolution fehlgeschlagen: {e}")
+
+        if not result:
+            return (False, f"[ERROR] Agent/Experte '{query}' nicht gefunden")
+
+        table = result['source_table']
+        tech_name = result['name']
+        old_display = result['display_name']
+
+        if dry_run:
+            return (True, f"[DRY-RUN] Wuerde '{tech_name}' umbenennen: '{old_display}' -> '{new_display_name}'")
+
+        try:
+            conn = sqlite3.connect(db_path)
+            conn.execute(
+                f"UPDATE {table} SET display_name = ? WHERE name = ?",
+                (new_display_name, tech_name)
+            )
+            conn.commit()
+            conn.close()
+            return (True, (
+                f"[OK] Display-Name geaendert\n"
+                f"     Agent:  {tech_name}\n"
+                f"     Vorher: {old_display}\n"
+                f"     Neu:    {new_display_name}"
+            ))
+        except Exception as e:
+            return (False, f"[ERROR] Umbenennung fehlgeschlagen: {e}")
