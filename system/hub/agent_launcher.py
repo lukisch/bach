@@ -117,7 +117,7 @@ class AgentLauncherHandler(BaseHandler):
             if sys.platform == 'win32':
                 result = subprocess.run(
                     ['tasklist', '/FI', f'PID eq {pid}'],
-                    capture_output=True, text=True
+                    capture_output=True, text=True, encoding='utf-8', errors='replace'
                 )
                 if str(pid) in result.stdout:
                     return pid
@@ -380,9 +380,9 @@ class AgentLauncherHandler(BaseHandler):
                     if sys.platform == 'win32':
                         result = subprocess.run(
                             ['tasklist', '/FI', f'PID eq {pid}'],
-                            capture_output=True, text=True
+                            capture_output=True, text=True, encoding='utf-8', errors='replace'
                         )
-                        running = str(pid) in result.stdout
+                        running = str(pid) in (result.stdout or '')
                     else:
                         try:
                             os.kill(pid, 0)
