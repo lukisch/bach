@@ -101,7 +101,10 @@ class WebScrapeHandler(BaseHandler):
 
         try:
             headers = {'User-Agent': 'Mozilla/5.0 (BACH WebScrape/1.0)'}
-            resp = requests.get(url, timeout=20, headers=headers, allow_redirects=True)
+            try:
+                resp = requests.get(url, timeout=20, headers=headers, allow_redirects=True)
+            except requests.exceptions.SSLError:
+                resp = requests.get(url, timeout=20, headers=headers, allow_redirects=True, verify=False)
             resp.raise_for_status()
             return resp, ""
         except Exception as e:
@@ -116,8 +119,8 @@ class WebScrapeHandler(BaseHandler):
         body = resp.text
         info = f"URL: {resp.url}\nStatus: {resp.status_code}\nContent-Type: {resp.headers.get('content-type', '?')}\nGroesse: {len(body)} Zeichen\n{'=' * 40}\n\n"
 
-        if len(body) > 5000:
-            return True, info + body[:5000] + f"\n\n... ({len(body) - 5000} weitere Zeichen)"
+        if len(body) > 10000:
+            return True, info + body[:10000] + f"\n\n... ({len(body) - 10000} weitere Zeichen)"
         return True, info + body
 
     def _links(self, url: str) -> Tuple[bool, str]:
