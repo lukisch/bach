@@ -27,7 +27,7 @@ from pathlib import Path
 # BACH system/ Verzeichnis ermitteln
 SCRIPT_DIR = Path(__file__).parent
 BACH_START_DIR = SCRIPT_DIR.parent
-BACH_ROOT = BACH_START_DIR
+BACH_ROOT = BACH_START_DIR.parent
 SYSTEM_DIR = BACH_ROOT / "system"
 
 # sys.path fuer BACH-Imports

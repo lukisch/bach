@@ -318,12 +318,27 @@ Datei-Autorität (ENT-44):
 
     elif subcommand == 'set':
         if len(args) < 3:
-            print("✗ Fehler: Key und Value fehlen. Verwendung: bach secrets set <key> <value> [desc] [cat]", file=sys.stderr)
+            print("✗ Fehler: Key und Value fehlen. Verwendung: bach secrets set <key> <value> [--desc=TEXT] [--category=CAT]", file=sys.stderr)
             return
         key = args[1]
         value = args[2]
-        description = args[3] if len(args) > 3 else ""
-        category = args[4] if len(args) > 4 else "general"
+        description = ""
+        category = "general"
+        # Parse remaining args: support both positional and --flag=value
+        remaining = args[3:]
+        positional = []
+        for arg in remaining:
+            if arg.startswith("--desc="):
+                description = arg[len("--desc="):]
+            elif arg.startswith("--category="):
+                category = arg[len("--category="):]
+            else:
+                positional.append(arg)
+        # Fallback: positional args (desc, category) for backwards compat
+        if not description and len(positional) > 0:
+            description = positional[0]
+        if category == "general" and len(positional) > 1:
+            category = positional[1]
         handler.set_secret(key, value, description, category)
 
     elif subcommand == 'delete':
