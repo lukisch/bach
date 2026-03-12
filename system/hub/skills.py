@@ -56,7 +56,7 @@ class SkillsHandler(BaseHandler):
             "list": t("skills_list_desc", default="Alle Skills auflisten"),
             "show": t("skills_show_desc", default="Skill-Details anzeigen"),
             "search": t("skills_search_desc", default="Skills durchsuchen"),
-            "create": t("skills_create_desc", default="Neuen Skill erstellen (v2.1 - Self-Extension)"),
+            "create": t("skills_create_desc", default="Neuen Skill erstellen (v2.1 - Self-Extension, --format anthropic fuer Anthropic-Standard)"),
             "reload": t("skills_reload_desc", default="Handler-Registry + Tools neu laden (Hot-Reload, v2.1)"),
             "export": t("skills_export_desc", default="Skill exportieren - autarkes Paket (v2.0)"),
             "install": t("skills_install_desc", default="Skill aus ZIP/Verzeichnis importieren"),
@@ -72,13 +72,16 @@ class SkillsHandler(BaseHandler):
 
         if operation == "create" and args:
             skill_type = "expert"
+            fmt = None
             for i, a in enumerate(args):
                 if a == "--type" and i + 1 < len(args):
                     skill_type = args[i + 1]
-            clean_args = [a for a in args if not a.startswith('--') and a not in ("agent", "expert", "service", "tool", "handler")]
+                if a == "--format" and i + 1 < len(args):
+                    fmt = args[i + 1]
+            clean_args = [a for a in args if not a.startswith('--') and a not in ("agent", "expert", "service", "tool", "handler", "anthropic", "bach")]
             if not clean_args:
-                return False, "Usage: bach skills create <name> [--type agent|expert|service|tool|handler]"
-            return self._create(clean_args[0], skill_type, dry_run)
+                return False, "Usage: bach skills create <name> [--type agent|expert|service|tool|handler] [--format anthropic]"
+            return self._create(clean_args[0], skill_type, dry_run, fmt=fmt)
         elif operation == "reload":
             return self._reload()
         elif operation == "show" and args:
@@ -86,10 +89,14 @@ class SkillsHandler(BaseHandler):
         elif operation == "search" and args:
             return self._search(" ".join(args))
         elif operation == "export" and args:
-            # Filter --dry-run aus args
-            clean_args = [a for a in args if not a.startswith('--')]
+            # Format-Flag extrahieren
+            export_fmt = "bach"
+            for i, a in enumerate(args):
+                if a == "--format" and i + 1 < len(args):
+                    export_fmt = args[i + 1]
+            clean_args = [a for a in args if not a.startswith('--') and a not in ("bach", "anthropic")]
             output_dir = clean_args[1] if len(clean_args) > 1 else None
-            return self._export(clean_args[0], output_dir, dry_run)
+            return self._export(clean_args[0], output_dir, dry_run, fmt=export_fmt)
         elif operation == "install" and args:
             return self._install(args[0], dry_run)
         elif operation == "hierarchy":
@@ -219,18 +226,27 @@ class SkillsHandler(BaseHandler):
         
         return True, "\n".join(results)
     
-    def _export(self, name: str, output_dir: str = None, dry_run: bool = False) -> tuple:
+    def _export(self, name: str, output_dir: str = None, dry_run: bool = False, fmt: str = "bach") -> tuple:
         """
         Skill exportieren mit manifest.json.
-        
+
         Args:
             name: Skill-Name (z.B. 'ati', 'steuer-agent')
-            output_dir: Zielverzeichnis (optional, default: system/system/system/system/exports/<name>_export)
+            output_dir: Zielverzeichnis (optional, default: exports/<name>_export)
             dry_run: Nur zeigen was passieren wuerde
-        
+            fmt: Export-Format -- 'bach' (Standard) oder 'anthropic'
+
         Returns:
             (success, message)
         """
+        # Anthropic-Format: Delegiert an skill_export.py SkillExporter
+        if fmt == "anthropic":
+            try:
+                from tools.skill_export import SkillExporter
+                exporter = SkillExporter(self.base_path)
+                return exporter.export(name, output_dir, dry_run, fmt="anthropic")
+            except ImportError:
+                return False, "skill_export.py nicht gefunden. Pfad: tools/skill_export.py"
         results = [f"SKILL EXPORT: {name}", "=" * 50]
         
         # 1. Skill finden
@@ -870,7 +886,7 @@ Weitere Informationen: https://github.com/anthropics/skills
 
         return True, "\n".join(results)
 
-    def _create(self, name: str, skill_type: str = "expert", dry_run: bool = False) -> tuple:
+    def _create(self, name: str, skill_type: str = "expert", dry_run: bool = False, fmt: str = None) -> tuple:
         """
         Neuen Skill erstellen (v2.1 Self-Extension).
 
@@ -881,10 +897,15 @@ Weitere Informationen: https://github.com/anthropics/skills
             name: Skill-Name (z.B. 'voice-processor', 'email-parser')
             skill_type: agent|expert|service|tool|handler
             dry_run: Nur zeigen was passieren wuerde
+            fmt: Optionales Format -- 'anthropic' nutzt skill_init.py fuer Anthropic-Standard
 
         Returns:
             (success, message)
         """
+        # Anthropic-Format: Delegiert an skill_init.py
+        if fmt and fmt.lower() == "anthropic":
+            return self._create_anthropic(name, dry_run)
+
         results = [f"SKILL CREATE: {name}", "=" * 50]
         results.append(f"Typ: {skill_type}")
 
@@ -1117,6 +1138,81 @@ anthropic_compatible: true
             pass
 
         return True, "\n".join(results)
+
+    def _create_anthropic(self, name: str, dry_run: bool = False) -> tuple:
+        """
+        Erstellt einen Skill im Anthropic-Standard-Format via skill_init.py.
+
+        Erzeugt: SKILL.md + scripts/ + references/ + assets/
+        Kompatibel mit: Claude Code, LobeHub, Cursor, Codex CLI
+        """
+        results = [f"SKILL CREATE (Anthropic-Format): {name}", "=" * 50]
+
+        # Zielverzeichnis: skills/_services/<name> (integriert in BACH)
+        output_path = self.skills_dir / "_services"
+        skill_dir = output_path / name
+
+        results.append(f"Format: Anthropic (scripts/ + references/ + assets/)")
+        results.append(f"Ziel: {skill_dir}")
+
+        if skill_dir.exists():
+            return False, f"Skill existiert bereits: {skill_dir}"
+
+        if dry_run:
+            results.append("\n[DRY-RUN] Wuerde erstellen:")
+            results.append(f"  {name}/SKILL.md")
+            results.append(f"  {name}/scripts/example.py")
+            results.append(f"  {name}/references/api_reference.md")
+            results.append(f"  {name}/assets/example_asset.txt")
+            return True, "\n".join(results)
+
+        # skill_init.py aufrufen
+        skill_init_path = self.base_path / "tools" / "skills" / "skill_init.py"
+
+        if not skill_init_path.exists():
+            return False, f"skill_init.py nicht gefunden: {skill_init_path}"
+
+        try:
+            # skill_init.py als Modul importieren und init_skill() aufrufen
+            import importlib.util
+            spec = importlib.util.spec_from_file_location("skill_init", skill_init_path)
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+
+            result_path = mod.init_skill(name, str(output_path))
+
+            if result_path is None:
+                return False, f"skill_init.py Fehler bei Erstellung von '{name}'"
+
+            # In DB registrieren
+            self._register_in_db(name, "skill", str(skill_dir))
+
+            results.append(f"\n[OK] Anthropic-Skill erstellt:")
+            results.append(f"  SKILL.md:             {skill_dir / 'SKILL.md'}")
+            results.append(f"  scripts/example.py:   {skill_dir / 'scripts' / 'example.py'}")
+            results.append(f"  references/:          {skill_dir / 'references'}")
+            results.append(f"  assets/:              {skill_dir / 'assets'}")
+            results.append(f"\nNaechste Schritte:")
+            results.append(f"  1. SKILL.md TODO-Items ausfuellen")
+            results.append(f"  2. Beispieldateien anpassen oder loeschen")
+            results.append(f"  3. bach skills reload  (Registrierung aktualisieren)")
+            results.append(f"\nDieser Skill ist standalone-faehig und kompatibel mit:")
+            results.append(f"  Claude Code, LobeHub Marketplace, Cursor, Codex CLI")
+
+            # Hook: after_skill_create
+            try:
+                from core.hooks import hooks
+                hooks.emit('after_skill_create', {
+                    'name': name, 'type': 'skill', 'format': 'anthropic',
+                    'path': str(skill_dir)
+                })
+            except Exception:
+                pass
+
+            return True, "\n".join(results)
+
+        except Exception as e:
+            return False, f"Fehler bei Anthropic-Skill-Erstellung: {e}"
 
     def _register_in_db(self, name: str, skill_type: str, path: str):
         """Registriert einen Skill in der Datenbank."""

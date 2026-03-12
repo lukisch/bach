@@ -44,6 +44,16 @@ Dieser Agent koordiniert folgende Experten:
 - [Fähigkeit 2]
 - [Fähigkeit 3]
 
+## Handler-Discovery
+
+Passende Handler, Experten und Help-Themen finden:
+
+```bash
+bach help <suchbegriff>       # Fuzzy-Suche in 187+ Help-Themen (primaer!)
+bach agent list               # Alle Agenten auflisten
+bach skills search <keyword>  # Skills nach Keyword filtern
+```
+
 ## Verwendung
 
 ```bash
@@ -81,4 +91,4 @@ Pfad: `user/[agent-name]/`
 - Initiale Version
 
 ---
-BACH Skill-Architektur v2.0
+BACH Skill-Architektur v2.0 | SKILL.md v3.8.0: Handler-Discovery via `bach help <suchbegriff>`

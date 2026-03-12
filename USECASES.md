@@ -1,7 +1,7 @@
 # BACH Usecases
 
 Automatisch generiert aus der Datenbank (usecases).
-Letzte Aktualisierung: 2026-03-06 20:57
+Letzte Aktualisierung: 2026-03-12 14:19
 
 **Total:** 50 Usecases
 

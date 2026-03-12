@@ -24,6 +24,17 @@ SOFTWARE.
 """
 
 """
+DEPRECATED: Dieses Modul wird durch document_pipeline.py ersetzt.
+Imports werden zur Rueckwaertskompatibilitaet weitergeleitet.
+Migration: DocumentCollector -> DocumentPipeline, CollectorResult -> ScanResult
+"""
+import warnings
+warnings.warn(
+    "document_collector ist deprecated. Nutze document_pipeline stattdessen.",
+    DeprecationWarning, stacklevel=2
+)
+
+"""
 Document Collector Service
 ===========================
 
@@ -307,7 +318,12 @@ class DocumentCollector:
         if is_root and not filename.startswith("_"):
             doc_info.category = DocumentCategory.CORE
             if doc_type == "unknown":
-                doc_info.doc_type = "root_dokument"
+                # Root .docx/.doc ohne Pattern-Match = Verlaufsprotokoll (Klientenname.docx)
+                suffix = filepath.suffix.lower()
+                if suffix in [".docx", ".doc"]:
+                    doc_info.doc_type = "protokoll"
+                else:
+                    doc_info.doc_type = "root_dokument"
             return doc_info
 
         # Kategorie basierend auf Typ und Datum
@@ -677,46 +693,23 @@ class DocumentCollector:
         return "[PDF-Extraktion fehlgeschlagen: pypdf, pdfplumber und PyMuPDF nicht verfuegbar]"
 
     def _extract_pdf_ocr(self, filepath: str) -> str:
-        """OCR fuer Bild-PDFs via c_ocr_engine."""
+        """OCR fuer Bild-PDFs via tools.ocr.engine.OCREngine."""
         try:
-            # Versuche den existierenden OCR-Engine zu nutzen
-            # Nutze bach_paths.py als Single Source of Truth fuer Pfade
-
-            # 1. Versuche Import, falls im Pfad
+            # tools/ocr/engine.py ist der aktuelle Pfad nach Refactoring
             try:
-                from c_ocr_engine import ocr_pdf, is_ocr_available
+                from tools.ocr.engine import OCREngine
             except ImportError:
-                # 2. Nutze bach_paths.py fuer den Tools-Pfad (Single Source of Truth)
-                tools_dir = None
-                try:
-                    # bach_paths sollte bereits im sys.path sein (via hub/)
-                    from bach_paths import get_path
-                    tools_dir = get_path("tools")
-                except ImportError:
-                    # Fallback: Manuell suchen wenn bach_paths nicht verfuegbar
-                    current = Path(__file__).resolve()
-                    for _ in range(6):
-                        current = current.parent
-                        candidates = [
-                            current / "skills" / "tools",
-                            current / "system" / "skills" / "tools",
-                        ]
-                        for candidate in candidates:
-                            if candidate.exists() and (candidate / "c_ocr_engine.py").exists():
-                                tools_dir = candidate
-                                break
-                        if tools_dir:
-                            break
+                # Fallback: tools-Verzeichnis manuell zum sys.path hinzufuegen
+                tools_dir = Path(__file__).resolve().parent.parent.parent.parent / "tools"
+                if tools_dir.exists() and str(tools_dir.parent) not in sys.path:
+                    sys.path.insert(0, str(tools_dir.parent))
+                from tools.ocr.engine import OCREngine
 
-                if tools_dir and str(tools_dir) not in sys.path:
-                    sys.path.insert(0, str(tools_dir))
-
-                from c_ocr_engine import ocr_pdf, is_ocr_available
-
-            if not is_ocr_available():
+            engine = OCREngine()
+            if not engine.available:
                 return "[OCR nicht verfuegbar - Tesseract nicht installiert]"
 
-            text = ocr_pdf(filepath)
+            text = engine.extract_text(filepath)
             return text if text else "[OCR: Kein Text erkannt]"
         except ImportError as e:
             return f"[OCR Import-Fehler: {e}]"

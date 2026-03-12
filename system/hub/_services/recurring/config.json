@@ -7,7 +7,7 @@
       "priority_score": 80,
       "task_text": "BACH SELF-CHECK: SKILL.md und Lessons pruefen",
       "aufwand": "mittel",
-      "last_run": "2026-02-06T07:25:52.272996"
+      "last_run": "2026-03-08T07:28:34.798864"
     },
     "onboarding_scan": {
       "enabled": true,
@@ -16,7 +16,7 @@
       "priority_score": 60,
       "task_text": "Neue Tools pruefen: bach ati onboard --check",
       "aufwand": "niedrig",
-      "last_run": "2026-02-06T07:25:52.272996"
+      "last_run": "2026-03-08T07:28:21.619329"
     },
     "code_quality": {
       "enabled": true,
@@ -25,7 +25,7 @@
       "priority_score": 50,
       "task_text": "Code-Qualitaet pruefen: c_method_analyzer auf alle Tools",
       "aufwand": "hoch",
-      "last_run": "2026-01-22T03:22:41.831447"
+      "last_run": "2026-03-08T07:28:46.411677"
     },
     "backup_check": {
       "enabled": true,
@@ -34,7 +34,7 @@
       "priority": "P3",
       "project": "BACH",
       "task_text": "BACH Backup pruefen: bach backup status",
-      "last_run": "2026-02-06T07:25:52.272996"
+      "last_run": "2026-03-08T07:37:50.946363"
     },
     "memory_cleanup": {
       "enabled": true,
@@ -43,7 +43,7 @@
       "priority": "P3",
       "project": "BACH",
       "task_text": "Memory-Archiv pruefen: alte Eintraege archivieren",
-      "last_run": "2026-01-21T20:35:07.024216"
+      "last_run": "2026-03-08T07:37:52.913752"
     },
     "integration_check": {
       "enabled": true,
@@ -53,7 +53,7 @@
       "project": "BACH",
       "task_text": "Anschlussanalyse: bach --maintain registry + skills. Workflow: skills/workflows/system-anschlussanalyse.md",
       "aufwand": "mittel",
-      "last_run": "2026-01-22T21:30:00.000000"
+      "last_run": "2026-03-08T07:37:55.021185"
     },
     "roadmap_review": {
       "enabled": true,
@@ -63,7 +63,7 @@
       "project": "BACH",
       "task_text": "ROADMAP.md Review: Erledigte Tasks markieren, Prioritaeten pruefen, veraltete Eintraege archivieren",
       "aufwand": "mittel",
-      "last_run": "2026-02-08T22:40:56.132056"
+      "last_run": "2026-03-08T07:37:57.120926"
     },
     "wiki_author": {
       "enabled": true,
@@ -73,7 +73,7 @@
       "project": "BACH",
       "task_text": "Wiki-Autoren: Einen Agenten/Experten auswaehlen, Wissensluecken identifizieren, Web-Recherche, Wiki-Beitrag erstellen. Workflow: skills/workflows/wiki-author.md",
       "aufwand": "hoch",
-      "last_run": "2026-01-24T10:23:08.918940"
+      "last_run": "2026-03-08T07:37:59.225407"
     },
     "help_forensic": {
       "enabled": true,
@@ -83,7 +83,7 @@
       "project": "BACH",
       "task_text": "Help-Forensik: Eine docs/docs/docs/help/*.txt pruefen, Ist vs Soll vergleichen, bei Abweichung Help oder Roadmap anpassen. Workflow: skills/workflows/help-forensic.md",
       "aufwand": "mittel",
-      "last_run": "2026-02-08T22:40:56.132056"
+      "last_run": "2026-03-08T07:38:01.496813"
     },
     "doc_freshness": {
       "enabled": true,
@@ -103,7 +103,7 @@
       "project": "BACH",
       "task_text": "Docs-Changelog Review: python skills/_services/docs/docs_changelog.py report, Aenderungen an docs/docs/docs/help/ und wiki/ pruefen",
       "aufwand": "niedrig",
-      "last_run": "2026-01-24T10:23:08.918940"
+      "last_run": "2026-03-08T07:38:03.915598"
     }
   }
 }

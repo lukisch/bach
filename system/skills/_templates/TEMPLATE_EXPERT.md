@@ -59,6 +59,16 @@ Dieser Experte wird koordiniert von:
 
 [Welche Tabellen/Daten nutzt dieser Experte?]
 
+## Handler-Discovery
+
+Passende Handler, Tools und Help-Themen finden:
+
+```bash
+bach help <suchbegriff>       # Fuzzy-Suche in 187+ Help-Themen (primaer!)
+bach tools search <keyword>   # Volltextsuche in Tools
+bach skills search <keyword>  # Skills nach Keyword filtern
+```
+
 ## Verwendung
 
 ```bash
@@ -86,4 +96,4 @@ bach agent [parent-agent] --expert [name]
 - Initiale Version
 
 ---
-BACH Skill-Architektur v2.0
+BACH Skill-Architektur v2.0 | SKILL.md v3.8.0: Handler-Discovery via `bach help <suchbegriff>`

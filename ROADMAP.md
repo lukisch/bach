@@ -390,3 +390,252 @@ Archivierte Versionen: `../docs/_archive/ROADMAP_*.md`
 ---
 
 *Konsolidiert am 2026-03-01 — BACH_Dev/ROADMAP.md und BACH/ROADMAP.md zu einem Dokument zusammengefuehrt*
+
+---
+
+## Persona-System & Skill-Architektur (2026-03-12)
+
+### Phase 1: DB-Personas — KOMPLETT (SUGAR v3.8.0, Migration 034)
+
+Das Persona-System ist seit SUGAR v3.8.0 in der Datenbank implementiert:
+
+**DB-Schema:**
+- `bach_agents.display_name` — Persona-Vorname (z.B. "Atlas", "Clara")
+- `bach_agents.persona` — Charakter-Beschreibung (z.B. "Pragmatischer Handwerker...")
+- `bach_experts.display_name` — Persona-Vorname (z.B. "Theodor", "Sophie")
+- `bach_experts.persona` — Charakter-Beschreibung
+
+**20 Default-Personas:**
+
+| Typ | System-Name | Persona | Charakter |
+|-----|-------------|---------|-----------|
+| Agent | ati | Atlas | Pragmatischer Handwerker |
+| Agent | bueroassistent | Clara | Strukturierte Organisatorin |
+| Agent | finanz-assistent | Felix | Aufmerksamer Sparfuchs |
+| Agent | gesundheitsassistent | Helena | Fuersorgliche Begleiterin |
+| Agent | persoenlicher-assistent | Paul | Vielseitiger Allrounder |
+| Expert | steuer-agent | Theodor | Peniler Steuerberater |
+| Expert | financial_mail | Frieda | Mail-Detektivin |
+| Expert | aboservice | Anton | Kuendigungskoenig |
+| Expert | gesundheitsverwalter | Gustav | Archivar der Befunde |
+| Expert | psycho-berater | Sophie | Einfuehlsame Zuhoererin |
+| Expert | health_import | Hugo | Gewissenhafter Datenpfleger |
+| Expert | haushaltsmanagement | Martha | Sparsame Hauswirtschafterin |
+| Expert | foerderplaner | Florian | Foerdermittel-Experte |
+| Expert | bewerbungsexperte | Benjamin | Karriere-Coach |
+| Expert | data-analysis | Diana | Zahlenfluesterin |
+| Expert | decision-briefing | Dietrich | Kuehler Stratege |
+| Expert | report_generator | Rita | Effiziente Berichtsmaschine |
+| Expert | mr_tiktak | Mr. TikTak | Strategischer Taktiker |
+| Expert | transkriptions-service | Tristan | Geduldiger Zuhoerer |
+| Expert | wikiquizzer | Wilhelm | Quizmaster |
+
+**Implementierte Features:**
+- `bach agent rename <name> <neuer-display-name>` — Display-Name aendern
+- Multi-Strategie Namensaufloesung in `resolve_agent_name()`:
+  Exakter Name → Display-Name → Substring → Fuzzy/Levenshtein
+- Persona-Injektion in Agent-System-Prompt bei Start (`agent_launcher.py`)
+- Display-Name-Anzeige in `bach agent list` (in Klammern)
+
+### Phase 2: Konzeptionelle Weiterentwicklung — OFFEN
+
+#### Kernidee: Drei getrennte Konzepte
+
+```
+PERSONA (wer)          SKILL (was)              SESSION (wie)
+  Charakter + Stil       Faehigkeiten + Code      Laufzeitumgebung
+  display_name + persona SKILL.md + scripts/      Context, Tools, Turns
+```
+
+**Persona:** Benannter Charakter mit Persoenlichkeit, Stil, Ethik-Grenzen.
+Definiert WER die Arbeit macht und WIE kommuniziert wird.
+Aktuell in DB-Spalten (`display_name`, `persona`), kuenftig auch als Dateien.
+
+**Skill:** Faehigkeit mit Instruktionen, Code, Referenzen.
+Definiert WAS getan werden kann. Standalone, exportierbar, portierbar (Anthropic-Standard).
+
+**Session/Agent:** Laufzeitumgebung mit Context Window, Tool-Zugriff, Turn-Limit.
+Definiert unter WELCHEN BEDINGUNGEN gearbeitet wird.
+
+#### Geplante Dateistruktur (schrittweise Migration)
+
+```
+agents/
+  personas/              # NEU: Eigenstaendige Persona-Dateien
+    THEODOR.md           # Steuerberater-Persona (aus DB extrahiert)
+    SOPHIE.md            # Psychologin-Persona
+    TIKTAK.md            # Stratege-Persona
+
+skills/
+  steuererklaerung/      # Faehigkeit als eigenstaendiger Skill
+    SKILL.md             # Anthropic-kompatibel
+    scripts/             # beleg_extractor.py, steuer_sync.py...
+    references/          # Workflows, Anleitungen
+```
+
+#### Interaktionsmodelle
+
+```
+# Direkt: Skill ohne Persona (schnell, sachlich)
+User: "Mach die Steuererklaerung"
+-> Skill STEUERERKLAERUNG wird geladen, LLM fuehrt aus
+
+# Mit Persona: Skill + Charakter (persoenlich, stilsicher)
+User: "Frag Theodor wegen der Steuer"
+-> Persona Theodor (DB) + Skill wird geladen
+
+# Session: Langfristige Arbeit (eigener Context)
+User: "Starte eine Steuersession mit Theodor"
+-> Agent-Session + Persona-Injektion + Skill
+```
+
+#### Kompatibilitaet mit Anthropic
+
+| BACH-Konzept | Anthropic-Aequivalent | Portierbar? |
+|-------------|----------------------|-------------|
+| Persona (DB/Datei) | `.claude/agents/<name>.md` | Nein (proprietaer) |
+| Skill (SKILL.md) | `.claude/skills/<name>/SKILL.md` | Ja (offener Standard) |
+| Session-Config | Agent-Frontmatter (tools, model, maxTurns) | Nein (proprietaer) |
+
+Skills sind das einzige portierbare Element. Personas und Sessions sind
+BACH-/Claude-Code-spezifisch -- aber das ist akzeptabel, da sie die
+Laufzeitumgebung definieren, nicht das Wissen.
+
+#### Offene Fragen (Phase 2+)
+
+- Persona-Dateien (agents/personas/) vs. DB-only: Braucht es beides?
+- Sollen Personas eigenstaendige Skills referenzieren oder nur bestehende Expert-Ordner nutzen?
+- Boss-Agent-Rolle: Entfaellt langfristig oder bleibt als interner Router?
+- Wie interagieren mehrere Personas in einer Session?
+- Migration: Schrittweise (bei Nutzung konvertieren) — User entscheidet Tempo
+
+#### Naechste Schritte
+
+| Prio | Aktion | Status |
+|------|--------|--------|
+| 1 | DB-Personas fuer alle Agenten/Experten | KOMPLETT (Migration 034) |
+| 2 | Persona-Template erstellen (TEMPLATE_PERSONA.md) | KOMPLETT |
+| 3 | Standard: Jeder Expert MUSS SKILL.md haben | KOMPLETT (22/22 Experts, 2026-03-12) |
+| 4 | Persona-Dateien aus DB generieren (agents/personas/) | KOMPLETT (20 Dateien, 2026-03-12) |
+| 5 | Proof-of-Concept: 1 Expert -> Persona + Skill konvertieren | Offen |
+| 6 | Export-Pipeline: `--format agent` fuer Claude Code Agents | Offen |
+| 7 | Boss-Agent-Rolle evaluieren (benoetigt? Router-Ersatz?) | Offen |
+
+### Referenzen
+
+- Migration 034: `data/schema/migrations/034_agent_personas.py`
+- Agent-Launcher mit Persona-Injektion: `hub/agent_launcher.py`
+- Namensaufloesung: `hub/agents.py` (`resolve_agent_name()`)
+- Anthropic Skills Standard: https://agentskills.io
+- Persona-Template: `skills/_templates/TEMPLATE_PERSONA.md`
+- Help: `bach help skill_standards`, `bach help agents`
+
+---
+
+## Safe DB Access Layer — bach_api.db (2026-03-12)
+
+> Status: KOMPLETT — core/safe_db.py + bach_api.db (2026-03-12)
+
+### Problem
+
+LLMs bevorzugen direkten DB-Zugriff (schnell, flexibel), aber direktes SQL
+hat keine Validierung, keine Hooks, kein Audit-Log. Einmal gab es dadurch
+Schaeden. Die bestehende bach_api (Handler) ist sicher, aber umstaendlich --
+man muss Handler, Operation und Args kennen.
+
+### Loesung: Validierte Schnellspur
+
+Ein neues API-Modul `bach_api.db` das sich wie SQL anfuehlt, aber sicher ist:
+
+```python
+from bach_api import db
+
+db.update("bach_experts", {"persona": "Neuer Text"}, where={"name": "mr_tiktak"})
+db.insert("tasks", {"title": "Aufgabe", "priority": "high"})
+db.delete("tasks", where={"id": 42})
+db.select("bach_agents", where={"language": "de"})  # Read bleibt frei
+```
+
+### Sicherheitsschichten
+
+1. **Tabellen-Whitelist** — nur bekannte BACH-Tabellen erlaubt
+2. **Schema-Validierung** — Spalten gegen `PRAGMA table_info` pruefen
+3. **Auto-Backup** — bei kritischen Tabellen (tasks, memory) vorher Snapshot
+4. **Hook-Trigger** — `after_memory_write`, `after_task_create` etc. feuern
+5. **Audit-Log** — wer (Partner), wann, was geaendert (monitor_* Tabelle)
+6. **WHERE-Pflicht** — UPDATE/DELETE ohne WHERE wird geblockt
+
+### Zugriffsebenen (von schnell zu sicher)
+
+| Zugriff | Speed | Sicherheit | Wann |
+|---------|-------|------------|------|
+| `db.update(...)` | Schnell | Validiert + geloggt | **Standard fuer LLMs** |
+| `task.add(...)` | Mittel | Voll (Handler-Logik) | Komplexe Operationen |
+| `sqlite3.connect()` | Sofort | Keine | Nur Dev-Mode |
+| `bach task add` (CLI) | Langsam | Voll | Menschen am Terminal |
+
+### Implementierung
+
+| Schritt | Beschreibung | Aufwand |
+|---------|-------------|---------|
+| 1 | `core/safe_db.py` — SafeDB-Klasse mit Whitelist + Schema-Check | KOMPLETT |
+| 2 | `bach_api.db` — Modul-Wrapper fuer SafeDB | KOMPLETT |
+| 3 | Hook-Integration — Events bei Schreibzugriffen ausloesen | KOMPLETT |
+| 4 | Audit-Log — Aenderungen in `monitor_db_changes` loggen | KOMPLETT |
+| 5 | Hook-Prompt anpassen — Empfehlung `bach_api.db` statt Block | Offen |
+
+---
+
+## Claude Code Hooks Distribution (2026-03-12)
+
+> Status: PHASE 1 KOMPLETT — `bach setup hooks` implementiert
+
+### Problem
+
+BACH nutzt Claude Code Hooks (z.B. DB-Schutz-Hook in `PreToolUse:Bash`) fuer
+Sicherheit und Workflow-Steuerung. Diese Hooks liegen in `~/.claude/settings.json`
+und sind damit **lokal pro User** — sie werden NICHT mit dem Repo ausgeliefert.
+
+Claude Code erlaubt keine Hooks in projektspezifischen `.claude/settings.json`
+(nur `permissions`, `model` etc.) — das ist eine Sicherheitsentscheidung von Anthropic.
+
+### Frage
+
+Sollen bestimmte Hooks als Teil der BACH-Installation mitgeliefert werden?
+
+### Optionen
+
+| Option | Beschreibung | Pro | Contra |
+|--------|-------------|-----|--------|
+| A | Installer kopiert Hooks bei `bach install` | Automatisch, einheitlich | Greift in User-Settings ein |
+| B | `bach hooks setup` als optionaler Befehl | User entscheidet | Muss aktiv aufgerufen werden |
+| C | Hooks nur dokumentieren (Help) | Kein Eingriff | Jeder muss manuell einrichten |
+| D | Hooks als Teil von SKILL.md mitliefern | Portabel | Anthropic unterstuetzt das (noch) nicht |
+
+### Kandidaten fuer Distribution
+
+| Hook | Typ | Zweck |
+|------|-----|-------|
+| bach-db-guard.sh | PreToolUse:Bash | Verhindert direkte DB-Schreibzugriffe ohne API |
+| (geplant) | SessionStart | BACH-Startup bei Session-Beginn |
+| (geplant) | PreToolUse:Edit | Schutz fuer BACH-Core-Dateien |
+
+### Implementiert: Option B
+
+`bach setup hooks` installiert empfohlene Hooks in die User-Settings:
+- Kopiert Hook-Scripts aus `system/hooks/` nach `~/.claude/hooks/`
+- Merged Hook-Config in `~/.claude/settings.json` (nicht-destruktiv)
+- Ist Teil von `bach setup full-install`
+- Erkennt bereits vorhandene Hooks und ueberspringt sie
+
+### Offen
+
+- ~~`bach hooks remove` — Hooks wieder entfernen (reversibel)~~ KOMPLETT (2026-03-12)
+- Weitere Hooks (SessionStart, PreToolUse:Edit) bei Bedarf
+
+### Referenzen
+
+- Hook-Quellen im Repo: `system/hooks/bach-db-guard.sh`
+- Installer: `hub/setup.py` (`_setup_hooks`, `CLAUDE_HOOKS`, `HOOK_FILES`)
+- Claude Code Hooks-Doku: Settings > hooks
+- BACH Hook-Framework (intern): `core/hooks.py`, `hub/hooks.py`

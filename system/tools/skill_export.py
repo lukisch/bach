@@ -24,10 +24,10 @@ SOFTWARE.
 
 """
 Tool: skill_export
-Version: 1.0.0
+Version: 1.1.0
 Author: BACH Team
 Created: 2026-02-08
-Updated: 2026-02-08
+Updated: 2026-03-12
 Anthropic-Compatible: True
 
 VERSIONS-HINWEIS: Prüfe auf neuere Versionen mit: bach tools version skill_export
@@ -346,7 +346,7 @@ class DependencyResolver:
             return
 
         # BACH-internes Modul?
-        if top_level in ('hub', 'skills', 'tools', 'gui'):
+        if top_level in ('hub', 'skills', 'tools', 'gui', 'agents', 'connectors', 'partners'):
             return
 
         # Bekannte pip-Pakete erkennen
@@ -407,24 +407,33 @@ class SkillExporter:
         self.resolver = DependencyResolver(system_root)
 
     def find_skill(self, name: str) -> Optional[Path]:
-        """Findet einen Skill nach Name."""
+        """Findet einen Skill nach Name (v2.6 Pfade)."""
         name_lower = name.lower()
 
-        # In Standard-Verzeichnissen suchen
-        for subdir in ['_agents', '_experts', '_services']:
-            skill_dir = self.skills_dir / subdir / name
+        # v2.6 Verzeichnisstruktur: agents/, agents/_experts/, connectors/, partners/, skills/workflows/, hub/_services/
+        search_dirs = [
+            self.system_root / "agents",               # Agenten (Top-Level)
+            self.system_root / "agents" / "_experts",   # Experten
+            self.system_root / "connectors",            # Connectors (Top-Level)
+            self.system_root / "partners",              # Partners (Top-Level)
+            self.system_root / "skills" / "workflows",  # Workflows/Protocols
+            self.system_root / "hub" / "_services",     # Services
+        ]
+
+        # Exakter Match
+        for parent in search_dirs:
+            skill_dir = parent / name
             if skill_dir.exists() and skill_dir.is_dir():
                 return skill_dir
 
         # Fuzzy-Match
-        for subdir in ['_agents', '_experts', '_services']:
-            parent = self.skills_dir / subdir
+        for parent in search_dirs:
             if parent.exists():
                 for item in parent.iterdir():
                     if item.is_dir() and name_lower in item.name.lower():
                         return item
 
-        # Einzeldatei-Suche
+        # Auch in skills/ selbst suchen (fuer Workflows, Templates etc.)
         for suffix in ['.md', '.txt']:
             for skill_file in self.skills_dir.rglob(f"*{suffix}"):
                 if name_lower == skill_file.stem.lower():
@@ -432,7 +441,7 @@ class SkillExporter:
 
         return None
 
-    def export(self, name: str, output_dir: Optional[str] = None, dry_run: bool = False) -> Tuple[bool, str]:
+    def export(self, name: str, output_dir: Optional[str] = None, dry_run: bool = False, fmt: str = "bach") -> Tuple[bool, str]:
         """
         Exportiert einen Skill mit allen Abhaengigkeiten.
 
@@ -440,10 +449,13 @@ class SkillExporter:
             name: Skill-Name
             output_dir: Optionales Zielverzeichnis
             dry_run: Nur zeigen, nichts kopieren
+            fmt: Export-Format -- 'bach' (Standard) oder 'anthropic'
 
         Returns:
             (success, message)
         """
+        if fmt == "anthropic":
+            return self._export_anthropic(name, output_dir, dry_run)
         lines = []
         lines.append("=" * 60)
         lines.append(f"SKILL EXPORT: {name}")
@@ -642,14 +654,236 @@ class SkillExporter:
         except Exception as e:
             return False, f"Export fehlgeschlagen: {e}\n\n" + "\n".join(lines)
 
+    def _export_anthropic(self, name: str, output_dir: Optional[str] = None, dry_run: bool = False) -> Tuple[bool, str]:
+        """
+        Exportiert einen Skill im Anthropic-Standard-Format.
+
+        Konvertiert BACH-Struktur zu:
+          <name>/SKILL.md + scripts/ + references/
+        """
+        lines = []
+        lines.append("=" * 60)
+        lines.append(f"SKILL EXPORT (Anthropic-Format): {name}")
+        lines.append("=" * 60)
+
+        # 1. Skill finden
+        skill_path = self.find_skill(name)
+        if not skill_path:
+            return False, f"Skill nicht gefunden: {name}\nVerfuegbare Skills pruefen mit: bach skills list"
+
+        is_dir = skill_path.is_dir()
+        skill_type = self._detect_type(skill_path)
+
+        lines.append(f"Quelle:  {skill_path}")
+        lines.append(f"Typ:     {skill_type}")
+        lines.append(f"Format:  Anthropic (scripts/ + references/)")
+        lines.append("")
+
+        # 2. Abhaengigkeiten aufloesen
+        deps = self.resolver.resolve(skill_path)
+
+        lines.append("ABHAENGIGKEITS-ANALYSE")
+        lines.append("-" * 40)
+        if deps['tools']:
+            lines.append(f"  Tools -> scripts/ ({len(deps['tools'])})")
+            for tool_name, tool_path in deps['tools'].items():
+                lines.append(f"    + {tool_name}")
+        if deps['services']:
+            lines.append(f"  Services -> scripts/ ({len(deps['services'])})")
+            for svc_name in deps['services']:
+                lines.append(f"    + {svc_name}")
+        if deps['workflows']:
+            lines.append(f"  Workflows -> references/ ({len(deps['workflows'])})")
+            for wf_name in deps['workflows']:
+                lines.append(f"    + {wf_name}")
+        if deps['pip_packages']:
+            lines.append(f"  Pip-Pakete ({len(deps['pip_packages'])}): {', '.join(deps['pip_packages'])}")
+        if not deps['tools'] and not deps['services'] and not deps['workflows']:
+            lines.append("  Keine Abhaengigkeiten gefunden")
+        if deps['warnings']:
+            for warn in deps['warnings']:
+                lines.append(f"    [!] {warn}")
+        lines.append("")
+
+        # 3. Zielverzeichnis
+        if output_dir:
+            export_path = Path(output_dir) / name
+        else:
+            export_path = self.exports_dir / name
+
+        lines.append(f"Zielverzeichnis: {export_path}")
+        lines.append("")
+
+        # 4. SKILL.md Frontmatter konvertieren (nur name + description)
+        skill_md_source = skill_path / "SKILL.md" if is_dir else skill_path
+        converted_skill_md = self._convert_skill_md_to_anthropic(skill_md_source, name)
+
+        if dry_run:
+            lines.append("KONVERTIERTE SKILL.md (Vorschau Frontmatter):")
+            lines.append("-" * 40)
+            # Nur Frontmatter zeigen
+            fm_end = converted_skill_md.find('---', 4)
+            if fm_end > 0:
+                lines.append(converted_skill_md[:fm_end + 3])
+            lines.append("-" * 40)
+            lines.append("")
+            lines.append("[DRY-RUN] Keine Dateien erstellt.")
+            return True, "\n".join(lines)
+
+        # 5. Export durchfuehren
+        try:
+            lines.append("EXPORT-VORGANG:")
+            lines.append("-" * 40)
+
+            if export_path.exists():
+                shutil.rmtree(export_path)
+            export_path.mkdir(parents=True, exist_ok=True)
+
+            # SKILL.md schreiben (konvertiertes Frontmatter)
+            (export_path / "SKILL.md").write_text(converted_skill_md, encoding='utf-8')
+            lines.append("  [+] SKILL.md (Anthropic-Frontmatter)")
+
+            # scripts/ -- Python-Code aus Skill + Tool-/Service-Dependencies
+            scripts_dir = export_path / "scripts"
+            has_scripts = False
+
+            # Skill-eigene Python-Dateien kopieren
+            if is_dir:
+                for py_file in skill_path.rglob("*.py"):
+                    if '__pycache__' not in str(py_file):
+                        if not has_scripts:
+                            scripts_dir.mkdir(exist_ok=True)
+                            has_scripts = True
+                        shutil.copy2(py_file, scripts_dir / py_file.name)
+                        lines.append(f"  [+] scripts/{py_file.name} (Skill)")
+
+            # Tool-Dependencies nach scripts/
+            for tool_name, tool_path in deps['tools'].items():
+                if not has_scripts:
+                    scripts_dir.mkdir(exist_ok=True)
+                    has_scripts = True
+                if tool_path.is_dir():
+                    for f in tool_path.rglob("*.py"):
+                        if '__pycache__' not in str(f):
+                            shutil.copy2(f, scripts_dir / f.name)
+                            lines.append(f"  [+] scripts/{f.name} (Tool: {tool_name})")
+                else:
+                    shutil.copy2(tool_path, scripts_dir / tool_path.name)
+                    lines.append(f"  [+] scripts/{tool_path.name} (Tool: {tool_name})")
+
+            # Service-Dependencies nach scripts/
+            for svc_name, svc_path in deps['services'].items():
+                if not has_scripts:
+                    scripts_dir.mkdir(exist_ok=True)
+                    has_scripts = True
+                if svc_path.is_dir():
+                    for f in svc_path.rglob("*.py"):
+                        if '__pycache__' not in str(f):
+                            shutil.copy2(f, scripts_dir / f.name)
+                            lines.append(f"  [+] scripts/{f.name} (Service: {svc_name})")
+                elif svc_path.suffix == '.py':
+                    shutil.copy2(svc_path, scripts_dir / svc_path.name)
+                    lines.append(f"  [+] scripts/{svc_path.name} (Service: {svc_name})")
+
+            # references/ -- Markdown-Dateien aus Skill + Workflow-Dependencies
+            references_dir = export_path / "references"
+            has_refs = False
+
+            # Skill-eigene Markdown-Dateien (ausser SKILL.md)
+            if is_dir:
+                for md_file in skill_path.rglob("*.md"):
+                    if md_file.name != "SKILL.md" and '__pycache__' not in str(md_file):
+                        if not has_refs:
+                            references_dir.mkdir(exist_ok=True)
+                            has_refs = True
+                        shutil.copy2(md_file, references_dir / md_file.name)
+                        lines.append(f"  [+] references/{md_file.name} (Skill)")
+
+            # Workflow-Dependencies nach references/
+            for wf_name, wf_path in deps['workflows'].items():
+                if not has_refs:
+                    references_dir.mkdir(exist_ok=True)
+                    has_refs = True
+                shutil.copy2(wf_path, references_dir / wf_path.name)
+                lines.append(f"  [+] references/{wf_path.name} (Workflow: {wf_name})")
+
+            # requirements.txt nur wenn pip-Pakete vorhanden
+            if deps['pip_packages']:
+                req_content = "\n".join(deps['pip_packages']) + "\n"
+                (export_path / "requirements.txt").write_text(req_content, encoding='utf-8')
+                lines.append("  [+] requirements.txt")
+
+            lines.append("-" * 40)
+            lines.append("")
+            lines.append(f"[OK] Anthropic-Export erfolgreich: {export_path}")
+            lines.append(f"Struktur ist kompatibel mit: Claude Code, LobeHub, Cursor, Codex CLI")
+
+            return True, "\n".join(lines)
+
+        except Exception as e:
+            return False, f"Export fehlgeschlagen: {e}\n\n" + "\n".join(lines)
+
+    def _convert_skill_md_to_anthropic(self, skill_md_path: Path, name: str) -> str:
+        """Konvertiert SKILL.md Frontmatter zum Anthropic-Format (nur name + description)."""
+        if not skill_md_path.exists():
+            return f"---\nname: {name}\ndescription: BACH Skill {name}\n---\n\n# {name}\n"
+
+        try:
+            content = skill_md_path.read_text(encoding='utf-8', errors='ignore')
+        except Exception:
+            return f"---\nname: {name}\ndescription: BACH Skill {name}\n---\n\n# {name}\n"
+
+        # YAML-Frontmatter extrahieren
+        yaml_match = re.match(r'^---\s*\n(.*?)\n---', content, re.DOTALL)
+        if not yaml_match:
+            return f"---\nname: {name}\ndescription: BACH Skill {name}\n---\n\n{content}"
+
+        yaml_text = yaml_match.group(1)
+        body = content[yaml_match.end():]
+
+        # Description und Name extrahieren
+        desc = f"BACH Skill: {name}"
+        name_val = name
+
+        # Versuche YAML zu parsen
+        try:
+            import yaml
+            header = yaml.safe_load(yaml_text)
+            if header and isinstance(header, dict):
+                name_val = header.get('name', name)
+                raw_desc = header.get('description', desc)
+                if isinstance(raw_desc, str):
+                    desc = raw_desc.strip()
+        except (ImportError, Exception):
+            # Regex-Fallback
+            name_match = re.search(r'name:\s*(.+)', yaml_text)
+            if name_match:
+                name_val = name_match.group(1).strip()
+            desc_match = re.search(r'description:\s*>?\s*\n?\s*(.+)', yaml_text)
+            if desc_match:
+                desc = desc_match.group(1).strip()
+
+        # Neues Anthropic-Frontmatter (nur name + description)
+        # Description auf eine Zeile bringen (max 1024 Zeichen)
+        desc_clean = ' '.join(desc.split())[:1024]
+        new_frontmatter = f"---\nname: {name_val}\ndescription: >\n  {desc_clean}\n---"
+
+        return new_frontmatter + body
+
     def _detect_type(self, skill_path: Path) -> str:
-        """Erkennt den Skill-Typ anhand des Pfads."""
-        path_str = str(skill_path).lower()
-        if '_agents' in path_str:
-            return 'agent'
-        elif '_experts' in path_str:
+        """Erkennt den Skill-Typ anhand des Pfads (v2.6 Struktur)."""
+        path_str = str(skill_path).lower().replace('\\', '/')
+        # v2.6: agents/_experts/ -> expert, agents/ -> agent, connectors/ -> connector,
+        #        partners/ -> partner, hub/_services/ -> service, skills/workflows/ -> workflow
+        if '_experts/' in path_str or '/_experts/' in path_str:
             return 'expert'
-        elif '_services' in path_str:
+        elif '/agents/' in path_str:
+            return 'agent'
+        elif '/connectors/' in path_str:
+            return 'connector'
+        elif '/partners/' in path_str:
+            return 'partner'
+        elif '_services/' in path_str or '/_services/' in path_str:
             return 'service'
         elif 'workflows' in path_str:
             return 'workflow'
@@ -730,7 +964,13 @@ def main():
     parser.add_argument(
         '--output', '-o',
         default=None,
-        help='Zielverzeichnis (Standard: system/system/system/system/exports/<skill>_export)'
+        help='Zielverzeichnis (Standard: exports/<skill>_export)'
+    )
+    parser.add_argument(
+        '--format', '-f',
+        default='bach',
+        choices=['bach', 'anthropic'],
+        help='Export-Format: bach (Standard mit _deps/) oder anthropic (scripts/ + references/)'
     )
 
     args = parser.parse_args()
@@ -740,6 +980,7 @@ def main():
         name=args.skill,
         output_dir=args.output,
         dry_run=args.dry_run,
+        fmt=args.format,
     )
 
     print(message)

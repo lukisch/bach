@@ -13096,11 +13096,11 @@ async def list_anon_clients():
 
         sys.path.insert(0, str(BACH_DIR))
 
-        from skills._services.document.quarantine_service import QuarantineScanner
+        from hub._services.document.file_access_hook import list_all_clients
 
-        scanner = QuarantineScanner(BACH_DIR)
+        clients = list_all_clients()
 
-        return {"success": True, "clients": scanner.list_clients()}
+        return {"success": True, "clients": clients}
 
     except Exception as e:
 
@@ -13118,23 +13118,27 @@ async def create_anon_profile(data: dict = Body(...)):
 
         sys.path.insert(0, str(BACH_DIR))
 
-        from skills._services.document.quarantine_service import QuarantineScanner
+        from hub._services.document.anonymizer_service import DocumentAnonymizer
 
-        scanner = QuarantineScanner(BACH_DIR)
+        anonymizer = DocumentAnonymizer()
 
-        
+
 
         folder_name = data.get("folder_name") or data.get("client_id")
 
         real_name = data.get("real_name", folder_name)
 
-        terms = [t.strip() for t in data.get("redaction_terms", "").split(",")]
+        terms = [t.strip() for t in data.get("redaction_terms", "").split(",") if t.strip()]
 
-        
 
-        result = scanner.create_profile_for_folder(folder_name, real_name, terms)
 
-        return result
+        profile = anonymizer.create_profile(
+            real_name=real_name,
+            geburtsdatum=data.get("geburtsdatum", "01.01.2010"),
+            additional_terms=terms
+        )
+
+        return {"success": True, "tarnname": profile.tarnname, "client_id": profile.client_id}
 
     except Exception as e:
 

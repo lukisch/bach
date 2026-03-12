@@ -31,3 +31,4 @@ from .pdf_service import PDFProcessor
 from .ocr_service import OCREngine
 from .redaction_service import RedactionDetector
 from .search_service import DocumentSearch
+from .foerderbericht_pipeline import FoerderberichtPipeline

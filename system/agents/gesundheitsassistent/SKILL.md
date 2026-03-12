@@ -1,10 +1,16 @@
 ---
 name: gesundheitsassistent
+description: >
+  Health management and medical documentation agent. Use this skill when you need to:
+  (1) analyze medical reports, (2) manage diagnoses and medications,
+  (3) track lab values and health metrics, (4) plan preventive care appointments,
+  (5) provide psychological support and wellness guidance.
+  Coordinates health management and psychological counseling experts.
 version: 2.0.0
 type: boss-agent
 author: Gemini
 created: 2026-01-20
-updated: 2026-02-04
+updated: 2026-03-12
 anthropic_compatible: true
 status: active
 
@@ -16,13 +22,6 @@ dependencies:
   tools: []
   services: []
   workflows: []
-
-description: >
-  Boss-Agent fuer Gesundheitsverwaltung und medizinische Dokumentation. Nutze
-  diesen Skill wenn: (1) Arztberichte analysiert werden sollen, (2)
-  Diagnosen/Medikamente verwaltet werden, (3) Laborwerte getrackt werden, (4)
-  Vorsorge geplant wird, (5) psychologische Unterstuetzung gewuenscht ist.
-  Koordiniert Experten: Gesundheitsverwalter, Psycho-Berater.
 ---
 ============================================================
 GESUNDHEITSASSISTENT (Boss-Agent)

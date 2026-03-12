@@ -1,10 +1,15 @@
 ---
 name: bueroassistent
+description: >
+  Office management and professional support agent. Use this skill when you need to:
+  (1) capture and categorize tax receipts, (2) create funding plans and grant applications,
+  (3) generate professional documentation, (4) organize work and schedules.
+  Coordinates specialized experts for tax management and funding planning.
 version: 1.0.0
 type: boss-agent
 author: Gemini
 created: 2026-01-20
-updated: 2026-02-04
+updated: 2026-03-12
 anthropic_compatible: true
 status: active
 
@@ -16,13 +21,6 @@ dependencies:
   tools: []
   services: []
   workflows: []
-
-description: >
-  Boss-Agent fuer berufliche Unterstuetzung und Bueroverwaltung. Nutze diesen
-  Skill wenn: (1) Steuerbelege erfasst werden sollen, (2) Foerderplaene
-  erstellt werden, (3) berufliche Dokumentation gebraucht wird, (4)
-  Arbeitsorganisation unterstuetzt werden soll. Koordiniert Experten:
-  Steuer-Agent, Foerderplaner.
 ---
 ============================================================
 BUEROASSISTENT (Boss-Agent)
@@ -94,6 +92,20 @@ Delegation an: steuer-agent
 - Methoden vorschlagen
 
 Delegation an: foerderplaner
+
+### Foerderbericht-Pipeline (3-Phasen-Flow)
+Der Foerderplaner kann automatisch Foerderberichte erstellen:
+- **Rollentrennung:** USER stellt Akte in data_roh/ ein. AI startet NUR das Script.
+  AI stellt KEINE Akten ein, kopiert KEINE, prueft NICHT vorab ob Akte da ist.
+  Das Script meldet selbst: Akte gefunden oder Fehler.
+- **Ein-Klient-Regel:** NUR 1 Ordner in data_roh/ pro Durchlauf!
+- **Phase 1:** prepare_prompt() -- Python anonymisiert + buendelt -> prompt.txt
+- **Phase 2:** AI liest prompt.txt, generiert JSON -> llm_response.txt
+- **Phase 3:** finish_report() -- Python de-anonymisiert + Word generiert
+- **Vollautomatisch:** run_full_pipeline() (.bat/llmauto/CLI)
+- Trigger: "Erstelle Foerderbericht" (Name wird automatisch erkannt)
+- CLI: bach bericht pipeline (Auto-Detect)
+- Sicherheit: .pipeline_lock, OneDrive-Pause, kein AI sieht Rohdaten
 
 [3. DOKUMENTATION]
 

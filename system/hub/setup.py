@@ -5,6 +5,7 @@ Setup Handler - System-Konfiguration und Installationshilfe
 
 bach setup mcp              MCP-Server global installieren und Claude Code konfigurieren
 bach setup n8n              n8n-manager-mcp optional installieren und konfigurieren
+bach setup hooks            Claude Code Hooks installieren (DB-Schutz etc.)
 bach setup check             Pruefe ob alle Abhaengigkeiten konfiguriert sind
 bach setup secrets           Secrets-Datei initialisieren / synchen
 bach setup user              USER.md pruefen, personalisieren und mit DB synchronisieren
@@ -50,10 +51,34 @@ class SetupHandler(BaseHandler):
         },
     }
 
+    # Claude Code Hooks die bei Installation eingerichtet werden
+    CLAUDE_HOOKS = {
+        "PreToolUse": [
+            {
+                "matcher": "Bash",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "bash ~/.claude/hooks/bach-db-guard.sh",
+                        "timeout": 5000,
+                        "statusMessage": "BACH DB-Schutz prueft...",
+                    }
+                ],
+            }
+        ],
+    }
+
+    # Hook-Dateien die kopiert werden (relativ zu system/)
+    HOOK_FILES = [
+        "hooks/bach-db-guard.sh",
+    ]
+
     def get_operations(self) -> dict:
         return {
             "mcp": "MCP-Server global installieren und Claude Code konfigurieren",
             "n8n": "n8n-manager-mcp optional installieren und konfigurieren",
+            "hooks": "Claude Code Hooks installieren (DB-Schutz etc.)",
+            "hooks-remove": "Claude Code Hooks entfernen (reversibel)",
             "check": "Pruefe ob alle Abhaengigkeiten konfiguriert sind",
             "secrets": "Secrets-Datei initialisieren / synchen",
             "user": "USER.md pruefen, personalisieren und mit DB synchronisieren",
@@ -67,6 +92,10 @@ class SetupHandler(BaseHandler):
             return self._setup_mcp(dry_run)
         elif operation == "n8n":
             return self._setup_n8n(dry_run)
+        elif operation == "hooks":
+            return self._setup_hooks(dry_run)
+        elif operation == "hooks-remove":
+            return self._remove_hooks(dry_run)
         elif operation == "check":
             return self._check()
         elif operation == "secrets":
@@ -333,6 +362,178 @@ class SetupHandler(BaseHandler):
 
         return all_ok, "\n".join(out)
 
+    # =========================================================================
+    # Claude Code Hooks Setup
+    # =========================================================================
+
+    def _setup_hooks(self, dry_run: bool = False) -> tuple:
+        """Installiert Claude Code Hooks (DB-Schutz etc.) in ~/.claude/.
+
+        - Kopiert Hook-Scripts nach ~/.claude/hooks/
+        - Merged Hook-Konfiguration in ~/.claude/settings.json
+        - Nicht-destruktiv: bestehende Hooks bleiben erhalten
+        """
+        import os
+        import stat
+
+        settings_path = Path(os.path.expanduser("~/.claude/settings.json"))
+        hooks_dir = Path(os.path.expanduser("~/.claude/hooks"))
+        out = []
+
+        # --- 1. Hook-Scripts kopieren ---
+        hooks_dir.mkdir(parents=True, exist_ok=True)
+        source_dir = self.base_path / "hooks"
+
+        for hook_file in self.HOOK_FILES:
+            src = self.base_path / hook_file
+            dst = hooks_dir / Path(hook_file).name
+
+            if not src.exists():
+                out.append(f"  [SKIP] {hook_file} nicht gefunden in {source_dir}")
+                continue
+
+            if dry_run:
+                out.append(f"  [DRY] Wuerde kopieren: {src} -> {dst}")
+                continue
+
+            # Kopieren (ueberschreibt bei Update)
+            shutil.copy2(str(src), str(dst))
+            # Ausfuehrbar machen
+            dst.chmod(dst.stat().st_mode | stat.S_IEXEC)
+            out.append(f"  [OK] {dst.name} installiert")
+
+        # --- 2. Hook-Config in settings.json mergen ---
+        if dry_run:
+            out.append("  [DRY] Wuerde Hooks in settings.json mergen")
+            return True, "\n".join(["Claude Code Hooks (dry-run):"] + out)
+
+        # Settings lesen
+        settings = {}
+        if settings_path.exists():
+            try:
+                settings = json.loads(settings_path.read_text(encoding="utf-8"))
+            except (json.JSONDecodeError, OSError):
+                settings = {}
+
+        # Hooks mergen (nicht ueberschreiben, nur fehlende hinzufuegen)
+        if "hooks" not in settings:
+            settings["hooks"] = {}
+
+        hooks_config = settings["hooks"]
+        added = 0
+
+        for event_name, event_hooks in self.CLAUDE_HOOKS.items():
+            if event_name not in hooks_config:
+                hooks_config[event_name] = event_hooks
+                added += len(event_hooks)
+                out.append(f"  [OK] {event_name}: {len(event_hooks)} Hook(s) hinzugefuegt")
+            else:
+                # Pruefen ob unser Hook schon drin ist (nach command-String)
+                existing_commands = set()
+                for matcher_block in hooks_config[event_name]:
+                    for h in matcher_block.get("hooks", []):
+                        cmd = h.get("command", "")
+                        if cmd:
+                            existing_commands.add(cmd)
+
+                for new_block in event_hooks:
+                    for h in new_block.get("hooks", []):
+                        cmd = h.get("command", "")
+                        if cmd and cmd not in existing_commands:
+                            hooks_config[event_name].append(new_block)
+                            added += 1
+                            out.append(f"  [OK] {event_name}: Hook hinzugefuegt")
+                            break
+                    else:
+                        out.append(f"  [SKIP] {event_name}: Hook bereits vorhanden")
+
+        # Settings schreiben
+        settings_path.parent.mkdir(parents=True, exist_ok=True)
+        settings_path.write_text(
+            json.dumps(settings, indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
+
+        summary = f"Claude Code Hooks: {added} neu installiert"
+        return True, "\n".join([summary] + out)
+
+    def _remove_hooks(self, dry_run: bool = False) -> tuple:
+        """Entfernt BACH Claude Code Hooks aus ~/.claude/ (reversibel).
+
+        - Loescht Hook-Scripts aus ~/.claude/hooks/
+        - Entfernt BACH-Hook-Eintraege aus ~/.claude/settings.json
+        - Laesst andere (nicht-BACH) Hooks unangetastet
+        """
+        import os
+
+        settings_path = Path(os.path.expanduser("~/.claude/settings.json"))
+        hooks_dir = Path(os.path.expanduser("~/.claude/hooks"))
+        out = []
+
+        # --- 1. Hook-Scripts entfernen ---
+        removed_files = 0
+        for hook_file in self.HOOK_FILES:
+            dst = hooks_dir / Path(hook_file).name
+            if dst.exists():
+                if dry_run:
+                    out.append(f"  [DRY] Wuerde loeschen: {dst}")
+                else:
+                    dst.unlink()
+                    out.append(f"  [OK] {dst.name} entfernt")
+                removed_files += 1
+            else:
+                out.append(f"  [SKIP] {dst.name} nicht vorhanden")
+
+        # --- 2. Hook-Config aus settings.json entfernen ---
+        removed_hooks = 0
+        if settings_path.exists():
+            try:
+                settings = json.loads(settings_path.read_text(encoding="utf-8"))
+            except (json.JSONDecodeError, OSError):
+                settings = {}
+
+            hooks_config = settings.get("hooks", {})
+
+            # BACH-Hook-Commands sammeln
+            bach_commands = set()
+            for event_hooks in self.CLAUDE_HOOKS.values():
+                for block in event_hooks:
+                    for h in block.get("hooks", []):
+                        cmd = h.get("command", "")
+                        if cmd:
+                            bach_commands.add(cmd)
+
+            # Aus settings entfernen
+            for event_name in list(hooks_config.keys()):
+                original_len = len(hooks_config[event_name])
+                hooks_config[event_name] = [
+                    block for block in hooks_config[event_name]
+                    if not any(
+                        h.get("command", "") in bach_commands
+                        for h in block.get("hooks", [])
+                    )
+                ]
+                diff = original_len - len(hooks_config[event_name])
+                if diff > 0:
+                    removed_hooks += diff
+                    out.append(f"  [OK] {event_name}: {diff} BACH-Hook(s) entfernt")
+
+                # Leere Event-Listen aufraeumen
+                if not hooks_config[event_name]:
+                    del hooks_config[event_name]
+
+            if not hooks_config:
+                settings.pop("hooks", None)
+
+            if not dry_run:
+                settings_path.write_text(
+                    json.dumps(settings, indent=2, ensure_ascii=False) + "\n",
+                    encoding="utf-8",
+                )
+
+        summary = f"Claude Code Hooks entfernt: {removed_files} Dateien, {removed_hooks} Config-Eintraege"
+        return True, "\n".join([summary] + out)
+
     def _full_install(self, args):
         """Vollstaendige BACH-Installation in einem Durchlauf."""
         config = {}
@@ -350,6 +551,7 @@ class SetupHandler(BaseHandler):
         steps = [
             ("Pre-Flight Check", self._preflight),
             ("MCP-Server", lambda a: self._setup_mcp()),
+            ("Claude Code Hooks", lambda a: self._setup_hooks()),
             ("Secrets", lambda a: self._setup_secrets()),
             ("User-Profil", lambda a: self._setup_user()),
         ]

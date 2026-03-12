@@ -33,6 +33,16 @@ description: >
 
 Dieser Service arbeitet eng mit `hub/[handler].py` zusammen.
 
+## Handler-Discovery
+
+Passende Handler und Help-Themen finden:
+
+```bash
+bach help <suchbegriff>       # Fuzzy-Suche in 187+ Help-Themen (primaer!)
+bach help cli                 # CLI-Befehlsuebersicht
+bach tools search <keyword>   # Volltextsuche in Tools
+```
+
 ## CLI-Befehle
 
 ```bash
@@ -71,4 +81,4 @@ bach [service] --help
 - Initiale Version
 
 ---
-BACH Skill-Architektur v2.0
+BACH Skill-Architektur v2.0 | SKILL.md v3.8.0: Handler-Discovery via `bach help <suchbegriff>`

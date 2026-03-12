@@ -302,6 +302,29 @@ def _generate_fake_address() -> str:
     return f"{strasse} {nr}, {stadt}"
 
 
+_TARN_INSTITUTION_PREFIXES = [
+    "Linden", "Eichen", "Birken", "Ahorn", "Buchen", "Tannen",
+    "Sonnen", "Mond", "Stern", "Regen", "Bach", "Berg", "Wald",
+]
+
+def _generate_fake_institution(original: str) -> str:
+    """Generiert einen falschen Institutionsnamen mit gleichem Typ-Suffix."""
+    # Suffix extrahieren (schule, klinik, heim, etc.)
+    suffixes = ["schule", "klinik", "heim", "werkstatt", "zentrum", "praxis",
+                "kindergarten", "kita", "hort", "internat", "wohnheim",
+                "wohngruppe", "tagesstaette", "foerderzentrum"]
+    found_suffix = ""
+    for s in suffixes:
+        if s in original.lower():
+            found_suffix = s
+            break
+    if not found_suffix:
+        found_suffix = "schule"
+    prefix = secrets.choice(_TARN_INSTITUTION_PREFIXES)
+    stadt = secrets.choice(TARN_STAEDTE)
+    return f"{prefix}{found_suffix} {stadt}"
+
+
 # ═══════════════════════════════════════════════════════════════
 # RegEx-Patterns fuer automatische Erkennung
 # ═══════════════════════════════════════════════════════════════
@@ -330,6 +353,24 @@ STREET_PATTERN = re.compile(
     r')',
     re.IGNORECASE
 )
+
+# Institutionsnamen (Schulen, Kliniken, Einrichtungen) + Ortsnamen
+# Erkennt z.B. "Wiesentalschule Maulburg", "Pestalozzischule Loerrach", "Rehaklinik Bad Saeckingen"
+INSTITUTION_PATTERN = re.compile(
+    r'(?:[A-ZÄÖÜ][a-zäöüß]+(?:schule|klinik|heim|werkstatt|zentrum|praxis|kindergarten|kita|hort|internat|wohnheim|wohngruppe|tagesstaette|foerderzentrum))'
+    r'(?:\s+[A-ZÄÖÜ][a-zäöüß]+(?:\s+[a-zäöüß]+)?)?',  # Optionaler Ortsname
+    re.UNICODE
+)
+
+# Private E-Mail-Domains (nicht-berufliche)
+_PRIVATE_EMAIL_DOMAINS = {
+    "gmail.com", "gmx.de", "gmx.net", "web.de", "yahoo.de", "yahoo.com",
+    "hotmail.com", "hotmail.de", "outlook.com", "outlook.de", "live.de",
+    "live.com", "t-online.de", "freenet.de", "arcor.de", "aol.com",
+    "icloud.com", "me.com", "mail.de", "email.de", "posteo.de",
+    "kabelbw.de", "kabelmail.de", "vodafone.de", "o2online.de",
+    "unitymedia.de", "1und1.de", "ionos.de",
+}
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -525,18 +566,19 @@ class DocumentAnonymizer:
 
     def scan_text_for_sensitive_data(self, text: str) -> Dict[str, List[str]]:
         """
-        Scannt Text nach sensiblen Daten (Telefon, E-Mail, Adressen).
+        Scannt Text nach sensiblen Daten (Telefon, E-Mail, Adressen, Institutionen).
 
         Args:
             text: Der zu scannende Text
 
         Returns:
-            Dict mit Listen: {"phones": [...], "emails": [...], "addresses": [...]}
+            Dict mit Listen: {"phones": [...], "emails": [...], "addresses": [...], "institutions": [...]}
         """
         found = {
             "phones": [],
             "emails": [],
-            "addresses": []
+            "addresses": [],
+            "institutions": []
         }
 
         # Telefonnummern finden
@@ -546,12 +588,14 @@ class DocumentAnonymizer:
             if cleaned and cleaned not in found["phones"]:
                 found["phones"].append(cleaned)
 
-        # E-Mails finden
+        # E-Mails finden (nur private Domains)
         emails = EMAIL_PATTERN.findall(text)
         for email in emails:
             cleaned = email.strip().lower()
             if cleaned and cleaned not in found["emails"]:
-                found["emails"].append(cleaned)
+                domain = cleaned.split("@", 1)[-1] if "@" in cleaned else ""
+                if domain in _PRIVATE_EMAIL_DOMAINS:
+                    found["emails"].append(cleaned)
 
         # Adressen finden
         addresses = STREET_PATTERN.findall(text)
@@ -559,6 +603,15 @@ class DocumentAnonymizer:
             cleaned = addr.strip()
             if cleaned and cleaned not in found["addresses"]:
                 found["addresses"].append(cleaned)
+
+        # Institutionsnamen finden (Schulen, Kliniken, etc.)
+        institutions = INSTITUTION_PATTERN.findall(text)
+        for inst in institutions:
+            cleaned = inst.strip()
+            if cleaned and cleaned not in found["institutions"]:
+                # Nicht auf globaler Whitelist?
+                if not any(w.lower() in cleaned.lower() for w in self.global_whitelist.get("organizations", [])):
+                    found["institutions"].append(cleaned)
 
         return found
 
@@ -675,6 +728,13 @@ class DocumentAnonymizer:
             for addr in scanned_data.get("addresses", []):
                 if addr not in mappings["addresses"]:
                     mappings["addresses"][addr] = _generate_fake_address()
+
+            # Institutionsnamen (Schulen, Kliniken, etc.)
+            for inst in scanned_data.get("institutions", []):
+                if inst not in mappings.get("institutions", {}):
+                    if "institutions" not in mappings:
+                        mappings["institutions"] = {}
+                    mappings["institutions"][inst] = _generate_fake_institution(inst)
 
         return AnonymProfile(
             client_id=client_id,

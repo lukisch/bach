@@ -31,6 +31,16 @@ Alle Templates enthalten den **VERSIONS-HINWEIS**:
 # Verwende IMMER die Version mit der höchsten Versionsnummer.
 ```
 
+## Handler-Discovery (SKILL.md v3.8.0)
+
+Alle Templates (Skill, Agent, Expert, Service) enthalten einen **Handler-Discovery**-Abschnitt. Der primaere Discovery-Mechanismus ist:
+
+```bash
+bach help <suchbegriff>       # Fuzzy-Suche in 187+ Help-Themen
+```
+
+Weitere Sucheinstiege: `bach tools search`, `bach skills search`, `bach agent list`.
+
 ## Pflichtfelder im Header
 
 ### Für Markdown-Dateien (YAML-Frontmatter)

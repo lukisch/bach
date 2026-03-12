@@ -38,6 +38,16 @@ description: >
 bach [skill] [command]
 ```
 
+## Handler-Discovery
+
+Passende Handler, Tools und Help-Themen finden:
+
+```bash
+bach help <suchbegriff>       # Fuzzy-Suche in 187+ Help-Themen (primaer!)
+bach tools search <keyword>   # Volltextsuche in Tools
+bach skills search <keyword>  # Skills nach Keyword filtern
+```
+
 ## Abhängigkeiten
 
 - Tools: [Liste oder "keine"]
@@ -60,4 +70,4 @@ bach [skill] [command]
 - Initiale Version
 
 ---
-BACH Skill-Architektur v2.0
+BACH Skill-Architektur v2.0 | SKILL.md v3.8.0: Handler-Discovery via `bach help <suchbegriff>`

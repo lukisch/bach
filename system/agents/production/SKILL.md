@@ -1,10 +1,15 @@
 ---
 name: production
+description: >
+  Content creation and media production agent. Orchestrates specialized sub-agents
+  for music, video, text, storytelling and PR. Use this skill when you need to
+  generate songs, produce podcasts, create videos, write copy, or manage PR campaigns.
+  Integrates external AI tools like Suno, ElevenLabs, Runway.
 version: 1.1.0
 type: boss-agent
 author: Gemini
 created: 2026-01-23
-updated: 2026-02-04
+updated: 2026-03-12
 anthropic_compatible: true
 status: active
 
@@ -16,11 +21,6 @@ dependencies:
   tools: []
   services: []
   workflows: []
-
-description: >
-  Boss-Agent für die Content-Erstellung und Medienproduktion. Orchestrieriert
-  spezialisierte Sub-Agenten für Musik, Video, Text, Storytelling und PR.
-  Nutzt externe AI-Tools und Services.
 ---
 # Production (Boss-Agent)
 

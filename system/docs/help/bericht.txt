@@ -1,82 +1,114 @@
-# Portabilitaet: UNIVERSAL
-# Version: 1.0.0
-# Zuletzt validiert: 2026-02-08
-# Naechste Pruefung: 2026-08-08
+# Portabilitaet: USER
+# Version: 3.0.0
+# Zuletzt validiert: 2026-03-11
+# Naechste Pruefung: 2026-09-11
 
 FOERDERBERICHT
 ==============
 
 ICF-basierte Entwicklungsberichte erstellen, exportieren und archivieren.
 Alle Klientendaten werden automatisch anonymisiert.
+Name und Geburtsdatum werden aus dem Ordnernamen in data_roh/ erkannt.
 
-WICHTIG: Der Handler (system/hub/bericht.py) nutzt FALSCHE Pfade!
-         Er verweist auf user/buero/foerderplanung (existiert nicht).
-         Tatsaechlicher Pfad: user/documents/foerderplaner/
-         Generator (generator.py) nutzt korrekte Pfade via bach_paths.py.
+SCHNELLSTART
+------------
+
+  1. Aktenordner in data_roh/ einlegen (Format: "Nachname, Vorname")
+  2. Einen der folgenden Wege nutzen:
+
+  Weg 1 - Chat (empfohlen):
+    "Erstelle Foerderbericht"
+
+  Weg 2 - Desktop .bat:
+    Foerderbericht_Pipeline.bat (ENTER fuer Auto-Detect)
+
+  Weg 3 - llmauto Chain:
+    bach chain start foerderbericht
+
+  Weg 4 - CLI:
+    bach bericht pipeline
+
+  3. Fertiger Bericht liegt in output_berichte/
 
 BEFEHLE
 -------
 
-  bach bericht help
-    Zeigt diese Hilfe an.
+  bach bericht pipeline [name] [geburtsdatum] [optionen]
+    End-to-End Pipeline: data_roh -> output_berichte
+    Name/Geburtsdatum optional (Auto-Detect aus Ordnername).
+    --zeitraum "01.01.2025 - 31.12.2025"  Berichtszeitraum
+    --backend claude_code|llmauto          LLM-Backend (Default: claude_code)
+    --eltern "Mutter" "Vater"             Elternnamen anonymisieren
+    --no-cleanup                           Zwischenordner behalten
 
   bach bericht list
     Listet alle Klienten-Ordner mit Status (JSON/DOCX vorhanden).
 
   bach bericht status
-    Zeigt Pipeline-Status aller Ordner (Berichte/data, bundles, output, _archive).
-
-  bach bericht extract <klient-ordner> [-o output]
-    Extrahiert Text aus .docx, .txt, .pdf im Klienten-Ordner.
-    Ohne -o wird der Text auf stdout ausgegeben.
-
-  bach bericht prompt <klient-ordner> [-o output]
-    Erstellt den vollstaendigen LLM-Prompt inkl. ICF-Referenz
-    und JSON-Schema-Anforderungen.
+    Zeigt Pipeline-Status aller Ordner.
 
   bach bericht generate <json-datei> -o <output> [-t vorlage]
     Fuellt die Word-Vorlage mit Daten aus der JSON-Datei.
-    -t: Vorlage (Standard: bericht_template_geiger_universal.docx)
-    -o: Ausgabedatei (erforderlich)
 
   bach bericht export <klient-ordner> -p <passwort>
-    De-anonymisiert den Bericht und legt ihn in
-    Berichte/output/<Echter_Name>/ ab.
+    De-anonymisiert den Bericht.
 
   bach bericht archive [name]
-    Verschiebt einen fertigen Bericht aus Berichte/output/
-    nach _archive/<Name>_YYYY-MM/.
+    Verschiebt fertigen Bericht ins Archiv.
+
+  bach bericht help
+    Zeigt diese Hilfe an.
+
+LLM-BACKENDS
+-------------
+
+  claude_code (DEFAULT)   Claude Code CLI als Subprocess
+  llmauto                 llmauto Chain-System
+  anthropic_sdk           Direkter API-Aufruf (braucht ANTHROPIC_API_KEY)
+
+  Standardwege sind claude_code und llmauto.
+  anthropic_sdk ist nur eine optionale Alternative (kein API-Key eingerichtet).
+
+PIPELINE-ORDNER (nur 4 + README)
+---------------------------------
+
+  data_roh/          Klienten-Akte einlegen (1 Ordner = 1 Klient!)
+       ↓
+  data_ano/          [Auto] Anonymisierte Dateien
+       ↓
+  data_bundled/      [Auto] Bundle + Prompt + LLM-Response
+       ↓
+  output_berichte/   [Auto] Fertiger Bericht (de-anonymisiert, Endprodukt)
+
+  README.md          Anleitung
+
+  Keine weiteren Ordner. Legacy-Ordner (data/, output/, bundles/,
+  Berichte_ano/, Berichte_clean/) werden beim Cleanup automatisch entfernt.
 
 BEISPIELE
 ---------
 
-  # Uebersicht
-  bach bericht list
+  # Vollautomatisch (Name aus Ordnername erkannt)
+  bach bericht pipeline
+
+  # Mit expliziten Angaben
+  bach bericht pipeline "Max Mustermann" "15.03.2016"
+
+  # Anderer Zeitraum
+  bach bericht pipeline --zeitraum "01.07.2025 - 30.06.2026"
+
+  # Status pruefen
   bach bericht status
+  bach bericht list
 
-  # Workflow (mit anonymisierten Bundles)
-  bach bericht extract Berichte/bundles/K_CE2E70
-  bach bericht prompt Berichte/bundles/K_CE2E70 -o Berichte/bundles/K_CE2E70/core/_prompt.txt
-  bach bericht generate Berichte/bundles/K_CE2E70/output/bericht_data.json \
-    -o Berichte/bundles/K_CE2E70/output/bericht_2026-02.docx
-  bach bericht export Berichte/bundles/K_CE2E70 -p bach2026
-  bach bericht archive Mustermann_Max
+VERWANDTE DATEIEN
+-----------------
 
-PIPELINE (user/documents/foerderplaner/)
------------------------------------------
-
-  Berichte/data/<Echter_Name>/     Echte Akten (nur User-Zugriff)
-         ↓
-  Berichte/bundles/K_xxxx/         Anonymisierte Bundles (LLM/Chatbot)
-         ↓
-  Berichte/output/<Echter_Name>/   De-anonymisierte Berichte
-         ↓
-  _archive/<Name>_YYYY-MM/         Abgeschlossene Berichte
-
-VERWANDTE SKILLS
-----------------
-
-  agents/_experts/report_generator/generator.py      Report Generator
-  hub/_services/document/anonymizer_service.py       Anonymisierung
+  hub/_services/document/foerderbericht_pipeline.py   Orchestrator
+  hub/_services/document/pipeline_runner.py           CLI-Runner
+  hub/bericht.py                                      CLI-Handler
+  tools/llmauto/chains/foerderbericht.json            Chain-Config
+  hub/_services/document/anonymizer_service.py        Anonymisierung
+  hub/_services/document/document_pipeline.py         Dokument-Scanner
   skills/_templates/bericht_template_geiger_universal.docx  Word-Vorlage
-  user/documents/foerderplaner/                      Klientendaten & Output
+  user/documents/foerderplaner/Berichte/              Arbeitsordner

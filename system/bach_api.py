@@ -62,7 +62,7 @@ Nutzung:
 
 Verfuegbare Module:
     session, task, memory, backup, steuer, lesson, status,
-    partner, logs, msg, tools, help, update, injector, app
+    partner, logs, msg, tools, help, update, injector, db, app
 """
 
 import re
@@ -212,6 +212,61 @@ email = _HandlerProxy("email")
 
 # App-Instanz fuer direkten Zugriff
 app = get_app
+
+
+# --- Safe DB Access Layer ---
+
+class _DBProxy:
+    """Validierter DB-Zugriff: fuehlt sich wie SQL an, ist aber sicher.
+
+    Beispiel:
+        from bach_api import db
+        db.select("tasks", where={"status": "pending"})
+        db.update("bach_experts", {"persona": "Neu"}, where={"name": "mr_tiktak"})
+        db.insert("tasks", {"title": "Aufgabe", "priority": "high"})
+        db.delete("tasks", where={"id": 42})
+    """
+
+    def __init__(self):
+        self._safe_db = None
+
+    def _get(self):
+        if self._safe_db is None:
+            from core.safe_db import SafeDB
+            db_path = _SYSTEM_DIR / "data" / "bach.db"
+            self._safe_db = SafeDB(db_path, partner="bach_api")
+        return self._safe_db
+
+    def set_partner(self, partner: str):
+        """Setzt den Partner-Namen fuer Audit-Log."""
+        self._get().partner = partner
+
+    def select(self, table, columns=None, where=None, order_by=None, limit=None):
+        return self._get().select(table, columns, where, order_by, limit)
+
+    def insert(self, table, data):
+        return self._get().insert(table, data)
+
+    def update(self, table, data, where):
+        return self._get().update(table, data, where)
+
+    def delete(self, table, where):
+        return self._get().delete(table, where)
+
+    def count(self, table, where=None):
+        return self._get().count(table, where)
+
+    def exists(self, table, where):
+        return self._get().exists(table, where)
+
+    def tables(self):
+        return self._get().tables()
+
+    def schema(self, table):
+        return self._get().schema(table)
+
+
+db = _DBProxy()
 
 # Hook-Framework (Lifecycle-Events)
 try:

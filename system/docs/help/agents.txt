@@ -1,12 +1,24 @@
 # Portabilitaet: UNIVERSAL
-# Version: 1.0.1
-# Zuletzt validiert: 2026-02-08 (Help-Forensik)
-# Naechste Pruefung: 2026-08-08
+# Version: 1.2.0
+# Zuletzt validiert: 2026-03-12 (Persona-System SUGAR v3.8.0 dokumentiert)
+# Naechste Pruefung: 2026-09-12
 
 BACH AGENTEN-SYSTEM
 ==================
 
-Hierarchisches System aus Boss-Agenten und Experten.
+Hierarchisches System aus Boss-Agenten und Experten mit Persona-System.
+
+DREI EBENEN
+-----------
+
+  Skills     Das Substanzielle. Wissen, Code, Workflows.
+             Portierbar, exportierbar, der eigentliche Wert.
+
+  Personas   Das Interface. Name, Stil, Charakter.
+             Personalisierbar (bach agent rename), Geschmackssache.
+
+  Sessions   Die Laufzeit. Context Window, Tools, Turns.
+             Technisches Detail.
 
 STRUKTUR
 --------
@@ -24,7 +36,7 @@ VERFUEGBARE AGENTEN (agents/)
 
 [BERUFLICH]
 
-  ATI (ati/)
+  ATI (ati/) — Persona: Atlas
     Software-Entwickler-Agent mit Scanner, Sessions
     Features: Task-Scanner, Headless Sessions, Tool Discovery
 
@@ -37,9 +49,9 @@ VERFUEGBARE AGENTEN (agents/)
   Research (research)
     Wissenschaftliche Recherche (PubMed, Perplexity, Consensus)
 
-  Bueroassistent (bueroassistent)
+  Bueroassistent (bueroassistent) — Persona: Clara
     Steuern, Foerderplanung, Dokumentation
-    Experten: Steuer, Foerderplaner
+    Experten: Steuer (Theodor), Foerderplaner (Florian)
 
   Reflection (reflection)
     Selbstreflexion und Meta-Analyse
@@ -47,22 +59,85 @@ VERFUEGBARE AGENTEN (agents/)
 
 [PRIVAT]
 
-  Persoenlicher Assistent (persoenlicher-assistent)
+  Persoenlicher Assistent (persoenlicher-assistent) — Persona: Paul
     Terminverwaltung, Recherche, Kommunikation
-    Experten: Haushaltsmanagement
+    Experten: Haushaltsmanagement (Martha)
 
-  Gesundheitsassistent (gesundheitsassistent)
+  Gesundheitsassistent (gesundheitsassistent) — Persona: Helena
     Medizinische Dokumentation und Verwaltung
-    Experten: Gesundheitsverwalter, Psycho-Berater
+    Experten: Gesundheitsverwalter (Gustav), Psycho-Berater (Sophie)
 
   Versicherungen (versicherungen)
     Versicherungs-Verwaltung
+
+  Finanz-Assistent (finanz-assistent) — Persona: Felix
+    Finanzplanung und Budgetierung
 
 
 [TEST]
 
   Test-Agent (test-agent)
     Fuer Tests und Experimente
+
+
+PERSONA-SYSTEM (SUGAR v3.8.0)
+------------------------------
+
+Seit SUGAR v3.8.0 haben Agenten und Experten benannte Personas:
+menschliche Vornamen + Charakter-Beschreibungen in der Datenbank.
+
+  DB-Spalten:
+    display_name    Persona-Vorname (z.B. "Atlas", "Theodor")
+    persona         Charakter-Text (z.B. "Pragmatischer Handwerker...")
+
+  Befehle:
+    bach agent rename <name> <neuer-name>   Display-Name aendern
+    bach agent list                          Zeigt Personas in Klammern
+    bach agent info <name>                   Details inkl. Persona
+
+  Namensaufloesung (resolve_agent_name):
+    1. Exakter System-Name (z.B. "steuer-agent")
+    2. Display-Name (z.B. "Theodor")
+    3. Substring (z.B. "theo")
+    4. Fuzzy/Levenshtein (z.B. "teodor")
+
+  Persona-Injektion:
+    Beim Agent-Start wird die Persona als System-Prompt injiziert:
+    "Dein Name ist \"Theodor\". Dein Charakter: Peniler Steuerberater..."
+    Siehe: hub/agent_launcher.py (_get_persona_info)
+
+
+  Boss-Agenten Personas:
+
+    System-Name               | Persona | Charakter
+    ati                       | Atlas   | Pragmatischer Handwerker
+    bueroassistent            | Clara   | Strukturierte Organisatorin
+    finanz-assistent          | Felix   | Aufmerksamer Sparfuchs
+    gesundheitsassistent      | Helena  | Fuersorgliche Begleiterin
+    persoenlicher-assistent   | Paul    | Vielseitiger Allrounder
+
+
+  Experten Personas:
+
+    System-Name               | Persona     | Charakter
+    steuer-agent              | Theodor     | Peniler Steuerberater
+    financial_mail            | Frieda      | Mail-Detektivin
+    aboservice                | Anton       | Kuendigungskoenig
+    gesundheitsverwalter      | Gustav      | Archivar der Befunde
+    psycho-berater            | Sophie      | Einfuehlsame Zuhoererin
+    health_import             | Hugo        | Gewissenhafter Datenpfleger
+    haushaltsmanagement       | Martha      | Sparsame Hauswirtschafterin
+    foerderplaner             | Florian     | Foerdermittel-Experte
+    bewerbungsexperte         | Benjamin    | Karriere-Coach
+    data-analysis             | Diana       | Zahlenfluesterin
+    decision-briefing         | Dietrich    | Kuehler Stratege
+    report_generator          | Rita        | Effiziente Berichtsmaschine
+    mr_tiktak                 | Mr. TikTak  | Strategischer Taktiker
+    transkriptions-service    | Tristan     | Geduldiger Zuhoerer
+    wikiquizzer               | Wilhelm     | Quizmaster
+
+  Template: skills/_templates/TEMPLATE_PERSONA.md
+  Migration: data/schema/migrations/034_agent_personas.py
 
 
 CLI-BEFEHLE
@@ -77,6 +152,9 @@ CLI-BEFEHLE
 
   # Agent-Details
   python tools/agent_cli.py info <agent-name>
+
+  # Persona umbenennen
+  bach agent rename <name> <neuer-display-name>
 
   # User-Ordner initialisieren
   python tools/agent_cli.py init all
@@ -97,20 +175,21 @@ VERZEICHNISSE
   user/<agent>/       User-Datenordner pro Agent
 
 WICHTIG: Agenten und Experten sind unterschiedliche Konzepte!
-  - Agenten (Boss): Koordinieren und delegieren (_agents/)
-  - Experten: Spezialisierte Ausfuehrung (_experts/)
+  - Agenten (Boss): Koordinieren und delegieren (agents/)
+  - Experten: Spezialisierte Ausfuehrung (agents/_experts/)
   - Einige in Help gelistete "Agenten" sind eigentlich Experten:
-    * steuer-agent → _experts/steuer/
-    * foerderplaner → _experts/foerderplaner/
-    * haushaltsmanagement → _experts/haushaltsmanagement/
-    * psycho-berater → _experts/psycho-berater/
+    * steuer-agent -> _experts/steuer/
+    * foerderplaner -> _experts/foerderplaner/
+    * haushaltsmanagement -> _experts/haushaltsmanagement/
+    * psycho-berater -> _experts/psycho-berater/
 
 
 DATENBANKEN
 -----------
 
   bach.db:
-    - agents (Agenten-Registry)
+    - bach_agents (Agenten-Registry + display_name + persona)
+    - bach_experts (Experten-Registry + display_name + persona)
     - agent_synergies (Synergien zwischen Agenten)
 
   bach.db:
@@ -122,8 +201,9 @@ WORKFLOW
 
 1. Agent aktivieren (ueber Skill oder CLI)
 2. Agent laedt Skill-Definition und User-Daten
-3. Bei Spezialthema: Delegation an Experten
-4. Experte fuehrt aus, Boss-Agent fasst zusammen
+3. Persona wird als System-Prompt injiziert (display_name + persona)
+4. Bei Spezialthema: Delegation an Experten
+5. Experte fuehrt aus, Boss-Agent fasst zusammen
 
 
 GUI
@@ -149,10 +229,49 @@ DATEIEN
   agents/README.md
 
 
+STANDARDS
+---------
+
+Pflicht-Dateien:
+
+  1. Jeder Agent und Expert MUSS eine SKILL.md haben
+     (nicht rolle.txt, nicht CONCEPT.md als Ersatz)
+  2. SKILL.md MUSS YAML-Frontmatter enthalten:
+     name, version, type, description (Minimum)
+  3. CONCEPT.md ist OPTIONAL (fuer detaillierte Konzepte)
+  4. rolle.txt ist DEPRECATED (in SKILL.md migrieren)
+
+Persona-System (SUGAR v3.8.0 -- implementiert):
+
+  Alle Agenten und Experten haben benannte Personas in der DB.
+  Personas bestehen aus display_name (Vorname) und persona (Charakter).
+
+  Konzept: Persona (wer) + Skill (was) + Session (wie)
+    - Persona: Charakter mit Stil und Grenzen (DB + optional Datei)
+    - Skill: Faehigkeit mit Code und Instruktionen (exportierbar)
+    - Session: Laufzeitumgebung (tools, turns, model)
+
+  Addressing: Agent ueber Persona-Name ansprechbar
+    (z.B. "Frag Theodor wegen der Steuer")
+
+  Zukunft: Persona-Dateien in agents/personas/ (schrittweise Migration)
+
+Anthropic-Kompatibilitaet:
+
+  - Skills sind exportierbar (offener Standard, LobeHub/Cursor etc.)
+  - Personas/Agents sind NICHT portierbar (nur Claude Code / BACH)
+  - Export: bach skills export <name> --format anthropic
+  - Neuer Skill: bach skills create <name> --format anthropic
+
+  Siehe: bach help skill_standards
+
+
 SIEHE AUCH
 ----------
 
-  bach --help actors      Ueberblick ueber Akteure
-  bach --help bach_paths        Verzeichnisstruktur
-  bach --help practices   Architektur-Prinzipien
-  bach --help ati         ATI Software-Entwickler Details
+  bach help skill_standards  Anthropic Skill-Standards
+  bach help actors           Ueberblick ueber Akteure
+  bach help bach_paths       Verzeichnisstruktur
+  bach help practices        Architektur-Prinzipien
+  bach help ati              ATI Software-Entwickler Details
+  bach wiki lobehub          LobeHub Marketplace

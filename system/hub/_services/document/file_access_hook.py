@@ -74,22 +74,15 @@ _hub_dir = _current.parent.parent.parent  # system/hub/
 _services_dir = _hub_dir / "_services"
 _bach_root = _hub_dir.parent.parent  # BACH/
 
-# Förderplaner-Verzeichnisse
+# Foerderplaner-Verzeichnisse (neue Ordnernamen seit Pipeline-Refactoring)
 _foerderplaner = _bach_root / "user" / "documents" / "foerderplaner" / "Berichte"
-DATA_DIR = _foerderplaner / "data"
-BUNDLES_DIR = _foerderplaner / "bundles"
-OUTPUT_DIR = _foerderplaner / "output"
+DATA_DIR = _foerderplaner / "data_roh"
+BUNDLES_DIR = _foerderplaner / "data_ano"
+OUTPUT_DIR = _foerderplaner / "output_berichte"
 
-# AnonymizedWorkflow importieren für Bundle-Erstellung
-_experts_dir = _bach_root / "system" / "skills" / "_experts" / "report_generator"
-if str(_experts_dir) not in sys.path:
-    sys.path.insert(0, str(_experts_dir))
-
-try:
-    from anonymized_workflow import AnonymizedWorkflow
-    WORKFLOW_AVAILABLE = True
-except ImportError:
-    WORKFLOW_AVAILABLE = False
+# DEPRECATED: AnonymizedWorkflow wurde entfernt (duplizierte Logik).
+# Die Anonymisierung wird jetzt ueber report_workflow_service.py / foerderbericht_pipeline.py gesteuert.
+WORKFLOW_AVAILABLE = False
 
 
 class FileAccessHook:

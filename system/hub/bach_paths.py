@@ -182,9 +182,18 @@ ANON_JOBS_DIR = USER_DIR / "anonymization_jobs"
 # Berichte-Verzeichnisse (für Förderbericht-Generator)
 BERICHTE_DIR = FOERDERPLANUNG_DIR / "Berichte"
 BERICHTE_KLIENTEN_DIR = BERICHTE_DIR / "Klienten"
-BERICHTE_OUTPUT_DIR = BERICHTE_DIR / "output"
-BERICHTE_DATA_DIR = BERICHTE_DIR / "data"           # Echte Klientendaten
 BERICHTE_BUNDLES_DIR = BERICHTE_DIR / "bundles"     # Anonymisierte Bundles
+
+# Pipeline-Ordner (v3 Struktur)
+BERICHTE_DATA_ROH_DIR = BERICHTE_DIR / "data_roh"
+BERICHTE_DATA_ANO_DIR = BERICHTE_DIR / "data_ano"
+BERICHTE_DATA_BUNDLED_DIR = BERICHTE_DIR / "data_bundled"
+BERICHTE_OUTPUT_DIR = BERICHTE_DIR / "output_berichte"
+
+# Legacy-Aliase (Rueckwaertskompatibilitaet)
+BERICHTE_DATA_DIR = BERICHTE_DATA_ROH_DIR
+BERICHTE_ANO_DIR = BERICHTE_DIR / "Berichte_ano"      # Deprecated, nicht mehr aktiv
+BERICHTE_CLEAN_DIR = BERICHTE_OUTPUT_DIR               # Alias fuer output_berichte
 
 # ============================================================================
 # TEMPLATES (in skills/_templates/)
@@ -271,8 +280,14 @@ _PATH_REGISTRY = {
     "berichte": BERICHTE_DIR,
     "berichte_output": BERICHTE_OUTPUT_DIR,
     "berichte_klienten": BERICHTE_KLIENTEN_DIR,
-    "berichte_data": BERICHTE_DATA_DIR,         # Echte Klientendaten
+    "berichte_data": BERICHTE_DATA_DIR,         # Legacy -> data_roh
     "berichte_bundles": BERICHTE_BUNDLES_DIR,   # Anonymisierte Bundles
+    "berichte_data_roh": BERICHTE_DATA_ROH_DIR,
+    "berichte_data_ano": BERICHTE_DATA_ANO_DIR,
+    "berichte_data_bundled": BERICHTE_DATA_BUNDLED_DIR,
+    "berichte_output": BERICHTE_OUTPUT_DIR,
+    "berichte_ano": BERICHTE_ANO_DIR,       # Deprecated
+    "berichte_clean": BERICHTE_CLEAN_DIR,   # Alias fuer output_berichte
     "klienten": KLIENTEN_DIR,
     "quarantine": QUARANTINE_DIR,
 

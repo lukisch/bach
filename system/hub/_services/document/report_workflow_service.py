@@ -30,10 +30,15 @@ Report Workflow Service
 Vereinheitlichter Workflow fuer Foerderberichte:
   1. Dateien importieren
   2. Temporaeres Anonymisierungsprofil erstellen
-  3. Dokumente anonymisieren und in bundles/ sortieren
+  3. Dokumente anonymisieren und in data_ano/ sortieren
   4. Prompt mit Wissensdatenbank-Kontext generieren
-  5. Word-Dokument generieren und de-anonymisieren
+  5. Word-Dokument generieren und de-anonymisieren nach output_berichte/
   6. Cleanup - alle temporaeren Daten loeschen
+
+Ordner-Mapping (Pipeline-Orchestrator verwaltet die neuen Namen):
+  data_roh/       (frueher: data/)      - Rohdaten vom Benutzer
+  data_ano/       (frueher: bundles/)   - Anonymisierte Dokumente
+  output_berichte/ (frueher: output/)    - Fertige Berichte
 
 KEIN permanentes Speichern von Profilen mehr!
 Jeder Durchlauf startet frisch.
@@ -69,8 +74,8 @@ try:
         TARN_VORNAMEN_W,
         TARN_NACHNAMEN
     )
-    from .document_collector import (
-        DocumentCollector,
+    from .document_pipeline import (
+        DocumentPipeline as DocumentCollector,
         DocumentCategory,
         TextBundle,
         CollectorResult
@@ -102,8 +107,8 @@ except ImportError:
         TARN_VORNAMEN_W,
         TARN_NACHNAMEN
     )
-    from document_collector import (
-        DocumentCollector,
+    from document_pipeline import (
+        DocumentPipeline as DocumentCollector,
         DocumentCategory,
         TextBundle,
         CollectorResult
@@ -150,7 +155,7 @@ else:
     TEMPLATE_PATH = BACH_BASE / "system" / "skills" / "_templates" / "bericht_template_geiger_universal.docx"
     WISSENSDATENBANK = Path.home() / "OneDrive" / "Dokumente" / "_Wissensdatenbank"
 
-ICF_REF_PATH = BACH_BASE / "system" / "skills" / "_experts" / "foerderplaner" / "Kontext" / "ICF-Checker Tabelle_Geiger.docx"
+ICF_REF_PATH = BACH_BASE / "system" / "agents" / "_experts" / "foerderplaner" / "Kontext" / "ICF-Checker Tabelle_Geiger.docx"
 
 # Whitelist: Diese Namen werden NICHT anonymisiert
 DEFAULT_WHITELIST = [
@@ -246,11 +251,11 @@ class ReportWorkflowService:
 
     Workflow:
         1. start_session() - Neue Session starten
-        2. import_files() - Dateien nach data/ kopieren
+        2. import_files() - Dateien nach data_roh/ kopieren
         3. create_temp_profile() - Temporaeres Anonymisierungsprofil
-        4. anonymize_to_bundles() - Dateien anonymisieren
+        4. anonymize_to_bundles() - Dateien anonymisieren nach data_ano/
         5. generate_prompt() - Prompt mit Wissensdatenbank
-        6. generate_report() - Word-Dokument erstellen
+        6. generate_report() - Word-Dokument erstellen nach output_berichte/
         7. cleanup() - Alles aufräumen
 
     Usage:
@@ -276,50 +281,78 @@ class ReportWorkflowService:
         self._used_tarnnames: set = set()
 
     def _get_icf_reference(self) -> str:
-        """Gibt die detaillierte Liste aller ICF-Codes zurück."""
-        icf_path = Path(ICF_REF_PATH)
-        if icf_path.exists():
-            try:
-                # Nutze DocumentAnonymizer für Text-Extraktion aus Docx
-                anonymizer = DocumentAnonymizer()
-                text = anonymizer.extract_text_from_file(str(icf_path))
-                if text.strip():
-                    # Vorne wegwerfen falls wir wissen wo die Codes anfangen
-                    return text.strip()
-            except Exception as e:
-                print(f"[WARN] konnte ICF-Referenz nicht aus DOCX lesen: {e}")
+        """
+        Gibt die vollstaendige Liste aller gueltigen ICF-Codes zurueck.
+        Nutzt dieselbe Quelle wie der Generator (build_icf_reference),
+        damit Prompt und Validierung identische Code-Listen verwenden.
+        """
+        try:
+            import importlib.util
+            generator_path = (
+                BACH_BASE / "system" / "agents" / "_experts"
+                / "report_generator" / "generator.py"
+            )
+            spec = importlib.util.spec_from_file_location(
+                "report_generator_ref", str(generator_path)
+            )
+            generator_mod = importlib.util.module_from_spec(spec)
+            gen_dir = str(generator_path.parent)
+            if gen_dir not in sys.path:
+                sys.path.insert(0, gen_dir)
+            spec.loader.exec_module(generator_mod)
+            return generator_mod.build_icf_reference()
+        except Exception as e:
+            print(f"[WARN] Konnte build_icf_reference nicht importieren: {e}")
 
-        # Fallback Liste (alt + erweitert)
-        return """
-d1 – Lernen und Wissensanwendung
-- Spielverhalten: D1310 (Symbolspiel), D1314 (So-tun-als-ob)
-- Theory of Mind: D1630 (Perspektivwechsel)
-- Logische Zusammenhänge: D1631, D1632
-- Aufmerksamkeit: D160 (Umlenken), D161 (Aufrechterhalten)
-- Auswahl treffen: D177
-- Lernen durch Wiederholung: D135
+        # Vollstaendige Fallback-Liste (identisch mit generator.py)
+        return """=== GUELTIGE ICF-CODES (NUR DIESE VERWENDEN!) ===
+ACHTUNG: Verwende AUSSCHLIESSLICH die folgenden Codes.
+Andere Codes wie D1, D2, D3, D7, D240, D7103, D880 etc. existieren NICHT!
 
-d2 – Allgemeine Aufgaben und Anforderungen
-- D210 (Einzelaufgabe), D220 (Mehrfachaufgaben), D230 (Tagesroutine), D250 (Verhaltensregulation)
+Lernen und Wissensanwendung:
+  D1310: Symbolspiel  D1314: So-tun-als-ob-Spiel
+  D1630: Rollenspiele/Theory of Mind  D1370: Groesse/Form/Menge
+  D1371: Klassifizieren  D1631: Logische Zusammenhaenge
+  D1632: Ursache-Wirkung  D160: Aufmerksamkeit umlenken
+  D161: Aufmerksamkeit aufrechterhalten  D177: Auswahl treffen
+  D135: Wiederholen  D1330: Woerter sprechen
+  D1331: Einfache Saetze  D1332: Komplexe Saetze
+  D1402: Woerter verstehen  D1400: Buchstaben erkennen
+  D1401: Buchstaben aussprechen  D1450: Handmotorik
+  D1451: Morphem-Graphem  D1452: Woerter schreiben
+  D1660: Lesestrategien  D1661: Lesen
 
-d3 – Kommunikation
-- D331 (Lautieren), D310 (Verbalsprache verstehen), D330 (Sprechen)
-- D315 (Nonverbal verstehen), D335 (Nonverbal senden)
-- D3350 (Körpersprache), D3351 (Zeichen/Symbole), D3352 (Piktogramme)
-- D350 (Konversation), D3500-D3504 (Unterhaltung führen)
+Allgemeine Aufgaben:
+  D210: Einzelaufgabe  D220: Mehrfachaufgaben
+  D230: Tagesroutine  D250: Verhaltensregulation
 
-d7 – Interpersonelle Interaktionen
-- D7100-D7106 (Soziale Basiskompetenzen: Mitgefühl, Respekt, Nähe/Distanz)
-- D7200-D7204 (Beziehungen führen: Gefühle regulieren, Regeln beachten)
-- D730 (Zweckgebundene Interaktion), D7500 (Freundschaften), D760 (Familie)
-"""
+Kommunikation:
+  D331: Lautieren  D310: Sprache verstehen
+  D330: Sprechen  D315: Nonverbal verstehen
+  D335: Nonverbal senden  D3350: Koerpersprache
+  D3351: Zeichen/Symbole  D3352: Piktogramme
+  D350: Konversation  D3500-D3504: Unterhaltung
+  D3600: Kommunikationsgeraete
+
+Interpersonelle Interaktionen:
+  D7100: Respekt  D7101: Anerkennung
+  D7102: Toleranz  D7104: Soziale Zeichen
+  D7105: Naehe/Distanz  D7106: Vertrautheit
+  D7200: Beziehungen fuehren  D7201: Trennung
+  D7202: Emotionsregulation  D7203: Soziale Regeln
+  D7204: Sozialer Abstand  D730: Fremde
+  D740: Formelle Beziehungen  D7500: Freundschaften
+  D7501: Nachbarn  D7502: Bekannte
+  D7503: Gleichaltrige  D760: Familie  D770: Sexualitaet"""
 
     def _ensure_folder_structure(self):
         """Erstellt die Ordnerstruktur falls nicht vorhanden."""
-        (self.base_path / "data").mkdir(parents=True, exist_ok=True)
-        (self.base_path / "bundles" / "core").mkdir(parents=True, exist_ok=True)
-        (self.base_path / "bundles" / "extended").mkdir(parents=True, exist_ok=True)
-        (self.base_path / "output").mkdir(parents=True, exist_ok=True)
+        # Pipeline-Ordnerstruktur (v3 -- nur 4 Ordner + README)
+        (self.base_path / "data_roh").mkdir(parents=True, exist_ok=True)
+        (self.base_path / "data_ano").mkdir(parents=True, exist_ok=True)
+        (self.base_path / "data_bundled").mkdir(parents=True, exist_ok=True)
+        (self.base_path / "output_berichte").mkdir(parents=True, exist_ok=True)
+        # KEINE Legacy-Ordner (bundles/, data/, output/) mehr erstellen!
 
     # ─────────────────────────────────────────────────────────────
     # Schritt 1: Session starten
@@ -352,20 +385,21 @@ d7 – Interpersonelle Interaktionen
         clear_existing: bool = True
     ) -> int:
         """
-        Importiert Dateien in den data/ Ordner.
+        Importiert Dateien in den data_roh/ Ordner (frueher: data/).
 
         Args:
             session: Aktive Session
             files: Liste von Dateipfaden
-            clear_existing: Bestehende Dateien in data/ loeschen
+            clear_existing: Bestehende Dateien in data_roh/ loeschen
 
         Returns:
             Anzahl importierter Dateien
         """
         session.status = "importing"
-        data_dir = self.base_path / "data"
+        data_dir = self.base_path / "data_roh"
+        data_dir.mkdir(parents=True, exist_ok=True)
 
-        # HINWEIS: data/ wird manuell vom Benutzer verwaltet - kein auto-cleanup
+        # HINWEIS: data_roh/ wird manuell vom Benutzer verwaltet - kein auto-cleanup
 
         # Dateien kopieren
         imported = 0
@@ -642,7 +676,7 @@ d7 – Interpersonelle Interaktionen
         include_extended: bool = False
     ) -> CollectorResult:
         """
-        Anonymisiert Dokumente und sortiert sie in bundles/.
+        Anonymisiert Dokumente und sortiert sie in data_ano/ (frueher: bundles/).
 
         Args:
             session: Aktive Session mit Profil
@@ -656,17 +690,20 @@ d7 – Interpersonelle Interaktionen
             session.status = "error"
             return CollectorResult()
 
-        data_dir = self.base_path / "data"
-        core_dir = self.base_path / "bundles" / "core"
-        extended_dir = self.base_path / "bundles" / "extended"
+        data_dir = self.base_path / "data_roh"
+        ano_dir = self.base_path / "data_ano"
 
-        # Bundles-Ordner leeren - Robuste Variante (deep_cleanup)
-        for d in [core_dir, extended_dir]:
-            self._deep_cleanup(d)
+        # data_ano/ leeren
+        self._deep_cleanup(ano_dir)
+
+        # Klienten-Unterordner erkennen: Scanne von dort (nicht data_roh selbst)
+        # damit Root-Dateien korrekt als CORE/protokoll erkannt werden
+        subdirs = [d for d in data_dir.iterdir() if d.is_dir() and not d.name.startswith(".")]
+        scan_base = subdirs[0] if len(subdirs) == 1 else data_dir
 
         # Dokumente scannen
         collector = DocumentCollector()
-        result = collector.scan_folder(str(data_dir))
+        result = collector.scan_folder(str(scan_base))
 
         # Anonymizer
         anonymizer = DocumentAnonymizer()
@@ -679,16 +716,8 @@ d7 – Interpersonelle Interaktionen
             if doc.category == DocumentCategory.EXTENDED and not include_extended:
                 continue
 
-            # Zielordner bestimmen
-            if doc.category == DocumentCategory.CORE:
-                dest_dir = core_dir
-            elif doc.category == DocumentCategory.STUFE2:
-                dest_dir = core_dir  # STUFE2 geht auch in core
-            else:
-                dest_dir = extended_dir
-
-            # Datei kopieren
-            dest_file = dest_dir / doc.path.name
+            # Alles nach data_ano/ (keine Trennung core/extended mehr)
+            dest_file = ano_dir / doc.path.name
             shutil.copy2(doc.path, dest_file)
 
             # Anonymisieren
@@ -706,10 +735,10 @@ d7 – Interpersonelle Interaktionen
         include_extended: bool = False
     ) -> CollectorResult:
         """
-        Anonymisiert Dokumente aus einem spezifischen Ordner und sortiert sie in bundles/.
+        Anonymisiert Dokumente aus einem spezifischen Ordner und sortiert sie in data_ano/ (frueher: bundles/).
 
-        Diese Variante scannt einen explizit angegebenen Ordner statt data/.
-        Nützlich wenn die Daten bereits in data/ liegen und nicht kopiert werden sollen.
+        Diese Variante scannt einen explizit angegebenen Ordner statt data_roh/.
+        Nuetzlich wenn die Daten bereits in data_roh/ liegen und nicht kopiert werden sollen.
 
         Args:
             session: Aktive Session mit Profil
@@ -724,12 +753,10 @@ d7 – Interpersonelle Interaktionen
             session.status = "error"
             return CollectorResult()
 
-        core_dir = self.base_path / "bundles" / "core"
-        extended_dir = self.base_path / "bundles" / "extended"
+        ano_dir = self.base_path / "data_ano"
 
-        # Bundles-Ordner leeren - Robuste Variante (deep_cleanup)
-        for d in [core_dir, extended_dir]:
-            self._deep_cleanup(d)
+        # data_ano/ leeren
+        self._deep_cleanup(ano_dir)
 
         # Dokumente aus dem angegebenen Ordner scannen
         collector = DocumentCollector()
@@ -749,16 +776,8 @@ d7 – Interpersonelle Interaktionen
             if doc.category == DocumentCategory.EXTENDED and not include_extended:
                 continue
 
-            # Zielordner bestimmen
-            if doc.category == DocumentCategory.CORE:
-                dest_dir = core_dir
-            elif doc.category == DocumentCategory.STUFE2:
-                dest_dir = core_dir  # STUFE2 geht auch in core
-            else:
-                dest_dir = extended_dir
-
-            # Datei kopieren
-            dest_file = dest_dir / doc.path.name
+            # Alles nach data_ano/ (keine Trennung core/extended mehr)
+            dest_file = ano_dir / doc.path.name
             try:
                 shutil.copy2(doc.path, dest_file)
                 processed += 1
@@ -775,7 +794,7 @@ d7 – Interpersonelle Interaktionen
             # Dateinamen anonymisieren
             self._anonymize_filename(dest_file, session.profile)
 
-        print(f"[DEBUG] {processed} Dateien in bundles/ verarbeitet")
+        print(f"[DEBUG] {processed} Dateien in data_ano/ verarbeitet")
         return result
 
     def _anonymize_filename(self, filepath: Path, profile: TempAnonymProfile) -> Path:
@@ -827,17 +846,17 @@ d7 – Interpersonelle Interaktionen
 
         Args:
             session: Aktive Session
-            from_data: True = aus data/ scannen, False = aus bundles/core
+            from_data: True = aus data_roh/ scannen, False = aus data_ano/core
 
         Returns:
             TextBundle mit extrahiertem Text
         """
         if from_data:
-            # Direkt aus data/ scannen (wenn keine Anonymisierung zu bundles/ erfolgt)
-            scan_dir = self.base_path / "data"
+            # Direkt aus data_roh/ scannen (wenn keine Anonymisierung zu data_ano/ erfolgt)
+            scan_dir = self.base_path / "data_roh"
         else:
-            # Aus bundles/core (nach anonymize_to_bundles)
-            scan_dir = self.base_path / "bundles" / "core"
+            # Aus data_ano/ (nach anonymize_to_bundles)
+            scan_dir = self.base_path / "data_ano"
 
         collector = DocumentCollector()
         result = collector.scan_folder(str(scan_dir))
@@ -875,12 +894,12 @@ d7 – Interpersonelle Interaktionen
         session.status = "generating"
 
         # Bundle extrahieren falls noch nicht geschehen
-        # Prüfe ob bundles/core Dateien hat, sonst aus data/ lesen
-        core_dir = self.base_path / "bundles" / "core"
-        has_bundles = core_dir.exists() and any(core_dir.iterdir())
+        # Pruefe ob data_ano/ Dateien hat, sonst aus data_roh/ lesen
+        ano_dir = self.base_path / "data_ano"
+        has_ano = ano_dir.exists() and any(ano_dir.iterdir())
 
         if not session.bundle:
-            self.extract_bundle_text(session, from_data=not has_bundles)
+            self.extract_bundle_text(session, from_data=not has_ano)
 
         bundle = session.bundle
         tarnname = session.profile.tarnname if session.profile else "Klient"
@@ -913,95 +932,185 @@ Berichtszeitraum: {berichtszeitraum}
 
 """
 
-        prompt += """=== AUFGABE ===
+        prompt += f"""=== AUFGABE ===
 
-Erstelle einen strukturierten JSON-Output für einen ICF-basierten Förderbericht.
+Erstelle einen strukturierten JSON-Output fuer einen ICF-basierten Foerderbericht.
 
 WICHTIGE REGELN:
-1. Antworte NUR mit validem JSON - KEIN Markdown, KEINE Erklärungen
+1. Antworte NUR mit validem JSON - KEIN Markdown, KEINE Erklaerungen
 2. Verwende den anonymisierten Namen wie angegeben
 3. Formuliere im fachlichen Berichtsstil (3. Person, sachlich)
 4. Beziehe dich auf konkrete Beobachtungen aus den Protokollen
 5. ICF-Codes: Verwende AUSSCHLIESSLICH die unten gelisteten ICF-Codes (d1-d9).
-   - D880 existiert NICHT. Verwende D1310 oder D1314 für Spielverhalten.
+   - D880 existiert NICHT. Verwende D1310 oder D1314 fuer Spielverhalten.
+6. DOKUMENTEN-PRIORISIERUNG (WICHTIG - beachte beim Schreiben!):
+   Die Dokumente sind nach Prioritaet sortiert. Gewichte sie beim Schreiben entsprechend:
+   HOHE PRIO:   Aktuelle Einzeltherapie-Protokolle, Aktendeckblatt, Hilfeplan, Bewilligungsbescheid
+   MITTLERE PRIO: Berichte von Foerderstellen (z.B. proAutismus), Arztberichte (<10 Jahre),
+                   Schulberichte, E-Mails/Korrespondenz
+   NIEDRIGE PRIO: Arztberichte aelter als 10 Jahre, veraltete Gutachten
+   - Stuetze den Bericht VORRANGIG auf aktuelle Protokolle und Beobachtungen
+   - Aeltere Dokumente nur fuer Diagnose-Historie und Hintergrundinformationen nutzen
+   - Bei Widerspruechen zwischen alten und neuen Dokumenten: NEUERE Daten bevorzugen
+   - HINWEIS: Innerhalb eines Protokoll-Dokuments stehen die NEUESTEN Eintraege am ENDE
 
-STAMMDATEN-EXTRAKTION:
-- landkreis: Aus Kostenzusage/Hilfeplan ablesen - "Loerrach" oder "Waldshut"
+STAMMDATEN-EXTRAKTION (alle Felder ausfuellen!):
+- name: Den anonymisierten Namen verwenden (wie oben angegeben)
+- geburtsdatum: Aus Aktendeckblatt/Stammdaten
+- landkreis: Aus Kostenzusage/Hilfeplan - "Loerrach" oder "Waldshut"
 - zeichen_amt: Aktenzeichen des Amts (z.B. "51.2.1-XXX")
 - foerderungsbeginn: Wann begann die Foerderung bei Foerderstelle? (aus Aktendeckblatt)
 - kostenzusage_ende: Datum Bewilligungsende (dd.mm.yyyy).
-  * WICHTIG: Suche nach Phrasen wie "Kostenzusage bis...", "befristet bis...", "Ende der Förderung am..."
-  * Wenn Text wie "bis Ende Februar 2026", konvertiere zu "28.02.2026".
-  * Wenn Text wie "bis Ende September 2025", konvertiere zu "30.09.2025".
-  * Das Datum im Aktendeckblatt ist oft das Erstellungsdatum, NICHT das Ende - prüfe die Kostenzusage!
+  * WICHTIG: Suche nach "Kostenzusage bis...", "befristet bis...", "Ende der Foerderung am..."
+  * Wenn Text wie "bis Ende Februar 2026", konvertiere zu "28.02.2026"
+  * Das Datum im Aktendeckblatt ist oft das Erstellungsdatum, NICHT das Ende!
+- weiterbewilligung_ab: Ab wann soll die Weiterbewilligung gelten? (Tag nach kostenzusage_ende)
+- sachbearbeiter: Name des zustaendigen Sachbearbeiters beim Jugendamt
+  * Suche nach "Sachbearbeiter", "Ansprechpartner", Unterschrift in Amtsschreiben
+- therapeut_einzel: Name des Einzeltherapeuten (aus Aktendeckblatt/Protokollen)
+- therapeut_gruppe: Name des Gruppentherapeuten (leer wenn nicht vorhanden)
+- kopie_an: Empfaenger fuer Kopien (z.B. Eltern, Schule - aus Hilfeplan)
+- amt_adresse: VOLLSTAENDIGE Adresse des zustaendigen Jugendamts/Aussenstelle
+  * WICHTIG: Loerrach hat mehrere Aussenstellen (Schopfheim, Loerrach-Stadt, etc.)
+  * Suche die EXAKTE Adresse aus Bewilligungsbescheid/Hilfeplan-Briefkopf
+  * Format: "Landratsamt Loerrach\\nJugend & Familie SD IV\\nStrasse Nr\\nPLZ Ort"
+  * Wenn nicht findbar: leer lassen (Default-Adresse wird verwendet)
 - diagnosen: Fuer JEDE Diagnose erfassen:
   * icd_code: z.B. "F84.5"
   * bezeichnung: z.B. "Asperger-Syndrom"
-  * diagnostiker: Wer hat diagnostiziert? (z.B. "Dr. Ritter-Gekeler", "Kreiskrankenhaus Loerrach")
+  * diagnostiker: Wer hat diagnostiziert?
   * datum: Wann? (Jahr oder volles Datum)
-  * quelle: Aus welchem Dokument stammt die Info? (z.B. "Bericht vom 12.03.2019")
+  * quelle: Aus welchem Dokument? (z.B. "Bericht vom 12.03.2019")
 
-VERFÜGBARE ICF-BEREICHE:
+VERFUEGBARE ICF-CODES:
 {self._get_icf_reference()}
 
-JSON-SCHEMA:
-{
-  "stammdaten": {
+SPRACHE UND UMLAUTE:
+- Schreibe ALLE Texte auf Deutsch mit korrekten Umlauten: ä, ö, ü, ß
+- NICHT ae, oe, ue, ss verwenden - immer die echten Umlaute!
+- Nur die JSON-KEYS bleiben in ASCII (z.B. "foerderziele", "verlaengerung")
+- Alle TEXT-WERTE muessen deutsche Umlaute enthalten (z.B. "Förderung", "übernehmen", "Veränderung")
+
+JSON-SCHEMA (ALLE Felder ausfuellen!):
+{{
+  "stammdaten": {{
     "name": "Anonymisierter Name",
     "geburtsdatum": "TT.MM.JJJJ",
     "berichtszeitraum": "TT.MM.JJJJ - TT.MM.JJJJ",
-    "stundenumfang": "75 Minuten wöchentlich",
-    "landkreis": "Lörrach oder Waldshut",
+    "stundenumfang": "75 Minuten woechentlich",
+    "landkreis": "Loerrach oder Waldshut",
+    "zeichen_amt": "Aktenzeichen (z.B. 51.2.1-XXX oder Z1-512.41-...)",
     "kostenzusage_ende": "TT.MM.JJJJ",
     "weiterbewilligung_ab": "TT.MM.JJJJ",
-    "foerderungsbeginn": "TT.MM.JJJJO",
-    "diagnosen": [{"icd_code": "F84.5", "bezeichnung": "...", "diagnostiker": "...", "datum": "..."}],
-    "therapieangebot": {"einzelfoerderung": true, "gruppenfoerderung": false},
-    "netzwerkarbeit": {"elternarbeit": true, "schule": false}
-  },
+    "foerderungsbeginn": "TT.MM.JJJJ",
+    "sachbearbeiter": "Name des Sachbearbeiters",
+    "therapeut_einzel": "Name des Einzeltherapeuten",
+    "therapeut_gruppe": "Name des Gruppentherapeuten oder leer",
+    "kopie_an": "Empfaenger fuer Kopie",
+    "amt_adresse": "Vollstaendige Adresse des Jugendamts (aus Hilfeplan/Bewilligung)",
+    "diagnosen": [{{
+      "icd_code": "F84.5",
+      "bezeichnung": "Asperger-Syndrom",
+      "diagnostiker": "Dr. Beispiel",
+      "datum": "2020",
+      "quelle": "Bericht vom 12.03.2020"
+    }}],
+    "therapieangebot": {{
+      "einzelfoerderung": true,
+      "gruppenfoerderung": false,
+      "co_foerderung": false,
+      "foerderdiagnostik": false
+    }},
+    "netzwerkarbeit": {{
+      "elternarbeit": true,
+      "kindergarten": false,
+      "schule": false,
+      "sonstige": false
+    }}
+  }},
   "foerderziele": [
-    {
+    {{
       "icf_code": "D350",
-      "zielformulierung": "Konversationsfähigkeiten verbessern",
-      "ist_stand": "Konkrete Beobachtung aus Protokollen (2-3 Sätze)",
+      "zielformulierung": "Konversationsfaehigkeiten verbessern",
+      "ist_stand": "Konkrete Beobachtung aus Protokollen (2-3 Saetze)",
       "erreicht": 2,
       "grund_nichterreichung": null
-    }
+    }}
   ],
-  "bereiche": {
-    "selbstversorgung": {"aktiv": true, "text": "Individualisierter Text zum Bereich..."},
-    "gesellschaft_freizeit": {"aktiv": false, "text": ""}
-  },
-  "umweltfaktoren": {
-    "kommunikation": {"aktiv": true, "text": "..."},
-    "wahrnehmung": {"aktiv": false, "text": ""}
-  },
-  "besondere_faehigkeiten": "Stärken des Klienten",
+  "bereiche": {{
+    "selbstversorgung": {{"aktiv": true, "text": "Individualisierter Text..."}},
+    "gesellschaft_freizeit": {{"aktiv": false, "text": ""}}
+  }},
+  "umweltfaktoren": {{
+    "kommunikation": {{"aktiv": true, "text": "..."}},
+    "wahrnehmung": {{"aktiv": false, "text": ""}}
+  }},
+  "besondere_faehigkeiten": "Staerken des Klienten",
   "neue_ziele": [
-    {"icf_code": "D7503", "zielformulierung": "...", "ist_stand": "..."}
+    {{"icf_code": "D7503", "zielformulierung": "...", "ist_stand": "..."}}
   ],
-  "empfehlung": {
+  "empfehlung": {{
     "verlaengerung": true,
     "begruendung": ["therapieziele_nicht_erreicht"],
-    "umfang": "75 Minuten wöchentlich",
+    "umfang": "Autismusspezifische Einzelfoerderung: 75 Minuten woechentlich",
     "sonstige_empfehlung": ""
-  },
-  "abschluss": {
+  }},
+  "abschluss": {{
     "aktuelle_entwicklungen": "Zusammenfassender Absatz...",
     "bedingungsmodell": "Wenn X, dann Y - Prognose..."
-  }
-}
+  }}
+}}
 
-ZIELERREICHUNG:
+FOERDERZIELE -- HILFEPLAN ALS PRIMAERQUELLE (WICHTIG!):
+- Wenn ein HILFEPLAN vorliegt, verwende den AKTUELLSTEN Hilfeplan!
+  Dessen Rahmenziele und Ergebnisziele muessen als Foerderziele
+  uebernommen werden! Formuliere sie woertlich oder sinngemaess.
+- Ordne jedes Hilfeplan-Ziel dem passenden ICF-Code zu.
+- Beschreibe im ist_stand den aktuellen Stand anhand der Protokoll-Beobachtungen.
+- Nur wenn KEIN Hilfeplan vorliegt: Ziele aus dem Foerderverlauf ableiten.
+- Themen die waehrend der Foerderung wichtig waren, aber NICHT zu den
+  Hilfeplan-Zielen passen, gehoeren in die NEUE_ZIELE Tabelle.
+- Beispiel: Hilfeplan sagt "Ich kann auf Menschen zugehen" -> foerderziele
+  mit passendem ICF-Code, ist_stand aus Protokollen, erreicht-Bewertung.
+  Thema "Emotionsregulation" war auch wichtig, steht aber nicht im Hilfeplan
+  -> kommt in neue_ziele.
+
+ZIELERREICHUNG (fuer foerderziele.erreicht):
 - 1 = nicht erreicht
 - 2 = teilweise erreicht
-- 3 = vollständig erreicht
+- 3 = vollstaendig erreicht
 
-BEGRÜNDUNGEN (für empfehlung.begruendung Array):
-- "therapieziele_nicht_erreicht"
-- "uebergang_lebensbereich"
-- "krise_erhoehter_bedarf"
-- "ziele_erreicht" (bei Beendigung)
+GRUND NICHTERREICHUNG (fuer foerderziele.grund_nichterreichung):
+- null = kein Grund (bei erreicht=3)
+- 1 = Foerderzeitraum zu kurz
+- 2 = Veraenderte Rahmenbedingungen
+- 3 = Entwicklungsbedingt noch nicht moeglich
+- 4 = Sonstiges
+
+CHECKBOXEN - THERAPIEANGEBOT (stammdaten.therapieangebot):
+- einzelfoerderung (bool): Einzelfoerderung - Default: true
+- gruppenfoerderung (bool): Gruppenfoerderung - Default: false
+- co_foerderung (bool): Co-Foerderung - Default: false
+- foerderdiagnostik (bool): Foerderdiagnostik - Default: false
+
+CHECKBOXEN - NETZWERKARBEIT (stammdaten.netzwerkarbeit):
+- elternarbeit (bool): Elternarbeit - Default: true
+- kindergarten (bool): Kindergarten - Default: false
+- schule (bool): Schule - Default: false
+- sonstige (bool): Sonstige Stellen - Default: false
+
+BEGRUENDUNGEN (fuer empfehlung.begruendung Array):
+Bei Verlaengerung (verlaengerung: true):
+- "therapieziele_nicht_erreicht" -> Checkbox "Therapieziele noch nicht erreicht"
+- "uebergang_lebensbereich" -> Checkbox "Uebergang in den naechsten Lebensbereich"
+- "krise_erhoehter_bedarf" -> Checkbox "Krise / erhoehter Bedarf"
+- "sonstiges_verlaengerung" -> Checkbox "Sonstiges" (bei Verlaengerung)
+
+Bei Beendigung (verlaengerung: false):
+- "ziele_erreicht" -> Checkbox "Ziele erreicht"
+- "andere_therapie_vorrangig" -> Checkbox "andere Therapie vorrangig"
+- "pausierung" -> Checkbox "Pausierung"
+- "sonstiges_beendigung" -> Checkbox "Sonstiges" (bei Beendigung)
 
 JSON:
 """
@@ -1157,7 +1266,7 @@ JSON:
             safe_name = "".join(c for c in original_name if c.isalnum() or c in " -_").strip()
             timestamp = datetime.now().strftime("%Y%m%d")
             output_name = f"Foerderbericht_{safe_name}_{timestamp}.docx"
-            output_path = self.base_path / "output" / output_name
+            output_path = self.base_path / "output_berichte" / output_name
 
             # Generator nutzen
             result = fill_template(
@@ -1194,6 +1303,23 @@ JSON:
     def _deanonymize_json(self, data: Dict, profile: TempAnonymProfile) -> Dict:
         """De-anonymisiert alle String-Werte in einem JSON-Dict rekursiv."""
         reverse_mappings = profile.get_reverse_mappings()
+
+        # Sicherstellen dass Tarnname -> Original immer dabei ist
+        if profile.tarnname and profile.original_name:
+            reverse_mappings[profile.tarnname] = profile.original_name
+            reverse_mappings[profile.tarnname.upper()] = profile.original_name.upper()
+            # Auch Einzelteile (Vorname/Nachname)
+            tarn_parts = profile.tarnname.strip().split()
+            orig_parts = profile.original_name.strip().split()
+            if len(tarn_parts) >= 2 and len(orig_parts) >= 2:
+                reverse_mappings[tarn_parts[0]] = orig_parts[0]
+                reverse_mappings[tarn_parts[-1]] = orig_parts[-1]
+            # Fake-Geburtsdatum -> echtes (falls vorhanden)
+            if profile.fake_geburtsdatum:
+                # Suche das echte Geburtsdatum in den Datum-Mappings
+                for orig_date, fake_date in profile.mappings.get("dates", {}).items():
+                    reverse_mappings[fake_date] = orig_date
+
         sorted_mappings = sorted(reverse_mappings.items(), key=lambda x: len(x[0]), reverse=True)
 
         def deanon_value(value):
@@ -1266,7 +1392,9 @@ JSON:
         safe_name = "".join(c for c in original_name if c.isalnum() or c in " -_").strip()
         timestamp = datetime.now().strftime("%Y%m%d")
         output_name = f"Foerderbericht_{safe_name}_{timestamp}.docx"
-        output_path = self.base_path / "output" / output_name
+        output_dir = self.base_path / "output_berichte"
+        output_dir.mkdir(parents=True, exist_ok=True)
+        output_path = output_dir / output_name
 
         doc.save(str(output_path))
 
@@ -1563,24 +1691,23 @@ JSON:
 
     def cleanup(self, session: WorkflowSession, keep_output: bool = True):
         """
-        Räumt temporäre Daten auf (NICHT data/ - wird manuell verwaltet).
+        Raeumt temporaere Daten auf (NICHT data_roh/ - wird manuell verwaltet).
 
         Args:
             session: Aktive Session
             keep_output: Output-Ordner behalten (Default: True)
         """
-        # HINWEIS: data/ wird NICHT automatisch geleert - Benutzer verwaltet das selbst
+        # HINWEIS: data_roh/ wird NICHT automatisch geleert - Benutzer verwaltet das selbst
 
-        # bundles/ leeren
-        for subdir in ["core", "extended"]:
-            bundle_dir = self.base_path / "bundles" / subdir
-            if bundle_dir.exists():
-                for f in bundle_dir.iterdir():
-                    try:
-                        if f.is_file():
-                            f.unlink()
-                    except PermissionError:
-                        pass
+        # data_ano/ leeren
+        ano_dir = self.base_path / "data_ano"
+        if ano_dir.exists():
+            for f in ano_dir.iterdir():
+                try:
+                    if f.is_file():
+                        f.unlink()
+                except PermissionError:
+                    pass
 
         # Profil-Cleanup
         if session.profile:
@@ -1622,18 +1749,18 @@ def quick_report(
     service = ReportWorkflowService()
     session = service.start_session()
 
-    # Prüfen ob input_folder bereits in data/ liegt
-    data_dir = service.base_path / "data"
+    # Pruefen ob input_folder bereits in data_roh/ liegt
+    data_roh_dir = service.base_path / "data_roh"
     is_in_data = False
     try:
-        input_folder.relative_to(data_dir)
+        input_folder.relative_to(data_roh_dir)
         is_in_data = True
     except ValueError:
         pass
 
     if is_in_data:
-        # Daten liegen bereits in data/ - nicht kopieren!
-        print(f"[INFO] Daten bereits in data/ - ueberspringe Import")
+        # Daten liegen bereits in data_roh/ - nicht kopieren!
+        print(f"[INFO] Daten bereits in data_roh/ - ueberspringe Import")
         session.status = "importing"
         session.input_files = list(input_folder.rglob("*"))
     else:
@@ -1693,7 +1820,7 @@ def main():
         print("  python report_workflow_service.py test                           - Schnelltest")
         print()
         print("Beispiel:")
-        print("  python report_workflow_service.py generate \"data/Mustermann, Max\" \"Max Mustermann\" \"01.01.2015\"")
+        print("  python report_workflow_service.py generate \"data_roh/Mustermann, Max\" \"Max Mustermann\" \"01.01.2015\"")
         return
 
     cmd = sys.argv[1]
@@ -1766,18 +1893,15 @@ def main():
         print(f"      Prompt: {len(prompt)} Zeichen")
 
         # Prompt in Datei speichern
-        prompt_file = data_path / "output" / "prompt.txt"
+        prompt_file = data_path / "data_bundled" / "prompt.txt"
         prompt_file.parent.mkdir(parents=True, exist_ok=True)
         prompt_file.write_text(prompt, encoding="utf-8")
         print(f"      Gespeichert: {prompt_file}")
 
-        # Schritt 2: Auf LLM-Antwort warten
-        # HINWEIS: Ollama deaktiviert - verwende stattdessen Claude-Agent
+        # Schritt 2: LLM-Verarbeitung (Claude API oder vorhandene Antwort)
         print("\n[2/3] LLM-Verarbeitung...")
-        print("      Ollama deaktiviert - Prompt muss an Claude-Agent uebergeben werden.")
-        print(f"      Prompt-Datei: {prompt_file}")
 
-        response_file = data_path / "output" / "llm_response.txt"
+        response_file = data_path / "data_bundled" / "llm_response.txt"
 
         # Pruefen ob bereits eine LLM-Antwort existiert
         if response_file.exists() and response_file.stat().st_size > 100:
@@ -1785,13 +1909,35 @@ def main():
             llm_response = response_file.read_text(encoding="utf-8")
             print(f"      LLM-Antwort: {len(llm_response)} Zeichen")
         else:
-            print("\n      AKTION ERFORDERLICH:")
-            print("      1. Oeffne den Prompt in: " + str(prompt_file))
-            print("      2. Sende den Inhalt an Claude (z.B. via Claude Code oder Web)")
-            print("      3. Speichere die Antwort in: " + str(response_file))
-            print("      4. Fuehre diesen Befehl erneut aus")
-            print("\n      Alternative: bach bericht finalize <ordner> <llm_response.txt>")
-            return
+            # Automatisch an Claude API senden
+            try:
+                import anthropic
+                print("      Sende Prompt an Claude API...")
+                client = anthropic.Anthropic()
+                message = client.messages.create(
+                    model="claude-sonnet-4-20250514",
+                    max_tokens=8192,
+                    messages=[{"role": "user", "content": prompt}]
+                )
+                llm_response = message.content[0].text
+                # Antwort speichern fuer Wiederverwendung
+                response_file.parent.mkdir(parents=True, exist_ok=True)
+                response_file.write_text(llm_response, encoding="utf-8")
+                print(f"      Claude-Antwort: {len(llm_response)} Zeichen")
+                print(f"      Gespeichert: {response_file}")
+            except ImportError:
+                print("\n      AKTION ERFORDERLICH (anthropic SDK nicht installiert):")
+                print("      1. Oeffne den Prompt in: " + str(prompt_file))
+                print("      2. Sende den Inhalt an Claude (z.B. via Claude Code oder Web)")
+                print("      3. Speichere die Antwort in: " + str(response_file))
+                print("      4. Fuehre diesen Befehl erneut aus")
+                print("\n      Alternative: bach bericht finalize <ordner> <llm_response.txt>")
+                return
+            except Exception as e:
+                print(f"\n      Claude API Fehler: {e}")
+                print(f"      Prompt-Datei: {prompt_file}")
+                print("      Manueller Fallback: Prompt an Claude senden, Antwort in " + str(response_file))
+                return
 
         # Schritt 3: Bericht generieren
         print("\n[3/3] Erstelle Word-Dokument...")

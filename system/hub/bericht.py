@@ -28,10 +28,10 @@ class BerichtHandler(BaseHandler):
 
     def __init__(self, base_path: Path):
         super().__init__(base_path)
-        self.foerderplanung_dir = base_path / "user" / "buero" / "foerderplanung"
+        self.foerderplanung_dir = base_path / "user" / "documents" / "foerderplaner"
         self.klienten_dir = self.foerderplanung_dir / "klienten"
         self.templates_dir = base_path / "skills" / "_templates"
-        self.generator_dir = base_path / "skills" / "_experts" / "report_generator"
+        self.generator_dir = base_path / "agents" / "_experts" / "report_generator"
 
     @property
     def profile_name(self) -> str:
@@ -48,6 +48,7 @@ class BerichtHandler(BaseHandler):
             "archive": "Exportierten Bericht archivieren",
             "extract": "Quelltexte aus Klienten-Ordner extrahieren",
             "prompt": "LLM-Prompt erstellen",
+            "pipeline": "End-to-End Pipeline: data_roh -> fertiger Bericht",
             "list": "Klienten-Ordner auflisten",
             "status": "Status der Pipeline anzeigen",
             "help": "Hilfe anzeigen",
@@ -65,6 +66,8 @@ class BerichtHandler(BaseHandler):
             return self._extract(args)
         elif operation == "prompt":
             return self._prompt(args)
+        elif operation == "pipeline":
+            return self._pipeline(args)
         elif operation == "list":
             return self._list(args)
         elif operation == "status":
@@ -106,7 +109,7 @@ class BerichtHandler(BaseHandler):
 
         try:
             sys.path.insert(0, str(self.base_path))
-            from skills._experts.report_generator.generator import ReportGenerator
+            from agents._experts.report_generator.generator import ReportGenerator
 
             gen = ReportGenerator()
             result = gen.generate_from_json(
@@ -147,7 +150,7 @@ class BerichtHandler(BaseHandler):
 
         try:
             sys.path.insert(0, str(self.base_path))
-            from skills._experts.report_generator.generator import ExportPipeline
+            from agents._experts.report_generator.generator import ExportPipeline
 
             pipeline = ExportPipeline(str(self.foerderplanung_dir))
             result = pipeline.export(
@@ -177,7 +180,7 @@ class BerichtHandler(BaseHandler):
 
         try:
             sys.path.insert(0, str(self.base_path))
-            from skills._experts.report_generator.generator import ExportPipeline
+            from agents._experts.report_generator.generator import ExportPipeline
 
             pipeline = ExportPipeline(str(self.foerderplanung_dir))
             success = pipeline.archive(client_folder="", ready_name=name)
@@ -210,7 +213,7 @@ class BerichtHandler(BaseHandler):
 
         try:
             sys.path.insert(0, str(self.base_path))
-            from skills._experts.report_generator.generator import ReportGenerator
+            from agents._experts.report_generator.generator import ReportGenerator
 
             gen = ReportGenerator()
             text = gen.extract_sources(folder)
@@ -244,7 +247,7 @@ class BerichtHandler(BaseHandler):
 
         try:
             sys.path.insert(0, str(self.base_path))
-            from skills._experts.report_generator.generator import ReportGenerator
+            from agents._experts.report_generator.generator import ReportGenerator
 
             gen = ReportGenerator()
             text = gen.extract_sources(folder)
@@ -257,6 +260,88 @@ class BerichtHandler(BaseHandler):
                 return True, f"Prompt: {len(prompt)} Zeichen\n\n{prompt[:500]}..."
         except Exception as e:
             return False, f"Fehler bei Prompt-Erstellung: {e}"
+
+    def _pipeline(self, args: List[str]) -> Tuple[bool, str]:
+        """End-to-End Pipeline: data_roh -> fertiger Bericht."""
+        # Name und Geburtsdatum sind jetzt optional (Auto-Detect aus Ordnername)
+        client_name = None
+        geburtsdatum = None
+        zeitraum = "01.01.2025 - 31.12.2025"
+        backend = "claude_code"
+        model = "claude-sonnet-4-6"
+        eltern = []
+        adresse = None
+        cleanup = True
+
+        # Positionale Args: [name] [geburtsdatum] -- beide optional
+        positional = []
+        i = 0
+        while i < len(args):
+            if args[i].startswith("--"):
+                if args[i] == "--zeitraum" and i + 1 < len(args):
+                    zeitraum = args[i + 1]
+                    i += 2
+                elif args[i] == "--backend" and i + 1 < len(args):
+                    backend = args[i + 1]
+                    i += 2
+                elif args[i] == "--model" and i + 1 < len(args):
+                    model = args[i + 1]
+                    i += 2
+                elif args[i] == "--eltern":
+                    i += 1
+                    while i < len(args) and not args[i].startswith("--"):
+                        eltern.append(args[i])
+                        i += 1
+                elif args[i] == "--adresse" and i + 1 < len(args):
+                    adresse = args[i + 1]
+                    i += 2
+                elif args[i] == "--no-cleanup":
+                    cleanup = False
+                    i += 1
+                else:
+                    i += 1
+            else:
+                positional.append(args[i])
+                i += 1
+
+        if len(positional) >= 1:
+            client_name = positional[0]
+        if len(positional) >= 2:
+            geburtsdatum = positional[1]
+        # client_name und geburtsdatum bleiben None -> Auto-Detect in Pipeline
+
+        try:
+            sys.path.insert(0, str(self.base_path))
+            from hub._services.document.foerderbericht_pipeline import FoerderberichtPipeline
+
+            pipeline = FoerderberichtPipeline()
+            result = pipeline.run_full_pipeline(
+                client_name=client_name,
+                geburtsdatum=geburtsdatum,
+                berichtszeitraum=zeitraum,
+                parent_names=eltern or None,
+                client_address=adresse,
+                llm_backend=backend,
+                model=model,
+                auto_cleanup=cleanup,
+            )
+
+            if result.success:
+                lines = [
+                    f"Pipeline erfolgreich!",
+                    f"  Bericht: {result.output_path}",
+                    f"  Tarnname: {result.tarnname}",
+                    f"  Dauer: {result.duration_s:.1f}s",
+                    "",
+                    "  Schritte:",
+                ]
+                for step in result.steps_completed:
+                    lines.append(f"    - {step}")
+                return True, "\n".join(lines)
+            else:
+                return False, f"Pipeline fehlgeschlagen: {result.error}"
+        except Exception as e:
+            return False, f"Fehler bei Pipeline: {e}"
 
     def _list(self, args: List[str]) -> Tuple[bool, str]:
         """Klienten-Ordner und Pipeline-Status auflisten."""
@@ -331,10 +416,15 @@ class BerichtHandler(BaseHandler):
         lines.extend([
             "",
             "Beispiele:",
+            "  bach bericht pipeline                              # Auto-Detect (empfohlen)",
+            "  bach bericht pipeline --zeitraum \"01.07.2025 - 30.06.2026\"",
+            "  bach bericht pipeline \"Max Mustermann\" \"15.03.2016\"  # Explizit",
             "  bach bericht list",
+            "  bach bericht status",
             "  bach bericht generate output/bericht_data.json -o output/bericht.docx",
             "  bach bericht export klienten/K_0042 -p meinpasswort",
-            "  bach bericht archive Max_Mustermann",
-            "  bach bericht status",
+            "",
+            "Standardwege: Chat/Subagent, Desktop-.bat, llmauto Chain, CLI",
+            "Name + Geburtsdatum werden automatisch aus data_roh/ erkannt.",
         ])
         return True, "\n".join(lines)
