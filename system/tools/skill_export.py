@@ -456,6 +456,8 @@ class SkillExporter:
         """
         if fmt == "anthropic":
             return self._export_anthropic(name, output_dir, dry_run)
+        if fmt == "agent":
+            return self._export_agent(name, output_dir, dry_run)
         lines = []
         lines.append("=" * 60)
         lines.append(f"SKILL EXPORT: {name}")
@@ -823,6 +825,238 @@ class SkillExporter:
         except Exception as e:
             return False, f"Export fehlgeschlagen: {e}\n\n" + "\n".join(lines)
 
+    def _export_agent(self, name: str, output_dir: Optional[str] = None, dry_run: bool = False) -> Tuple[bool, str]:
+        """
+        Exportiert einen BACH Agent/Expert als Claude Code Agent (.md Datei).
+
+        Generiert eine .md Datei mit YAML-Frontmatter (name, description, model,
+        tools, maxTurns) und Body aus Persona + SKILL.md Inhalt.
+
+        Args:
+            name: Agent/Expert-Name (z.B. 'research', 'entwickler', 'data-analysis')
+            output_dir: Zielverzeichnis (Standard: .claude/agents/)
+            dry_run: Nur Vorschau zeigen
+
+        Returns:
+            (success, message)
+        """
+        lines = []
+        lines.append("=" * 60)
+        lines.append(f"SKILL EXPORT (Claude Code Agent): {name}")
+        lines.append("=" * 60)
+
+        # 1. Skill finden
+        skill_path = self.find_skill(name)
+        if not skill_path:
+            return False, f"Agent/Expert nicht gefunden: {name}\nVerfuegbare Skills pruefen mit: bach skills list"
+
+        is_dir = skill_path.is_dir()
+        skill_type = self._detect_type(skill_path)
+
+        lines.append(f"Quelle:  {skill_path}")
+        lines.append(f"Typ:     {skill_type}")
+        lines.append(f"Format:  Claude Code Agent (.md)")
+        lines.append("")
+
+        # 2. SKILL.md lesen und parsen
+        skill_md_path = skill_path / "SKILL.md" if is_dir else skill_path
+        skill_name = name
+        skill_description = f"BACH {skill_type}: {name}"
+        skill_model = "claude-sonnet-4-6"
+        skill_tools = ["Read", "Write", "Edit", "Bash", "Glob", "Grep"]
+        skill_max_turns = 10
+        skill_body = ""
+
+        if skill_md_path.exists():
+            try:
+                content = skill_md_path.read_text(encoding='utf-8', errors='ignore')
+
+                # YAML-Frontmatter extrahieren
+                yaml_match = re.match(r'^---\s*\n(.*?)\n---', content, re.DOTALL)
+                if yaml_match:
+                    yaml_text = yaml_match.group(1)
+                    skill_body = content[yaml_match.end():].strip()
+
+                    # Versuche YAML zu parsen
+                    try:
+                        import yaml
+                        header = yaml.safe_load(yaml_text)
+                        if header and isinstance(header, dict):
+                            skill_name = header.get('name', name)
+                            raw_desc = header.get('description', skill_description)
+                            if isinstance(raw_desc, str):
+                                skill_description = ' '.join(raw_desc.split()).strip()
+
+                            # Runtime-Einstellungen (falls vorhanden)
+                            runtime = header.get('runtime', {})
+                            if isinstance(runtime, dict):
+                                if runtime.get('model'):
+                                    skill_model = runtime['model']
+                                if runtime.get('max_turns'):
+                                    skill_max_turns = runtime['max_turns']
+                                if runtime.get('tools') and isinstance(runtime['tools'], list):
+                                    skill_tools = runtime['tools']
+
+                            # Tools aus dependencies uebernehmen wenn keine runtime-tools
+                            deps = header.get('dependencies', {})
+                            if isinstance(deps, dict) and deps.get('tools'):
+                                dep_tools = deps['tools']
+                                if isinstance(dep_tools, list) and dep_tools:
+                                    lines.append(f"  BACH-Dependencies: {dep_tools}")
+
+                    except ImportError:
+                        # Regex-Fallback
+                        name_match = re.search(r'name:\s*(.+)', yaml_text)
+                        if name_match:
+                            skill_name = name_match.group(1).strip()
+                        desc_match = re.search(r'description:\s*>?\s*\n?\s*(.+)', yaml_text)
+                        if desc_match:
+                            skill_description = desc_match.group(1).strip()
+                    except Exception as e:
+                        lines.append(f"  [!] YAML-Parse-Fehler: {e}")
+                else:
+                    skill_body = content.strip()
+            except Exception as e:
+                lines.append(f"  [!] Fehler beim Lesen von SKILL.md: {e}")
+
+        # 3. Persona suchen
+        persona_content = ""
+        personas_dir = self.system_root / "agents" / "personas"
+        persona_file = None
+
+        if personas_dir.exists():
+            # Suche passende Persona: Name-Match oder display_name-Match
+            name_lower = name.lower().replace('-', '_').replace(' ', '_')
+            for pf in personas_dir.glob("*.md"):
+                # Erst nach display_name / name im YAML suchen
+                try:
+                    pcontent = pf.read_text(encoding='utf-8', errors='ignore')
+                    pyaml_match = re.match(r'^---\s*\n(.*?)\n---', pcontent, re.DOTALL)
+                    if pyaml_match:
+                        pyaml_text = pyaml_match.group(1)
+
+                        # Name-Match im YAML
+                        pname_match = re.search(r'name:\s*(.+)', pyaml_text)
+                        if pname_match:
+                            pname = pname_match.group(1).strip().lower().replace('-', '_').replace(' ', '_')
+                            if pname == name_lower or name_lower in pname or pname in name_lower:
+                                persona_file = pf
+                                break
+
+                        # display_name Match
+                        display_match = re.search(r'display_name:\s*["\']?(\w+)', pyaml_text)
+                        if display_match:
+                            dname = display_match.group(1).strip().lower()
+                            if dname == name_lower or name_lower in dname:
+                                persona_file = pf
+                                break
+
+                        # parent_agents Match
+                        if name_lower in pyaml_text.lower():
+                            persona_file = pf
+                            break
+                except Exception:
+                    continue
+
+        if persona_file:
+            lines.append(f"  Persona: {persona_file.name}")
+            try:
+                pcontent = persona_file.read_text(encoding='utf-8', errors='ignore')
+                # Body nach Frontmatter extrahieren
+                pyaml_match = re.match(r'^---\s*\n(.*?)\n---', pcontent, re.DOTALL)
+                if pyaml_match:
+                    persona_content = pcontent[pyaml_match.end():].strip()
+                else:
+                    persona_content = pcontent.strip()
+            except Exception as e:
+                lines.append(f"  [!] Fehler beim Lesen der Persona: {e}")
+        else:
+            lines.append("  Persona: keine gefunden (wird ohne Persona exportiert)")
+
+        lines.append("")
+
+        # 4. Sanitize fuer Frontmatter
+        # Display-Name: Aus skill_name einen lesbaren Namen machen
+        display_name = skill_name.replace('-', ' ').replace('_', ' ').title()
+
+        # Description: Einzeilig, max 200 Zeichen
+        desc_clean = ' '.join(skill_description.split())[:200]
+
+        # Tools: Als JSON-Liste
+        tools_json = json.dumps(skill_tools)
+
+        # 5. Claude Code Agent .md generieren
+        agent_md_parts = []
+        agent_md_parts.append("---")
+        agent_md_parts.append(f"name: {display_name}")
+        agent_md_parts.append(f"description: {desc_clean}")
+        agent_md_parts.append(f"model: {skill_model}")
+        agent_md_parts.append(f"tools: {tools_json}")
+        agent_md_parts.append(f"maxTurns: {skill_max_turns}")
+        agent_md_parts.append("---")
+        agent_md_parts.append("")
+
+        # Persona zuerst (Charakter/Verhalten)
+        if persona_content:
+            agent_md_parts.append("## Persona")
+            agent_md_parts.append("")
+            agent_md_parts.append(persona_content)
+            agent_md_parts.append("")
+            agent_md_parts.append("---")
+            agent_md_parts.append("")
+
+        # SKILL.md Body (Faehigkeiten/Anweisungen)
+        if skill_body:
+            agent_md_parts.append("## Anweisungen")
+            agent_md_parts.append("")
+            agent_md_parts.append(skill_body)
+
+        agent_md_content = "\n".join(agent_md_parts)
+
+        # 6. Vorschau
+        lines.append("GENERIERTE AGENT-DATEI (Frontmatter):")
+        lines.append("-" * 40)
+        # Nur Frontmatter + erste 10 Zeilen Body zeigen
+        preview_lines = agent_md_content.split('\n')
+        for pl in preview_lines[:20]:
+            lines.append(f"  {pl}")
+        if len(preview_lines) > 20:
+            lines.append(f"  ... ({len(preview_lines) - 20} weitere Zeilen)")
+        lines.append("-" * 40)
+        lines.append("")
+
+        if dry_run:
+            lines.append("[DRY-RUN] Keine Dateien erstellt.")
+            return True, "\n".join(lines)
+
+        # 7. Datei schreiben
+        try:
+            if output_dir:
+                export_path = Path(output_dir)
+            else:
+                # Standard: .claude/agents/ im BACH-Hauptverzeichnis
+                export_path = self.system_root.parent / ".claude" / "agents"
+
+            export_path.mkdir(parents=True, exist_ok=True)
+
+            # Dateiname: Kleinbuchstaben, Bindestriche
+            file_name = name.lower().replace(' ', '-').replace('_', '-') + ".md"
+            file_path = export_path / file_name
+
+            file_path.write_text(agent_md_content, encoding='utf-8')
+
+            lines.append(f"[OK] Claude Code Agent exportiert: {file_path}")
+            lines.append(f"Dateiname: {file_name}")
+            lines.append(f"Groesse: {len(agent_md_content)} Bytes")
+            lines.append("")
+            lines.append("Verwendung in Claude Code:")
+            lines.append(f"  claude agent {file_name.replace('.md', '')}")
+
+            return True, "\n".join(lines)
+
+        except Exception as e:
+            return False, f"Export fehlgeschlagen: {e}\n\n" + "\n".join(lines)
+
     def _convert_skill_md_to_anthropic(self, skill_md_path: Path, name: str) -> str:
         """Konvertiert SKILL.md Frontmatter zum Anthropic-Format (nur name + description)."""
         if not skill_md_path.exists():
@@ -969,8 +1203,8 @@ def main():
     parser.add_argument(
         '--format', '-f',
         default='bach',
-        choices=['bach', 'anthropic'],
-        help='Export-Format: bach (Standard mit _deps/) oder anthropic (scripts/ + references/)'
+        choices=['bach', 'anthropic', 'agent'],
+        help='Export-Format: bach (Standard mit _deps/), anthropic (scripts/ + references/), agent (Claude Code Agent .md)'
     )
 
     args = parser.parse_args()

@@ -319,7 +319,10 @@ def main():
     parser.add_argument("--compare", action="store_true", help="Beide Modi vergleichen")
     parser.add_argument("--dry-run", action="store_true", default=True,
                         help="Nur Tasks anzeigen (Standard)")
-    parser.add_argument("--workers", type=int, default=3, help="Anzahl paralleler Worker (default: 3)")
+    parser.add_argument("--workers", type=int, default=0,
+                        help="Anzahl paralleler Worker (default: auto, basierend auf Task-Anzahl)")
+    parser.add_argument("--max-workers", type=int, default=0,
+                        help="Obere Schranke fuer dynamische Worker-Anzahl (default: min(CPU, 8))")
     parser.add_argument("--category", "-c", choices=list(TASK_CATALOG.keys()),
                         help="Nur eine Kategorie benchmarken")
     parser.add_argument("--model", "-m", default="claude-haiku-4-5-20251001",
@@ -363,6 +366,16 @@ def main():
         print(f"\nGesamt: {len(tasks)} Tasks")
         print("Ausfuehren mit: bach schwarm benchmark --run [--parallel|--sequential|--compare]")
         return 0
+
+    # Dynamische Worker-Berechnung
+    if args.workers <= 0:
+        try:
+            from .runner import calculate_dynamic_workers
+            args.workers = calculate_dynamic_workers(len(tasks), max_workers=args.max_workers)
+        except ImportError:
+            cap = args.max_workers if args.max_workers > 0 else 8
+            args.workers = min(max(2, len(tasks) // 2), cap)
+        print(f"[BENCHMARK] Worker-Anzahl automatisch berechnet: {args.workers} (basierend auf {len(tasks)} Tasks)")
 
     # Runner erstellen
     print(f"\nSchwarm Benchmark")

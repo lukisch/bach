@@ -115,6 +115,7 @@ PLAN.txt
 # === LOKALE DEV-TOOLS (nicht committen) ===
 /system/_dev/
 /_dev/
+/.dev/
 
 # === USER-DATEN MIT ECHTEN NAMEN ===
 /system/data/anonymizer_whitelist.json

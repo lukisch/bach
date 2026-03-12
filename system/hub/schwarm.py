@@ -13,9 +13,9 @@ Verfuegbare Muster:
 Befehle:
   bach schwarm list                                  Verfuegbare Muster anzeigen
   bach schwarm run <muster> <aufgabe>                Schwarm-Muster ausfuehren
-  bach schwarm translate --file <path> [--workers N]  Schwarm-Uebersetzung
-  bach schwarm summarize [--batch-size N]             Chunk-Zusammenfassungen
-  bach schwarm benchmark [--compare] [--workers N]    Performance-Benchmark
+  bach schwarm translate --file <path> [--workers N] [--max-workers N]  Schwarm-Uebersetzung
+  bach schwarm summarize [--batch-size N]                               Chunk-Zusammenfassungen
+  bach schwarm benchmark [--compare] [--workers N] [--max-workers N]    Performance-Benchmark
   bach schwarm consensus <frage> [--voters N]         Konsensus-Abstimmung
   bach schwarm hierarchy <aufgabe> [--workers N]      Boss-Worker-Aggregator
   bach schwarm stigmergy <aufgabe> [--agents N]       Pheromon-basierte Koordination
@@ -210,6 +210,9 @@ class SchwarmHandler(BaseHandler):
             elif arg in ("--workers", "-w") and i + 1 < len(args):
                 cmd_args.extend(["--workers", args[i + 1]])
                 i += 2
+            elif arg == "--max-workers" and i + 1 < len(args):
+                cmd_args.extend(["--max-workers", args[i + 1]])
+                i += 2
             elif arg == "--chunk-size" and i + 1 < len(args):
                 cmd_args.extend(["--chunk-size", args[i + 1]])
                 i += 2
@@ -292,6 +295,9 @@ class SchwarmHandler(BaseHandler):
                 i += 1
             elif arg in ("--workers", "-w") and i + 1 < len(args):
                 cmd_args.extend(["--workers", args[i + 1]])
+                i += 2
+            elif arg == "--max-workers" and i + 1 < len(args):
+                cmd_args.extend(["--max-workers", args[i + 1]])
                 i += 2
             elif arg in ("--category", "-c") and i + 1 < len(args):
                 cmd_args.extend(["--category", args[i + 1]])
@@ -410,9 +416,11 @@ class SchwarmHandler(BaseHandler):
 
         # Argumente parsen
         task = args[0]
-        workers = 3
+        workers = 0  # 0 = dynamisch
+        max_workers = 0
         boss_model = "sonnet"
         worker_model = "haiku"
+        workers_explicit = False
 
         i = 1
         while i < len(args):
@@ -420,8 +428,15 @@ class SchwarmHandler(BaseHandler):
             if arg in ("--workers", "-w") and i + 1 < len(args):
                 try:
                     workers = int(args[i + 1])
+                    workers_explicit = True
                 except ValueError:
                     return False, f"--workers erwartet eine Zahl, nicht '{args[i + 1]}'"
+                i += 2
+            elif arg == "--max-workers" and i + 1 < len(args):
+                try:
+                    max_workers = int(args[i + 1])
+                except ValueError:
+                    return False, f"--max-workers erwartet eine Zahl, nicht '{args[i + 1]}'"
                 i += 2
             elif arg == "--boss-model" and i + 1 < len(args):
                 boss_model = args[i + 1]
@@ -432,6 +447,17 @@ class SchwarmHandler(BaseHandler):
             else:
                 task += " " + args[i]
                 i += 1
+
+        # Dynamische Worker-Berechnung wenn nicht explizit gesetzt
+        if not workers_explicit or workers <= 0:
+            try:
+                from tools.schwarm.runner import calculate_dynamic_workers
+                # Hierarchy: Workers basierend auf geschaetzter Sub-Task-Anzahl
+                # Default-Annahme: ~4 Sub-Tasks pro Aufgabe
+                estimated_subtasks = 4
+                workers = calculate_dynamic_workers(estimated_subtasks, max_workers=max_workers)
+            except ImportError:
+                workers = 3  # Fallback auf bisherigen Default
 
         if dry_run:
             return True, (

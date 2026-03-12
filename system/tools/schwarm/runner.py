@@ -19,6 +19,43 @@ from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
+# --- Dynamische Worker-Berechnung ---
+
+
+def calculate_dynamic_workers(num_chunks: int, max_workers: int = 0) -> int:
+    """Berechnet die optimale Worker-Anzahl basierend auf Task-Groesse.
+
+    Heuristik:
+      - < 4 Chunks  -> 2 Workers
+      - 4-10 Chunks -> 4 Workers
+      - > 10 Chunks -> min(chunks // 2, max_workers)
+
+    Args:
+        num_chunks: Anzahl der zu verarbeitenden Chunks/Tasks.
+        max_workers: Obere Schranke. 0 = auto (min(CPU-Kerne, 8)).
+
+    Returns:
+        Optimale Worker-Anzahl (mindestens 2).
+    """
+    if max_workers <= 0:
+        try:
+            cpu_count = os.cpu_count() or 4
+        except Exception:
+            cpu_count = 4
+        max_workers = min(cpu_count, 8)
+
+    if num_chunks < 4:
+        workers = 2
+    elif num_chunks <= 10:
+        workers = 4
+    else:
+        workers = num_chunks // 2
+
+    # Clamp: min 2, max max_workers, nie mehr als chunks selbst
+    workers = max(2, min(workers, max_workers, num_chunks))
+    return workers
+
+
 # --- Kosten pro Modell (USD / 1M Tokens) ---
 MODEL_COSTS = {
     "claude-haiku-4-5-20251001": {"input": 1.00, "output": 5.00},

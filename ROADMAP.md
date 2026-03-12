@@ -517,7 +517,7 @@ Laufzeitumgebung definieren, nicht das Wissen.
 | 2 | Persona-Template erstellen (TEMPLATE_PERSONA.md) | KOMPLETT |
 | 3 | Standard: Jeder Expert MUSS SKILL.md haben | KOMPLETT (22/22 Experts, 2026-03-12) |
 | 4 | Persona-Dateien aus DB generieren (agents/personas/) | KOMPLETT (20 Dateien, 2026-03-12) |
-| 5 | Proof-of-Concept: 1 Expert -> Persona + Skill konvertieren | Offen |
+| 5 | Proof-of-Concept: 1 Expert -> Persona + Skill konvertieren | KOMPLETT (Steuer/Theodor, 2026-03-12) |
 | 6 | Export-Pipeline: `--format agent` fuer Claude Code Agents | Offen |
 | 7 | Boss-Agent-Rolle evaluieren (benoetigt? Router-Ersatz?) | Offen |
 

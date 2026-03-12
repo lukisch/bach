@@ -58,7 +58,8 @@ class SkillsHandler(BaseHandler):
             "search": t("skills_search_desc", default="Skills durchsuchen"),
             "create": t("skills_create_desc", default="Neuen Skill erstellen (v2.1 - Self-Extension, --format anthropic fuer Anthropic-Standard)"),
             "reload": t("skills_reload_desc", default="Handler-Registry + Tools neu laden (Hot-Reload, v2.1)"),
-            "export": t("skills_export_desc", default="Skill exportieren - autarkes Paket (v2.0)"),
+            "export": t("skills_export_desc", default="Skill exportieren - autarkes Paket (v2.0, --format agent fuer Claude Code Agent)"),
+            "export-agent": t("skills_export_agent_desc", default="Skill als Claude Code Agent exportieren (.md Datei)"),
             "install": t("skills_install_desc", default="Skill aus ZIP/Verzeichnis importieren"),
             "hierarchy": t("skills_hierarchy_desc", default="Hierarchie aus DB anzeigen (v1.1.73)"),
             "version": t("skills_version_desc", default="Versions-Check: lokal vs zentral (v2.0)")
@@ -94,9 +95,14 @@ class SkillsHandler(BaseHandler):
             for i, a in enumerate(args):
                 if a == "--format" and i + 1 < len(args):
                     export_fmt = args[i + 1]
-            clean_args = [a for a in args if not a.startswith('--') and a not in ("bach", "anthropic")]
+            clean_args = [a for a in args if not a.startswith('--') and a not in ("bach", "anthropic", "agent")]
             output_dir = clean_args[1] if len(clean_args) > 1 else None
             return self._export(clean_args[0], output_dir, dry_run, fmt=export_fmt)
+        elif operation == "export-agent" and args:
+            # Kurzform: bach skills export-agent <name> [output_dir]
+            clean_args = [a for a in args if not a.startswith('--')]
+            output_dir = clean_args[1] if len(clean_args) > 1 else None
+            return self._export(clean_args[0], output_dir, dry_run, fmt="agent")
         elif operation == "install" and args:
             return self._install(args[0], dry_run)
         elif operation == "hierarchy":
@@ -234,17 +240,17 @@ class SkillsHandler(BaseHandler):
             name: Skill-Name (z.B. 'ati', 'steuer-agent')
             output_dir: Zielverzeichnis (optional, default: exports/<name>_export)
             dry_run: Nur zeigen was passieren wuerde
-            fmt: Export-Format -- 'bach' (Standard) oder 'anthropic'
+            fmt: Export-Format -- 'bach' (Standard), 'anthropic' oder 'agent' (Claude Code Agent)
 
         Returns:
             (success, message)
         """
-        # Anthropic-Format: Delegiert an skill_export.py SkillExporter
-        if fmt == "anthropic":
+        # Anthropic/Agent-Format: Delegiert an skill_export.py SkillExporter
+        if fmt in ("anthropic", "agent"):
             try:
                 from tools.skill_export import SkillExporter
                 exporter = SkillExporter(self.base_path)
-                return exporter.export(name, output_dir, dry_run, fmt="anthropic")
+                return exporter.export(name, output_dir, dry_run, fmt=fmt)
             except ImportError:
                 return False, "skill_export.py nicht gefunden. Pfad: tools/skill_export.py"
         results = [f"SKILL EXPORT: {name}", "=" * 50]

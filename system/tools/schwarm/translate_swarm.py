@@ -43,7 +43,7 @@ except ImportError:
 
 MODEL = "claude-haiku-4-5-20251001"
 DEFAULT_CHUNK_SIZE = 10
-DEFAULT_WORKERS = 8
+DEFAULT_WORKERS = 0  # 0 = dynamisch (auto-berechnet aus Chunk-Anzahl)
 MAX_RETRIES = 3
 RETRY_BASE_DELAY = 2.0
 
@@ -272,7 +272,7 @@ def write_results_to_db(db_path, all_results):
 
 def run_swarm(source_lang="de", target_lang="en", namespace=None,
               chunk_size=DEFAULT_CHUNK_SIZE, workers=DEFAULT_WORKERS,
-              limit=0, dry_run=False):
+              max_workers=0, limit=0, dry_run=False):
     """Schwarm-Uebersetzung mit Epstein-Methode."""
     db_path = get_db_path()
 
@@ -295,6 +295,16 @@ def run_swarm(source_lang="de", target_lang="en", namespace=None,
 
     # 2. Chunken
     chunks = chunk_texts(missing, chunk_size)
+
+    # Dynamische Worker-Berechnung wenn nicht explizit gesetzt
+    if workers <= 0:
+        try:
+            from .runner import calculate_dynamic_workers
+            workers = calculate_dynamic_workers(len(chunks), max_workers=max_workers)
+        except ImportError:
+            cap = max_workers if max_workers > 0 else 8
+            workers = min(max(2, len(chunks) // 2), cap)  # Fallback
+        print(f"[SWARM] Worker-Anzahl automatisch berechnet: {workers} (basierend auf {len(chunks)} Chunks)")
     print(f"[SWARM] {len(chunks)} Chunks a {chunk_size} Texte, {workers} parallele Worker")
 
     if dry_run:
@@ -446,7 +456,11 @@ def main():
     )
     parser.add_argument(
         "--workers", "-w", type=int, default=DEFAULT_WORKERS,
-        help=f"Parallele Threads (default: {DEFAULT_WORKERS})",
+        help="Parallele Threads (default: auto, basierend auf Chunk-Anzahl)",
+    )
+    parser.add_argument(
+        "--max-workers", type=int, default=0,
+        help="Obere Schranke fuer dynamische Worker-Anzahl (default: min(CPU, 8))",
     )
     parser.add_argument(
         "--limit", type=int, default=0,
@@ -469,6 +483,7 @@ def main():
         namespace=args.namespace,
         chunk_size=args.chunk_size,
         workers=args.workers,
+        max_workers=args.max_workers,
         limit=args.limit,
         dry_run=args.dry_run,
     )
