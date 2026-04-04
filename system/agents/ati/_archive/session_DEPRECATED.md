@@ -8,7 +8,7 @@ Diese Dateien wurden durch System-Services ersetzt.
 - Service: `skills/_services/prompt_generator/`
 - Templates: `skills/_services/prompt_generator/templates/`
 - Config: `skills/_services/prompt_generator/config.json`
-- Dokumentation: `skills/docs/docs/docs/docs/help/prompt-generator.txt`
+- Dokumentation: `skills/docs/help/prompt-generator.txt`
 
 ### Session-Daemon (Headless Sessions) -- DEPRECATED
 - Session Daemon: `hub/_services/daemon/session_daemon.py` (legacy)

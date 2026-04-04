@@ -23,7 +23,7 @@ help.run("<thema>")            # Programmatischer Zugriff
 ```
 docs/
 ├── README.md                  ← Diese Datei
-├── help/                      ← CLI-Referenz (bach help <thema>)
+├── docs/help/                      ← CLI-Referenz (bach help <thema>)
 │   ├── *.txt                  ← Handler- & Konzept-Artikel (~110 Stueck)
 │   └── tools/                 ← Tool-spezifische Artikel (~80 Stueck)
 │       └── _index.txt         ← Tool-Index
@@ -237,7 +237,7 @@ docs/
 
 ---
 
-## Tool-Dokumentation (help/tools/)
+## Tool-Dokumentation (docs/help/tools/)
 
 Einzeldokumentation fuer ~80 Python-Tools. Zugriff:
 

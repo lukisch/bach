@@ -81,7 +81,7 @@
       "target": "tasks",
       "priority": "P2",
       "project": "BACH",
-      "task_text": "Help-Forensik: Eine docs/docs/docs/help/*.txt pruefen, Ist vs Soll vergleichen, bei Abweichung Help oder Roadmap anpassen. Workflow: skills/workflows/help-forensic.md",
+      "task_text": "Help-Forensik: Eine docs/help/*.txt pruefen, Ist vs Soll vergleichen, bei Abweichung Help oder Roadmap anpassen. Workflow: skills/workflows/help-forensic.md",
       "aufwand": "mittel",
       "last_run": "2026-03-08T07:38:01.496813"
     },
@@ -101,7 +101,7 @@
       "target": "tasks",
       "priority": "P3",
       "project": "BACH",
-      "task_text": "Docs-Changelog Review: python skills/_services/docs/docs_changelog.py report, Aenderungen an docs/docs/docs/help/ und wiki/ pruefen",
+      "task_text": "Docs-Changelog Review: python skills/_services/docs/docs_changelog.py report, Aenderungen an docs/help/ und wiki/ pruefen",
       "aufwand": "niedrig",
       "last_run": "2026-03-08T07:38:03.915598"
     }

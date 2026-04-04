@@ -418,7 +418,7 @@ class WikiHandler(BaseHandler):
                     except Exception as e:
                         print(f"Fehler bei {txt_file}: {e}")
                 
-            # 2. Help-Dateien (docs/docs/docs/docs/help/*.txt) - Legacy-Support
+            # 2. Help-Dateien (docs/help/*.txt) - Legacy-Support
             help_dir = self.base_path / "docs" / "help"
             if help_dir.exists():
                 # Root help Files

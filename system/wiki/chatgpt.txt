@@ -131,7 +131,7 @@ Plus, Pro, Business und Enterprise bleiben WERBEFREI.
 BACH-RELEVANZ
 -------------
 In BACH ist ChatGPT als Partner registriert:
-  - docs/docs/docs/help/partners.txt: ChatGPT als "Fallback"
+  - docs/help/partners.txt: ChatGPT als "Fallback"
   - Zone 1-2 verfuegbar (Token-System)
 
 Fuer BACH-Integration waere die API relevant:
@@ -163,4 +163,4 @@ SIEHE AUCH
   wiki/gemini.txt         Google Gemini
   wiki/copilot.txt        Microsoft Copilot
   wiki/ollama.txt         Ollama (lokal/cloud)
-  docs/docs/docs/help/partners.txt            KI-Partner im BACH-System
+  docs/help/partners.txt            KI-Partner im BACH-System

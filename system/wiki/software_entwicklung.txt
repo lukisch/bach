@@ -87,4 +87,4 @@ SIEHE AUCH
 ----------
 wiki/batch.txt     BATCH-System Dokumentation
 wiki/chiah.txt     CHIAH-System Dokumentation
-docs/docs/docs/help/tools.txt          BACH Native Tools
+docs/help/tools.txt          BACH Native Tools

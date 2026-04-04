@@ -58,7 +58,7 @@ Copyright (c) 2026 BACH Contributors. Alle Rechte vorbehalten.
   |  llmauto:     Sequenz von Claude-Prompts mit bach://-Variablen   |
   |                                                                    |
   |  - `bach chain create/list/run/show`                             |
-  |  - bach:// URL-Resolution: memory/facts, task/current, help/...  |
+  |  - bach:// URL-Resolution: memory/facts, task/current, docs/help/...  |
   |  - Ergebnis-Weitergabe zwischen Chain-Steps                      |
   +------------------------------------------------------------------+
                               |
@@ -210,7 +210,7 @@ CLI:
 
 | Was suchst du? | Wo findest du es? | Dateien |
 |---|---|---|
-| **Befehls-Hilfe** | `help/*.txt` | 93 Help-Dateien zu allen BACH-Befehlen |
+| **Befehls-Hilfe** | `docs/help/*.txt` | 93 Help-Dateien zu allen BACH-Befehlen |
 | **Hintergrundwissen** | `wiki/*.txt` | Artikel zu Konzepten und Methoden |
 | **Arbeitsablaeufe** | `skills/workflows/*.md` | 24 Schritt-fuer-Schritt Anleitungen |
 | **Neue Skills erstellen** | `_templates/` | Vorlagen fuer Handler, Tools, Agents |
@@ -384,7 +384,7 @@ Jeder Handler:
 +-----------------------------------------------------------------+
 |  FORMAT       |  VERWENDUNG              |  BEISPIEL            |
 |-----------------------------------------------------------------|
-|  .txt         |  Dokumentation, Help     |  skills/docs/docs/docs/help/tasks.txt      |
+|  .txt         |  Dokumentation, Help     |  skills/docs/help/tasks.txt      |
 |  .md          |  Navigation, Skills      |  SKILL.md            |
 |  .py          |  Code                    |  bach.py             |
 |  .sql         |  Schema                  |  SCHEMA.sql          |
@@ -482,7 +482,7 @@ Technische Ebene: Handler, Tools, Datenbanken, Delegation
   | partners/gemini/       |      |   ../user/ (User-Ordner)       |
   |   inbox/ outbox/      |      |   memory/ (Archiv)          |
   | partners/ollama/       |      |   logs/ (Sessions)          |
-  | MCP Server (extern)   |      |   skills/docs/docs/docs/help/ (Wiki)              |
+  | MCP Server (extern)   |      |   skills/docs/help/ (Wiki)              |
   +-----------------------+      +-----------------------------+
 ```
 
@@ -682,7 +682,7 @@ Alle Ebenen zusammen mit Verknuepfungen
   +---------------------+             +-------------------------+
   |  SEMANTISCHES        |             |  memory_facts (174)     |
   |  GEDAECHTNIS         |             |  + memory_lessons (68)  |
-  |  "Was weiss ich"     |             |  + skills/docs/docs/docs/help/, wiki/         |
+  |  "Was weiss ich"     |             |  + skills/docs/help/, wiki/         |
   |  Fakten, Konzepte,   |  <------->  |  Fakten, Erkenntnisse,  |
   |  Weltwissen          |             |  Dokumentation          |
   +----------+-----------+             +----------+--------------+
@@ -733,7 +733,7 @@ Alle Ebenen zusammen mit Verknuepfungen
                                       archiviert, Kontext konsolidiert.
 
   Metakognition             <-->      Workflows + Strategien: "Weiss ich
-  ("Weiss ich, was ich                genug?" -> skills/docs/docs/docs/help/ nachschlagen.
+  ("Weiss ich, was ich                genug?" -> skills/docs/help/ nachschlagen.
    nicht weiss?")                     "Welches Tool?" -> bach tools search
 
 
@@ -849,7 +849,7 @@ agents/                          # KI-Agenten (Top-Level)
 skills/
 +-- _services/                   # Hintergrund-Services
 |   +-- wiki/                    # Wiki-Autoren Service
-|   +-- skills/docs/docs/docs/help/                    # Help-Forensik Service
+|   +-- skills/docs/help/                    # Help-Forensik Service
 |   +-- recurring/               # Recurring Tasks
 |
 +-- workflows/                   # Arbeitsablaeufe (ehem. _workflows/_protocols)
@@ -1023,7 +1023,7 @@ BACH_ROOT/
 |   +-- workflows/     # Arbeitsablaeufe (ehem. _workflows/_protocols)
 +-- connectors/        # Konnektoren (Top-Level)
 +-- partners/          # Partner-LLMs (Top-Level)
-+-- skills/docs/docs/docs/help/              # Dokumentation (KI-optimiert)
++-- skills/docs/help/              # Dokumentation (KI-optimiert)
 |   +-- wiki/          # Hintergrundwissen
 +-- ../docs/              # Entwickler-Dokumentation (Menschen)
 +-- ../user/              # Nutzer-spezifische Daten
@@ -1040,8 +1040,8 @@ BACH_ROOT/
 |----------|-----------|
 | Diagramm 3 (Gesamt) | SKILL.md, ROADMAP.md, README |
 | Diagramm 1 (Backend) | ../docs/ Entwicklerdoku |
-| Diagramm 2 (Frontend) | skills/docs/docs/docs/help/bach.txt, Einstiegs-Hilfe |
-| Diagramm 4 (Memory) | skills/docs/docs/docs/help/memory.txt, ../docs/ Konzeptdoku |
+| Diagramm 2 (Frontend) | skills/docs/help/bach.txt, Einstiegs-Hilfe |
+| Diagramm 4 (Memory) | skills/docs/help/memory.txt, ../docs/ Konzeptdoku |
 
 ---
 
@@ -1050,7 +1050,7 @@ BACH_ROOT/
 | Ressource | Beschreibung | Zugriff |
 |-----------|--------------|---------|
 | SKILL.md | KI-Referenz | Root-Verzeichnis |
-| skills/docs/docs/docs/help/*.txt | Befehls-Dokumentation | `bach --help <thema>` |
+| skills/docs/help/*.txt | Befehls-Dokumentation | `bach --help <thema>` |
 | skills/wiki/*.txt | Hintergrundwissen | `bach wiki <artikel>` |
 | ../user/README.md | Nutzer-Einstieg | ../user/ Ordner |
 | ROADMAP.md | Entwicklungsplan | Root-Verzeichnis |

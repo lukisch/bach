@@ -106,4 +106,4 @@ bach validate expert <name>
 - `bach help skills` - Skills-System
 - `bach help agents` - Agenten-Übersicht
 - `bach help naming` - Namenskonventionen
-- `skills/docs/docs/docs/help/practices.txt` - Best Practices
+- `skills/docs/help/practices.txt` - Best Practices

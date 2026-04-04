@@ -206,7 +206,7 @@ def detect_subscriptions(username: str, steuerjahr: int):
 hub/handlers/abo.py           CLI-Handler
 skills/tools/abo/abo_scanner.py      Erkennungs-Logik
 gui/templates/abo.html        Dashboard-Template
-skills/docs/docs/docs/help/abo.txt                  Hilfe-Dokumentation
+skills/docs/help/abo.txt                  Hilfe-Dokumentation
 data/abo_patterns.json        Bekannte Abo-Anbieter
 ```
 

@@ -16,7 +16,7 @@ Dieser Workflow beschreibt alle Schritte die nötig sind wenn ein neuer CLI-Befe
 ├─────────────────────────────────────────────────────────┤
 │  1. Handler implementieren (hub/handlers/)              │
 │  2. In bach.py registrieren                             │
-│  3. Help-Datei erstellen (skills/docs/docs/docs/help/*.txt)                   │
+│  3. Help-Datei erstellen (skills/docs/help/*.txt)                   │
 │  4. KNOWN_COMMANDS aktualisieren                        │
 │  5. SKILL.md Befehlsübersicht aktualisieren             │
 │  6. Test: --help und Funktion prüfen                    │
@@ -107,7 +107,7 @@ elif command == "<name>":
 
 ## Schritt 3: Help-Datei erstellen
 
-**Ort:** `skills/docs/docs/docs/help/<name>.txt`
+**Ort:** `skills/docs/help/<name>.txt`
 
 ### Vorlage
 
@@ -148,7 +148,7 @@ SIEHE AUCH
 ### Checkliste
 
 ```
-□ Datei in skills/docs/docs/docs/help/<name>.txt erstellt
+□ Datei in skills/docs/help/<name>.txt erstellt
 □ Alle Operationen dokumentiert
 □ Beispiele vorhanden
 □ SIEHE AUCH verweist auf relevante Themen
@@ -247,7 +247,7 @@ NEUER CLI-BEFEHL: <name>
 □ hub/handlers/<name>.py erstellt
 □ bach.py: handler_imports erweitert
 □ bach.py: elif-Block für Subcommand
-□ skills/docs/docs/docs/help/<name>.txt erstellt
+□ skills/docs/help/<name>.txt erstellt
 □ KNOWN_COMMANDS in bach.py ergänzt
 □ SKILL.md Befehlsübersicht aktualisiert
 □ SKILL.md Version erhöht
@@ -283,9 +283,9 @@ NEUER CLI-BEFEHL: <name>
 ## Siehe auch
 
 - `skills/workflows/system-anschlussanalyse.md` - Allgemeine Konsistenz
-- `skills/docs/docs/docs/help/cli.txt` - CLI-Konventionen
-- `skills/docs/docs/docs/help/coding.txt` - Coding-Standards
-- `skills/docs/docs/docs/help/naming.txt` - Namenskonventionen
+- `skills/docs/help/cli.txt` - CLI-Konventionen
+- `skills/docs/help/coding.txt` - Coding-Standards
+- `skills/docs/help/naming.txt` - Namenskonventionen
 
 ---
 

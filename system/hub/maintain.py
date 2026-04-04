@@ -596,7 +596,7 @@ Siehe: tools/skill_header_gen.py"""
         if not args:
             return True, """Skill Help Generator
 ====================
-Generiert docs/docs/docs/help/*.txt Dateien aus SKILL.md.
+Generiert docs/help/*.txt Dateien aus SKILL.md.
 
 Verwendung:
   bach --maintain skill-help <name>          Einzelner Skill
@@ -809,7 +809,7 @@ nach 'NUL' geschrieben wird (Windows Device-Name)."""
         lines.append("              YAML-Header fuer SKILL.md generieren/validieren")
         lines.append("")
         lines.append("  skill-help  Skill Help Generator")
-        lines.append("              Generiert docs/docs/docs/help/*.txt aus SKILL.md")
+        lines.append("              Generiert docs/help/*.txt aus SKILL.md")
         lines.append("")
         lines.append("  workflows   Workflow Format-Validator")
         lines.append("              Prueft Workflow-Dateien auf Format-Konsistenz")

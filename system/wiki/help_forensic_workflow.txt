@@ -10,7 +10,7 @@ Stand: 2026-01-28
 
 PHILOSOPHIE: HELP ALS WAHRHEIT
 ------------------------------
-In BACH gilt das Prinzip: "Die Documentation (`docs/docs/docs/help/*.txt`) definiert das System."
+In BACH gilt das Prinzip: "Die Documentation (`docs/help/*.txt`) definiert das System."
 Wenn das System anders verhaelt als die Doku, ist das ein Bug - entweder im Code oder in der Doku. Help Forensik ist der Prozess, diese Diskrepanz aufzuloesen.
 
 WARUM "FORENSIK"?

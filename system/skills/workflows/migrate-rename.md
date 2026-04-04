@@ -128,6 +128,6 @@ Nach ca. 30 Tagen oder wenn Log zeigt dass keine neuen Eintraege:
 
 ## Siehe auch
 
-- `skills/docs/docs/docs/help/migrate.txt` - CLI-Dokumentation
+- `skills/docs/help/migrate.txt` - CLI-Dokumentation
 - `bach --maintain heal` - Automatische Pfadkorrektur
-- `skills/docs/docs/docs/help/practices.txt` - Architekturprinzip #3: Evolutionaere Migration
+- `skills/docs/help/practices.txt` - Architekturprinzip #3: Evolutionaere Migration

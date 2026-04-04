@@ -44,7 +44,7 @@ STRUKTUR:
     │       ├── _services/  <- Service-Skills (.md)
     │       ├── _templates/
     │       ├── _os/
-    │       └── docs/docs/docs/docs/docs/help/
+    │       └── docs/help/
     └── user/
         └── documents/
 
@@ -103,7 +103,7 @@ SKILLS_DIR = SYSTEM_ROOT / "skills"
 DIST_DIR = SYSTEM_ROOT / "dist"
 TEMPLATES_DIR = SYSTEM_ROOT / "_templates"
 
-# Help liegt unter system/docs/docs/docs/docs/docs/help/
+# Help liegt unter system/docs/help/
 HELP_DIR = SYSTEM_ROOT / "docs" / "help"
 
 # Tools-Verzeichnis (direkt unter system/, NICHT unter skills/)

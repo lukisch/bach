@@ -39,7 +39,7 @@ Usage:
     python c_path_healer.py [args]
 """
 
-__version__ = "1.0.0"
+__version__ = "2.1.0"
 __author__ = "BACH Team"
 
 # -*- coding: utf-8 -*-
@@ -74,52 +74,16 @@ from typing import Dict, List, Tuple, Any
 # Reihenfolge wichtig: Spezifischere zuerst!
 # Hinweis: Backslashes muessen als \\\\ oder r-strings escaped werden
 
+# ============================================================================
+# IDEMPOTENZ-REGELN (v2.1.0):
+# - Jede Regel darf NUR matchen wenn der ALTE Zustand vorliegt
+# - Die Regel darf NICHT erneut matchen nachdem sie angewandt wurde
+# - Format: (alt, neu) — "alt" darf NICHT Substring von "neu" sein!
+# - Wenn das unvermeidbar ist, nutze _apply_safe_correction() mit Negativ-Guard
+# ============================================================================
+
+# Einfache String-Ersetzungen (NUR fuer Regeln wo alt != Substring von neu)
 PATH_CORRECTIONS: List[Tuple[str, str]] = [
-    # === Struktur-Cleanup v2.7 (2026-02-14) ===
-    # Config-Move + Backups-Move + Exports-Move
-
-    # Config → data/config (Forward-Slash)
-    ("system/config/", "system/data/config/"),
-    ("config/db_sync_enabled", "data/config/db_sync_enabled"),
-
-    # Config → data/config (Backslash)
-    ("system\\config\\", "system\\data\\config\\"),
-    ("config\\db_sync_enabled", "data\\config\\db_sync_enabled"),
-
-    # Backups → data/backups (Forward-Slash)
-    ("backups/", "system/data/backups/"),
-    ("/backups/", "/system/data/backups/"),
-
-    # Backups → data/backups (Backslash)
-    ("backups\\", "system\\data\\backups\\"),
-    ("\\backups\\", "\\system\\data\\backups\\"),
-
-    # Exports → system/exports (Forward-Slash)
-    ("exports/", "system/exports/"),
-    ("/exports/", "/system/exports/"),
-
-    # Exports → system/exports (Backslash)
-    ("exports\\", "system\\exports\\"),
-    ("\\exports\\", "\\system\\exports\\"),
-
-    # === Docs-Refactoring v2.6 (2026-02-14) ===
-    # WICHTIG: Spezifischere Patterns ZUERST!
-
-    # Help-Pfade (Forward-Slash)
-    ("system/help/wiki/", "system/wiki/"),          # Wichtig: ZUERST
-    ("help/wiki/", "wiki/"),
-    ("system/help/", "system/docs/help/"),
-    ("help/", "docs/help/"),
-
-    # Help-Pfade (Backslash - Windows)
-    ("system\\help\\wiki\\", "system\\wiki\\"),      # Wichtig: ZUERST
-    ("help\\wiki\\", "wiki\\"),
-    ("system\\help\\", "system\\docs\\help\\"),
-    ("help\\", "docs\\help\\"),
-
-    # Python-Imports (falls relevant)
-    ("from help.", "from docs.help."),
-
     # === Directory Restructuring v2.5 (2026-02-13) ===
 
     # Python-Imports (Punkt-Notation)
@@ -128,7 +92,7 @@ PATH_CORRECTIONS: List[Tuple[str, str]] = [
     ("skills._agents.reflection", "agents.reflection"),
     ("skills._agents.", "agents."),
 
-    # Pfad-Strings (Forward-Slash) - spezifischere zuerst
+    # Pfad-Strings (Forward-Slash) — spezifischere zuerst
     ("skills/_connectors/", "connectors/"),
     ("skills/_agents/ati/", "agents/ati/"),
     ("skills/_agents/", "agents/"),
@@ -136,7 +100,7 @@ PATH_CORRECTIONS: List[Tuple[str, str]] = [
     ("skills/_workflows/", "skills/workflows/"),
     ("skills/_partners/", "partners/"),
 
-    # Pfad-Strings (Backslash - Windows)
+    # Pfad-Strings (Backslash — Windows)
     ("skills\\_connectors\\", "connectors\\"),
     ("skills\\_agents\\ati\\", "agents\\ati\\"),
     ("skills\\_agents\\", "agents\\"),
@@ -148,7 +112,26 @@ PATH_CORRECTIONS: List[Tuple[str, str]] = [
     ("_partners/", "partners/"),
     ("_partners\\", "partners\\"),
 
-    # === Bestehende Korrekturen (Legacy) ===
+    # === Config-Move v2.7 (2026-02-14) ===
+    ("system/config/", "system/data/config/"),
+    ("system\\config\\", "system\\data\\config\\"),
+]
+
+# Regeln die NICHT idempotent sind als einfache Ersetzung.
+# Diese werden mit Negativ-Guard angewandt: nur matchen wenn
+# das Ergebnis nicht bereits vorhanden ist.
+# Format: (alt, neu, guard) — "guard" ist der String der NICHT im Kontext stehen darf
+GUARDED_CORRECTIONS: List[Tuple[str, str, str]] = [
+    # help/ → docs/help/ — aber NUR wenn NICHT bereits docs/help/
+    ("help/", "docs/help/", "docs/help/"),
+    ("help\\", "docs\\help\\", "docs\\help\\"),
+    ("system/help/wiki/", "system/wiki/", "system/wiki/"),
+    ("system\\help\\wiki\\", "system\\wiki\\", "system\\wiki\\"),
+    # exports/ → system/exports/ — aber NUR wenn NICHT bereits system/exports/
+    ("exports/", "system/exports/", "system/exports/"),
+    ("exports\\", "system\\exports\\", "system\\exports\\"),
+    # Python-Import
+    ("from help.", "from docs.help.", "from docs.help."),
 ]
 
 # Erweiterbare Liste - kann durch DB geladen werden
@@ -180,8 +163,8 @@ def _get_bach_root() -> Path:
 
     # Methode 2: Relativ berechnen
     current_dir = Path(__file__).resolve().parent
-    # tools -> system -> BACH_ROOT
-    return current_dir.parent.parent
+    # maintenance -> tools -> system -> BACH_ROOT
+    return current_dir.parent.parent.parent
 
 
 class BachPathHealer:
@@ -296,6 +279,7 @@ class BachPathHealer:
 
             original = content
 
+            # Einfache Ersetzungen (idempotent — alt ist nie Substring von neu)
             for old_str, new_str in PATH_CORRECTIONS:
                 if old_str in content and old_str != new_str:
                     count = content.count(old_str)
@@ -305,6 +289,34 @@ class BachPathHealer:
                         "new": new_str,
                         "count": count
                     })
+
+            # Guarded Ersetzungen (mit Negativ-Guard für Idempotenz)
+            for old_str, new_str, guard in GUARDED_CORRECTIONS:
+                if old_str in content and old_str != new_str:
+                    # Nur ersetzen wo der Guard NICHT bereits vorhanden ist
+                    import re
+                    # Finde alle Vorkommen von old_str die NICHT Teil von guard sind
+                    count = 0
+                    new_content = []
+                    i = 0
+                    while i < len(content):
+                        guard_start = max(0, i - len(guard) + len(old_str))
+                        context = content[guard_start:i + len(guard)]
+                        if content[i:i+len(old_str)] == old_str and guard not in context:
+                            new_content.append(new_str)
+                            i += len(old_str)
+                            count += 1
+                        else:
+                            new_content.append(content[i])
+                            i += 1
+                    if count > 0:
+                        content = "".join(new_content)
+                        result["changes"].append({
+                            "old": old_str,
+                            "new": new_str,
+                            "count": count,
+                            "guarded": True
+                        })
 
             if content != original:
                 result["healed"] = True
@@ -338,7 +350,7 @@ class BachPathHealer:
 
         report = {
             "timestamp": datetime.now().isoformat(),
-            "version": "2.0.0",
+            "version": "2.1.0",
             "system": "BACH",
             "base_path": str(self.base_path),
             "duration_seconds": duration,

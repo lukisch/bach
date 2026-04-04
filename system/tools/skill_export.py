@@ -1198,7 +1198,7 @@ def main():
     parser.add_argument(
         '--output', '-o',
         default=None,
-        help='Zielverzeichnis (Standard: exports/<skill>_export)'
+        help='Zielverzeichnis (Standard: system/exports/<skill>_export)'
     )
     parser.add_argument(
         '--format', '-f',

@@ -17,7 +17,7 @@
           {
             "name": "task_file_exists",
             "passed": true,
-            "details": "Gefunden: ['system////skills////_experts////haushaltsmanagement////aufgaben.txt', 'user////_archive////Aufgaben.txt', 'system////skills////docs/docs/docs/help////tasks.txt']"
+            "details": "Gefunden: ['system////skills////_experts////haushaltsmanagement////aufgaben.txt', 'user////_archive////Aufgaben.txt', 'system////skills////docs/help////tasks.txt']"
           },
           {
             "name": "task_structure",
@@ -298,9 +298,9 @@
         "config_files": [
           ".claude//settings.local.json",
           "docs//_archive//SEP_ERFAHRUNGSTEST_2026-01-17.json",
-          "system/system/system/system/exports//ati_export//manifest.json",
-          "system/system/system/system/exports//communicate_export//manifest.json",
-          "system/system/system/system/exports//steuer-agent_export//manifest.json",
+          "system/exports//ati_export//manifest.json",
+          "system/exports//communicate_export//manifest.json",
+          "system/exports//steuer-agent_export//manifest.json",
           "extensions//AmpelClip//config.json",
           "extensions//MediaBrain//settings.json",
           "extensions//MetaWiki//metawiki.json",

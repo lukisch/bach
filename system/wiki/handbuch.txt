@@ -114,7 +114,7 @@ BACH/
 ├── 📁 data/
 │   └── bach.db             # Zentrale Datenbank (SQLite)
 │
-├── 📁 docs/docs/docs/help/                # Dokumentation (fuer KI)
+├── 📁 docs/help/                # Dokumentation (fuer KI)
 │   ├── *.txt               # Befehls-Dokumentation
 │   └── wiki/               # Hintergrundwissen
 │
@@ -148,7 +148,7 @@ BACH hat drei Ebenen der Dokumentation:
 │  docs/ARCHITECTURE  │  Entwickler    │  docs/            │
 │  (Systemaufbau)                      │                   │
 ├───────────────────────────────────────────────────────────┤
-│  docs/docs/docs/help/*.txt         │  KI-Agenten    │  docs/docs/docs/help/            │
+│  docs/help/*.txt         │  KI-Agenten    │  docs/help/            │
 │  (Operative Befehle)                 │                   │
 ├───────────────────────────────────────────────────────────┤
 │  wiki/*.txt    │  Alle          │  wiki/       │

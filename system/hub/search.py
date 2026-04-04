@@ -21,7 +21,7 @@ Operationen:
 Quellen (durchsucht gleichzeitig):
   - wiki_articles (413+ Artikel)
   - memory_working, memory_facts, memory_lessons
-  - document_index (help/ Dateien, FTS5)
+  - document_index (docs/help/ Dateien, FTS5)
   - KnowledgeDigest Skills + Wiki (766 + 413 Docs)
   - Beliebige gescannte Verzeichnisse (via 'index <path>')
 
@@ -385,7 +385,7 @@ Befehle:
 
 Quellen (gleichzeitig durchsucht):
   wiki                    413+ Wiki-Artikel
-  document                Dokumente aus document_index (help/)
+  document                Dokumente aus document_index (docs/help/)
   memory_*                Working Memory, Fakten, Lessons Learned
   file                    Gescannte Verzeichnisse
   knowledgedigest_skill   Skills aus KnowledgeDigest

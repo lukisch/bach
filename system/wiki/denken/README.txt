@@ -154,6 +154,6 @@ WEITERFUEHRUNG
 SIEHE AUCH
 ==========
   wiki/automatisierung/README.txt
-  docs/docs/docs/help/partners.txt
+  docs/help/partners.txt
   partners/mr_tiktak.md
 

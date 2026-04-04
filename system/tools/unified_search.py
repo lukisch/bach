@@ -205,7 +205,7 @@ class UnifiedSearch:
     """Unified search engine for BACH.
 
     Indexes and searches across:
-    - document_index (existing FTS5, help/ docs)
+    - document_index (existing FTS5, docs/help/ docs)
     - wiki_articles (413 articles)
     - memory_working, memory_facts, memory_lessons
     - arbitrary directories (ProFiler-style file scan)

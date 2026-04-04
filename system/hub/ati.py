@@ -968,7 +968,7 @@ Optionen:
   --force      Existierende Dateien ueberschreiben ohne Nachfrage
 
 Beispiel:
-  bach ati install dist/system/system/system/system/exports/bach-ati-v1.0.0-20260121.zip
+  bach ati install dist/system/exports/bach-ati-v1.0.0-20260121.zip
 
 Das ZIP muss ein manifest.json mit type='bach-agent' enthalten.
 """

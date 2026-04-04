@@ -365,7 +365,7 @@ DOKUMENTENVERWEISE IN BACH
   wiki/psychologie/organisationspsychologie/  → Arbeit und Organisation
   wiki/psychologie/fuehrungspsychologie/      → Fuehrungsverhalten
   wiki/psychologie/schulpsychologie/          → Schulischer Kontext
-  docs/docs/docs/help/templates/gutachten/                        → Gutachtenvorlagen
+  docs/help/templates/gutachten/                        → Gutachtenvorlagen
 
 ================================================================================
 

@@ -138,9 +138,9 @@ Agenten koennen auf Wiki-Ordner verweisen:
 
 ABGRENZUNG ZU HELP
 ------------------
-  docs/docs/docs/help/*.txt           WIE benutze ich BACH? (Anleitungen)
+  docs/help/*.txt           WIE benutze ich BACH? (Anleitungen)
   wiki/*.txt      WAS ist X? (Hintergrundwissen)
-  docs/docs/docs/help/tools/*.txt     Tool-Dokumentation (Auto-generiert)
+  docs/help/tools/*.txt     Tool-Dokumentation (Auto-generiert)
 
 BEISPIEL: SYSTEM-SPEZIFISCHE DATEI
 ----------------------------------
@@ -161,11 +161,11 @@ Wiki-Artikel beschreiben Konzepte, sie speichern keine Daten.
 Wenn ein Agent oder Skill Daten speichern muss:
   → Pruefe erst: Gehoert das in bach.db?
   → JSON nur bei begruendeten Ausnahmen
-  → Details: docs/docs/docs/help/formats.txt
+  → Details: docs/help/formats.txt
 
 SIEHE AUCH
 ----------
   wiki/_index.txt        Inhaltsverzeichnis
-  docs/docs/docs/help/practices.txt          BACH Best Practices
-  docs/docs/docs/help/formats.txt            Datenformate (JSON vs DB)
+  docs/help/practices.txt          BACH Best Practices
+  docs/help/formats.txt            Datenformate (JSON vs DB)
   skills/AGENT_KONVENTION.md  Agent-Dokumentations-Standard

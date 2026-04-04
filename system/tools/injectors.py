@@ -559,7 +559,7 @@ class ToolInjector:
         """Gibt Tool-Uebersicht fuer Session-Start zurueck.
 
         Liest registrierte Tools aus bach.db und ergaenzt mit Kategorien.
-        Tool-Hilfe: docs/docs/docs/help/tools/<toolname>.txt
+        Tool-Hilfe: docs/help/tools/<toolname>.txt
         """
         lines = ["[VERFUEGBARE TOOLS - Deine Haende]"]
 
@@ -588,7 +588,7 @@ class ToolInjector:
 
         lines.append("")
         lines.append("  Tool-Suche:   bach tools search <begriff>")
-        lines.append("  Tool-Hilfe:   docs/docs/docs/help/tools/<toolname>.txt (100+ Hilfe-Dateien)")
+        lines.append("  Tool-Hilfe:   docs/help/tools/<toolname>.txt (100+ Hilfe-Dateien)")
         lines.append("  Tool-DB:      bach tools list (alle registrierten Tools)")
         lines.append("  Empfehlung:   bach tool suggest '<beschreibung>'")
         return "\n".join(lines)

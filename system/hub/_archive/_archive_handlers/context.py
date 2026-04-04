@@ -357,7 +357,7 @@ class ContextHandler(BaseHandler):
                     if all(term in content for term in terms):
                         for line in content.split("\n"):
                             if any(term in line for term in terms):
-                                results.append({"file": f"docs/docs/docs/help/{f.name}", "match": line.strip()})
+                                results.append({"file": f"docs/help/{f.name}", "match": line.strip()})
                                 break
                 except:
                     pass

@@ -121,7 +121,7 @@ Das "Frontend" ist hier die funktionale Beschreibungsebene:
 - Agent-Profile (.txt) in agents/
 - Experten-Wissen in agents/_experts/
 - Service-Beschreibungen in skills/_services/
-- Help-Dateien in skills/docs/docs/docs/help/
+- Help-Dateien in skills/docs/help/
 
 **Ergebnis:**
 - Alle funktionalen Beschreibungen existieren
@@ -165,7 +165,7 @@ Das "Frontend" ist hier die funktionale Beschreibungsebene:
   [ ] Scan/Import ist wiederholbar (idempotent)?
   [ ] Kein Hardcoded-Pfad?
   [ ] Tool registriert: bach tools register
-  [ ] Help-Datei erstellt: skills/docs/docs/docs/help/skills/tools/<name>.txt
+  [ ] Help-Datei erstellt: skills/docs/help/skills/tools/<name>.txt
 ```
 
 Ref: ../docs/WICHTIG_SYSTEMISCH_FIRST.md
@@ -256,8 +256,8 @@ generieren gleichzeitig neue Anforderungen.
 - ../docs/WICHTIG_SYSTEMISCH_FIRST.md - Kernprinzip
 - skills/workflows/system-testverfahren.md - B/O/E-Tests
 - skills/workflows/bugfix-protokoll.md - Fehlerkorrektur
-- skills/docs/docs/docs/help/dev.txt - Kurzreferenz Entwicklungsmodus
-- skills/docs/docs/docs/help/usecase.txt - Usecase-Dokumentation
+- skills/docs/help/dev.txt - Kurzreferenz Entwicklungsmodus
+- skills/docs/help/usecase.txt - Usecase-Dokumentation
 
 ---
 

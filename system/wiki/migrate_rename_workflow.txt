@@ -44,4 +44,4 @@ Nach einer Karenzzeit (z.B. 30 Tage ohne Log-Eintraege) kann der Wrapper gefahrl
 SIEHE AUCH
 ----------
 skills/_protocols/migrate-rename.md      Workflow-Schritte
-docs/docs/docs/help/practices.txt                       Architekturprinzipien
+docs/help/practices.txt                       Architekturprinzipien

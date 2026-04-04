@@ -133,7 +133,7 @@ BACH-RELEVANZ
 In BACH ist Copilot als Partner registriert:
   - Office-Integration (Excel, Word, Outlook)
   - Delegation bei Office-spezifischen Tasks
-  - docs/docs/docs/help/partner.txt: "Excel/Word/Outlook → Copilot"
+  - docs/help/partner.txt: "Excel/Word/Outlook → Copilot"
 
 Copilot ist NICHT fuer Headless-API-Nutzung gedacht.
 Fuer Coding-Tasks: Nutze Copilot in IDE oder Claude Code.
@@ -151,4 +151,4 @@ SIEHE AUCH
   wiki/chatgpt.txt        OpenAI ChatGPT
   wiki/gemini.txt         Google Gemini
   wiki/claude-code.txt    Anthropic Claude Code
-  docs/docs/docs/help/partners.txt            KI-Partner im BACH-System
+  docs/help/partners.txt            KI-Partner im BACH-System

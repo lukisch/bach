@@ -131,7 +131,7 @@ class PathClassifier:
         "data/schema.sql",
         "user/IDENTITY.md",
         "skills/_prompts/*.md",
-        "docs/docs/docs/help/*.md",
+        "docs/help/*.md",
         "ROADMAP.md",
         "README.md",
     ]

@@ -43,7 +43,7 @@ DER LIFECYCLE EINES BEFEHLS
 1. **Entwurf:** Definition der Syntax (Arguments, Flags).
 2. **Implementierung:** Isolation der Logik im Handler.
 3. **Registrierung:** Bekanntmachen im Core (`bach.py`).
-4. **Dokumentation:** Erstellung der Help-Datei (`docs/docs/docs/help/X.txt`).
+4. **Dokumentation:** Erstellung der Help-Datei (`docs/help/X.txt`).
 5. **Veroeffentlichung:** Aufnahme in `SKILL.md`.
 
 WARUM HELP-FILES PFLICHT SIND
@@ -52,6 +52,6 @@ BACH verfolgt den Ansatz "Documentation First". Ein Befehl ohne Help-Datei exist
 
 SIEHE AUCH
 ----------
-docs/docs/docs/help/cli.txt                 CLI-Konventionen
-docs/docs/docs/help/coding.txt              Coding-Standards
+docs/help/cli.txt                 CLI-Konventionen
+docs/help/coding.txt              Coding-Standards
 skills/_protocols/cli-aenderung-checkliste.md  Implementierungs-Checkliste

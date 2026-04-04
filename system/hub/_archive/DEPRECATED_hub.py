@@ -15,7 +15,7 @@ Diese Datei leitet alle Aufrufe an bach.py weiter und wird
 in einer zukuenftigen Version entfernt.
 
 Migration: Ersetze alle Aufrufe von hub.py/chiah.py durch bach.py
-Siehe:     docs/docs/docs/help/hub.txt fuer Details
+Siehe:     docs/help/hub.txt fuer Details
 
 Version: 3.1.0 (DEPRECATED)
 Deprecated seit: 2026-01-23

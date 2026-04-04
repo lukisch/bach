@@ -122,5 +122,5 @@ skill-name/
 ## Siehe auch
 
 - `docs/CONCEPT_Skill_Architecture_v2.md` - Vollständiges Konzept
-- `docs/docs/docs/help/skills.txt` - Skill-System Dokumentation
-- `docs/docs/docs/help/naming.txt` - Namenskonventionen
+- `docs/help/skills.txt` - Skill-System Dokumentation
+- `docs/help/naming.txt` - Namenskonventionen

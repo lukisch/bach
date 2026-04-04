@@ -221,7 +221,7 @@ distributions/
 │   ├── hub/                (dist_type=2)
 │   ├── skills/tools/              (dist_type=2)
 │   ├── skills/             (dist_type=2)
-│   ├── skills/docs/docs/docs/help/               (dist_type=2)
+│   ├── skills/docs/help/               (dist_type=2)
 │   └── snapshots/          (dist_type=1, Template-Originale)
 │       ├── SKILL.md.orig
 │       └── config.json.orig

@@ -239,7 +239,7 @@ VERWENDUNG
 Die Wiki-Artikel sind reine Wissensartikel und erklaeren
 Konzepte. Sie sind KEINE Bedienungsanleitungen fuer BACH.
 
-  docs/docs/docs/help/*.txt       = Wie benutze ich BACH?
+  docs/help/*.txt       = Wie benutze ich BACH?
   wiki/*.txt  = Was ist X? (Hintergrundwissen)
 
 EMPFOHLENE LESEREIHENFOLGE (KI)

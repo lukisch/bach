@@ -15,7 +15,7 @@ Neue Struktur (v2.6 Refactoring):
   docs/
     ├── README.md
     ├── getting-started.md
-    ├── docs/docs/docs/help/              # Legacy .txt (aus docs/docs/docs/help/)
+    ├── docs/help/              # Legacy .txt (aus docs/help/)
     ├── guides/            # Neue Markdown-Guides
     └── reference/         # API & Command Reference
 """
@@ -216,7 +216,7 @@ class DocsHandler(BaseHandler):
                     results.append(f"  {name:<20} bach docs reference/{name}")
                 results.append("")
 
-        # Legacy Help (docs/docs/docs/docs/help/)
+        # Legacy Help (docs/help/)
         help_dir = self.docs_dir / "help"
         if help_dir.exists():
             txt_count = len(list(help_dir.rglob("*.txt")))
@@ -382,7 +382,7 @@ class DocsHandler(BaseHandler):
                     content = md_file.read_text(encoding="utf-8")
                     txt_content = self._markdown_to_plaintext(content)
 
-                    # In docs/docs/docs/docs/help/<subdir>/ ablegen
+                    # In docs/help/<subdir>/ ablegen
                     help_subdir = self.docs_dir / "help" / subdir
                     help_subdir.mkdir(parents=True, exist_ok=True)
 
@@ -1381,7 +1381,7 @@ python bach.py --shutdown
    ```
 
 4. **Eigenen Workflow erstellen**
-   - Siehe: [Skills/_workflows/](skills/_workflows/)
+   - Siehe: [Skills/_workflows/](skills/workflows/)
    - Beispiele fuer wiederkehrende Aufgaben
 
 ---
@@ -1454,7 +1454,7 @@ English version: [QUICKSTART.md](QUICKSTART.md)
    ```
 
 4. **Create your own workflow**
-   - See: [Skills/_workflows/](skills/_workflows/)
+   - See: [Skills/_workflows/](skills/workflows/)
    - Examples for recurring tasks
 
 ---

@@ -2,7 +2,7 @@
 
 **Version:** 1.0.0
 **Erstellt:** 2026-01-24
-**Service:** skills/_services/skills/docs/docs/docs/help/
+**Service:** skills/_services/skills/docs/help/
 **Recurring:** help_forensic (14 Tage)
 
 ---
@@ -13,7 +13,7 @@ Systematische Ueberpruefung der Help-Dokumentation auf Aktualitaet.
 Vergleicht dokumentierten Soll-Zustand mit tatsaechlicher Implementierung.
 Bei Abweichungen: Help anpassen ODER Roadmap/Tasks erweitern.
 
-Prinzip: `skills/docs/docs/docs/help/*.txt ist die WAHRHEIT` - aber nur wenn sie aktuell ist!
+Prinzip: `skills/docs/help/*.txt ist die WAHRHEIT` - aber nur wenn sie aktuell ist!
 
 ---
 
@@ -32,13 +32,13 @@ Prinzip: `skills/docs/docs/docs/help/*.txt ist die WAHRHEIT` - aber nur wenn sie
 
 ```bash
 # Alle Help-Dateien auflisten
-ls skills/docs/docs/docs/help/*.txt
+ls skills/docs/help/*.txt
 
 # Nach Aenderungsdatum sortiert (aelteste zuerst)
-ls -lt skills/docs/docs/docs/help/*.txt | tail -10
+ls -lt skills/docs/help/*.txt | tail -10
 
 # Zufaellig waehlen
-ls skills/docs/docs/docs/help/*.txt | shuf | head -1
+ls skills/docs/help/*.txt | shuf | head -1
 ```
 
 ### 1.2 Auswahl-Kriterien
@@ -52,7 +52,7 @@ ls skills/docs/docs/docs/help/*.txt | shuf | head -1
 ### 1.3 Dokumentieren
 
 ```
-Ausgewaehlte Datei: skills/docs/docs/docs/help/[name].txt
+Ausgewaehlte Datei: skills/docs/help/[name].txt
 Letzte Aenderung: [Datum]
 Auswahl-Grund: [zufaellig | aelteste | auftrag]
 ```
@@ -64,7 +64,7 @@ Auswahl-Grund: [zufaellig | aelteste | auftrag]
 ### 2.1 Datei lesen
 
 ```bash
-cat skills/docs/docs/docs/help/[name].txt
+cat skills/docs/help/[name].txt
 ```
 
 ### 2.2 Strukturiert erfassen
@@ -264,7 +264,7 @@ Schlussfolgerung: [geplant | vergessen | absichtlich_entfernt]
 
 ```
 1. In ROADMAP.md eintragen:
-   | HELP_[NNN] | [Feature] implementieren (aus skills/docs/docs/docs/help/[name].txt) | OFFEN |
+   | HELP_[NNN] | [Feature] implementieren (aus skills/docs/help/[name].txt) | OFFEN |
 
 2. Oder als Task:
    python bach.py --tasks add "[Feature] implementieren" --priority P3
@@ -298,7 +298,7 @@ logs/help_forensic/REPORT_YYYY-MM-DD_[name].md
 # Help-Forensik Bericht
 
 **Datum:** YYYY-MM-DD
-**Datei:** skills/docs/docs/docs/help/[name].txt
+**Datei:** skills/docs/help/[name].txt
 **Analyst:** [Claude/Gemini]
 
 ## Dokumentierter Zustand
@@ -365,7 +365,7 @@ logs/help_forensic/REPORT_YYYY-MM-DD_[name].md
 
 ## Siehe auch
 
-- `skills/_services/skills/docs/docs/docs/help/SKILL.md` - Service-Beschreibung
-- `skills/docs/docs/docs/help/practices.txt` - Best Practices (#7: HELP ALS WAHRHEIT)
+- `skills/_services/skills/docs/help/SKILL.md` - Service-Beschreibung
+- `skills/docs/help/practices.txt` - Best Practices (#7: HELP ALS WAHRHEIT)
 - `bach --maintain docs` - Dokumentations-Checker Tool
 - `skills/workflows/wiki-author.md` - Wiki-Autoren Workflow

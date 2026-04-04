@@ -4,7 +4,7 @@ WORKFLOW:
 1. Warte auf spezifisches Thema vom User
 
 2. Lies relevante Dateien im BACH-System:
-   - docs/docs/docs/help/ und wiki/ fuer existierende Dokumentation
+   - docs/help/ und wiki/ fuer existierende Dokumentation
    - docs/ fuer Konzepte und Architektur
    - tools/ fuer Implementierungen
 

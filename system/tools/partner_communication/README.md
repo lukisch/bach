@@ -163,5 +163,5 @@ bach partner test              # Integration-Tests ausführen
 ## Referenzen
 
 - Skill-Definition: `skills/_services/communicate.md`
-- Help: `skills/docs/docs/docs/help/partners.txt`, `skills/docs/docs/docs/help/connections.txt`
+- Help: `skills/docs/help/partners.txt`, `skills/docs/help/connections.txt`
 - Datenbank: `data/bach.db` (connections, partner_recognition)

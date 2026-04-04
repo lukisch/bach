@@ -148,5 +148,5 @@ SIEHE AUCH
 ----------
   wiki/was_ist_bach.txt         BACH Philosophie (Herkunft von Self-Healing)
   docs/architecture.md           Technische Architektur
-  help/health-check.txt          Health-Check Befehl (CLI)
-  help/heal.txt                  Heal Befehl (Manuelle Heilung)
+  docs/help/health-check.txt          Health-Check Befehl (CLI)
+  docs/help/heal.txt                  Heal Befehl (Manuelle Heilung)

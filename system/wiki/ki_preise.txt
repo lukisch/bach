@@ -197,7 +197,7 @@ Zone 3 (60-85% Tokens): Lokal
 Zone 4 (>85% Tokens): Notfall
   → Nur Human-Eskalation
 
-Siehe: docs/docs/docs/help/partner.txt (Zonen-System)
+Siehe: docs/help/partner.txt (Zonen-System)
 
 NUETZLICHE LINKS
 ================
@@ -214,4 +214,4 @@ SIEHE AUCH
   wiki/gemini.txt         Gemini Details
   wiki/copilot.txt        Copilot Details
   wiki/ollama.txt         Ollama Details
-  docs/docs/docs/help/partner.txt             BACH Partner-System
+  docs/help/partner.txt             BACH Partner-System

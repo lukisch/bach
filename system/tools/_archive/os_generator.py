@@ -454,7 +454,7 @@ def get_templates(name: str) -> dict:
 └── INTERFACE-SCHICHT
     ├── gui/                # Dashboards
     ├── reports/            # Dokumentation
-    └── system/system/system/system/exports/            # Deployment
+    └── system/exports/            # Deployment
 ```
 
 ## 💾 Backup-System (🆕 v3.0)
@@ -881,7 +881,7 @@ Dokumentation und Berichte.
 - `templates/` - Berichts-Vorlagen
 ''',
 
-        "system/system/system/system/exports/SKILL.md": '''# Exports
+        "system/exports/SKILL.md": '''# Exports
 
 ## 📋 Übersicht
 Deployment und Paketierung.

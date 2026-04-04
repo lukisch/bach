@@ -65,7 +65,7 @@ description: >
 
 - **Verträge:** `user/documents/insurance/`
 - **Finanzplan:** `user/financials/budget.txt`
-- **Checklisten:** `docs/docs/docs/help/insurance_checklists.txt`
+- **Checklisten:** `docs/help/insurance_checklists.txt`
 
 ---
 Status: ✅ EINSATZBEREIT  

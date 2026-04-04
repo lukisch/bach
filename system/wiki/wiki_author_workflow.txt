@@ -10,7 +10,7 @@ Stand: 2026-01-28
 
 WAS IST DER WIKI AUTHOR WORKFLOW?
 ---------------------------------
-Der Wiki Author Workflow ist ein systematischer Prozess zur Erstellung, Pflege und Validierung der BACH Wissensbasis (docs/docs/docs/help/wiki). Er stellt sicher, dass das Wiki aktuell, relevant und fehlerfrei bleibt.
+Der Wiki Author Workflow ist ein systematischer Prozess zur Erstellung, Pflege und Validierung der BACH Wissensbasis (docs/help/wiki). Er stellt sicher, dass das Wiki aktuell, relevant und fehlerfrei bleibt.
 
 MODI
 ----

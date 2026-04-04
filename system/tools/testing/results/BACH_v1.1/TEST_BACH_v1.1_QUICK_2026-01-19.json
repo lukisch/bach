@@ -145,7 +145,7 @@
           {
             "name": "task_file_exists",
             "passed": true,
-            "details": "Gefunden: ['user//Aufgaben.txt', 'docs/docs/docs/help//tasks.txt']"
+            "details": "Gefunden: ['user//Aufgaben.txt', 'docs/help//tasks.txt']"
           },
           {
             "name": "task_structure",

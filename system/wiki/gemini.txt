@@ -404,6 +404,6 @@ SIEHE AUCH
 ----------
   wiki/antigravity.txt    Antigravity IDE (ausfuehrlich!)
   wiki/ollama.txt         Lokaler LLM-Server
-  docs/docs/docs/help/partners.txt            KI-Partner im BACH-System
+  docs/help/partners.txt            KI-Partner im BACH-System
   partners/gemini/            Gemini Partner-Workspace
   tools/gemini_start.py        BACH Gemini Starter

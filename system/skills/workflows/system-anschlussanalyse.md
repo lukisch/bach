@@ -35,7 +35,7 @@ Dieser Workflow prüft BACH auf unverbundene Systembereiche, Inkonsistenzen und 
 
 | Quelle | Prüfung | Befehl |
 |--------|---------|--------|
-| skills/docs/docs/docs/help/*.txt | Alle Handler dokumentiert? | `dir docs\docs\docs\help\*.txt` |
+| skills/docs/help/*.txt | Alle Handler dokumentiert? | `dir docs\docs\docs\help\*.txt` |
 | hub/handlers/*.py | Alle Handler haben Help? | `dir hub\handlers\*.py` |
 | bach.py | Alle Subcommands in KNOWN_COMMANDS? | Zeile ~855 |
 | practices.txt | REGELWERK-INDEX vollständig? | `--help practices` |
@@ -43,7 +43,7 @@ Dieser Workflow prüft BACH auf unverbundene Systembereiche, Inkonsistenzen und 
 ### Checkliste
 
 ```
-□ Jeder Handler hat eine skills/docs/docs/docs/help/*.txt Datei
+□ Jeder Handler hat eine skills/docs/help/*.txt Datei
 □ REGELWERK-INDEX verweist auf alle relevanten Themen
 □ Keine verwaisten Help-Dateien ohne Handler
 ```
@@ -93,8 +93,8 @@ Alle Handler sollten BEIDE Wege unterstützen (mit und ohne --).
 | Problem | Beispiel | Lösung |
 |---------|----------|--------|
 | Alter Pfad | `recludOS/` statt `BACH/` | `--maintain heal` |
-| Fehlende Referenz | skills/docs/docs/docs/help/x.txt erwähnt nicht existierende Datei | Korrigieren |
-| Doppelte Doku | Info in skills/docs/docs/docs/help/*.txt UND in DB | Konsolidieren |
+| Fehlende Referenz | skills/docs/help/x.txt erwähnt nicht existierende Datei | Korrigieren |
+| Doppelte Doku | Info in skills/docs/help/*.txt UND in DB | Konsolidieren |
 
 ### Befehle
 
@@ -119,7 +119,7 @@ bach --maintain skills check
 
 | Bereich | Struktur A | Struktur B | Empfehlung |
 |---------|------------|------------|------------|
-| Lessons | skills/docs/docs/docs/help/lessons.txt (statisch) | memory_lessons DB (dynamisch) | Help verweist auf DB |
+| Lessons | skills/docs/help/lessons.txt (statisch) | memory_lessons DB (dynamisch) | Help verweist auf DB |
 | Facts | memory_facts DB | config.json | DB für dynamisch, JSON für statisch |
 | Befehle | `mem` Kurzform | `--memory` Handler | Beide behalten, dokumentieren |
 
@@ -186,12 +186,12 @@ bach --maintain integration [--dry-run]
 
 1. **CLI-Syntax:** `--partner` funktionierte, `partner` nicht → **GELÖST** (elif-Block hinzugefügt)
 2. **Did-you-mean:** Fehlte bei unbekannten Befehlen → **GELÖST** (`_suggest_command()`)
-3. **CLI-Dokumentation:** skills/docs/docs/docs/help/cli.txt fehlte → **GELÖST** (erstellt)
+3. **CLI-Dokumentation:** skills/docs/help/cli.txt fehlte → **GELÖST** (erstellt)
 4. **REGELWERK-INDEX:** CLI-Syntax fehlte → **GELÖST** (ergänzt)
 
 ### Erstellte Artefakte
 
-- `skills/docs/docs/docs/help/cli.txt` - CLI-Konventionen
+- `skills/docs/help/cli.txt` - CLI-Konventionen
 - `_suggest_command()` in bach.py - Did-you-mean Funktion
 - Lesson #34, #35 - CLI-Dokumentation
 - Dieser Workflow
@@ -201,7 +201,7 @@ bach --maintain integration [--dry-run]
 ## Schnell-Checkliste
 
 ```
-□ skills/docs/docs/docs/help/*.txt ↔ hub/handlers/*.py Abgleich
+□ skills/docs/help/*.txt ↔ hub/handlers/*.py Abgleich
 □ bach.py KNOWN_COMMANDS aktuell
 □ practices.txt REGELWERK-INDEX vollständig
 □ --maintain heal --dry-run ohne Fehler
@@ -216,8 +216,8 @@ bach --maintain integration [--dry-run]
 
 - `skills/workflows/system-mapping.md` - Feature-Erfassung
 - `skills/workflows/system-synopse.md` - System-Übersicht
-- `skills/docs/docs/docs/help/maintain.txt` - Wartungs-Tools
-- `skills/docs/docs/docs/help/practices.txt` - Best Practices Index
+- `skills/docs/help/maintain.txt` - Wartungs-Tools
+- `skills/docs/help/practices.txt` - Best Practices Index
 
 ---
 

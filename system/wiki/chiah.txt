@@ -50,7 +50,7 @@ wurden nach BACH migriert:
 
   [x] CLI-Befehle         -> bach.py mit --command Syntax
   [x] Injektoren          -> tools/injectors.py
-  [x] Help-System         -> docs/docs/docs/help/*.txt
+  [x] Help-System         -> docs/help/*.txt
   [x] Context Sources     -> In Memory-System integriert
   [x] Scanner             -> tools/tool_scanner.py
 
@@ -64,6 +64,6 @@ strukturierte CLI-Interaktion und automatische Kontext-Hilfe.
 SIEHE AUCH
 ----------
   wiki/batch.txt       Erstes Vorgaengersystem
-  docs/docs/docs/help/injectors.txt        Injektor-System Dokumentation
-  docs/docs/docs/help/cli.txt              CLI-Konventionen
+  docs/help/injectors.txt        Injektor-System Dokumentation
+  docs/help/cli.txt              CLI-Konventionen
   ROADMAP.md                Best-of Herkunft (Abschnitt 1.1)

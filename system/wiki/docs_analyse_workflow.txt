@@ -51,4 +51,4 @@ OUTPUT ARTIFACTS
 SIEHE AUCH
 ----------
 skills/_protocols/docs-analyse.md    Der technische Workflow
-docs/docs/docs/help/practices.txt                   Best Practices (#7 Doku-Wahrheit)
+docs/help/practices.txt                   Best Practices (#7 Doku-Wahrheit)

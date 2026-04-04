@@ -4,8 +4,8 @@ Help Handler - Zeigt Hilfe-Texte aus .txt Dateien
 =================================================
 
 Unterstuetzt auch Unterordner:
-  bach --help tools                    -> docs/docs/docs/docs/help/tools.txt
-  bach --help tools/python_cli_editor  -> docs/docs/docs/docs/help/tools/python_cli_editor.txt
+  bach --help tools                    -> docs/help/tools.txt
+  bach --help tools/python_cli_editor  -> docs/help/tools/python_cli_editor.txt
   
 NEU (v1.1.38): Tool-Direktzugriff
   bach --help path_healer              -> Tool-Info aus DB
@@ -22,7 +22,7 @@ class HelpHandler(BaseHandler):
 
     def __init__(self, base_path: Path):
         super().__init__(base_path)
-        # Help liegt jetzt unter docs/docs/docs/docs/help/ (v2.6 Refactoring)
+        # Help liegt jetzt unter docs/help/ (v2.6 Refactoring)
         self.help_dir = base_path / "docs" / "help"
     
     @property
@@ -100,9 +100,9 @@ class HelpHandler(BaseHandler):
         """Zeigt Hilfe zu einem bestimmten Thema.
         
         Unterstuetzt:
-          topic             -> docs/docs/docs/help/topic.txt
-          folder/topic      -> docs/docs/docs/help/folder/topic.txt
-          folder            -> docs/docs/docs/help/folder/_index.txt (falls vorhanden)
+          topic             -> docs/help/topic.txt
+          folder/topic      -> docs/help/folder/topic.txt
+          folder            -> docs/help/folder/_index.txt (falls vorhanden)
         """
         # Normalisieren: Backslash zu Slash, Leerzeichen zu Underscore
         topic = topic.lower().replace("\\", "/").replace("-", "_").replace(" ", "_")

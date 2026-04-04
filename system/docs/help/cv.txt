@@ -51,7 +51,7 @@ Der "status"-Befehl zeigt:
 DATEIEN
 -------
   Handler:     hub/cv.py
-  Generator:   skills/_experts/bewerbungsexperte/cv_generator.py
+  Generator:   agents/_experts/bewerbungsexperte/cv_generator.py
   Datenbasis:  data/bach.db
 
 SIEHE AUCH

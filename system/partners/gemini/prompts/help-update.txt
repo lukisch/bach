@@ -6,7 +6,7 @@ Folge dem Workflow in: skills/_protocols/help-forensic.md
 KURZVERSION:
 
 1. Zufaellige Help-Datei auswaehlen:
-   ls docs/docs/docs/help/*.txt | shuf | head -1
+   ls docs/help/*.txt | shuf | head -1
 
 2. Datei lesen und analysieren:
    - Ist die Dokumentation aktuell?
@@ -34,6 +34,6 @@ KURZVERSION:
    python bach.py msg send user "Help-Datei <name> aktualisiert. Report: partners/gemini/outbox/" --from gemini
 
 WICHTIG:
-- NUR Help-Dateien in docs/docs/docs/help/ aendern
+- NUR Help-Dateien in docs/help/ aendern
 - Bei Abweichungen: Help ODER Task erstellen fuer Code-Fix
 - IMMER Nachricht an User am Ende

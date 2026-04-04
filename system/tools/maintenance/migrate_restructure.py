@@ -31,7 +31,7 @@ Einmaliges Script fuer die Standards-konforme Verzeichnis-Umstrukturierung.
 Verschiebungen:
   agents/*      -> agents/*
   agents/_experts/*     -> agents/_experts/*
-  skills/_workflows/*   -> skills/workflows/*
+  skills/workflows/*   -> skills/workflows/*
   partners/*    -> partners/*
   connectors/*  -> connectors/*
   hub/_services/*.md    -> skills/_services/*.md  (nur Top-Level .md Dateien)
@@ -134,9 +134,9 @@ def migrate(dry_run=False):
         log("[SKIP] agents/_experts/ existiert nicht")
 
     # ================================================================
-    # 4. skills/_workflows/* -> skills/workflows/*
+    # 4. skills/workflows/* -> skills/workflows/*
     # ================================================================
-    print("\n[4/6] Verschiebe skills/_workflows/* -> skills/workflows/*...")
+    print("\n[4/6] Verschiebe skills/workflows/* -> skills/workflows/*...")
     src_workflows = skills_dir / "_workflows"
     dst_workflows = skills_dir / "workflows"
 

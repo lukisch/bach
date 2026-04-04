@@ -271,7 +271,7 @@ class ConsolidationHandler(BaseHandler):
         if help_dir.exists():
             for f in help_dir.glob("*.txt"):
                 key = f"HELP.{f.stem}"
-                value = f"docs/docs/docs/help/{f.name}"
+                value = f"docs/help/{f.name}"
 
                 if not dry_run:
                     cursor.execute("""

@@ -136,6 +136,6 @@ Gesetze und Hoechstbetraege aendern sich jaehrlich.
 SIEHE AUCH
 ----------
   wiki/_index.txt               Wiki-Hauptindex
-  docs/docs/docs/help/steuer.txt                    Steuer CLI-Hilfe (alle Befehle)
+  docs/help/steuer.txt                    Steuer CLI-Hilfe (alle Befehle)
   agents/steuer-agent.txt    Steuer-Agent
   wiki/datev.txt                DATEV-Schnittstelle

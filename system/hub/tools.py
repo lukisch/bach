@@ -479,7 +479,7 @@ class ToolsHandler(BaseHandler):
                 else:
                     results.append("\nKeine Dokumentation vorhanden.")
             else:
-                results.append(f"\nOrdner existiert nicht: docs/docs/docs/help/tools/")
+                results.append(f"\nOrdner existiert nicht: docs/help/tools/")
             
             results.append(f"\n{'=' * 50}")
             results.append("Generieren: bach tools docs --generate")

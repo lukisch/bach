@@ -34,7 +34,7 @@ VERSIONS-HINWEIS: Prüfe auf neuere Versionen mit: bach tools version c_header_m
 
 Description:
     Migriert fehlende Standard-Header in Help- und Tool-Dateien.
-    Prueft alle docs/docs/docs/help/*.txt und tools/*.py auf Standard-Header
+    Prueft alle docs/help/*.txt und tools/*.py auf Standard-Header
     und fuegt fehlende Header hinzu.
 
 Usage:

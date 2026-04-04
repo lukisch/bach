@@ -148,7 +148,7 @@ bach selbst status                    # Gesamtuebersicht
 
 ```
 user/selbstmanagement/
-  system/system/system/system/exports/              # PDF/Markdown Exporte
+  system/exports/              # PDF/Markdown Exporte
   assessments/          # Detaillierte Bewertungen
   goals/                # Ziel-Dokumentation
 ```

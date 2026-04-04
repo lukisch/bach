@@ -8,8 +8,8 @@ bach --connections db          Alias fuer list
 bach --connections db --type ai    Nur AI-Partner
 bach --connections db --type mcp   Nur MCP-Server
 bach --connections show <n>    Details zu einer Connection
-bach --connections actors      Actors-Model (docs/docs/docs/help/actors.txt)
-bach --connections partners    Partner-Profile (docs/docs/docs/help/partners.txt)
+bach --connections actors      Actors-Model (docs/help/actors.txt)
+bach --connections partners    Partner-Profile (docs/help/partners.txt)
 
 Daten in: bach.db/connections (nach Migration aus _archive/)
 """

@@ -7,9 +7,9 @@ WORKFLOW:
    - Notiere alle aktuellen Befehle und Features
 
 2. Existierende Dokumentation scannen:
-   docs/docs/docs/help/*.txt                 # Haupt-Help-Dateien
+   docs/help/*.txt                 # Haupt-Help-Dateien
    wiki/*.txt            # Wiki-Eintraege
-   docs/docs/docs/help/tools/*.txt           # Tool-spezifische Hilfe
+   docs/help/tools/*.txt           # Tool-spezifische Hilfe
 
 3. Vergleich und Aktualisierung:
    - Pruefe jede Help-Datei auf Aktualitaet
@@ -37,7 +37,7 @@ WORKFLOW:
    python bach.py msg send user "Docs-Update abgeschlossen. X Dateien aktualisiert. Report: partners/gemini/outbox/" --from gemini
 
 WICHTIGE REGELN:
-- NUR Dokumentations-Dateien aendern (docs/docs/docs/help/, wiki/)
+- NUR Dokumentations-Dateien aendern (docs/help/, wiki/)
 - Keine Code-Aenderungen
 - Bei Unsicherheit: Im Report als "zu pruefen" markieren
 - IMMER Nachricht an User am Ende

@@ -77,7 +77,7 @@ def scan_directory_structure():
         "directories": directories,
         "files": files,
         "changes": [
-            "docs/docs/docs/help/ -> docs/docs/docs/docs/help/",
+            "docs/help/ -> docs/help/",
             "wiki/ -> wiki/",
             "docs/guides/ created",
             "docs/reference/ created"

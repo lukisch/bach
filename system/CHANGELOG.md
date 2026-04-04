@@ -69,7 +69,7 @@ Copyright (c) 2026 BACH Contributors. Alle Rechte vorbehalten.
 - **NEU:** bach:// URL-Schema in llmauto-Prompts
   - `bach://memory/facts/key` → laedt Fact direkt in Prompt
   - `bach://task/current` → injiziert aktuellen Task
-  - `bach://skill/help/topic` → laedt Help-Text fuer Thema
+  - `bach://skill/docs/help/topic` → laedt Help-Text fuer Thema
   - Resolution via `hub/url_resolver.py`
 
 ### Prompt-Migration
@@ -174,7 +174,7 @@ Copyright (c) 2026 BACH Contributors. Alle Rechte vorbehalten.
   - `bach connector queue-status` - Queue-Statistiken anzeigen
   - `bach connector retry <id|all>` - Dead-Letter zuruecksetzen
 
-- **NEU:** Help-Datei `docs/docs/docs/help/connector.txt` - Vollstaendige Connector-Dokumentation
+- **NEU:** Help-Datei `docs/help/connector.txt` - Vollstaendige Connector-Dokumentation
 - **NEU:** `connectors/SKILL.md` - Connector Skill-Dokumentation
 
 ### Geaendert
@@ -182,8 +182,8 @@ Copyright (c) 2026 BACH Contributors. Alle Rechte vorbehalten.
 - **UPDATE:** `gui/api/headless.py` - Messages-Router eingebunden (4 Endpoints)
 - **UPDATE:** `hub/connector.py` - 3 neue Operationen, Help-Text erweitert
 - **UPDATE:** `db/schema.sql` - Kanonische Definitionen fuer Neuinstallationen
-- **UPDATE:** `docs/docs/docs/help/messages.txt` - Connector-Integration, REST-API Sektion
-- **UPDATE:** `docs/docs/docs/help/daemon.txt` - Connector-Jobs dokumentiert
+- **UPDATE:** `docs/help/messages.txt` - Connector-Integration, REST-API Sektion
+- **UPDATE:** `docs/help/daemon.txt` - Connector-Jobs dokumentiert
 
 ---
 
@@ -226,7 +226,7 @@ Copyright (c) 2026 BACH Contributors. Alle Rechte vorbehalten.
 - **NEU:** Pfad-Konsolidierung - Neue Ordnerstruktur
   - `system/` Ordner fuer System-Kern (bach.py, hub/, gui/, data/, skills/)
   - `user/` auf Root-Ebene fuer User-Daten (isoliert)
-  - `docs/`, `system/system/system/system/exports/`, `extensions/` auf Root-Ebene
+  - `docs/`, `system/exports/`, `extensions/` auf Root-Ebene
   - Klare Trennung System vs. User-Daten
 
 - **NEU:** GitHub-Kompatibilitaet
@@ -242,7 +242,7 @@ Copyright (c) 2026 BACH Contributors. Alle Rechte vorbehalten.
 
 - **NEU:** Skills-Konsolidierung unter `system/skills/`
   - `tools/` - Python-Tools (~70 Scripts)
-  - `docs/docs/docs/help/` - Hilfe-Texte
+  - `docs/help/` - Hilfe-Texte
   - `_agents/`, `_experts/`, `partners/`, `_workflows/`, `_services/`
 
 - **NEU:** User-Dokumente Struktur
@@ -255,7 +255,7 @@ Copyright (c) 2026 BACH Contributors. Alle Rechte vorbehalten.
 
 - **UPDATE:** `system/hub/bach_paths.py` - Komplette Neustrukturierung
 - **UPDATE:** `system/bach.py` - Pfad-Konstanten angepasst
-- **UPDATE:** `system/hub/help.py` - help_dir auf skills/docs/docs/docs/help/
+- **UPDATE:** `system/hub/help.py` - help_dir auf skills/docs/help/
 - **UPDATE:** `system/hub/tools.py` - tools_dir auf skills/tools/
 
 ### Dokumentation
@@ -323,8 +323,8 @@ Copyright (c) 2026 BACH Contributors. Alle Rechte vorbehalten.
 
 - **UPDATE:** hub/startup.py - Clock-In Logik, Partner-Awareness Sektion
 - **UPDATE:** hub/shutdown.py - Clock-Out Logik
-- **UPDATE:** skills/docs/docs/docs/help/startup.txt - Stempelkarten-System dokumentiert
-- **UPDATE:** skills/docs/docs/docs/help/multi_llm.txt - Richtiger Start mit Stempelkarte
+- **UPDATE:** skills/docs/help/startup.txt - Stempelkarten-System dokumentiert
+- **UPDATE:** skills/docs/help/multi_llm.txt - Richtiger Start mit Stempelkarte
 - **UPDATE:** SKILL.md - Multi-LLM Sektion mit Startup-Anleitung
 
 ---
@@ -351,7 +351,7 @@ Copyright (c) 2026 BACH Contributors. Alle Rechte vorbehalten.
   - `bach llm handshake` - Auto-Detection starten
   - `bach llm status` - Multi-LLM Status anzeigen
 - **NEU:** hub/multi_llm_protocol.py - Protokoll-Implementation (545 Zeilen)
-- **NEU:** skills/docs/docs/docs/help/multi_llm.txt - Protokoll-Dokumentation (192 Zeilen)
+- **NEU:** skills/docs/help/multi_llm.txt - Protokoll-Dokumentation (192 Zeilen)
 - **NEU:** Lesson #53 erweitert: CLI-First-Prinzip mit Regeln, Checkliste und Ausnahmen
 - **NEU:** 4 neue Lessons (#54-57):
   - #54: Vor neuen Datenstrukturen Anschlussfaehigkeit pruefen
@@ -376,7 +376,7 @@ Copyright (c) 2026 BACH Contributors. Alle Rechte vorbehalten.
 
 ### Geaendert
 
-- **UPDATE:** skills/docs/docs/docs/help/tasks.txt - Dokumentation fuer task edit ergaenzt
+- **UPDATE:** skills/docs/help/tasks.txt - Dokumentation fuer task edit ergaenzt
 - **UPDATE:** Steuer-Templates: "Nr" -> "PostenID"/"BelegNr" fuer Konsistenz mit Exports
 - **AUDIT:** Lessons-Audit - 4 Lessons deaktiviert (#21 test, #29 recludOS veraltet, #30 Duplikat, #33 in #32 integriert)
 - **TEST:** Multi-LLM Parallelarbeit (Task #529) - Getrennte Workspaces OK, Shared Files haben Race Conditions

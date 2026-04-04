@@ -37,7 +37,7 @@ NEUE STRUKTUR (v1.2.0):
     │   ├── gui/
     │   └── skills/
     │       ├── tools/
-    │       ├── docs/docs/docs/help/
+    │       ├── docs/help/
     │       └── partners/
     └── user/
 

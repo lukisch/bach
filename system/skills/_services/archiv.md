@@ -49,7 +49,7 @@ Verzeichnisführung und Export-Funktionalität.
 ```
 → Alle Archive in ZIP packen
 → Datum-basierter Dateiname
-→ Nach main/system/system/system/system/exports/ verschieben
+→ Nach main/system/exports/ verschieben
 → Archive leeren (optional)
 ```
 
@@ -85,7 +85,7 @@ Verzeichnisführung und Export-Funktionalität.
 ## 📦 Export-Format
 
 ```
-main/system/system/system/system/exports/
+main/system/exports/
 └── Archiv_Export_2025-12-28.zip
     ├── Workspace_Archiviert/
     │   ├── datei1.pdf

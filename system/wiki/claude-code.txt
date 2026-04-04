@@ -313,7 +313,7 @@ NUETZLICHE LINKS
 
 SIEHE AUCH
 ----------
-  docs/docs/docs/help/claude-code.txt       Kurzreferenz
+  docs/help/claude-code.txt       Kurzreferenz
   wiki/gemini.txt       Gemini CLI/Antigravity
   wiki/ollama.txt       Lokale LLMs
   wiki/mcp.txt          Model Context Protocol

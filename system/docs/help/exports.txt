@@ -25,7 +25,7 @@ UEBERSICHT
   chains_export.py        data/CHAINS.md            toolchains (bach.db)
   partners_export.py      data/PARTNERS.md          delegation_rules,
                                                     partner_recognition
-  workflows_export.py     data/WORKFLOWS.md         skills/_workflows/ (Scan)
+  workflows_export.py     data/WORKFLOWS.md         skills/workflows/ (Scan)
   usecases_export.py      data/USECASES.md          usecases (bach.db)
   skill_export.py         ZIP-Paket                 skills/ (Dateisystem)
 
@@ -62,7 +62,7 @@ Delegations-Regeln und Erkennungsmuster.
 
 WORKFLOWS_EXPORT
 ----------------
-Scannt skills/_workflows/ nach Workflow-Dateien (.md) und erstellt eine
+Scannt skills/workflows/ nach Workflow-Dateien (.md) und erstellt eine
 Uebersicht. Extrahiert Metadaten (Titel, Ziel, Schritte) per Regex
 aus dem Dateiinhalt.
 

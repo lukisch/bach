@@ -11,7 +11,7 @@ Embeddings in ChromaDB via Ollama.
 Usage:
     python tools/rag/ingest.py                    # Alles indexieren
     python tools/rag/ingest.py --source docs      # Nur docs/
-    python tools/rag/ingest.py --source help      # Nur docs/docs/docs/help/
+    python tools/rag/ingest.py --source help      # Nur docs/help/
     python tools/rag/ingest.py --status            # Index-Status
     python tools/rag/ingest.py --reset             # Index loeschen
 

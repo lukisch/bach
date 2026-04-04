@@ -35,7 +35,7 @@ VERSIONS-HINWEIS: Prüfe auf neuere Versionen mit: bach tools version skill_help
 skill_help_gen.py - Auto-Help-Generierung fuer Skills
 ======================================================
 
-Liest SKILL.md Dateien und generiert passende docs/docs/docs/help/*.txt Eintraege
+Liest SKILL.md Dateien und generiert passende docs/help/*.txt Eintraege
 im BACH-Help-Format.
 
 Usage:
@@ -270,7 +270,7 @@ class HelpGenerator:
         """
         Generiert formatierten Help-Text im BACH-Standard.
 
-        Format orientiert sich an bestehenden docs/docs/docs/help/*.txt Dateien:
+        Format orientiert sich an bestehenden docs/help/*.txt Dateien:
         - Metadaten-Kommentare oben
         - Titel in Grossbuchstaben
         - Abschnitte: UEBERSICHT, BEFEHLE, BEISPIELE, SIEHE AUCH
@@ -282,7 +282,7 @@ class HelpGenerator:
 
         lines = []
 
-        # Header-Kommentare (wie in bestehenden docs/docs/docs/help/*.txt)
+        # Header-Kommentare (wie in bestehenden docs/help/*.txt)
         lines.append(f"# Portabilitaet: UNIVERSAL")
         lines.append(f"# Version: {version}")
         lines.append(f"# Zuletzt validiert: {today} (Auto-Generated)")

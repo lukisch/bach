@@ -39,7 +39,7 @@ und aktualisiert entweder Help oder Roadmap.
 
 ### Automatisch (Recurring Task)
 - Intervall: 14 Tage
-- Task: "Help-Forensik: Eine docs/docs/docs/help/*.txt pruefen..."
+- Task: "Help-Forensik: Eine docs/help/*.txt pruefen..."
 - Ziel: Dokumentation immer aktuell halten
 
 ### Manuell
@@ -58,7 +58,7 @@ und aktualisiert entweder Help oder Roadmap.
 
 ```
 1. HELP-DATEI AUSWAEHLEN
-   └─> Zufaellig aus docs/docs/docs/help/*.txt
+   └─> Zufaellig aus docs/help/*.txt
    └─> Oder nach Auftrag spezifisch
    └─> Priorisierung: aelteste zuerst
 
@@ -104,7 +104,7 @@ und aktualisiert entweder Help oder Roadmap.
 HELP-FORENSIK ANALYSEBERICHT
 ============================
 Datum: YYYY-MM-DD
-Datei: docs/docs/docs/help/[name].txt
+Datei: docs/help/[name].txt
 Letzte Aenderung: [Datum der Datei]
 
 DOKUMENTIERTER ZUSTAND
@@ -139,7 +139,7 @@ DURCHGEFUEHRTE AKTION
 ## Dateien
 
 ```
-hub/_services/docs/docs/docs/help/
+hub/_services/docs/help/
 ├── SKILL.md              # Diese Datei
 ├── help_forensic.py      # Hauptlogik (TODO)
 ├── templates/
@@ -157,9 +157,9 @@ hub/_services/docs/docs/docs/help/
 - Automatische Task-Erstellung
 
 ### Mit Help-System
-- Liest docs/docs/docs/help/*.txt
-- Schreibt docs/docs/docs/help/*.txt (bei Korrekturen)
-- Beachtet docs/docs/docs/help/practices.txt (#7: HELP ALS WAHRHEIT)
+- Liest docs/help/*.txt
+- Schreibt docs/help/*.txt (bei Korrekturen)
+- Beachtet docs/help/practices.txt (#7: HELP ALS WAHRHEIT)
 
 ### Mit Roadmap
 - Liest ROADMAP.md
@@ -185,6 +185,6 @@ hub/_services/docs/docs/docs/help/
 ## Siehe auch
 
 - `skills/workflows/help-forensic.md` - Detaillierter Workflow
-- `docs/docs/docs/help/practices.txt` - Best Practices (#7: HELP ALS WAHRHEIT)
+- `docs/help/practices.txt` - Best Practices (#7: HELP ALS WAHRHEIT)
 - `bach --maintain docs` - Dokumentations-Checker
 - `hub/_services/wiki/SKILL.md` - Wiki-Autoren Service

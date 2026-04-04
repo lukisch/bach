@@ -31,7 +31,7 @@ Der TUeV-Handler (Test, Ueberpruefen, Validierung) verwaltet:
 
 Der Handler arbeitet mit:
   * Datenbank: data/bach.db (workflow_tuev, usecases Tabellen)
-  * Workflows: skills/_workflows/ (*.md Dateien)
+  * Workflows: skills/workflows/ (*.md Dateien)
   * Test-Input/Output als JSON in DB
 
 
@@ -45,7 +45,7 @@ TUEV-OPERATIONEN:
   bach tuev check WFNAME  - Einzelnen Workflow und seine Usecases pruefen
   bach tuev run           - Alle abgelaufenen Workflows auflisten
   bach tuev renew WFNAME  - TUeV erneuern (90 Tage Gueltigkeit)
-  bach tuev init          - Workflows aus skills/_workflows/ registrieren
+  bach tuev init          - Workflows aus skills/workflows/ registrieren
 
 USECASE-OPERATIONEN:
 
@@ -81,7 +81,7 @@ BEISPIELE
 3. Workflow-Pruefung mit Usecases:
    $ bach tuev check bugfix-protokoll
    [TUeV] Pruefung: bugfix-protokoll
-   Pfad: skills/_workflows/bugfix-protokoll.md
+   Pfad: skills/workflows/bugfix-protokoll.md
    Status: pending
    Score: 75%
 
@@ -120,7 +120,7 @@ DATEIEN
 Relativ zu system/:
 
   data/bach.db                    - SQLite-Datenbank mit TUeV/Usecase-Tabellen
-  skills/_workflows/*.md          - Workflow-Dateien (werden initialisiert)
+  skills/workflows/*.md          - Workflow-Dateien (werden initialisiert)
   hub/tuev.py                     - TuevHandler und UsecaseHandler Klassen
 
 
@@ -129,4 +129,4 @@ SIEHE AUCH
 
   bach db          - Direkte Datenbank-Abfragen
   hub/base.py      - BaseHandler Basis-Klasse
-  skills/_workflows/ - Verfuegbare Workflow-Dateien
+  skills/workflows/ - Verfuegbare Workflow-Dateien

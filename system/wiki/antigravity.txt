@@ -336,5 +336,5 @@ SIEHE AUCH
 ----------
   wiki/gemini.txt                   Google Gemini KI
   wiki/ollama.txt                   Lokaler LLM-Server
-  docs/docs/docs/help/partners.txt                      KI-Partner im BACH-System
+  docs/help/partners.txt                      KI-Partner im BACH-System
   system/partners/gemini/        Gemini Partner-Workspace

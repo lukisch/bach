@@ -30,7 +30,7 @@ BACH Docs Changelog Service v1.0
 Automatisches Logging von Help- und Wiki-Aenderungen.
 
 Verwendung:
-  python docs_changelog.py log "docs/docs/docs/help/workflow.txt" "added" "Steuer-Workflows hinzugefuegt"
+  python docs_changelog.py log "docs/help/workflow.txt" "added" "Steuer-Workflows hinzugefuegt"
   python docs_changelog.py log "wiki/steuer/fortbildung.txt" "created" "Neuer Wiki-Artikel"
   python docs_changelog.py show                    # Zeige letzte Aenderungen
   python docs_changelog.py report                  # Erstelle Monatsbericht
@@ -199,7 +199,7 @@ def generate_report() -> str:
 
         if "wiki/" in file_path:
             wiki_changes.append(entry)
-        elif "docs/docs/docs/help/" in file_path:
+        elif "docs/help/" in file_path:
             help_changes.append(entry)
 
     # Report generieren
@@ -257,7 +257,7 @@ def log_wiki_article(article_path: str, title: str, action: str = "created"):
 def log_help_update(help_name: str, changes: str):
     """Convenience-Funktion fuer Help-Updates."""
     log_change(
-        file_path=f"docs/docs/docs/help/{help_name}.txt",
+        file_path=f"docs/help/{help_name}.txt",
         action="updated",
         description=changes,
         author="system"

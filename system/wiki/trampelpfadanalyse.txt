@@ -108,23 +108,23 @@ Verzeichnis-Heatmap:
   WARM (10-29): hub/ (28x), wiki/ (21x), tools/ (12x), skills/ (11x),
                 docs/ (11x), agents/ (10x), connectors/ (10x)
   COOL (1-9):  partners/ (9x), gui/ (1x), _templates/ (1x)
-  COLD (0):    help/ (0x!) - KOMPLETT UNSICHTBAR trotz 93 Dateien!
+  COLD (0):    docs/help/ (0x!) - KOMPLETT UNSICHTBAR trotz 93 Dateien!
 
 Task-Erfolgsquoten:
   100%: BACH starten, Logs finden, Agenten auflisten, Nachrichten senden
    80%: Telegram-Bot, Wiki durchsuchen
    40%: Tasks erstellen, Python-Tools, System-Status
    20%: Steuerbelege, DB-Export
-    0%: Neuen Skill erstellen (help/ und _protocols/ unsichtbar!)
+    0%: Neuen Skill erstellen (docs/help/ und _protocols/ unsichtbar!)
 
 Groesste Probleme:
-  1. help/ nie besucht (0/100) - Hauptblindfleck
+  1. docs/help/ nie besucht (0/100) - Hauptblindfleck
   2. Windows-Pfade: 53% aller Tool-Aufrufe mit Backslashes (fehlerhaft)
   3. skills/_protocols/ nur 2x besucht (nach Umbenennung von _workflows)
   4. Bash-Dominanz: ls statt Glob, find statt Grep
 
 Massnahmen nach Grossversuch:
-  - ARCHITECTURE.md: Schnellnavigation fuer LLMs hinzugefuegt (help/, wiki/ etc.)
+  - ARCHITECTURE.md: Schnellnavigation fuer LLMs hinzugefuegt (docs/help/, wiki/ etc.)
   - ARCHITECTURE.md: Forward-Slash-Warnung ergaenzt
   - _templates/README.md: Self-Extension Referenz hinzugefuegt
 

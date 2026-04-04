@@ -74,8 +74,8 @@ Oder kurz: **BACH = Persönliches KI-Betriebssystem mit kognitivem Gedächtnis.*
 
 SIEHE AUCH
 ----------
-docs/docs/docs/help/bach_info.txt       Kurz-Uebersicht
-docs/docs/docs/help/architecture.txt    Technische Details
-docs/docs/docs/help/features.txt        Feature-Liste
-docs/docs/docs/help/memory.txt          Details zum Gedaechtnismodell
-docs/docs/docs/help/partner.txt         Details zum Partner-Netzwerk
+docs/help/bach_info.txt       Kurz-Uebersicht
+docs/help/architecture.txt    Technische Details
+docs/help/features.txt        Feature-Liste
+docs/help/memory.txt          Details zum Gedaechtnismodell
+docs/help/partner.txt         Details zum Partner-Netzwerk

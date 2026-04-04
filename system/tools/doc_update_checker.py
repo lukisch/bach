@@ -139,7 +139,7 @@ class DocUpdateChecker:
     def _get_all_docs(self) -> List[Dict]:
         """Lädt alle Dokumentationen per Dateisuche (glob-basiert)
         
-        Durchsucht docs/, docs/docs/docs/help/, skills/ nach Markdown-Dateien.
+        Durchsucht docs/, docs/help/, skills/ nach Markdown-Dateien.
         Keine DB-Tabelle erforderlich - rein dateibasiert.
         """
         docs = []

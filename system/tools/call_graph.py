@@ -530,7 +530,7 @@ def _status() -> str:
         f"  Experts:     {experts:>4} (agents/_experts/)",
         f"  Services:    {services:>4} (hub/_services/)",
         f"  Workflows:   {workflows:>4} (skills/workflows/)",
-        f"  Help:        {helps:>4} (docs/docs/docs/help/*.txt)",
+        f"  Help:        {helps:>4} (docs/help/*.txt)",
         f"  Wiki:        {wikis:>4} (wiki/)",
         "",
         f"Generierte Graphen: {', '.join(existing) if existing else 'keine'}",

@@ -408,7 +408,7 @@ python tools/testing/test_runner.py --compare "C:\...\anderes_system"
 
 - skills/workflows/skill-abdeckungsanalyse.md
 - tools/testing/e_tests/PROMPT_TEMPLATE.txt
-- docs/docs/docs/help/selfcheck.txt
+- docs/help/selfcheck.txt
 
 ---
 

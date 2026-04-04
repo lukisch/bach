@@ -141,6 +141,6 @@ SIEHE AUCH
 ==========
   wiki/ki_preise.txt       Kostenueberblick LLMs
   wiki/mcp.txt             Model Context Protocol
-  docs/docs/docs/help/partners.txt             BACH Partner-System
+  docs/help/partners.txt             BACH Partner-System
   wiki/rag.txt             Retrieval-Augmented Generation
   wiki/n8n.txt             Workflow-Automatisierung (zu erstellen)

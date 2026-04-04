@@ -5203,7 +5203,7 @@ async def list_help_files():
 
 
 
-@app.get("/api/docs/docs/docs/help/{name:path}")
+@app.get("/api/docs/help/{name:path}")
 
 async def get_help_file(name: str):
 
@@ -5299,7 +5299,7 @@ class HelpUpdate(BaseModel):
 
 
 
-@app.put("/api/docs/docs/docs/help/{name:path}")
+@app.put("/api/docs/help/{name:path}")
 
 async def update_help_file(name: str, data: HelpUpdate):
 
@@ -5433,7 +5433,7 @@ async def create_help_file(name: str = Query(...), data: HelpUpdate = None):
 
 
 
-@app.delete("/api/docs/docs/docs/help/{name:path}")
+@app.delete("/api/docs/help/{name:path}")
 
 async def delete_help_file(name: str):
 
@@ -5474,7 +5474,7 @@ async def delete_help_file(name: str):
 
 
 
-@app.get("/api/docs/docs/docs/help/search/{term}")
+@app.get("/api/docs/help/search/{term}")
 
 async def search_help(term: str):
 

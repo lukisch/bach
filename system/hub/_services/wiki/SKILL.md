@@ -177,4 +177,4 @@ hub/_services/wiki/
 - `skills/workflows/wiki-author.md` - Detaillierter Workflow (v2.0)
 - `wiki/_index.txt` - Wiki-Verzeichnis
 - `wiki/wiki_konventionen.txt` - Format-Regeln
-- `hub/_services/docs/docs/docs/help/SKILL.md` - Help-Forensik Service
+- `hub/_services/docs/help/SKILL.md` - Help-Forensik Service

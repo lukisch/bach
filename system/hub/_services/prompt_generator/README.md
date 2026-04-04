@@ -61,7 +61,7 @@ Die ATI-Session-Dateien wurden bereits als DEPRECATED markiert:
 
 ## GUI
 
-Geplant unter `/prompt-generator` - siehe `skills/docs/docs/docs/help/prompt-generator.txt`
+Geplant unter `/prompt-generator` - siehe `skills/docs/help/prompt-generator.txt`
 
 ## Siehe auch
 

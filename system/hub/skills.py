@@ -238,7 +238,7 @@ class SkillsHandler(BaseHandler):
 
         Args:
             name: Skill-Name (z.B. 'ati', 'steuer-agent')
-            output_dir: Zielverzeichnis (optional, default: exports/<name>_export)
+            output_dir: Zielverzeichnis (optional, default: system/exports/<name>_export)
             dry_run: Nur zeigen was passieren wuerde
             fmt: Export-Format -- 'bach' (Standard), 'anthropic' oder 'agent' (Claude Code Agent)
 

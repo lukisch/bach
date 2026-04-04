@@ -86,6 +86,6 @@ ABGRENZUNG
 
 SIEHE AUCH
 ----------
-  docs/docs/docs/help/backup.txt         BACH Backup-System
+  docs/help/backup.txt         BACH Backup-System
   wiki/gemini.txt    Partner-Konfiguration
-  docs/docs/docs/help/steuer.txt         Steuer-Daten Handling
+  docs/help/steuer.txt         Steuer-Daten Handling

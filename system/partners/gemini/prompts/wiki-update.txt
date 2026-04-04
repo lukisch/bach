@@ -16,7 +16,7 @@ KURZVERSION:
 3. Mit aktuellen Skills/Code abgleichen:
    - SKILL.md lesen
    - Relevante Code-Dateien pruefen
-   - docs/docs/docs/help/*.txt fuer Konsistenz pruefen
+   - docs/help/*.txt fuer Konsistenz pruefen
 
 4. Eintrag aktualisieren oder ausbauen:
    - Veraltete Infos korrigieren

@@ -49,8 +49,8 @@ je minimaler Systemkenntnis arbeitet EIN Agent mit maximalem Systemkontext.
 
 | Kategorie | Pfad | Dateien | Prioritaet |
 |-----------|------|---------|------------|
-| **Core** | `docs/docs/docs/help/*.txt` | ~93 | HOCH (immer pruefen) |
-| **Tools** | `docs/docs/docs/help/tools/*.txt` | ~81 | MITTEL (bei Bedarf) |
+| **Core** | `docs/help/*.txt` | ~93 | HOCH (immer pruefen) |
+| **Tools** | `docs/help/tools/*.txt` | ~81 | MITTEL (bei Bedarf) |
 | **Wiki** | `wiki/**/*.txt` | ~258 | NIEDRIG (nur Stichproben) |
 
 **Regelmaessiger Durchlauf:** Nur Core (~93 Dateien)
@@ -93,8 +93,8 @@ Lesen (als Ausgangsbasis):
   1. system/ROADMAP.md                    → Vision, Phasen, Architektur-Diagramm
   2. system/CHANGELOG.md                  → Was hat sich geaendert
   3. system/BUGLOG.md                     → Bekannte Probleme
-  4. system/docs/docs/docs/docs/help/practices.txt            → Architektur-Prinzipien
-  5. system/docs/docs/docs/docs/help/strategic.txt            → Metakognition
+  4. system/docs/help/practices.txt            → Architektur-Prinzipien
+  5. system/docs/help/strategic.txt            → Metakognition
 
 Optional (bei Bedarf fuer Kontext):
   6. agents/*/SKILL.md            → Agent-Definitionen
@@ -150,7 +150,7 @@ RUNDE 2 - Skills & Tools (Guete 3):
 RUNDE 3 - Peripherie (Guete 3):
   ls system/gui/                     → Dashboard
   ls system/gui/api/                 → REST-APIs
-  ls system/docs/docs/docs/docs/help/                    → Help-Dateien selbst (Bestand zaehlen)
+  ls system/docs/help/                    → Help-Dateien selbst (Bestand zaehlen)
   ls ../user/                        → User-Daten Struktur
   ls ../docs/                        → Konzepte und Dokumentation
 ```
@@ -334,20 +334,20 @@ Expert liest arrow.txt      → OK → weiter
 
 Haiku (sicher, klein):
 ```
-"In docs/docs/docs/help/agents.txt Zeile 132: Aendere http:/127.0.0.1 zu http://127.0.0.1
+"In docs/help/agents.txt Zeile 132: Aendere http:/127.0.0.1 zu http://127.0.0.1
  Dasselbe in Zeile 133 und 134. Read file first, then Edit."
 ```
 
 Sonnet (unsicher, Pruefauftrag):
 ```
-"In docs/docs/docs/help/distribution.txt Zeile 41 steht '114 Tabellen nutzen dist_type'.
+"In docs/help/distribution.txt Zeile 41 steht '114 Tabellen nutzen dist_type'.
  Pruefe in db/schema.sql wie viele CREATE TABLE dist_type enthalten.
  Korrigiere die Zahl NUR wenn der Verdacht stimmt."
 ```
 
 Opus (gross, strukturell):
 ```
-"In docs/docs/docs/help/architecture.txt ist die Sektion 'Handler-Map' (Zeile 45-80) veraltet.
+"In docs/help/architecture.txt ist die Sektion 'Handler-Map' (Zeile 45-80) veraltet.
  Seit v2.0 gibt es Auto-Discovery via core/registry.py. Schreibe die Sektion
  komplett neu basierend auf dem aktuellen System."
 ```
@@ -425,8 +425,8 @@ Workflow-Definition: skills/workflows/help-expert-review.md
 PHASE 1 - DREISTUFIGER WISSENSAUFBAU (~15 Min):
 
 Stufe I (Vorwissen, Guete 1):
-Lies ROADMAP.md, CHANGELOG.md, BUGLOG.md, docs/docs/docs/help/practices.txt,
-docs/docs/docs/help/strategic.txt. Das ist deine Ausgangshypothese.
+Lies ROADMAP.md, CHANGELOG.md, BUGLOG.md, docs/help/practices.txt,
+docs/help/strategic.txt. Das ist deine Ausgangshypothese.
 
 Stufe II (Echte Exploration, Guete 2-3):
 Erkunde JEDEN Ordner unter system/ (ls, README lesen).
@@ -440,7 +440,7 @@ Bilde deine mentale Repraesentation. Beschreibe in 10 Saetzen
 dein Systemverstaendnis inkl. gefundener Abweichungen (Selbsttest).
 
 PHASE 2 - STREAMING-REVIEW (~20 Min):
-Lies docs/docs/docs/help/*.txt EINZELN, eine nach der anderen.
+Lies docs/help/*.txt EINZELN, eine nach der anderen.
 Pruefe jede gegen dein Wissensmodell (Guete-Hierarchie beachten!).
 DU SELBST KORRIGIERST NICHTS - du liest NUR und delegierst:
 - Sicherer kleiner Fehler → Haiku Sub-Agent losschicken (Task Tool, model=haiku)
@@ -664,8 +664,8 @@ Fixer liest die Queue, setzt Status auf "in_progress", dann "done" oder "wontfix
 ## Siehe auch
 
 - `skills/workflows/help-forensic.md` - Alter 90-Agenten Ansatz
-- `skills/docs/docs/docs/help/practices.txt` - Best Practices (#7: HELP ALS WAHRHEIT)
-- `docs/docs/docs/help/*.txt` - Zu pruefende Dateien
+- `skills/docs/help/practices.txt` - Best Practices (#7: HELP ALS WAHRHEIT)
+- `docs/help/*.txt` - Zu pruefende Dateien
 - `system/ROADMAP.md` - Aktuelle Phase
 - `system/CHANGELOG.md` - Aenderungshistorie
 - `system/BUGLOG.md` - Bekannte Bugs

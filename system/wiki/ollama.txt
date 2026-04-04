@@ -190,4 +190,4 @@ SIEHE AUCH
   wiki/antigravity.txt    Google Antigravity IDE
   wiki/chatgpt.txt        OpenAI ChatGPT
   wiki/copilot.txt        Microsoft Copilot
-  docs/docs/docs/help/partners.txt            KI-Partner im BACH-System
+  docs/help/partners.txt            KI-Partner im BACH-System

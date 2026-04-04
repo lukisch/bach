@@ -111,5 +111,5 @@ Aktuell: 1.2.2 (2026-01-23)
 SIEHE AUCH
 ----------
 wiki/mcp.txt         Model Context Protocol (geplant)
-docs/docs/docs/help/tools.txt            BACH Tool-Inventar
+docs/help/tools.txt            BACH Tool-Inventar
 wiki/ollama.txt      Lokaler LLM-Server
