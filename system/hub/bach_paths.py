@@ -44,7 +44,7 @@ STRUKTUR:
     │       ├── _services/  <- Service-Skills (.md)
     │       ├── _templates/
     │       ├── _os/
-    │       └── docs/help/
+    │       └── docs/docs/docs/docs/docs/help/
     └── user/
         └── documents/
 
@@ -103,7 +103,7 @@ SKILLS_DIR = SYSTEM_ROOT / "skills"
 DIST_DIR = SYSTEM_ROOT / "dist"
 TEMPLATES_DIR = SYSTEM_ROOT / "_templates"
 
-# Help liegt unter system/docs/help/
+# Help liegt unter system/docs/docs/docs/docs/docs/help/
 HELP_DIR = SYSTEM_ROOT / "docs" / "help"
 
 # Tools-Verzeichnis (direkt unter system/, NICHT unter skills/)
@@ -119,7 +119,8 @@ SERVICES_DIR = SKILLS_DIR / "_services"
 
 # Data-Unterverzeichnisse
 LOGS_DIR = DATA_DIR / "logs"
-BACKUPS_DIR = DATA_DIR / "_backups"
+# Backups LOKAL — NICHT in OneDrive (OneDrive IST das Backup)
+BACKUPS_DIR = Path(r"C:\_Local_DEV\BACKUPS\BACH")
 ARCHIVE_DIR = DATA_DIR / "_archive"
 TRASH_DIR = DATA_DIR / "_trash"
 MESSAGES_DIR = DATA_DIR / "messages"

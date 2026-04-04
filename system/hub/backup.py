@@ -20,7 +20,8 @@ class BackupHandler(BaseHandler):
     
     def __init__(self, base_path: Path):
         super().__init__(base_path)
-        self.backups_dir = base_path / "_backups"
+        # Backups LOKAL speichern — NICHT in OneDrive (OneDrive IST das Backup)
+        self.backups_dir = Path(r"C:\_Local_DEV\BACKUPS\BACH\userdata")
         self.tools_dir = base_path / "tools"
     
     @property

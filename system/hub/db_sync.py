@@ -59,7 +59,8 @@ class DBSyncManager:
     def __init__(self, db_path: Path = None, backup_dir: Path = None):
         self.base_path = Path(__file__).parent.parent
         self.db_path = db_path or self.base_path / "data" / "bach.db"
-        self.backup_dir = backup_dir or self.base_path.parent / "backups"
+        # Backups LOKAL speichern — NICHT in OneDrive (OneDrive IST das Backup)
+        self.backup_dir = backup_dir or Path(r"C:\_Local_DEV\BACKUPS\BACH\db_sync")
         self.hostname = socket.gethostname()
         self.heartbeat_file = self.backup_dir / "heartbeat.json"
 

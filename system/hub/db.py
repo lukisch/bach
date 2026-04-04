@@ -407,7 +407,8 @@ class DbHandler(BaseHandler):
 
     def _backup(self) -> tuple:
         """Quick-Backup der Datenbank."""
-        backup_dir = self.base_path / "data" / "_backups"
+        # Backups LOKAL speichern — NICHT in OneDrive
+        backup_dir = Path(r"C:\_Local_DEV\BACKUPS\BACH\db_quick")
         backup_dir.mkdir(exist_ok=True)
 
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")

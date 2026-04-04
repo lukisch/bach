@@ -58,7 +58,8 @@ class UpdateHandler(BaseHandler):
         self.version_file = self.base_path / "data" / VERSION_FILE
         self.migrations_dir = self.base_path / "data" / "migrations"
         self.hub_dir = self.base_path / "hub"
-        self.backups_dir = self.base_path / "_backups"
+        # Backups LOKAL — NICHT in OneDrive
+        self.backups_dir = Path(r"C:\_Local_DEV\BACKUPS\BACH\updates")
         self.db_path = self.base_path / "data" / "bach.db"
 
     @property

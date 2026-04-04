@@ -200,26 +200,35 @@ class BachPathHealer:
         self.safety_backup_path = None
 
     def _create_safety_backup(self) -> bool:
-        """Erstellt Safety-Backup des system-Ordners vor Heilung"""
+        """Erstellt Safety-Backup des system-Ordners vor Heilung.
+
+        Backups werden LOKAL gespeichert (nicht in OneDrive), um:
+        1. Zirkuläre Kopien zu vermeiden (Backup innerhalb der Quelle)
+        2. OneDrive-Sync nicht zu belasten
+        """
         try:
             import shutil
 
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            backup_dir = self.base_path / "system" / "data" / "backups" / "safety"
+            # LOKAL speichern — NICHT im OneDrive/BACH-Verzeichnis!
+            backup_dir = Path(r"C:\_Local_DEV\BACKUPS\BACH\safety")
             backup_dir.mkdir(parents=True, exist_ok=True)
 
             self.safety_backup_path = backup_dir / f"system_backup_{timestamp}"
 
-            # Kopiere system-Ordner (ohne backups selbst - Rekursion vermeiden)
             system_src = self.base_path / "system"
-            shutil.copytree(
-                system_src,
-                self.safety_backup_path,
-                ignore=shutil.ignore_patterns('data/backups/*', '__pycache__', '*.pyc'),
-                dirs_exist_ok=False
-            )
 
-            print(f"[SAFETY] Backup erstellt: {self.safety_backup_path.name}")
+            # Nur die DB und Config sichern — kein volles copytree mehr
+            self.safety_backup_path.mkdir(parents=True, exist_ok=True)
+            db_src = system_src / "data" / "bach.db"
+            config_src = system_src / "data" / "config"
+            if db_src.exists():
+                shutil.copy2(db_src, self.safety_backup_path / "bach.db")
+            if config_src.exists():
+                shutil.copytree(config_src, self.safety_backup_path / "config",
+                                dirs_exist_ok=True)
+
+            print(f"[SAFETY] Backup erstellt: {self.safety_backup_path} (DB + Config)")
             return True
 
         except Exception as e:
