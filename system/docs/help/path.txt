@@ -54,7 +54,27 @@ hub/bach_paths.py               Zentrale Pfad-Registry und Funktionen
 data/bach.db                    Speichert Pfad-Overrides
 
 
+PFAD-HEILUNG / PATH HEALING
+===========================
+Pfade werden automatisch ueber bach_paths.py verwaltet.
+Manuelle Pfad-Reparaturen sind NICHT noetig!
+
+  bach_paths.py berechnet alle Pfade dynamisch relativ zum
+  eigenen Standort. Wenn BACH verschoben wird, passen sich
+  alle Pfade automatisch an.
+
+Nur Dokumentations-Pfade (in .txt/.md Dateien) muessen bei
+Umstrukturierungen aktualisiert werden:
+
+  bach --maintain docs-paths          Dokumentations-Pfade pruefen
+  bach --maintain docs-paths --apply  Dokumentations-Pfade korrigieren
+
+Siehe: bach --help tools/path_healer  (Details)
+
+
 SIEHE AUCH
 ==========
-hub/base.py                     BaseHandler-Dokumentation
-docs/help/                      Weitere Handler-Dokumentation
+hub/bach_paths.py                Zentrale Pfad-Registry (Single Source of Truth)
+docs/help/bach_paths.txt         Ausfuehrliche Doku zu bach_paths
+docs/help/tools/path_healer.txt  Pfad-Aktualisierung fuer Dokumentation
+hub/base.py                      BaseHandler-Dokumentation

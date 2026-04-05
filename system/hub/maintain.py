@@ -48,7 +48,8 @@ class MaintainHandler(BaseHandler):
             "scan": "System nach CLI-Tools scannen",
             "clean": "Dateien nach Alter/Muster loeschen",
             "json": "JSON-Dateien reparieren",
-            "heal": "Pfad-Korrektur und Selbstheilung",
+            "heal": "VERALTET — siehe docs-paths (Pfade sind automatisch via bach_paths.py)",
+            "docs-paths": "Dokumentations-Pfade aktualisieren (.md/.txt)",
             "registry": "Registry-Konsistenz pruefen",
             "skills": "Skill-Gesundheit pruefen",
             "sync": "Skills mit Datenbank synchronisieren",
@@ -82,7 +83,18 @@ class MaintainHandler(BaseHandler):
         elif op == "json":
             return self._run_json_fixer(args, dry_run)
         elif op == "heal":
-            return self._run_path_healer(args, dry_run)
+            return True, """HINWEIS: Pfad-Heilung ist nicht mehr noetig!
+============================================================
+bach_paths.py verwaltet alle Laufzeit-Pfade automatisch.
+Wenn BACH verschoben wird, passen sich Pfade von selbst an.
+
+Fuer Dokumentations-Updates (Help, Wiki, Markdown):
+  bach --maintain docs-paths          Dry-Run (nur anzeigen)
+  bach --maintain docs-paths --apply  Tatsaechlich korrigieren
+
+Siehe: bach --help tools/path_healer"""
+        elif op == "docs-paths":
+            return self._run_doc_path_updater(args, dry_run)
         elif op == "registry":
             return self._run_registry_watcher(args)
         elif op == "skills":
@@ -370,52 +382,38 @@ Siehe: tools/json_fixer.py"""
         except Exception as e:
             return False, f"Fehler: {e}"
     
-    def _run_path_healer(self, args: list, dry_run: bool) -> tuple:
-        """Fuehrt Path-Healer aus."""
-        script = self.tools_dir / "c_path_healer.py"
+    def _run_doc_path_updater(self, args: list, dry_run: bool) -> tuple:
+        """Aktualisiert veraltete Pfade in Dokumentation (Help, Wiki, Markdown)."""
+        script = self.tools_dir / "maintenance" / "doc_path_updater.py"
         if not script.exists():
             return False, f"Script nicht gefunden: {script}"
-        
+
         if not args:
-            return True, """Path Healer
-===========
-Korrigiert veraltete Pfade in BACH-Dateien.
+            return True, """Doc Path Updater
+================
+Aktualisiert veraltete Pfade in Dokumentation (.md, .txt).
+Laufzeit-Pfade werden von bach_paths.py automatisch verwaltet!
 
 Verwendung:
-  bach --maintain heal [optionen]
+  bach --maintain docs-paths              Dry-Run (nur anzeigen)
+  bach --maintain docs-paths --apply      Tatsaechlich korrigieren
+  bach --maintain docs-paths --report     Report generieren
 
-Optionen:
-  --dry-run       Nur pruefen, nichts aendern (default)
-  --execute       Tatsaechlich korrigieren
-  --target <p>    Nur bestimmte Datei pruefen
-  --report        Detaillierten Report generieren
+Siehe: bach --help tools/path_healer"""
 
-Korrigiert:
-  - Alte recludOS-Pfade -> BACH
-  - Alte Skill-Pfade
-  - Hub/Handler-Pfade
-  - Tools-Verweise
-
-Beispiele:
-  bach --maintain heal                   # Dry-run fuer alle
-  bach --maintain heal --execute         # Alle korrigieren
-  bach --maintain heal --target config.py
-  bach --maintain heal --report
-
-Basiert auf: RecludOS Unified Path Healer v2.3.0
-Siehe: tools/path_healer.py"""
-        
         cmd_args = list(args)
-        if dry_run and "--execute" not in args:
+        if "--apply" not in args:
             cmd_args.append("--dry-run")
-        
+        else:
+            cmd_args.remove("--apply")
+
         try:
             result = subprocess.run(
-                [sys.executable, str(script)] + cmd_args,
+                [sys.executable, str(script), "--base", str(self.base_path.parent)] + cmd_args,
                 capture_output=True,
                 text=True,
                 timeout=120,
-                cwd=str(self.base_path)
+                cwd=str(self.base_path.parent)
             )
             return result.returncode == 0, result.stdout + result.stderr
         except Exception as e:

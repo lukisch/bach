@@ -23,50 +23,48 @@ SOFTWARE.
 """
 
 """
-Tool: c_path_healer
-Version: 1.0.0
+Tool: doc_path_updater
+Version: 3.0.0
 Author: BACH Team
 Created: 2026-02-04
-Updated: 2026-02-04
-Anthropic-Compatible: True
-
-VERSIONS-HINWEIS: Prüfe auf neuere Versionen mit: bach tools version c_path_healer
+Updated: 2026-04-05
 
 Description:
-    [Beschreibung hinzufügen]
+    Dokumentations-Pfad-Updater fuer BACH.
+    Aktualisiert veraltete Pfade NUR in Dokumentation (.md, .txt).
+
+    WICHTIG: Laufzeit-Pfade werden von bach_paths.py dynamisch verwaltet.
+    Dieses Tool ist NUR fuer Doku-Dateien gedacht (Help, Wiki, Markdown).
 
 Usage:
-    python c_path_healer.py [args]
+    python doc_path_updater.py --dry-run     # Nur anzeigen
+    python doc_path_updater.py               # Doku-Pfade korrigieren
+    python doc_path_updater.py --target X    # Einzelne Datei
+
+CLI:
+    bach --maintain docs-paths               # Dry-Run
+    bach --maintain docs-paths --apply       # Korrigieren
 """
 
-__version__ = "2.1.0"
+__version__ = "3.0.0"
 __author__ = "BACH Team"
 
 # -*- coding: utf-8 -*-
 """
-██╗    ██╗ █████╗ ██████╗ ███╗   ██╗██╗███╗   ██╗ ██████╗
-██║    ██║██╔══██╗██╔══██╗████╗  ██║██║████╗  ██║██╔════╝
-██║ █╗ ██║███████║██████╔╝██╔██╗ ██║██║██╔██╗ ██║██║  ███╗
-██║███╗██║██╔══██║██╔══██╗██║╚██╗██║██║██║╚██╗██║██║   ██║
-╚███╔███╔╝██║  ██║██║  ██║██║ ╚████║██║██║ ╚████║╚██████╔╝
- ╚══╝╚══╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝╚═╝  ╚═══╝ ╚═════╝
+BACH Path Healer v2.0.0
+Zentraler Pfad-Heilungs-Service fuer BACH
 
-VERALTET — NICHT DIREKT AUSFUEHREN!
-====================================
-Dieses Script ist ein RecludOS-Relikt und wurde durch zwei Systeme ersetzt:
+Nutzt bach_paths.py fuer Base-Pfad (kein hardcoded Pfad mehr!)
 
-1. bach_paths.py — Laufzeit-Pfade (AUTOMATISCH, keine Aktion noetig)
-2. doc_path_updater.py — Dokumentations-Pfade (.md, .txt)
+Usage:
+    python c_path_healer.py                    # Vollstaendiger Scan
+    python c_path_healer.py --dry-run          # Nur pruefen
+    python c_path_healer.py --target <pfad>    # Einzelne Datei
+    python c_path_healer.py --report           # Report generieren
 
-Nutze stattdessen:
-    bach --maintain docs-paths          Doku-Pfade pruefen
-    bach --maintain docs-paths --apply  Doku-Pfade korrigieren
-
-HINTERGRUND:
-Dieses Script hat durch nicht-idempotente Regeln 101 Dateien korrumpiert
-(docs/help/ -> docs/docs/docs/.../help/) und durch copytree-Backup
-eine 124-Ebenen-Rekursion (48 GB, 17.246 Ordner) erzeugt. Beide Bugs
-wurden in v2.1.0 behoben, aber das Tool bleibt veraltet.
+CLI:
+    bach maintain heal                       # Vollstaendiger Scan
+    bach maintain heal --dry-run             # Nur pruefen
 """
 
 import os
@@ -144,7 +142,8 @@ GUARDED_CORRECTIONS: List[Tuple[str, str, str]] = [
 ]
 
 # Erweiterbare Liste - kann durch DB geladen werden
-HEALABLE_EXTENSIONS = {'.json', '.md', '.py', '.txt', '.ps1', '.bat', '.sh', '.yaml', '.yml'}
+# NUR Dokumentation — KEIN Python-Code! Laufzeit-Pfade werden von bach_paths.py verwaltet.
+HEALABLE_EXTENSIONS = {'.md', '.txt'}
 IGNORE_DIRS = {'__pycache__', '.git', 'node_modules', 'venv', '.venv', 'dist', 'build', '.claude'}
 
 

@@ -131,7 +131,16 @@ bach_paths berechnet alle Pfade relativ zum eigenen Standort.
 Wenn BACH verschoben wird, funktioniert alles weiterhin -
 keine manuellen Anpassungen noetig.
 
+PFAD-HEILUNG: NICHT NOETIG
+--------------------------
+bach_paths.py macht manuelle Pfad-Heilung ueberfluessig!
+Alle Laufzeit-Pfade werden dynamisch berechnet.
+
+Nur fuer Dokumentations-Updates (Help-Texte, Wiki, Markdown):
+  bach --maintain docs-paths
+
 SIEHE AUCH
 ----------
-- c_path_healer.py  - Pfad-Korrekturen in Dateien
-- maintain heal     - CLI-Befehl zum Heilen von Pfaden
+- bach path validate               Pfade pruefen
+- bach --help path                 Path-Handler Doku
+- bach --help tools/path_healer    Dokumentations-Pfad-Updater
