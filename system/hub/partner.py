@@ -26,6 +26,17 @@ try:
 except ImportError:
     HAS_COMPLEXITY_SCORER = False
 
+# clutch-bridge Imports (Tasks [1075]-[1079])
+try:
+    from strecken_analyse import get_analyser as get_strecken_analyser
+    from gas_bremse import get_gas_bremse, berechne_gas
+    from bordcomputer import get_bordcomputer
+    from fahrschule import get_fahrschule
+    from fahrtenbuch import get_fahrtenbuch
+    HAS_CLUTCH_BRIDGE = True
+except ImportError:
+    HAS_CLUTCH_BRIDGE = False
+
 
 class PartnerHandler(BaseHandler):
     """Handler fuer --partner Operationen"""
@@ -264,20 +275,22 @@ class PartnerHandler(BaseHandler):
         return True, "\n".join(results)
     
     def _delegate(self, data: dict, args: list, dry_run: bool = False) -> tuple:
-        """Task an Partner delegieren (Token-aware).
-        
+        """Task an Partner delegieren (Token-aware + clutch-bridge).
+
         Args:
             args: Liste mit Task-Text und optionalen Flags
                   --to=NAME: Spezifischer Partner
                   --zone=N: Zone erzwingen (1-4)
+                  --gas=N: Reasoning-Level 0-100 (clutch-bridge)
         """
         # Parse args
         task_text = ""
         target_partner = None
         forced_zone = None
+        gas_level = None
         results = []
         fallback_local = "--fallback-local" in args or "--fal" in args
-        
+
         args = [a for a in args if a not in ["--fallback-local", "--fal", "--dry-run"]]
 
         for arg in args:
@@ -288,12 +301,28 @@ class PartnerHandler(BaseHandler):
                     forced_zone = int(arg.split("=", 1)[1])
                 except ValueError:
                     return False, f"Ungueltige Zone: {arg}"
+            elif arg.startswith("--gas="):
+                try:
+                    gas_level = int(arg.split("=", 1)[1])
+                except ValueError:
+                    return False, f"Ungueltige Gas-Stellung: {arg}"
             else:
                 task_text = arg if not task_text else f"{task_text} {arg}"
-        
+
         if not task_text:
-            return False, "Kein Task angegeben. Nutzung: bach partner delegate 'Task-Beschreibung' [--to=NAME] [--zone=N]"
-        
+            return False, "Kein Task angegeben. Nutzung: bach partner delegate 'Task-Beschreibung' [--to=NAME] [--zone=N] [--gas=N]"
+
+        # clutch-bridge: StreckenAnalyse + Gas/Bremse
+        strecken_profil = None
+        gas_stellung = None
+        if HAS_CLUTCH_BRIDGE:
+            strecken_profil = get_strecken_analyser().analysiere(task_text)
+            gas_stellung = berechne_gas(
+                gas_level=gas_level,
+                strecken_schwierigkeit=strecken_profil.schwierigkeit,
+                strecken_typ_code=strecken_profil.typ_code,
+            )
+
         # Aktuelle Zone ermitteln (vereinfacht: Zone 1 als Default)
         current_zone = forced_zone if forced_zone else self._get_current_zone()
         
@@ -359,6 +388,33 @@ class PartnerHandler(BaseHandler):
                 else:
                     return False, f"Netzwerk offline und kein lokaler AI-Partner gefunden."
 
+        # clutch-bridge: Bordcomputer Circuit-Breaker prüfen
+        if HAS_CLUTCH_BRIDGE and selected:
+            bordcomputer = get_bordcomputer()
+            provider_name = selected.get('name', '')
+            if not bordcomputer.is_available(provider_name):
+                # Provider gesperrt, Alternative suchen
+                for p in available:
+                    if p != selected and bordcomputer.is_available(p.get('name', '')):
+                        results.append(f"  [BORDCOMPUTER] {provider_name} gesperrt (Circuit-Breaker OPEN)")
+                        results.append(f"  [BORDCOMPUTER] Fallback: {p.get('name')}")
+                        selected = p
+                        break
+                else:
+                    results.append(f"  [BORDCOMPUTER] WARNUNG: {provider_name} gesperrt, kein Fallback verfügbar")
+
+            # Overkill-Check
+            if strecken_profil:
+                overkill = bordcomputer.check_overkill(
+                    task_beschreibung=task_text,
+                    gewaehltes_modell=selected.get('name', '').lower(),
+                    strecken_typ=strecken_profil.typ,
+                    strecken_schwierigkeit=strecken_profil.schwierigkeit,
+                    empfohlener_gang=strecken_profil.empfohlener_gang,
+                )
+                if overkill:
+                    results.append(f"  [BORDCOMPUTER] Overkill: {overkill.gewaehltes_modell} für {overkill.strecken_typ} (empfohlen: {overkill.empfohlenes_modell})")
+
         # Delegation vorbereiten
         if not results:
             results = []
@@ -369,38 +425,81 @@ class PartnerHandler(BaseHandler):
         results.append(f"  Partner:  {selected.get('name')}")
         results.append(f"  Typ:      {selected.get('type')}")
         results.append(f"  Kosten:   {selected.get('token_cost')}")
+
+        # clutch-bridge Details
+        if strecken_profil:
+            results.append(f"  Strecke:  {strecken_profil.typ} (Schw. {strecken_profil.schwierigkeit}/5, Etappen: {strecken_profil.etappen})")
+        if gas_stellung:
+            results.append(f"  Gas:      {gas_stellung.level}% ({gas_stellung.strategie.value}), Token-Multi: {gas_stellung.token_multiplikator}x")
+
         results.append("")
         results.append(f"  Task:     {task_text}")
         results.append("")
-        
+
         if dry_run:
             results.append("  [DRY-RUN] Keine Aktion ausgefuehrt.")
         else:
             # Nachricht in MessageBox speichern
             msg_path = self.base_path / "data" / "messages" / "message_box.md"
             msg_path.parent.mkdir(parents=True, exist_ok=True)
-            
+
             from datetime import datetime
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
-            
+
+            # clutch-bridge Kontext in Delegation-Nachricht
+            clutch_info = ""
+            if strecken_profil:
+                clutch_info += f"\n- Strecke: {strecken_profil.typ} (Code {strecken_profil.typ_code})"
+                clutch_info += f"\n- Schwierigkeit: {strecken_profil.schwierigkeit}/5, Etappen: {strecken_profil.etappen}"
+            if gas_stellung:
+                clutch_info += f"\n- Gas-Stellung: {gas_stellung.level}% ({gas_stellung.strategie.value})"
+                clutch_info += f"\n- Token-Multiplikator: {gas_stellung.token_multiplikator}x"
+
+            # Prompt-Modifikation durch Gas/Bremse
+            task_for_delegation = task_text
+            if gas_stellung and gas_stellung.prompt_prefix:
+                task_for_delegation = f"{gas_stellung.prompt_prefix}\n\n{task_text}"
+            if gas_stellung and gas_stellung.prompt_suffix:
+                task_for_delegation = f"{task_for_delegation}\n\n{gas_stellung.prompt_suffix}"
+
             delegation_msg = f"""
 ## Delegation an {selected.get('name')} ({timestamp})
 
-**Task:** {task_text}
+**Task:** {task_for_delegation}
 
 **Kontext:**
 - Zone: {current_zone}
 - Capabilities: {', '.join(selected.get('capabilities', []))}
-- Rolle: {selected.get('role')}
+- Rolle: {selected.get('role')}{clutch_info}
 
 ---
 """
             with open(msg_path, 'a', encoding='utf-8') as f:
                 f.write(delegation_msg)
-            
+
             results.append(f"  [OK] Delegation in MessageBox gespeichert.")
             results.append(f"       -> {msg_path}")
-        
+
+            # clutch-bridge: Fahrtenbuch-Eintrag schreiben
+            if HAS_CLUTCH_BRIDGE:
+                try:
+                    fb = get_fahrtenbuch(db_path=self.base_path / "data" / "bach.db")
+                    fb.eintrag(
+                        task_text=task_text,
+                        provider=selected.get('name', ''),
+                        model=strecken_profil.empfohlener_gang if strecken_profil else '',
+                        strecken_typ=strecken_profil.typ if strecken_profil else '',
+                        strecken_typ_code=strecken_profil.typ_code if strecken_profil else 0,
+                        schwierigkeit=strecken_profil.schwierigkeit if strecken_profil else 0,
+                        etappen=strecken_profil.etappen if strecken_profil else 0,
+                        gas_level=gas_stellung.level if gas_stellung else 50,
+                        gas_strategie=gas_stellung.strategie.value if gas_stellung else 'ausgewogen',
+                        token_budget_faktor=gas_stellung.token_multiplikator if gas_stellung else 1.0,
+                        zone=current_zone,
+                    )
+                except Exception:
+                    pass  # Fahrtenbuch-Fehler sollen Delegation nicht blockieren
+
         return True, "\n".join(results)
     
     def _get_current_zone(self) -> int:

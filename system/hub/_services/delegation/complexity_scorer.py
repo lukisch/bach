@@ -43,7 +43,16 @@ Faktoren:
 """
 
 import re
-from typing import Dict, Tuple
+from typing import Dict, Optional, Tuple
+
+# clutch-bridge Integration (Task [1078])
+try:
+    from hub._services.delegation.strecken_analyse import (
+        StreckenAnalyse, StreckenProfil, get_analyser, analysiere_task
+    )
+    _STRECKEN_AVAILABLE = True
+except ImportError:
+    _STRECKEN_AVAILABLE = False
 
 
 class ComplexityScorer:
@@ -154,6 +163,34 @@ class ComplexityScorer:
         total_score = min(100, sum(breakdown.values()))
 
         return total_score, breakdown
+
+    def score_with_strecke(self, task_description: str) -> Tuple[int, Dict]:
+        """
+        Erweitertes Scoring mit StreckenAnalyse (clutch-bridge).
+
+        Kombiniert den klassischen Score mit der StreckenAnalyse.
+        Falls StreckenAnalyse nicht verfügbar, fällt auf score() zurück.
+
+        Returns:
+            (score, extended_breakdown) mit StreckenProfil
+        """
+        score, breakdown = self.score(task_description)
+
+        if _STRECKEN_AVAILABLE:
+            profil = get_analyser().analysiere(task_description)
+            breakdown["strecke"] = profil.to_dict()
+            breakdown["empfohlener_gang"] = profil.empfohlener_gang
+            breakdown["token_budget_faktor"] = profil.token_budget_faktor
+        else:
+            breakdown["strecke"] = None
+
+        return score, breakdown
+
+    def get_strecken_profil(self, task_description: str) -> Optional["StreckenProfil"]:
+        """Gibt StreckenProfil zurück oder None wenn nicht verfügbar."""
+        if _STRECKEN_AVAILABLE:
+            return get_analyser().analysiere(task_description)
+        return None
 
     def get_recommended_model(self, score: int) -> str:
         """
