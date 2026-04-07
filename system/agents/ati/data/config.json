@@ -12,9 +12,9 @@
   },
   "scan": {
     "folders": [
-      "{USER_DEV_PATH}"
+      "C:\\Users\\User\\OneDrive\\.TOPICS\\.SOFTWARE"
     ],
-    "note": "Flat-Struktur seit 2026-02-13: Alle 67 Projekte direkt im Root",
+    "note": "Seit 2026-02-24: Projekte in Themenordnern unter .TOPICS/.SOFTWARE/",
     "patterns": [
       "- [ ]",
       "- [x]",

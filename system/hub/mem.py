@@ -73,15 +73,15 @@ class MemHandler(BaseHandler):
                 return success, msg
 
             elif sub_op == "cleanup":
-                # Cleanup-Modus
+                # Cleanup-Modus (Soft Delete expired Eintraege)
                 dry = "--dry-run" in sub_args
-                success, msg = cleanup.cleanup(dry_run=dry)
+                success, msg = cleanup.cleanup_soft(dry_run=dry)
                 return success, msg
 
             elif sub_op == "set-expires":
-                # Set-Expires-Modus
+                # Set-Expires-Modus (Expires retroaktiv setzen)
                 dry = "--dry-run" in sub_args
-                success, msg = cleanup.set_expires_batch(dry_run=dry)
+                success, msg = cleanup.set_expires_retroactive(dry_run=dry)
                 return success, msg
 
             else:

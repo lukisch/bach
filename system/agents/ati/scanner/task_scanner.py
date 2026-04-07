@@ -30,6 +30,7 @@ Scannt Software-Ordner nach AUFGABEN.txt und synchronisiert mit bach.db
 Migriert von: scanner/task_scanner.py (Task 81)
 Original: _BATCH/scanner.py
 
+v1.3.2 (2026-04-07): Tool-Registry Pfad-Migration bei Ordner-Umbenennungen
 v1.3.0 (2026-02-01): Migration auf bach.db - Tabellen umbenannt zu ati_*
 v1.2.1 (2026-01-25): Duplikaterkennung - Prueft vor INSERT ob task_text bereits existiert
 """
@@ -262,7 +263,13 @@ class TaskScanner:
         print(f"     [+] {tool_name}: {len(tasks)} Tasks")
     
     def _register_tool(self, tool_path: Path, conn) -> int:
-        """Registriert Tool in ati_tool_registry, gibt ID zurueck."""
+        """Registriert Tool in ati_tool_registry, gibt ID zurueck.
+
+        v1.3.2: Pfad-Migration -- wenn ein Tool mit gleichem Namen aber anderem
+        Pfad existiert (z.B. nach Ordner-Umbenennung), wird der Pfad aktualisiert
+        statt einen neuen Eintrag zu erstellen.
+        """
+        # 1. Exakter Pfad-Match
         existing = conn.execute(
             "SELECT id FROM ati_tool_registry WHERE path = ?",
             (str(tool_path),)
@@ -271,7 +278,23 @@ class TaskScanner:
         if existing:
             return existing[0]
 
-        # Pruefen ob TEST.txt oder TESTERGEBNIS.txt existiert
+        # 2. Name-Match (Pfad hat sich geaendert, z.B. Ordner-Umbenennung)
+        tool_name = tool_path.name
+        existing_by_name = conn.execute(
+            "SELECT id, path FROM ati_tool_registry WHERE name = ?",
+            (tool_name,)
+        ).fetchone()
+
+        if existing_by_name:
+            # Pfad aktualisieren statt neuen Eintrag
+            conn.execute(
+                "UPDATE ati_tool_registry SET path = ?, updated_at = ? WHERE id = ?",
+                (str(tool_path), datetime.now().isoformat(), existing_by_name[0])
+            )
+            conn.commit()
+            return existing_by_name[0]
+
+        # 3. Neues Tool registrieren
         has_test = any((tool_path / f).exists() for f in ['TEST.txt', 'Test.txt'])
         has_feedback = any((tool_path / f).exists() for f in ['TESTERGEBNIS.txt', 'AENDERUNGEN.txt'])
 
@@ -279,7 +302,7 @@ class TaskScanner:
             INSERT INTO ati_tool_registry (name, path, has_aufgaben, has_test, has_feedback, created_at)
             VALUES (?, ?, 1, ?, ?, ?)
         """, (
-            tool_path.name,
+            tool_name,
             str(tool_path),
             1 if has_test else 0,
             1 if has_feedback else 0,

@@ -34,7 +34,7 @@ class ATIHandler(BaseHandler):
     
     def __init__(self, base_path: Path):
         super().__init__(base_path)
-        self.ati_dir = base_path / "skills" / "_agents" / "ati"
+        self.ati_dir = base_path / "agents" / "ati"
         self.ati_data_dir = base_path / "data" / "ati"
         self.config_path = self.ati_dir / "data" / "config.json"
         self.db_path = base_path / "data" / "bach.db"

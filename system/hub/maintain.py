@@ -16,6 +16,7 @@ Befehle:
     bach --maintain workflows     Workflow-Format validieren
 """
 
+import os
 import sys
 import subprocess
 from pathlib import Path
@@ -25,10 +26,12 @@ from .lang import t
 
 class MaintainHandler(BaseHandler):
     """Handler fuer --maintain Befehle"""
-    
+
     def __init__(self, base_path: Path):
         super().__init__(base_path)
         self.tools_dir = base_path / "tools"
+        # Fix: UTF-8 Encoding fuer alle Subprocesses (Windows cp1252 Problem)
+        self._subprocess_env = {**os.environ, "PYTHONIOENCODING": "utf-8"}
     
     @property
     def profile_name(self) -> str:
@@ -131,6 +134,8 @@ Siehe: bach --help tools/path_healer"""
                 [sys.executable, str(script)] + cmd_args,
                 capture_output=True,
                 text=True,
+                encoding='utf-8',
+                env=self._subprocess_env,
                 timeout=120,
                 cwd=str(self.base_path)
             )
@@ -192,6 +197,8 @@ Siehe: tools/skill_generator.py"""
                 [sys.executable, str(script)] + args,
                 capture_output=True,
                 text=True,
+                encoding='utf-8',
+                env=self._subprocess_env,
                 timeout=60
             )
             return result.returncode == 0, result.stdout + result.stderr
@@ -226,6 +233,8 @@ Siehe: tools/exporter.py"""
                 [sys.executable, str(script)] + args,
                 capture_output=True,
                 text=True,
+                encoding='utf-8',
+                env=self._subprocess_env,
                 timeout=120
             )
             return result.returncode == 0, result.stdout + result.stderr
@@ -269,6 +278,8 @@ Siehe: tools/pattern_tool.py"""
                 [sys.executable, str(script)] + cmd_args,
                 capture_output=True,
                 text=True,
+                encoding='utf-8',
+                env=self._subprocess_env,
                 timeout=60
             )
             return result.returncode == 0, result.stdout + result.stderr
@@ -288,6 +299,8 @@ Siehe: tools/pattern_tool.py"""
                 [sys.executable, str(script)] + cmd_args,
                 capture_output=True,
                 text=True,
+                encoding='utf-8',
+                env=self._subprocess_env,
                 timeout=60
             )
             return result.returncode == 0, result.stdout + result.stderr
@@ -330,6 +343,8 @@ Siehe: tools/file_cleaner.py"""
                 [sys.executable, str(script)] + cmd_args,
                 capture_output=True,
                 text=True,
+                encoding='utf-8',
+                env=self._subprocess_env,
                 timeout=120
             )
             return result.returncode == 0, result.stdout + result.stderr
@@ -376,6 +391,8 @@ Siehe: tools/json_fixer.py"""
                 [sys.executable, str(script)] + cmd_args,
                 capture_output=True,
                 text=True,
+                encoding='utf-8',
+                env=self._subprocess_env,
                 timeout=60
             )
             return result.returncode == 0, result.stdout + result.stderr
@@ -412,6 +429,8 @@ Siehe: bach --help tools/path_healer"""
                 [sys.executable, str(script), "--base", str(self.base_path.parent)] + cmd_args,
                 capture_output=True,
                 text=True,
+                encoding='utf-8',
+                env=self._subprocess_env,
                 timeout=120,
                 cwd=str(self.base_path.parent)
             )
@@ -433,6 +452,8 @@ Siehe: bach --help tools/path_healer"""
                 [sys.executable, str(script)] + list(args),
                 capture_output=True,
                 text=True,
+                encoding='utf-8',
+                env=self._subprocess_env,
                 timeout=60,
                 cwd=str(self.base_path)
             )
@@ -454,6 +475,8 @@ Siehe: bach --help tools/path_healer"""
                 [sys.executable, str(script)] + list(args),
                 capture_output=True,
                 text=True,
+                encoding='utf-8',
+                env=self._subprocess_env,
                 timeout=60,
                 cwd=str(self.base_path)
             )
@@ -478,6 +501,8 @@ Siehe: bach --help tools/path_healer"""
                 [sys.executable, str(script)] + cmd_args,
                 capture_output=True,
                 text=True,
+                encoding='utf-8',
+                env=self._subprocess_env,
                 timeout=60,
                 cwd=str(self.base_path)
             )
@@ -574,6 +599,8 @@ Siehe: tools/skill_header_gen.py"""
                 [sys.executable, str(script)] + cmd_args,
                 capture_output=True,
                 text=True,
+                encoding='utf-8',
+                env=self._subprocess_env,
                 timeout=120,
                 cwd=str(self.base_path)
             )

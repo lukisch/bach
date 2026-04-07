@@ -39,8 +39,9 @@ if sys.platform == 'win32':
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 
 # Pfade - BACH v1.1
+# Fix v1.0.1: BACH_ROOT ist system/, nicht tools/ (Script liegt in tools/maintenance/)
 SCRIPT_DIR = Path(__file__).parent
-BACH_ROOT = SCRIPT_DIR.parent
+BACH_ROOT = SCRIPT_DIR.parent.parent  # tools/maintenance -> tools -> system
 DATA_DIR = BACH_ROOT / "data"
 DB_FILE = DATA_DIR / "bach.db"
 REPORTS_DIR = BACH_ROOT / "logs"
@@ -81,17 +82,20 @@ class RegistryWatcher:
         
         # Zusammenfassung erstellen
         total_issues = 0
+        has_errors = False
         for category, check_result in results["checks"].items():
             total_issues += len(check_result.get("missing_files", []))
             total_issues += len(check_result.get("orphan_db_entries", []))
-            total_issues += len(check_result.get("orphan_db_entries", []))
             total_issues += len(check_result.get("orphan_files", []))
             total_issues += len(check_result.get("config_errors", []))
-        
+            if check_result.get("error"):
+                total_issues += 1
+                has_errors = True
+
         results["summary"] = {
             "total_issues": total_issues,
-            "healthy": total_issues == 0,
-            "recommendation": "Alles OK" if total_issues == 0 else f"{total_issues} Probleme gefunden"
+            "healthy": total_issues == 0 and not has_errors,
+            "recommendation": "Alles OK" if (total_issues == 0 and not has_errors) else f"{total_issues} Probleme gefunden"
         }
         
         return results
