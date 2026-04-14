@@ -1,0 +1,44 @@
+# BACH - Text-Based Operating System for LLMs
+
+> BACH is a text-based operating system that empowers Large Language Models to work autonomously, learn, and self-organize. Part of the ellmos family (Extra Large Language Model Operating Systems), BACH provides infrastructure for task management, structured memory, multi-agent orchestration, and automation -- not a framework like LangChain or LlamaIndex, but the working environment underneath.
+
+BACH differs from agent frameworks (LangChain, LlamaIndex, Haystack) by treating the LLM as a resident of a persistent text-based OS rather than a caller of a pipeline. Core primitives: handlers (CLI/API surface), skills (reusable workflows), chains (llmauto prompt sequences), boss-expert agents, a SharedMemory Bus for cross-agent coordination, and a scheduler for time-based and event-driven automation. Memory is first-class: five memory types with decay, conflict detection, and consolidation across 145+ DB tables.
+
+Current version: v3.8.0-sugar-of-babel. Scale: 109+ handlers, 373+ tools, 932+ skills, 54 protocol workflows. Stack: Python 3.10+, SQLite. License: MIT.
+
+## Docs
+
+- [README](https://github.com/ellmos-ai/bach/blob/main/README.md): Project overview, installation, key features, ellmos family positioning
+- [README (Deutsch)](https://github.com/ellmos-ai/bach/blob/main/README.de.md): Full German documentation
+- [Quickstart Guide](https://github.com/ellmos-ai/bach/blob/main/QUICKSTART.md): First workflow in 5 minutes
+- [User Manual](https://github.com/ellmos-ai/bach/blob/main/BACH_USER_MANUAL.md): Complete handbook, all subsystems
+- [SKILL.md](https://github.com/ellmos-ai/bach/blob/main/SKILL.md): LLM operating instructions (Claude, Gemini, Ollama)
+- [CHANGELOG](https://github.com/ellmos-ai/bach/blob/main/CHANGELOG.md): Version history and breaking changes
+
+## Core subsystems
+
+- [Agents Catalog](https://github.com/ellmos-ai/bach/blob/main/AGENTS.md): Boss-expert orchestration model, 5 boss agents (ati, officeassistant, finance-assistant, health-assistant, personal-assistant)
+- [Skills Catalog](https://github.com/ellmos-ai/bach/blob/main/SKILLS.md): All 932+ reusable workflows and templates
+- [Workflows](https://github.com/ellmos-ai/bach/blob/main/WORKFLOWS.md): 54 protocol workflows (pre-built processes)
+- [Chains](https://github.com/ellmos-ai/bach/blob/main/CHAINS.md): llmauto chain steps with `bach://` URL resolution
+- [Memory System](https://github.com/ellmos-ai/bach/blob/main/MEMORY.md): Five memory types, decay, consolidation, conflict detection
+- [Ollama Integration](https://github.com/ellmos-ai/bach/blob/main/OLLAMA.md): Local LLM backend configuration
+- [Contributing Guide](https://github.com/ellmos-ai/bach/blob/main/CONTRIBUTING.md): Contribution workflow
+
+## ellmos family (related projects)
+
+- [USMC](https://github.com/ellmos-ai/usmc): Tier 1 -- United Shared Memory Client, the spring (shared memory primitive only)
+- [Rinnsal](https://github.com/ellmos-ai/rinnsal): Tier 2 -- the trickle, USMC + llmauto (LLM orchestration), extremely compact
+- [BACH](https://github.com/ellmos-ai/bach): Tier 3 -- the stream that unites everything, full OS with handlers, agents, GUI, bridges
+
+## MCP servers (IDE integration)
+
+- [ellmos-codecommander-mcp](https://github.com/ellmos-ai/ellmos-codecommander-mcp): Code analysis, JSON repair, encoding fix, import organization (14 tools)
+- [ellmos-filecommander-mcp](https://github.com/ellmos-ai/ellmos-filecommander-mcp): File management and batch operations
+
+## Optional
+
+- [GitHub Issues](https://github.com/ellmos-ai/bach/issues): Bug reports and feature requests
+- [GitHub Discussions](https://github.com/ellmos-ai/bach/discussions): Community Q&A
+- [Code of Conduct](https://github.com/ellmos-ai/bach/blob/main/CODE_OF_CONDUCT.md): Project community standards
+- [License (MIT)](https://github.com/ellmos-ai/bach/blob/main/LICENSE): License text
